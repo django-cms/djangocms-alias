@@ -1,0 +1,42 @@
+from django import template
+from django.utils.safestring import mark_safe
+
+from cms.toolbar.utils import get_toolbar_from_request
+
+from ..constants import DETAIL_ALIAS_URL_NAME
+from ..models import Category
+from ..utils import alias_plugin_reverse
+
+
+register = template.Library()
+
+
+@register.assignment_tag(takes_context=False)
+def get_alias_categories():
+    return Category.objects.order_by('name')
+
+
+@register.assignment_tag(takes_context=False)
+def get_alias_url(alias):
+    return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk])
+
+
+@register.simple_tag(takes_context=True)
+def render_alias2_plugin(context, instance):
+    request = context['request']
+    toolbar = get_toolbar_from_request(request)
+    renderer = toolbar.content_renderer
+
+    source = instance.alias.placeholder
+
+    # TODO This needs to be using draft/live alias feature
+    can_see_content = True
+
+    if can_see_content and source:
+        content = renderer.render_placeholder(
+            placeholder=source,
+            context=context,
+            editable=False,
+        )
+        return mark_safe(content)
+    return ''

@@ -135,22 +135,21 @@ class Alias2Plugin(CMSPluginBase):
             ),
         ]
 
-    def create_alias_plugin(self, name, category, plugins):
+    def create_alias(self, name, category, plugins):
         alias = Alias.objects.create(
             name=name,
             category=category,
         )
-        placeholder = alias.placeholder
         copy_plugins_to_placeholder(
             plugins,
-            placeholder=placeholder,
+            placeholder=alias.placeholder,
         )
         return alias
 
     def replace_plugin_with_alias(self, plugin, alias, language):
         new_plugin = add_plugin(
             plugin.placeholder,
-            self.name,
+            self.__class__,
             target=plugin,
             position='left',  # TODO find out how to reuse plugin's position
             language=plugin.language,
@@ -168,7 +167,7 @@ class Alias2Plugin(CMSPluginBase):
         placeholder.clear()
         return add_plugin(
             placeholder,
-            self.name,
+            self.__class__,
             alias=alias,
             language=language,
         )
@@ -217,7 +216,7 @@ class Alias2Plugin(CMSPluginBase):
                 'Plugins are required to create an alias',
             )
 
-        alias = self.create_alias_plugin(
+        alias = self.create_alias(
             name=create_form.cleaned_data.get('name'),
             category=create_form.cleaned_data.get('category'),
             plugins=plugins,
@@ -277,6 +276,14 @@ class Alias2Plugin(CMSPluginBase):
 
         return view(request)
 
+    def detach_alias_plugin(self, plugin):
+        instance = plugin.get_plugin_instance()[0]
+        copy_plugins_to_placeholder(
+            list(instance.alias.placeholder.get_plugins()),
+            placeholder=instance.placeholder,
+        )
+        plugin.delete()
+
     def detach_alias_plugin_view(self, request):
         if not request.user.is_staff:
             raise PermissionDenied
@@ -286,13 +293,9 @@ class Alias2Plugin(CMSPluginBase):
         if request.method == 'GET' or not form.is_valid():
             return HttpResponseBadRequest('Form received unexpected values')
 
-        plugin = form.cleaned_data['plugin']
-        instance = plugin.get_plugin_instance()[0]
-        copy_plugins_to_placeholder(
-            list(instance.alias.placeholder.get_plugins()),
-            placeholder=instance.placeholder,
+        self.detach_alias_plugin(
+            plugin=form.cleaned_data['plugin'],
         )
-        plugin.delete()
 
         return HttpResponse(
             '<div><div class="messagelist">'

@@ -9,3 +9,4 @@ build/
 .env
 local.sqlite
 .coverage
+htmlcov

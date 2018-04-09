@@ -1,46 +1,9 @@
-from cms.api import (
-    add_plugin,
-    create_page,
-)
-from cms.test_utils.testcases import CMSTestCase
+from cms.api import add_plugin
 
-from djangocms_alias.constants import CREATE_ALIAS_URL_NAME
-from djangocms_alias.cms_plugins import Alias2Plugin
-from djangocms_alias.models import Category
-from djangocms_alias.utils import alias_plugin_reverse
+from .base import BaseAlias2PluginTestCase
 
 
-class Alias2PluginTestCase(CMSTestCase):
-    CREATE_ALIAS_ENDPOINT = alias_plugin_reverse(CREATE_ALIAS_URL_NAME)
-
-    def setUp(self):
-        self.language = 'en'
-        self.page = create_page(
-            title='test',
-            template='page.html',
-            language=self.language,
-        )
-        self.category = Category.objects.create(
-            name='test category',
-        )
-        self.placeholder = self.page.placeholders.get(slot='content')
-        self.plugin = add_plugin(
-            self.placeholder,
-            'TextPlugin',
-            language='en',
-            body='test',
-        )
-        self.alias_plugin = Alias2Plugin()
-        self.superuser = self.get_superuser()
-
-    def _create_alias(self, plugins, name='test alias', category=None):
-        if category is None:
-            category = self.category
-        return self.alias_plugin.create_alias_plugin(
-            name=name,
-            category=category,
-            plugins=plugins,
-        )
+class Alias2PluginTestCase(BaseAlias2PluginTestCase):
 
     def test_create_alias_from_plugin_list(self):
         plugins = self.placeholder.get_plugins()
@@ -55,16 +18,10 @@ class Alias2PluginTestCase(CMSTestCase):
         )
 
     def test_replace_plugin_with_alias(self):
-        plugin = add_plugin(
-            self.placeholder,
-            'TextPlugin',
-            language='en',
-            body='test 2',
-        )
         alias = self._create_alias(
-            [plugin],
+            [self.plugin],
         )
-        self.alias_plugin.replace_plugin_with_alias(
+        alias_plugin = self.alias_plugin_base.replace_plugin_with_alias(
             self.plugin,
             alias,
             self.language,
@@ -74,10 +31,53 @@ class Alias2PluginTestCase(CMSTestCase):
             self.plugin,
             plugins,
         )
-        self.assertEqual(plugins[0].plugin_type, 'Alias2Plugin')
-        self.assertEqual(plugins[0].get_plugin_instance()[0].alias, alias)
+        self.assertEqual(plugins[0].get_plugin_instance()[0], alias_plugin)
 
-    def test_create_alias_view_get_no_data(self):
-        with self.login_user_context(self.superuser):
-            response = self.client.get(self.CREATE_ALIAS_ENDPOINT)
-            self.assertEqual(response.status_code, 400)
+    def test_replace_placeholder_content_with_alias(self):
+        add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='en',
+            body='test 2',
+        )
+        alias = self._create_alias(
+            self.placeholder.get_plugins(),
+        )
+        self.alias_plugin_base.replace_placeholder_content_with_alias(
+            self.placeholder,
+            alias,
+            self.language,
+        )
+        plugins = self.placeholder.get_plugins()
+        self.assertEqual(plugins.count(), 1)
+        self.assertEqual(alias.placeholder.get_plugins().count(), 2)
+        self.assertEqual(
+            alias.placeholder.get_plugins()[1].get_plugin_instance()[0].body,
+            'test 2',
+        )
+
+    def test_detach_alias(self):
+        alias = self._create_alias([])
+        add_plugin(
+            alias.placeholder,
+            'TextPlugin',
+            language='en',
+            body='test 1',
+        )
+        add_plugin(
+            alias.placeholder,
+            'TextPlugin',
+            language='en',
+            body='test 2',
+        )
+        plugins = self.placeholder.get_plugins()
+        self.assertEqual(plugins.count(), 1)
+        alias_plugin = add_plugin(
+            self.placeholder,
+            self.alias_plugin_base.__class__,
+            language='en',
+            alias=alias,
+        )
+        self.assertEqual(plugins.count(), 2)
+        self.alias_plugin_base.detach_alias_plugin(alias_plugin)
+        self.assertEqual(plugins.count(), 3)

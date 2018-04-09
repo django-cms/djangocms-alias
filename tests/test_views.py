@@ -2,7 +2,7 @@ from cms.api import add_plugin
 from cms.models import Placeholder
 from cms.utils.plugins import downcast_plugins
 
-from djangocms_aliases.models import Alias
+from djangocms_alias.models import Alias
 
 from .base import BaseAlias2PluginTestCase
 

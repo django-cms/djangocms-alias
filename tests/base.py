@@ -3,16 +3,21 @@ from cms.api import (
     create_page,
 )
 from cms.test_utils.testcases import CMSTestCase
-from cms.utils.urlutils import admin_reverse
 
-from djangocms_aliases.cms_plugins import Alias2Plugin
-from djangocms_aliases.models import Category
+from djangocms_alias.cms_plugins import Alias2Plugin
+from djangocms_alias.constants import (
+    CREATE_ALIAS_URL_NAME,
+    DETACH_ALIAS_PLUGIN_URL_NAME,
+    LIST_ALIASES_URL_NAME,
+)
+from djangocms_alias.models import Category
+from djangocms_alias.utils import alias_plugin_reverse
 
 
 class BaseAlias2PluginTestCase(CMSTestCase):
-    CREATE_ALIAS_ENDPOINT = admin_reverse('djangocms_aliases_create')
-    LIST_ALIASES_ENDPOINT = admin_reverse('djangocms_aliases_list')
-    DETACH_ALIAS_PLUGIN_ENDPOINT = admin_reverse('djangocms_aliases_detach_plugin')  # noqa: E501
+    CREATE_ALIAS_ENDPOINT = alias_plugin_reverse(CREATE_ALIAS_URL_NAME)
+    LIST_ALIASES_ENDPOINT = alias_plugin_reverse(LIST_ALIASES_URL_NAME)
+    DETACH_ALIAS_PLUGIN_ENDPOINT = alias_plugin_reverse(DETACH_ALIAS_PLUGIN_URL_NAME)  # noqa: E501
 
     def setUp(self):
         self.language = 'en'

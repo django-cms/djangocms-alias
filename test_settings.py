@@ -19,55 +19,55 @@ HELPER_SETTINGS = {
     'CMS_LANGUAGES': {
         1: [
             {
+                'code': 'en',
+                'name': 'English',
+                'fallbacks': ['de', 'fr']
+            },
+            {
                 'code': 'de',
                 'name': 'Deutsche',
-                'fallbacks': ['en', ]  # FOR TESTING DO NOT ADD 'fr' HERE
+                'fallbacks': ['en']  # FOR TESTING DO NOT ADD 'fr' HERE
             },
             {
                 'code': 'fr',
                 'name': 'Française',
-                'fallbacks': ['en', ]  # FOR TESTING DO NOT ADD 'de' HERE
-            },
-            {
-                'code': 'en',
-                'name': 'English',
-                'fallbacks': ['de', 'fr', ]
+                'fallbacks': ['en']  # FOR TESTING DO NOT ADD 'de' HERE
             },
             {
                 'code': 'it',
                 'name': 'Italiano',
-                'fallbacks': ['fr', ]  # FOR TESTING, LEAVE AS ONLY 'fr'
+                'fallbacks': ['fr']  # FOR TESTING, LEAVE AS ONLY 'fr'
             },
         ],
     },
-    # app-specific
     'PARLER_LANGUAGES': {
         1: [
             {
                 'code': 'en',
                 'fallbacks': ['de', 'fr'],
-                'hide_untranslated': False
-            },
-            {
-                'code': 'fr',
-                'fallbacks': ['en'],
-                'hide_untranslated': False
+                'hide_untranslated': False,
             },
             {
                 'code': 'de',
                 'fallbacks': ['en'],
-                'hide_untranslated': False
+                'hide_untranslated': False,
+            },
+            {
+                'code': 'fr',
+                'fallbacks': ['en'],
+                'hide_untranslated': False,
             },
             {
                 'code': 'it',
                 'fallbacks': ['fr', ],  # FOR TESTING, LEAVE AS ONLY 'fr'
-                'hide_untranslated': False
+                'hide_untranslated': False,
             },
         ],
         'default': {
             'code': 'en',
             'fallbacks': ['en'],
-            'hide_untranslated': False}
+            'hide_untranslated': False,
+        }
     },
     'PARLER_ENABLE_CACHING': False,
     'LANGUAGE_CODE': 'en',

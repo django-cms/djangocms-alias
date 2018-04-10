@@ -1,5 +1,6 @@
 from cms.api import add_plugin
 from cms.models import Placeholder
+from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.constants import DETAIL_ALIAS_URL_NAME
@@ -315,6 +316,7 @@ class Alias2ViewsTestCase(BaseAlias2PluginTestCase):
             )
 
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.plugin.body)
 
     def test_detail_view_standard_user(self):
         alias = self._create_alias([self.plugin])
@@ -334,5 +336,45 @@ class Alias2ViewsTestCase(BaseAlias2PluginTestCase):
             )
         self.assertEqual(response.status_code, 200)
 
-    # TODO: test multilanguage support for creation/edit of alias
-    # TODO: test edit on details ?
+    def test_detail_view_multilanguage(self):
+        en_plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='en',
+            body='This is text in English',
+        )
+        de_plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='de',
+            body='Das ist Text auf Deutsch',
+        )
+        fr_plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='fr',
+            body='C\'est le texte en français',
+        )
+        # Create alias with only en plugin
+        alias = self._create_alias([en_plugin, de_plugin, fr_plugin])
+
+        with self.login_user_context(self.superuser):
+            with force_language('de'):
+                response = self.client.get(
+                    alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk]),  # noqa: E501
+                )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, de_plugin.body)
+        self.assertNotContains(response, fr_plugin.body)
+        self.assertNotContains(response, en_plugin.body)
+
+        with self.login_user_context(self.superuser):
+            with force_language('fr'):
+                response = self.client.get(
+                    alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk]),  # noqa: E501
+                )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, fr_plugin.body)
+        self.assertNotContains(response, de_plugin.body)
+        self.assertNotContains(response, en_plugin.body)

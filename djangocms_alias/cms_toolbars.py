@@ -1,4 +1,3 @@
-from django.core.urlresolvers import resolve
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
@@ -14,7 +13,6 @@ from cms.toolbar_pool import toolbar_pool
 from .constants import (
     CREATE_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
-    PLUGIN_URL_NAME_PREFIX,
 )
 from .utils import alias_plugin_reverse
 
@@ -33,19 +31,15 @@ class AliasToolbar(CMSToolbar):
     name = _('Alias')
     plural_name = _('Aliases')
 
+    def populate(self):
+        self.add_aliases_link_to_admin_menu()
+        self.add_alias_menu()
+
     def get_create_alias_url(self, parameters):
         return alias_plugin_reverse(
             CREATE_ALIAS_URL_NAME,
             parameters=parameters,
         )
-
-    def populate(self):
-        self.is_user_currently_on_alias_plugin_pages = resolve(
-            self.toolbar.request_path,
-        ).url_name.startswith(PLUGIN_URL_NAME_PREFIX)
-
-        self.add_aliases_link_to_admin_menu()
-        self.add_alias_menu()
 
     def add_aliases_link_to_admin_menu(self):
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
@@ -56,7 +50,7 @@ class AliasToolbar(CMSToolbar):
         )
 
     def add_alias_menu(self):
-        if self.is_user_currently_on_alias_plugin_pages:
+        if self.is_current_app:
             alias_menu = self.toolbar.get_or_create_menu(
                 ALIAS_MENU_IDENTIFIER,
                 self.name,

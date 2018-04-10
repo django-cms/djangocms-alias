@@ -2,7 +2,12 @@ from cms.api import add_plugin
 from cms.models import Placeholder
 from cms.utils.plugins import downcast_plugins
 
-from djangocms_alias.models import Alias
+from djangocms_alias.constants import DETAIL_ALIAS_URL_NAME
+from djangocms_alias.models import (
+    Alias,
+    Category,
+)
+from djangocms_alias.utils import alias_plugin_reverse
 
 from .base import BaseAlias2PluginTestCase
 
@@ -245,3 +250,89 @@ class Alias2ViewsTestCase(BaseAlias2PluginTestCase):
             plugins[0].get_plugin_instance()[0].body,
             plugins[1].get_plugin_instance()[0].body,
         )
+
+    def test_list_view(self):
+        category1 = Category.objects.create(
+            name='Category 1',
+        )
+        category2 = Category.objects.create(
+            name='Category 2',
+        )
+
+        plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language=self.language,
+            body='This is basic content',
+        )
+
+        alias1 = self._create_alias(
+            [plugin],
+            name='Alias 1',
+            category=category1,
+        )
+        alias2 = self._create_alias(
+            [plugin],
+            name='Alias 2',
+            category=category2,
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(self.LIST_ALIASES_ENDPOINT)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, category1.name)
+        self.assertContains(response, category2.name)
+        self.assertContains(response, alias1.name)
+        self.assertContains(
+            response,
+            alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias1.pk])
+        )
+        self.assertContains(
+            response,
+            alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias2.pk])
+        )
+        self.assertContains(response, alias2.name)
+        self.assertContains(response, 'This is basic content')
+
+    def test_list_view_standard_user(self):
+        with self.login_user_context(self.get_standard_user()):
+            response = self.client.get(self.LIST_ALIASES_ENDPOINT)
+        self.assertEqual(response.status_code, 403)
+
+    def test_list_view_standard_staff_user(self):
+        with self.login_user_context(
+            self.get_staff_user_with_std_permissions(),
+        ):
+            response = self.client.get(self.LIST_ALIASES_ENDPOINT)
+        self.assertEqual(response.status_code, 200)
+
+    def test_detail_view(self):
+        alias = self._create_alias([self.plugin])
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk]),
+            )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_detail_view_standard_user(self):
+        alias = self._create_alias([self.plugin])
+        with self.login_user_context(self.get_standard_user()):
+            response = self.client.get(
+                alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk]),
+            )
+        self.assertEqual(response.status_code, 403)
+
+    def test_detail_view_standard_staff_user(self):
+        alias = self._create_alias([self.plugin])
+        with self.login_user_context(
+            self.get_staff_user_with_std_permissions(),
+        ):
+            response = self.client.get(
+                alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk]),
+            )
+        self.assertEqual(response.status_code, 200)
+
+    # TODO: test multilanguage support for creation/edit of alias
+    # TODO: test edit on details ?

@@ -30,6 +30,7 @@ ALIAS_MENU_CREATE_IDENTIFIER = 'alias-add'
 
 @toolbar_pool.register
 class AliasToolbar(CMSToolbar):
+    name = _('Alias')
     plural_name = _('Aliases')
 
     def get_create_alias_url(self, parameters):
@@ -58,7 +59,7 @@ class AliasToolbar(CMSToolbar):
         if self.is_user_currently_on_alias_plugin_pages:
             alias_menu = self.toolbar.get_or_create_menu(
                 ALIAS_MENU_IDENTIFIER,
-                self.plural_name,
+                self.name,
                 position=1,
             )
             alias_menu.add_modal_item(

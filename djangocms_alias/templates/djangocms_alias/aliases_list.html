@@ -3,7 +3,7 @@
 
 {% block aliases_content %}
     <div class="cms-aliases-page container">
-      <h1 class="cms-aliases-page-h1"><a href="{% url "pages-root" %}">{% trans 'Aliases' %}</a></h1>
+      <h1 class="cms-aliases-page-h1">{% trans 'Aliases' %}</h1>
         {% for category in categories %}
             <h2 class="cms-aliases-page-heading" id="{{ category.name|slugify }}">
                 <span class="cms-aliases-page-heading-inner">

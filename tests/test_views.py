@@ -1,3 +1,6 @@
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+
 from cms.api import add_plugin
 from cms.models import Placeholder
 from cms.utils.i18n import force_language
@@ -201,6 +204,34 @@ class Alias2ViewsTestCase(BaseAlias2PluginTestCase):
             placeholder_plugins[0].get_plugin_instance()[0].alias,
             alias,
         )
+
+    def test_create_alias_view_post_no_create_permission(self):
+        with self.login_user_context(self.get_staff_user_with_no_permissions()):  # noqa: E501
+            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+                'plugin': self.plugin.pk,
+                'category': self.category.pk,
+                'name': 'test alias',
+            })
+            self.assertEqual(response.status_code, 403)
+
+    def test_create_alias_view_post_no_replace_permission(self):
+        user = self.get_staff_user_with_std_permissions()
+        user.user_permissions.add(
+            Permission.objects.get(
+                content_type=ContentType.objects.get_for_model(
+                    Alias,
+                ),
+                codename='add_alias',
+            )
+        )
+        with self.login_user_context(user):  # noqa: E501
+            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+                'plugin': self.plugin.pk,
+                'category': self.category.pk,
+                'name': 'test alias',
+                'replace': True,
+            })
+            self.assertEqual(response.status_code, 403)
 
     def test_detach_view_non_staff_denied_access(self):
         response = self.client.get(self.DETACH_ALIAS_PLUGIN_ENDPOINT)

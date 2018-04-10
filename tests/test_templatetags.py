@@ -9,7 +9,7 @@ from djangocms_alias.templatetags.djangocms_alias_tags import (
 from .base import BaseAlias2PluginTestCase
 
 
-class Alias2PluginMenuTestCase(BaseAlias2PluginTestCase):
+class Alias2TemplateTagsTestCase(BaseAlias2PluginTestCase):
     alias_template = """{% load djangocms_alias_tags %}{% render_alias2_plugin plugin %}"""  # noqa: E501
 
     def test_get_alias_categories(self):
@@ -87,7 +87,7 @@ class Alias2PluginMenuTestCase(BaseAlias2PluginTestCase):
         add_plugin(
             alias.placeholder,
             self.alias_plugin_base.__class__,
-            language='en',
+            language=self.language,
             alias=alias,
         )
         alias_plugin = self.alias_plugin_base.replace_placeholder_content_with_alias(  # noqa: E501

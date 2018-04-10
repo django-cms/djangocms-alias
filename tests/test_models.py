@@ -3,7 +3,7 @@ from cms.api import add_plugin
 from .base import BaseAlias2PluginTestCase
 
 
-class Alias2PluginMenuTestCase(BaseAlias2PluginTestCase):
+class Alias2ModelsTestCase(BaseAlias2PluginTestCase):
 
     def test_alias_placeholder_slot_save_again(self):
         alias = self._create_alias(self.placeholder.get_plugins())
@@ -25,7 +25,7 @@ class Alias2PluginMenuTestCase(BaseAlias2PluginTestCase):
         alias_plugin = add_plugin(
             self.placeholder,
             self.alias_plugin_base.__class__,
-            language='en',
+            language=self.language,
             alias=alias,
         )
         self.assertFalse(alias_plugin.is_recursive())
@@ -37,7 +37,7 @@ class Alias2PluginMenuTestCase(BaseAlias2PluginTestCase):
         recursed_alias_plugin = add_plugin(
             alias.placeholder,
             self.alias_plugin_base.__class__,
-            language='en',
+            language=self.language,
             alias=alias,
         )
         self.assertTrue(recursed_alias_plugin.is_recursive())

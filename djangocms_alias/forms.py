@@ -97,6 +97,14 @@ class CreateAliasForm(BaseCreateAliasForm):
         return list(plugins)
 
 
+class CreateAliasWithReplaceForm(CreateAliasForm):
+    replace = forms.BooleanField(
+        label=_('Replace current plugin'),
+        help_text=_('Replace current plugin with alias'),
+        required=False,
+    )
+
+
 class DetachAliasPluginForm(forms.Form):
     plugin = forms.ModelChoiceField(
         queryset=CMSPlugin.objects.filter(plugin_type='Alias2Plugin'),

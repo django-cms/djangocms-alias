@@ -42,7 +42,7 @@ class BaseAlias2PluginTestCase(CMSTestCase):
         self.plugin = add_plugin(
             self.placeholder,
             'TextPlugin',
-            language='en',
+            language=self.language,
             body='test',
         )
         self.alias_plugin_base = Alias2Plugin()

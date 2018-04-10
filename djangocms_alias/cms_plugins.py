@@ -20,7 +20,14 @@ from cms.plugin_base import (
     PluginMenuItem,
 )
 from cms.plugin_pool import plugin_pool
-from cms.utils.plugins import copy_plugins_to_placeholder
+from cms.utils.plugins import (
+    copy_plugins_to_placeholder,
+    reorder_plugins,
+)
+from cms.utils.permissions import (
+    get_model_permission_codename,
+    has_plugin_permission,
+)
 
 from .constants import (
     CREATE_ALIAS_URL_NAME,
@@ -31,6 +38,7 @@ from .constants import (
 from .forms import (
     BaseCreateAliasForm,
     CreateAliasForm,
+    CreateAliasWithReplaceForm,
     DetachAliasPluginForm,
 )
 from .models import (
@@ -135,7 +143,8 @@ class Alias2Plugin(CMSPluginBase):
             ),
         ]
 
-    def create_alias(self, name, category, plugins):
+    @classmethod
+    def create_alias(cls, name, category, plugins):
         alias = Alias.objects.create(
             name=name,
             category=category,
@@ -146,20 +155,22 @@ class Alias2Plugin(CMSPluginBase):
         )
         return alias
 
-    def replace_plugin_with_alias(self, plugin, alias, language):
+    @classmethod
+    def replace_plugin_with_alias(cls, plugin, alias, language):
         new_plugin = add_plugin(
             plugin.placeholder,
-            self.__class__,
+            cls.__name__,
             target=plugin,
-            position='left',  # TODO find out how to reuse plugin's position
+            position='left',
             language=plugin.language,
             alias=alias,
         )
         plugin.delete()
         return new_plugin
 
+    @classmethod
     def replace_placeholder_content_with_alias(
-        self,
+        cls,
         placeholder,
         alias,
         language,
@@ -167,10 +178,29 @@ class Alias2Plugin(CMSPluginBase):
         placeholder.clear()
         return add_plugin(
             placeholder,
-            self.__class__,
+            cls.__name__,
             alias=alias,
             language=language,
         )
+
+    @classmethod
+    def can_create_alias(cls, user, plugins):
+        if not user.has_perm(
+            get_model_permission_codename(Alias, 'add'),
+        ):
+            return False
+
+        return all(
+            has_plugin_permission(
+                user,
+                plugin.plugin_type,
+                'add',
+            ) for plugin in plugins
+        )
+
+    @classmethod
+    def can_replace_with_alias(cls, user):
+        return has_plugin_permission(user, cls.__name__, 'add')
 
     def create_alias_view(self, request):
         if not request.user.is_staff:
@@ -186,7 +216,14 @@ class Alias2Plugin(CMSPluginBase):
         if request.method == 'GET' and not form.is_valid():
             return HttpResponseBadRequest('Form received unexpected values')
 
-        create_form = CreateAliasForm(
+        user = request.user
+
+        if self.can_replace_with_alias(user):
+            form_class = CreateAliasWithReplaceForm
+        else:
+            form_class = CreateAliasForm
+
+        create_form = form_class(
             request.POST or None,
             initial=initial_data,
         )
@@ -216,14 +253,21 @@ class Alias2Plugin(CMSPluginBase):
                 'Plugins are required to create an alias',
             )
 
+        if not self.can_create_alias(user, plugins):
+            raise PermissionDenied
+
+        replace = create_form.cleaned_data.get('replace')
+
+        if replace and not self.can_replace_with_alias(user):
+            raise PermissionDenied
+
         alias = self.create_alias(
             name=create_form.cleaned_data.get('name'),
             category=create_form.cleaned_data.get('category'),
             plugins=plugins,
         )
-        if create_form.cleaned_data.get('replace'):
+        if replace:
             plugin = create_form.cleaned_data.get('plugin')
-            placeholder = create_form.cleaned_data.get('placeholder')
             language = get_language()
             if plugin:
                 new_plugin = self.replace_plugin_with_alias(
@@ -231,7 +275,8 @@ class Alias2Plugin(CMSPluginBase):
                     alias,
                     language=language,
                 )
-            elif placeholder:
+            else:
+                placeholder = create_form.cleaned_data.get('placeholder')
                 new_plugin = self.replace_placeholder_content_with_alias(
                     placeholder,
                     alias,
@@ -276,13 +321,55 @@ class Alias2Plugin(CMSPluginBase):
 
         return view(request)
 
-    def detach_alias_plugin(self, plugin):
+    @classmethod
+    def can_detach(cls):
+        return True
+
+    @classmethod
+    def detach_alias_plugin(cls, plugin, language):
         instance = plugin.get_plugin_instance()[0]
-        copy_plugins_to_placeholder(
-            list(instance.alias.placeholder.get_plugins()),
-            placeholder=instance.placeholder,
+        source_placeholder = instance.alias.placeholder
+        target_placeholder = instance.placeholder
+
+        order = target_placeholder.get_plugin_tree_order(language=language)
+
+        source_plugins = list(instance.alias.placeholder.get_plugins())
+        copied_plugins = copy_plugins_to_placeholder(
+            source_plugins,
+            placeholder=target_placeholder,
         )
+        pk_map = {
+            source.pk: copy.pk
+            for (source, copy) in zip(source_plugins, copied_plugins)
+        }
+
+        source_order = source_placeholder.get_plugin_tree_order(
+            language=language,
+        )
+
+        index = order.index(instance.pk)
         plugin.delete()
+        order[index:index + 1] = [pk_map[pk] for pk in source_order]
+
+        plugin_map = {
+            plugin.pk: plugin
+            for plugin in target_placeholder.get_plugins()
+        }
+
+        reorder_plugins(
+            target_placeholder,
+            language=language,
+            order=order,
+            parent_id=instance.parent_id,
+        )
+        # TODO get a better solution for moving a group of nodes at once
+        for plugin in copied_plugins:
+            target = plugin_map[order[order.index(plugin.pk) - 1]]
+            target.refresh_from_db()
+            plugin.move(
+                target,
+                'right',
+            )
 
     def detach_alias_plugin_view(self, request):
         if not request.user.is_staff:
@@ -293,8 +380,12 @@ class Alias2Plugin(CMSPluginBase):
         if request.method == 'GET' or not form.is_valid():
             return HttpResponseBadRequest('Form received unexpected values')
 
+        if not self.can_detach():
+            return PermissionDenied
+
         self.detach_alias_plugin(
             plugin=form.cleaned_data['plugin'],
+            language=get_language(),
         )
 
         return HttpResponse(

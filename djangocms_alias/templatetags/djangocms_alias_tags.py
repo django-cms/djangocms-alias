@@ -27,6 +27,9 @@ def render_alias2_plugin(context, instance):
     toolbar = get_toolbar_from_request(request)
     renderer = toolbar.content_renderer
 
+    if not instance:
+        return ''
+
     source = instance.alias.placeholder
 
     # TODO This needs to be using draft/live alias feature

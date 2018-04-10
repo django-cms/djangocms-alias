@@ -378,3 +378,14 @@ class Alias2ViewsTestCase(BaseAlias2PluginTestCase):
         self.assertContains(response, fr_plugin.body)
         self.assertNotContains(response, de_plugin.body)
         self.assertNotContains(response, en_plugin.body)
+
+    def test_detail_view_only_one_language_created_user_can_see_different_langs(self):  # noqa: E501
+        # alias with en plugin
+        alias = self._create_alias([self.plugin])
+
+        with self.login_user_context(self.superuser):
+            with force_language('de'):
+                response = self.client.get(
+                    alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk]),  # noqa: E501
+                )
+        self.assertEqual(response.status_code, 200)

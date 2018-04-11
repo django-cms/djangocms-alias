@@ -199,7 +199,7 @@ class Alias2Plugin(CMSPluginBase):
         alias,
         language,
     ):
-        for plugin in placeholder.get_plugins():
+        for plugin in placeholder.get_plugins(language):
             cls.move_plugin(plugin, alias.placeholder, language)
         return add_plugin(
             placeholder,
@@ -446,16 +446,17 @@ class Alias2Plugin(CMSPluginBase):
 
         plugin = form.cleaned_data['plugin']
         instance = plugin.get_plugin_instance()[0]
+        language = get_language()
 
         if not self.can_detach(
             request.user,
-            instance.alias.placeholder.get_plugins(),
+            instance.alias.placeholder.get_plugins(language),
         ):
             raise PermissionDenied
 
         self.detach_alias_plugin(
             plugin=instance,
-            language=get_language(),
+            language=language,
         )
 
         return HttpResponse(

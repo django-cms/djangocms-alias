@@ -63,11 +63,6 @@ class CreateAliasForm(BaseCreateAliasForm):
         queryset=Category.objects.all(),
         required=True,
     )
-    replace = forms.BooleanField(
-        label=_('Replace current plugin'),
-        help_text=_('Replace current plugin with alias'),
-        required=False,
-    )
 
     def set_category_widget(self, request):
         related_modeladmin = admin.site._registry.get(Category)

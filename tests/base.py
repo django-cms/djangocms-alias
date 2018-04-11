@@ -47,11 +47,15 @@ class BaseAlias2PluginTestCase(CMSTestCase):
         self.alias_plugin_base = Alias2Plugin()
         self.superuser = self.get_superuser()
 
-    def _create_alias(self, plugins, name='test alias', category=None):
+    def _create_alias(self, plugins=None, name='test alias', category=None):
         if category is None:
             category = self.category
-        return self.alias_plugin_base.create_alias(
+        if plugins is None:
+            plugins = []
+        alias = self.alias_plugin_base.create_alias(
             name=name,
             category=category,
-            plugins=plugins,
         )
+        if plugins:
+            self.alias_plugin_base.populate_alias(alias, plugins)
+        return alias

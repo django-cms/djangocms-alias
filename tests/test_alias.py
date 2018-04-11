@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 from cms.api import add_plugin
 from cms.utils.plugins import downcast_plugins
 
@@ -39,17 +41,21 @@ class Alias2PluginTestCase(BaseAlias2PluginTestCase):
         self.assertEqual(alias_plugin.alias.placeholder.get_plugins()[0].get_plugin_instance()[0].body, 'test')  # noqa: E501
 
     def test_replace_plugin_with_alias_correct_position(self):
-        add_plugin(
+        second_plugin = add_plugin(
             self.placeholder,
             'TextPlugin',
             language=self.language,
             body='test 2',
         )
-        alias = self._create_alias(
-            [self.plugin],
+        add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language=self.language,
+            body='test 3',
         )
+        alias = self._create_alias()
         alias_plugin = self.alias_plugin_base.replace_plugin_with_alias(
-            self.plugin,
+            second_plugin,
             alias,
             self.language,
         )
@@ -58,11 +64,16 @@ class Alias2PluginTestCase(BaseAlias2PluginTestCase):
             self.plugin,
             plugins,
         )
-        self.assertEqual(plugins[0].get_plugin_instance()[0], alias_plugin)
+        self.assertEqual(plugins[1].get_plugin_instance()[0], alias_plugin)
+
+        ordered_plugins = sorted(
+            downcast_plugins(plugins),
+            key=attrgetter('position'),
+        )
 
         self.assertEqual(
-            [plugin.plugin_type for plugin in downcast_plugins(plugins)],
-            ['Alias2Plugin', 'TextPlugin'],
+            [plugin.plugin_type for plugin in ordered_plugins],
+            ['TextPlugin', 'Alias2Plugin', 'TextPlugin'],
         )
 
     def test_replace_placeholder_content_with_alias(self):
@@ -72,15 +83,14 @@ class Alias2PluginTestCase(BaseAlias2PluginTestCase):
             language=self.language,
             body='test 2',
         )
-        alias = self._create_alias(
-            self.placeholder.get_plugins(),
-        )
+        alias = self._create_alias()
         self.alias_plugin_base.replace_placeholder_content_with_alias(
             self.placeholder,
             alias,
             self.language,
         )
         plugins = self.placeholder.get_plugins()
+
         self.assertEqual(plugins.count(), 1)
         self.assertEqual(alias.placeholder.get_plugins().count(), 2)
         self.assertEqual(
@@ -89,7 +99,7 @@ class Alias2PluginTestCase(BaseAlias2PluginTestCase):
         )
 
     def test_detach_alias(self):
-        alias = self._create_alias([])
+        alias = self._create_alias()
         add_plugin(
             alias.placeholder,
             'TextPlugin',
@@ -146,8 +156,12 @@ class Alias2PluginTestCase(BaseAlias2PluginTestCase):
         self.alias_plugin_base.detach_alias_plugin(alias_plugin, self.language)
         self.assertEqual(plugins.count(), 4)
 
+        ordered_plugins = sorted(
+            downcast_plugins(plugins),
+            key=attrgetter('position'),
+        )
         self.assertEqual(
-            [str(plugin) for plugin in downcast_plugins(plugins)],
+            [str(plugin) for plugin in ordered_plugins],
             ['test', 'test 1', 'test 2', 'test 3'],
         )
 

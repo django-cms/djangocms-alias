@@ -1,5 +1,10 @@
+import json
+
 from django.conf.urls import url
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import (
+    ObjectDoesNotExist,
+    PermissionDenied,
+)
 from django.core.urlresolvers import reverse
 from django.http import (
     HttpResponse,
@@ -20,6 +25,10 @@ from cms.plugin_base import (
     PluginMenuItem,
 )
 from cms.plugin_pool import plugin_pool
+from cms.toolbar.utils import (
+    get_plugin_toolbar_info,
+    get_plugin_tree_as_json,
+)
 from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
@@ -144,28 +153,43 @@ class Alias2Plugin(CMSPluginBase):
         ]
 
     @classmethod
-    def create_alias(cls, name, category, plugins):
+    def create_alias(cls, name, category):
         alias = Alias.objects.create(
             name=name,
             category=category,
         )
+        return alias
+
+    @classmethod
+    def populate_alias(cls, alias, plugins):
         copy_plugins_to_placeholder(
             plugins,
             placeholder=alias.placeholder,
         )
-        return alias
+
+    @classmethod
+    def move_plugin(cls, plugin, target_placeholder, language):
+        plugin_data = {
+            'placeholder': target_placeholder,
+            'language': language,
+        }
+        plugin.update(refresh=True, **plugin_data)
+        plugin.get_descendants().update(**plugin_data)
 
     @classmethod
     def replace_plugin_with_alias(cls, plugin, alias, language):
+        cls.move_plugin(plugin, alias.placeholder, language)
+
         new_plugin = add_plugin(
             plugin.placeholder,
             cls.__name__,
             target=plugin,
             position='left',
-            language=plugin.language,
+            language=language,
             alias=alias,
         )
-        plugin.delete()
+        new_plugin.position = plugin.position
+        new_plugin.save(update_fields=['position'])
         return new_plugin
 
     @classmethod
@@ -175,7 +199,8 @@ class Alias2Plugin(CMSPluginBase):
         alias,
         language,
     ):
-        placeholder.clear()
+        for plugin in placeholder.get_plugins():
+            cls.move_plugin(plugin, alias.placeholder, language)
         return add_plugin(
             placeholder,
             cls.__name__,
@@ -264,10 +289,10 @@ class Alias2Plugin(CMSPluginBase):
         alias = self.create_alias(
             name=create_form.cleaned_data.get('name'),
             category=create_form.cleaned_data.get('category'),
-            plugins=plugins,
         )
         if replace:
             plugin = create_form.cleaned_data.get('plugin')
+            placeholder = create_form.cleaned_data.get('placeholder')
             language = get_language()
             if plugin:
                 new_plugin = self.replace_plugin_with_alias(
@@ -276,18 +301,64 @@ class Alias2Plugin(CMSPluginBase):
                     language=language,
                 )
             else:
-                placeholder = create_form.cleaned_data.get('placeholder')
                 new_plugin = self.replace_placeholder_content_with_alias(
                     placeholder,
                     alias,
                     language=language,
                 )
-            return self.render_close_frame(request, obj=new_plugin)
+            return self.render_replace_response(
+                request,
+                new_plugin=new_plugin,
+                source_placeholder=placeholder,
+                source_plugin=plugin,
+            )
+        else:
+            self.populate_alias(alias, plugins)
 
         return HttpResponse(
             '<div><div class="messagelist">'
             '<div class="success"></div>'
             '</div></div>'
+        )
+
+    def render_replace_response(
+        self,
+        request,
+        new_plugin,
+        source_placeholder=None,
+        source_plugin=None,
+    ):
+        try:
+            root = (
+                new_plugin.parent.get_bound_plugin()
+                if new_plugin.parent else new_plugin
+            )
+        except ObjectDoesNotExist:
+            root = new_plugin
+
+        plugins = [root] + list(root.get_descendants().order_by('path'))
+
+        context = {
+            'added_plugin': json.dumps(get_plugin_toolbar_info(new_plugin)),
+            'added_plugin_structure': get_plugin_tree_as_json(
+                request,
+                plugins,
+            ),
+            'is_popup': True,
+        }
+        if source_plugin is not None:
+            context['replaced_plugin'] = json.dumps(
+                get_plugin_toolbar_info(source_plugin),
+            )
+        if source_placeholder is not None:
+            context['replaced_placeholder'] = json.dumps({
+                'placeholder_id': source_placeholder.pk,
+                'deleted': True,
+            })
+        return render(
+            request,
+            'djangocms_alias/alias_replace.html',
+            context,
         )
 
     def alias_detail_view(self, request, pk):
@@ -338,7 +409,7 @@ class Alias2Plugin(CMSPluginBase):
 
         order = target_placeholder.get_plugin_tree_order(language=language)
 
-        source_plugins = list(plugin.alias.placeholder.get_plugins())
+        source_plugins = plugin.alias.placeholder.get_plugins(language)
         copied_plugins = copy_plugins_to_placeholder(
             source_plugins,
             placeholder=target_placeholder,
@@ -352,14 +423,10 @@ class Alias2Plugin(CMSPluginBase):
             language=language,
         )
 
-        index = order.index(plugin.pk)
-        plugin.delete()
-        order[index:index + 1] = [pk_map[pk] for pk in source_order]
+        target_pos = order.index(plugin.pk)
+        order[target_pos:target_pos + 1] = [pk_map[pk] for pk in source_order]
 
-        plugin_map = {
-            plugin.pk: plugin
-            for plugin in target_placeholder.get_plugins()
-        }
+        plugin.delete()
 
         reorder_plugins(
             target_placeholder,
@@ -367,14 +434,6 @@ class Alias2Plugin(CMSPluginBase):
             order=order,
             parent_id=plugin.parent_id,
         )
-        # TODO get a better solution for moving a group of nodes at once
-        for plugin in copied_plugins:
-            target = plugin_map[order[order.index(plugin.pk) - 1]]
-            target.refresh_from_db()
-            plugin.move(
-                target,
-                'right',
-            )
 
     def detach_alias_plugin_view(self, request):
         if not request.user.is_staff:

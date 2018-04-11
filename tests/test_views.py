@@ -224,7 +224,7 @@ class Alias2ViewsTestCase(BaseAlias2PluginTestCase):
                 codename='add_alias',
             )
         )
-        with self.login_user_context(user):  # noqa: E501
+        with self.login_user_context(user):
             response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
@@ -233,7 +233,7 @@ class Alias2ViewsTestCase(BaseAlias2PluginTestCase):
             })
             self.assertEqual(response.status_code, 403)
 
-    def test_detach_view_non_staff_denied_access(self):
+    def test_detach_view_no_permission_to_add_plugins_from_alias(self):
         response = self.client.get(self.DETACH_ALIAS_PLUGIN_ENDPOINT)
         self.assertEqual(response.status_code, 403)
 
@@ -241,6 +241,24 @@ class Alias2ViewsTestCase(BaseAlias2PluginTestCase):
         with self.login_user_context(self.superuser):
             response = self.client.get(self.DETACH_ALIAS_PLUGIN_ENDPOINT)
             self.assertEqual(response.status_code, 400)
+
+    def test_detach_view_non_staff_denied_access(self):
+        alias = self._create_alias([self.plugin])
+        plugin = add_plugin(
+            self.placeholder,
+            self.alias_plugin_base.__class__,
+            language='en',
+            alias=alias,
+        )
+        user = self.get_staff_user_with_no_permissions()
+        with self.login_user_context(user):
+            response = self.client.post(
+                self.DETACH_ALIAS_PLUGIN_ENDPOINT,
+                data={
+                    'plugin': plugin.pk
+                },
+            )
+        self.assertEqual(response.status_code, 403)
 
     def test_detach_view_invalid_form(self):
         with self.login_user_context(self.superuser):

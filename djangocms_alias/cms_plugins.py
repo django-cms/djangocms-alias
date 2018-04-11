@@ -20,13 +20,13 @@ from cms.plugin_base import (
     PluginMenuItem,
 )
 from cms.plugin_pool import plugin_pool
-from cms.utils.plugins import (
-    copy_plugins_to_placeholder,
-    reorder_plugins,
-)
 from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
+)
+from cms.utils.plugins import (
+    copy_plugins_to_placeholder,
+    reorder_plugins,
 )
 
 from .constants import (
@@ -322,18 +322,23 @@ class Alias2Plugin(CMSPluginBase):
         return view(request)
 
     @classmethod
-    def can_detach(cls):
-        return True
+    def can_detach(cls, user, plugins):
+        return all(
+            has_plugin_permission(
+                user,
+                plugin.plugin_type,
+                'add',
+            ) for plugin in plugins
+        )
 
     @classmethod
     def detach_alias_plugin(cls, plugin, language):
-        instance = plugin.get_plugin_instance()[0]
-        source_placeholder = instance.alias.placeholder
-        target_placeholder = instance.placeholder
+        source_placeholder = plugin.alias.placeholder
+        target_placeholder = plugin.placeholder
 
         order = target_placeholder.get_plugin_tree_order(language=language)
 
-        source_plugins = list(instance.alias.placeholder.get_plugins())
+        source_plugins = list(plugin.alias.placeholder.get_plugins())
         copied_plugins = copy_plugins_to_placeholder(
             source_plugins,
             placeholder=target_placeholder,
@@ -347,7 +352,7 @@ class Alias2Plugin(CMSPluginBase):
             language=language,
         )
 
-        index = order.index(instance.pk)
+        index = order.index(plugin.pk)
         plugin.delete()
         order[index:index + 1] = [pk_map[pk] for pk in source_order]
 
@@ -360,7 +365,7 @@ class Alias2Plugin(CMSPluginBase):
             target_placeholder,
             language=language,
             order=order,
-            parent_id=instance.parent_id,
+            parent_id=plugin.parent_id,
         )
         # TODO get a better solution for moving a group of nodes at once
         for plugin in copied_plugins:
@@ -380,11 +385,17 @@ class Alias2Plugin(CMSPluginBase):
         if request.method == 'GET' or not form.is_valid():
             return HttpResponseBadRequest('Form received unexpected values')
 
-        if not self.can_detach():
-            return PermissionDenied
+        plugin = form.cleaned_data['plugin']
+        instance = plugin.get_plugin_instance()[0]
+
+        if not self.can_detach(
+            request.user,
+            instance.alias.placeholder.get_plugins(),
+        ):
+            raise PermissionDenied
 
         self.detach_alias_plugin(
-            plugin=form.cleaned_data['plugin'],
+            plugin=instance,
             language=get_language(),
         )
 

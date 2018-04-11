@@ -151,49 +151,6 @@ class Alias2PluginTestCase(BaseAlias2PluginTestCase):
             ['test', 'test 1', 'test 2', 'test 3'],
         )
 
-    def test_page_plugin_has_create_alias_button(self):
-        page_plugin = add_plugin(
-            self.placeholder,
-            'TextPlugin',
-            language=self.language,
-            body='Test plugin on a page',
-        )
-        request = self.rf.get('/')
-
-        page_plugin_menu_items = self.alias_plugin_base.__class__.get_extra_plugin_menu_items(  # noqa: E501
-            request,
-            page_plugin,
-        )
-        self.assertEqual(len(page_plugin_menu_items), 1)
-        self.assertEqual(page_plugin_menu_items[0].name, 'Create Alias')
-        self.assertIn(self.CREATE_ALIAS_ENDPOINT, page_plugin_menu_items[0].url)  # noqa: E501
-
-    def test_alias_plugin_has_edit_and_detach_alias_buttons(self):
-        alias = self._create_alias([])
-        alias_plugin = add_plugin(
-            self.placeholder,
-            self.alias_plugin_base.__class__,
-            language=self.language,
-            alias=alias,
-        )
-        request = self.rf.get('/')
-
-        alias_plugin_menu_items = self.alias_plugin_base.__class__.get_extra_plugin_menu_items(  # noqa: E501
-            request,
-            alias_plugin,
-        )
-
-        self.assertEqual(len(alias_plugin_menu_items), 2)
-
-        self.assertEqual(alias_plugin_menu_items[0].name, 'Edit Alias')
-        self.assertEqual(
-            alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk]),
-            alias_plugin_menu_items[0].url,
-        )
-
-        self.assertEqual(alias_plugin_menu_items[1].name, 'Detach Alias')
-        self.assertIn(self.DETACH_ALIAS_PLUGIN_ENDPOINT, alias_plugin_menu_items[1].url)  # noqa: E501
-
     def test_alias_plugin_edit_button_redirecting_to_page_with_structure_mode_turned_on(self):  # noqa: E501
         alias = self._create_alias([])
         alias_plugin = add_plugin(
@@ -202,7 +159,7 @@ class Alias2PluginTestCase(BaseAlias2PluginTestCase):
             language=self.language,
             alias=alias,
         )
-        request = self.rf.get('/')
+        request = self.get_request('/')
 
         alias_plugin_menu_items = self.alias_plugin_base.__class__.get_extra_plugin_menu_items(  # noqa: E501
             request,

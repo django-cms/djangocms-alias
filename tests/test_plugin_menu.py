@@ -8,7 +8,7 @@ class Alias2PluginMenuTestCase(BaseAlias2PluginTestCase):
 
     def test_extra_plugin_items_for_regular_plugins(self):
         extra_items = self.alias_plugin_base.get_extra_plugin_menu_items(
-            self.rf.get(self.page.get_absolute_url()),
+            self.get_request(self.page.get_absolute_url()),
             self.plugin,
         )
         self.assertEqual(len(extra_items), 1)
@@ -28,7 +28,7 @@ class Alias2PluginMenuTestCase(BaseAlias2PluginTestCase):
         )
 
         extra_items = self.alias_plugin_base.get_extra_plugin_menu_items(
-            self.rf.get(self.page.get_absolute_url()),
+            self.get_request(self.page.get_absolute_url()),
             alias_plugin,
         )
 
@@ -48,7 +48,7 @@ class Alias2PluginMenuTestCase(BaseAlias2PluginTestCase):
 
     def test_extra_plugin_items_for_placeholder(self):
         extra_items = self.alias_plugin_base.get_extra_placeholder_menu_items(
-            self.rf.get(self.page.get_absolute_url()),
+            self.get_request(self.page.get_absolute_url()),
             self.placeholder,
         )
         self.assertEqual(len(extra_items), 1)

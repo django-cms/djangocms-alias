@@ -37,7 +37,7 @@ class Alias2TemplateTagsTestCase(BaseAlias2PluginTestCase):
         output = self.render_template_obj(
             self.alias_template,
             {},
-            self.rf.get('/'),
+            self.get_request('/'),
         )
         self.assertEqual(output, '')
 
@@ -56,7 +56,7 @@ class Alias2TemplateTagsTestCase(BaseAlias2PluginTestCase):
             {
                 'plugin': alias_plugin,
             },
-            self.rf.get('/'),
+            self.get_request('/'),
         )
         self.assertEqual(output, 'test')
 
@@ -76,7 +76,7 @@ class Alias2TemplateTagsTestCase(BaseAlias2PluginTestCase):
             {
                 'plugin': alias_plugin,
             },
-            self.rf.get('/'),
+            self.get_request('/'),
         )
         self.assertEqual(output, '')
 
@@ -101,6 +101,6 @@ class Alias2TemplateTagsTestCase(BaseAlias2PluginTestCase):
             {
                 'plugin': alias_plugin,
             },
-            self.rf.get('/'),
+            self.get_request('/'),
         )
         self.assertEqual(output, 'test\n')

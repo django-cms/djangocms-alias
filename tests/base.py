@@ -1,5 +1,3 @@
-from django.test.client import RequestFactory
-
 from cms.api import (
     add_plugin,
     create_page,
@@ -34,6 +32,7 @@ class BaseAlias2PluginTestCase(CMSTestCase):
             title='test',
             template='page.html',
             language=self.language,
+            published=True,
         )
         self.category = Category.objects.create(
             name='test category',
@@ -47,7 +46,6 @@ class BaseAlias2PluginTestCase(CMSTestCase):
         )
         self.alias_plugin_base = Alias2Plugin()
         self.superuser = self.get_superuser()
-        self.rf = RequestFactory()
 
     def _create_alias(self, plugins, name='test alias', category=None):
         if category is None:

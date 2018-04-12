@@ -1,3 +1,4 @@
+from cms.utils.conf import get_cms_setting
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import DETAIL_ALIAS_URL_NAME
@@ -14,7 +15,7 @@ def alias_plugin_reverse(viewname, *args, **kwargs):
     if viewname == DETAIL_ALIAS_URL_NAME:
         parameters = {
             **parameters,
-            'structure': "1",
+            get_cms_setting('CMS_TOOLBAR_URL__BUILD'): "1",
         }
 
     reversed_url = admin_reverse(viewname, *args, **kwargs)

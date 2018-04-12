@@ -1,6 +1,8 @@
 from cms.cms_toolbars import ADMIN_MENU_IDENTIFIER, ADMINISTRATION_BREAK
 from cms.toolbar.items import Break
 
+from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
+
 from .base import BaseAliasPluginTestCase
 
 
@@ -31,11 +33,23 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         item_positioned_before_admin_break = admin_menu.items[break_item.index - 1]  # noqa: E501
         self.assertEqual(item_positioned_before_admin_break.name, 'Aliases')
 
-    def test_add_alias_menu(self):
-        # TODO only in current app
-        # TODO showing if has perms
-        # TODO delete alias
-        pass
+    def test_add_alias_menu_showing_only_on_alias_plugin_views(self):
+        request = self.get_page_request(self.page, self.superuser)
+        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+        self.assertEqual(alias_menu, None)
 
-    def test_delete_alias(self):
-        pass
+        alias = self._create_alias([self.plugin])
+        for endpoint in [
+            self.LIST_ALIASES_ENDPOINT,
+            self.DETAIL_ALIAS_ENDPOINT(alias.pk),
+        ]:
+            request = self.get_page_request(
+                None,
+                self.superuser,
+                path=self.LIST_ALIASES_ENDPOINT,
+            )
+            alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+            self.assertEqual(alias_menu.name, 'Alias')
+
+    # TODO delete alias
+    # TODO showing if has perms

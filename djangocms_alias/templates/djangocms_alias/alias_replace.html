@@ -25,6 +25,8 @@ window.CMS || window.parent.CMS || document.write(
                 var addedPlugin = {{ added_plugin|safe }};
                 addedPlugin.structure = {{ added_plugin_structure|safe }};
                 Window.CMS.API.StructureBoard.invalidateState('ADD', addedPlugin);
+                var moveData = {{ move_data|safe }};
+                Window.CMS.API.StructureBoard.invalidateState('MOVE', moveData);
             }, 100);
         });
     })(window.parent || window);

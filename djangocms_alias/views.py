@@ -182,12 +182,20 @@ def render_replace_response(
 
     plugins = [root] + list(root.get_descendants().order_by('path'))
 
+    move_data = get_plugin_toolbar_info(new_plugin)
+    move_data['plugin_order'] = new_plugin.placeholder.get_plugin_tree_order(  # noqa: E501
+        new_plugin.language,
+        parent_id=new_plugin.parent_id,
+    )
+    plugin_tree = get_plugin_tree_as_json(
+        request,
+        plugins,
+    )
+    move_data.update(json.loads(plugin_tree))
     context = {
         'added_plugin': json.dumps(get_plugin_toolbar_info(new_plugin)),
-        'added_plugin_structure': get_plugin_tree_as_json(
-            request,
-            plugins,
-        ),
+        'added_plugin_structure': plugin_tree,
+        'move_data': json.dumps(move_data),
         'is_popup': True,
     }
     if source_plugin is not None:

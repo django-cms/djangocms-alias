@@ -356,11 +356,7 @@ class Alias(CMSPluginBase):
         if not request.user.is_staff:
             raise PermissionDenied
 
-        queryset = Category.objects.prefetch_related(
-            'aliases',
-        ).order_by(
-            'name',
-        )
+        queryset = Category.objects.prefetch_related('aliases').order_by('name')  # noqa: E501
 
         view = ListView.as_view(
             model=Category,

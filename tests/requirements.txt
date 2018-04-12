@@ -1,5 +1,4 @@
 coverage
 djangocms_helper
 flake8
-ipdb
 isort

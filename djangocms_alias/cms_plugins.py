@@ -368,7 +368,6 @@ class Alias(CMSPluginBase):
             queryset=queryset,
             template_name='djangocms_alias/aliases_list.html',
         )
-
         return view(request)
 
     @classmethod

@@ -6,10 +6,7 @@ from django.utils.encoding import force_text
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
-from cms.models import (
-    CMSPlugin,
-    Placeholder,
-)
+from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderField
 
 

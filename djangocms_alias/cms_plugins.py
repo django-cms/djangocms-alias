@@ -1,42 +1,24 @@
 import json
 
 from django.conf.urls import url
-from django.core.exceptions import (
-    ObjectDoesNotExist,
-    PermissionDenied,
-)
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import (
-    HttpResponse,
-    HttpResponseBadRequest,
-)
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.middleware.csrf import get_token
 from django.shortcuts import render
 from django.utils.translation import get_language
 from django.utils.translation import ugettext_lazy as _
-from django.views.generic import (
-    DetailView,
-    ListView,
-)
+from django.views.generic import DetailView, ListView
 
 from cms.api import add_plugin
-from cms.plugin_base import (
-    CMSPluginBase,
-    PluginMenuItem,
-)
+from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
-from cms.toolbar.utils import (
-    get_plugin_toolbar_info,
-    get_plugin_tree_as_json,
-)
+from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
 )
-from cms.utils.plugins import (
-    copy_plugins_to_placeholder,
-    reorder_plugins,
-)
+from cms.utils.plugins import copy_plugins_to_placeholder, reorder_plugins
 
 from .constants import (
     CREATE_ALIAS_URL_NAME,
@@ -50,11 +32,8 @@ from .forms import (
     CreateAliasWithReplaceForm,
     DetachAliasPluginForm,
 )
-from .models import (
-    Alias as AliasModel,
-    AliasPlugin,
-    Category,
-)
+from .models import Alias as AliasModel
+from .models import AliasPlugin, Category
 from .utils import alias_plugin_reverse
 
 

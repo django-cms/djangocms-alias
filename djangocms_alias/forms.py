@@ -6,15 +6,9 @@ from django.contrib.admin.widgets import (
 )
 from django.utils.translation import ugettext_lazy as _
 
-from cms.models import (
-    CMSPlugin,
-    Placeholder,
-)
+from cms.models import CMSPlugin, Placeholder
 
-from .models import (
-    Alias,
-    Category,
-)
+from .models import Alias, Category
 
 
 __all__ = [

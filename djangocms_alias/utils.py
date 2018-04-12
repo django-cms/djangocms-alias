@@ -1,7 +1,4 @@
-from cms.utils.urlutils import (
-    add_url_parameters,
-    admin_reverse,
-)
+from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import DETAIL_ALIAS_URL_NAME
 

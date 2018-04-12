@@ -1,7 +1,4 @@
-from cms.cms_toolbars import (
-    ADMIN_MENU_IDENTIFIER,
-    ADMINISTRATION_BREAK,
-)
+from cms.cms_toolbars import ADMIN_MENU_IDENTIFIER, ADMINISTRATION_BREAK
 from cms.toolbar.items import Break
 
 from .base import BaseAliasPluginTestCase

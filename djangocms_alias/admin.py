@@ -2,10 +2,7 @@ from django.contrib import admin
 
 from cms.admin.placeholderadmin import PlaceholderAdminMixin
 
-from .models import (
-    Alias,
-    Category,
-)
+from .models import Alias, Category
 
 
 __all__ = [

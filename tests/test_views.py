@@ -5,10 +5,7 @@ from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.constants import DETAIL_ALIAS_URL_NAME
-from djangocms_alias.models import (
-    Alias,
-    Category,
-)
+from djangocms_alias.models import Alias, Category
 from djangocms_alias.utils import alias_plugin_reverse
 
 from .base import BaseAliasPluginTestCase

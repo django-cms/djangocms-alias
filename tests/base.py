@@ -1,9 +1,6 @@
 from django.test.client import RequestFactory
 
-from cms.api import (
-    add_plugin,
-    create_page,
-)
+from cms.api import add_plugin, create_page
 from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
 from cms.utils.conf import get_cms_setting

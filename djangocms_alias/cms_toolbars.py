@@ -10,10 +10,7 @@ from cms.toolbar.items import Break
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 
-from .constants import (
-    CREATE_ALIAS_URL_NAME,
-    LIST_ALIASES_URL_NAME,
-)
+from .constants import CREATE_ALIAS_URL_NAME, LIST_ALIASES_URL_NAME
 from .utils import alias_plugin_reverse
 
 

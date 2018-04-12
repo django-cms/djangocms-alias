@@ -1,8 +1,7 @@
+from djangocms_alias.constants import DETAIL_ALIAS_URL_NAME
 from djangocms_alias.utils import alias_plugin_reverse
 
 from .base import BaseAliasPluginTestCase
-
-from djangocms_alias.constants import DETAIL_ALIAS_URL_NAME
 
 
 class AliasPluginReverseTestCase(BaseAliasPluginTestCase):

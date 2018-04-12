@@ -386,7 +386,7 @@ class Alias(CMSPluginBase):
         source_placeholder = plugin.alias.placeholder
         target_placeholder = plugin.placeholder
 
-        order = target_placeholder.get_plugin_tree_order(language=language)
+        order = target_placeholder.get_plugin_tree_order(language)
 
         source_plugins = plugin.alias.placeholder.get_plugins(language)
         copied_plugins = copy_plugins_to_placeholder(
@@ -398,9 +398,7 @@ class Alias(CMSPluginBase):
             for (source, copy) in zip(source_plugins, copied_plugins)
         }
 
-        source_order = source_placeholder.get_plugin_tree_order(
-            language=language,
-        )
+        source_order = source_placeholder.get_plugin_tree_order(language)
 
         target_pos = order.index(plugin.pk)
         order[target_pos:target_pos + 1] = [pk_map[pk] for pk in source_order]

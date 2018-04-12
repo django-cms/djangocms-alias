@@ -32,12 +32,6 @@ class AliasToolbar(CMSToolbar):
         self.add_aliases_link_to_admin_menu()
         self.add_alias_menu()
 
-    def get_create_alias_url(self, parameters):
-        return alias_plugin_reverse(
-            CREATE_ALIAS_URL_NAME,
-            parameters=parameters,
-        )
-
     def add_aliases_link_to_admin_menu(self):
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
         admin_menu.add_link_item(

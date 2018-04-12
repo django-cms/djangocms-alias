@@ -52,4 +52,5 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             self.assertEqual(alias_menu.name, 'Alias')
 
     # TODO delete alias
+    # TODO: cover cases from get_insert_position
     # TODO showing if has perms

@@ -14,7 +14,7 @@ __all__ = [
     'Category',
     'AliasPlaceholder',
     'Alias',
-    'AliasPluginModel',
+    'AliasPlugin',
 ]
 
 

@@ -31,10 +31,6 @@ class Alias(CMSPluginBase):
     model = AliasPlugin
     render_template = 'djangocms_alias/alias.html'
 
-    def get_plugin_urls(self):
-        import djangocms_alias.urls as urls
-        return urls
-
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):
         if plugin.plugin_type == cls.__name__:

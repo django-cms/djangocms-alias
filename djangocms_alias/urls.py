@@ -6,7 +6,6 @@ from .constants import (
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
 )
-
 from .views import (
     alias_detail_view,
     alias_list_view,

@@ -1,3 +1,5 @@
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 
 from cms.api import add_plugin
 from cms.models import Placeholder
@@ -42,6 +44,25 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             self.assertEqual(
                 response.context['form'].initial['placeholder'],
                 self.placeholder,
+            )
+
+    def test_create_alias_view_show_form_replace_hidden(self):
+        user = self.get_staff_user_with_std_permissions()
+        user.user_permissions.add(
+            Permission.objects.get(
+                content_type=ContentType.objects.get_for_model(
+                    Alias,
+                ),
+                codename='add_alias',
+            )
+        )
+        with self.login_user_context(user):
+            response = self.client.get(self.CREATE_ALIAS_ENDPOINT, data={
+                'plugin': self.plugin.pk,
+            })
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(
+                response.context['form'].fields['replace'].widget.is_hidden,
             )
 
     def test_create_alias_view_post_plugin(self):
@@ -206,6 +227,25 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
+            })
+            self.assertEqual(response.status_code, 403)
+
+    def test_create_alias_view_post_no_replace_permission(self):
+        user = self.get_staff_user_with_std_permissions()
+        user.user_permissions.add(
+            Permission.objects.get(
+                content_type=ContentType.objects.get_for_model(
+                    Alias,
+                ),
+                codename='add_alias',
+            )
+        )
+        with self.login_user_context(user):
+            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+                'plugin': self.plugin.pk,
+                'category': self.category.pk,
+                'name': 'test alias',
+                'replace': True,
             })
             self.assertEqual(response.status_code, 403)
 

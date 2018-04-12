@@ -57,6 +57,17 @@ class CreateAliasForm(BaseCreateAliasForm):
         queryset=Category.objects.all(),
         required=True,
     )
+    replace = forms.BooleanField(
+        label=_('Replace current plugin'),
+        help_text=_('Replace current plugin with alias'),
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        can_replace = kwargs.pop('can_replace')
+        super().__init__(*args, **kwargs)
+        if not can_replace:
+            self.fields['replace'].widget = forms.HiddenInput()
 
     def set_category_widget(self, request):
         related_modeladmin = admin.site._registry.get(Category)
@@ -84,14 +95,6 @@ class CreateAliasForm(BaseCreateAliasForm):
         else:
             plugins = plugin.get_tree(plugin).order_by('path')
         return list(plugins)
-
-
-class CreateAliasWithReplaceForm(CreateAliasForm):
-    replace = forms.BooleanField(
-        label=_('Replace current plugin'),
-        help_text=_('Replace current plugin with alias'),
-        required=False,
-    )
 
 
 class DetachAliasPluginForm(forms.Form):

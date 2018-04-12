@@ -29,7 +29,6 @@ from .constants import (
 from .forms import (
     BaseCreateAliasForm,
     CreateAliasForm,
-    CreateAliasWithReplaceForm,
     DetachAliasPluginForm,
 )
 from .models import Alias as AliasModel
@@ -221,15 +220,12 @@ class Alias(CMSPluginBase):
             return HttpResponseBadRequest('Form received unexpected values')
 
         user = request.user
+        can_replace = self.can_replace_with_alias(user)
 
-        if self.can_replace_with_alias(user):
-            form_class = CreateAliasWithReplaceForm
-        else:
-            form_class = CreateAliasForm
-
-        create_form = form_class(
+        create_form = CreateAliasForm(
             request.POST or None,
             initial=initial_data,
+            can_replace=can_replace,
         )
         create_form.set_category_widget(request)
 
@@ -262,7 +258,7 @@ class Alias(CMSPluginBase):
 
         replace = create_form.cleaned_data.get('replace')
 
-        if replace and not self.can_replace_with_alias(user):
+        if replace and not can_replace:
             raise PermissionDenied
 
         alias = self.create_alias(

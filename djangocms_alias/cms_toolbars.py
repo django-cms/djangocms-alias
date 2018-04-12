@@ -46,7 +46,7 @@ class AliasToolbar(CMSToolbar):
         admin_menu.add_link_item(
             self.plural_name,
             url=alias_plugin_reverse(LIST_ALIASES_URL_NAME),
-            position=get_insert_position(admin_menu, self.plural_name)
+            position=get_insert_position(admin_menu, self.plural_name),
         )
 
     def add_alias_menu(self):
@@ -56,14 +56,14 @@ class AliasToolbar(CMSToolbar):
                 self.name,
                 position=1,
             )
-            alias_menu.add_modal_item(
-                _('Create Alias'),
-                url=self.get_create_alias_url({
-                    'edit': 1,
-                    'language': self.toolbar.language,
-                }),
-                # disabled=not has_perm,
-            )
+            # alias_menu.add_modal_item(
+            #     _('Delete Alias'),
+            #     url=self.get_create_alias_url({
+            #         'edit': 1,
+            #         'language': self.toolbar.language,
+            #     }),
+            #     disabled=not has_perm,
+            # )
 
 
 def get_insert_position(admin_menu, item_name):

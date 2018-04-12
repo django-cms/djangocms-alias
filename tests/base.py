@@ -1,8 +1,12 @@
+from django.test.client import RequestFactory
+
 from cms.api import (
     add_plugin,
     create_page,
 )
+from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
+from cms.utils.conf import get_cms_setting
 
 from djangocms_alias.cms_plugins import Alias2Plugin
 from djangocms_alias.constants import (
@@ -59,3 +63,34 @@ class BaseAlias2PluginTestCase(CMSTestCase):
         if plugins:
             self.alias_plugin_base.populate_alias(alias, plugins)
         return alias
+
+    def get_page_request(self, page, user, path=None, edit=False,
+                         preview=False, structure=False, lang_code='en', disable=False):  # noqa: E501
+        if not path:
+            path = page.get_absolute_url()
+
+        if edit:
+            path += '?%s' % get_cms_setting('CMS_TOOLBAR_URL__EDIT_ON')
+
+        if structure:
+            path += '?%s' % get_cms_setting('CMS_TOOLBAR_URL__BUILD')
+
+        if preview:
+            path += '?preview'
+
+        request = RequestFactory().get(path)
+        request.session = {}
+        request.user = user
+        request.LANGUAGE_CODE = lang_code
+        if edit:
+            request.GET = {'edit': None}
+        else:
+            request.GET = {'edit_off': None}
+        if disable:
+            request.GET[get_cms_setting('CMS_TOOLBAR_URL__DISABLE')] = None
+        request.current_page = page
+        mid = ToolbarMiddleware()
+        mid.process_request(request)
+        if hasattr(request, 'toolbar'):
+            request.toolbar.populate()
+        return request

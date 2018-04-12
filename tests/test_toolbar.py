@@ -4,10 +4,10 @@ from cms.cms_toolbars import (
 )
 from cms.toolbar.items import Break
 
-from .base import BaseAlias2PluginTestCase
+from .base import BaseAliasPluginTestCase
 
 
-class AliasToolbarTestCase(BaseAlias2PluginTestCase):
+class AliasToolbarTestCase(BaseAliasPluginTestCase):
 
     def test_add_aliases_link_to_admin_menu(self):
         with self.login_user_context(self.get_standard_user()):

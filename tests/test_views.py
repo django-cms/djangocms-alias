@@ -1,5 +1,3 @@
-from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
 
 from cms.api import add_plugin
 from cms.models import Placeholder
@@ -13,10 +11,10 @@ from djangocms_alias.models import (
 )
 from djangocms_alias.utils import alias_plugin_reverse
 
-from .base import BaseAlias2PluginTestCase
+from .base import BaseAliasPluginTestCase
 
 
-class Alias2ViewsTestCase(BaseAlias2PluginTestCase):
+class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_view_get_no_data(self):
         with self.login_user_context(self.superuser):

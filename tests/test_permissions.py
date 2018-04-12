@@ -5,10 +5,10 @@ from cms.api import add_plugin
 
 from djangocms_alias.models import Alias
 
-from .base import BaseAlias2PluginTestCase
+from .base import BaseAliasPluginTestCase
 
 
-class Alias2PermissionsTestCase(BaseAlias2PluginTestCase):
+class AliasPermissionsTestCase(BaseAliasPluginTestCase):
 
     def test_can_create_alias_superuser(self):
         self.assertTrue(
@@ -49,7 +49,7 @@ class Alias2PermissionsTestCase(BaseAlias2PluginTestCase):
                 content_type=ContentType.objects.get_for_model(
                     self.alias_plugin_base.model,
                 ),
-                codename='add_aliaspluginmodel',
+                codename='add_aliasplugin',
             )
         )
         alias = self._create_alias(self.placeholder.get_plugins())
@@ -90,7 +90,7 @@ class Alias2PermissionsTestCase(BaseAlias2PluginTestCase):
                 content_type=ContentType.objects.get_for_model(
                     self.alias_plugin_base.model,
                 ),
-                codename='add_aliaspluginmodel',
+                codename='add_aliasplugin',
             )
         )
         self.assertTrue(

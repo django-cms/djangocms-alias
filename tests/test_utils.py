@@ -1,11 +1,11 @@
 from djangocms_alias.utils import alias_plugin_reverse
 
-from .base import BaseAlias2PluginTestCase
+from .base import BaseAliasPluginTestCase
 
 from djangocms_alias.constants import DETAIL_ALIAS_URL_NAME
 
 
-class AliasPluginReverseTestCase(BaseAlias2PluginTestCase):
+class AliasPluginReverseTestCase(BaseAliasPluginTestCase):
 
     def test_detail_reverse_url_to_add_structure_mode(self):
         alias = self._create_alias([self.plugin])

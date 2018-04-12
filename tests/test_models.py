@@ -1,9 +1,9 @@
 from cms.api import add_plugin
 
-from .base import BaseAlias2PluginTestCase
+from .base import BaseAliasPluginTestCase
 
 
-class Alias2ModelsTestCase(BaseAlias2PluginTestCase):
+class AliasModelsTestCase(BaseAliasPluginTestCase):
 
     def test_alias_placeholder_slot_save_again(self):
         alias = self._create_alias(self.placeholder.get_plugins())

@@ -90,7 +90,7 @@ class Alias(models.Model):
         return placeholder
 
 
-class AliasPluginModel(CMSPlugin):
+class AliasPlugin(CMSPlugin):
     alias = models.ForeignKey(
         Alias,
         verbose_name=_('alias'),
@@ -108,8 +108,8 @@ class AliasPluginModel(CMSPlugin):
     def is_recursive(self):
         placeholder_id = self.alias.placeholder_id
 
-        plugins = AliasPluginModel.objects.filter(
-            plugin_type='Alias2Plugin',
+        plugins = AliasPlugin.objects.filter(
+            plugin_type='Alias',
             placeholder_id=placeholder_id,
         )
         plugins = plugins.filter(

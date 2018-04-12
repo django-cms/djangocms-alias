@@ -22,7 +22,7 @@ def get_alias_url(alias):
 
 
 @register.simple_tag(takes_context=True)
-def render_alias2_plugin(context, instance):
+def render_alias_plugin(context, instance):
     request = context['request']
     toolbar = get_toolbar_from_request(request)
     renderer = toolbar.content_renderer

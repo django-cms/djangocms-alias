@@ -51,23 +51,23 @@ from .forms import (
     DetachAliasPluginForm,
 )
 from .models import (
-    Alias,
-    AliasPluginModel,
+    Alias as AliasModel,
+    AliasPlugin,
     Category,
 )
 from .utils import alias_plugin_reverse
 
 
 __all__ = [
-    'Alias2Plugin',
+    'Alias',
 ]
 
 
 @plugin_pool.register_plugin
-class Alias2Plugin(CMSPluginBase):
-    # name = _('Alias')
-    model = AliasPluginModel
-    render_template = 'djangocms_alias/render_alias.html'
+class Alias(CMSPluginBase):
+    name = _('Alias')
+    model = AliasPlugin
+    render_template = 'djangocms_alias/alias.html'
 
     def get_plugin_urls(self):
         urlpatterns = [
@@ -154,7 +154,7 @@ class Alias2Plugin(CMSPluginBase):
 
     @classmethod
     def create_alias(cls, name, category):
-        alias = Alias.objects.create(
+        alias = AliasModel.objects.create(
             name=name,
             category=category,
         )
@@ -211,7 +211,7 @@ class Alias2Plugin(CMSPluginBase):
     @classmethod
     def can_create_alias(cls, user, plugins):
         if not user.has_perm(
-            get_model_permission_codename(Alias, 'add'),
+            get_model_permission_codename(AliasModel, 'add'),
         ):
             return False
 
@@ -366,9 +366,9 @@ class Alias2Plugin(CMSPluginBase):
             raise PermissionDenied
 
         view = DetailView.as_view(
-            model=Alias,
+            model=AliasModel,
             context_object_name='alias',
-            queryset=Alias.objects.all(),
+            queryset=AliasModel.objects.all(),
             template_name='djangocms_alias/alias_detail.html',
         )
         return view(request, pk=pk)

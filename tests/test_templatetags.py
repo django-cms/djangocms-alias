@@ -6,11 +6,11 @@ from djangocms_alias.templatetags.djangocms_alias_tags import (
     get_alias_url,
 )
 
-from .base import BaseAlias2PluginTestCase
+from .base import BaseAliasPluginTestCase
 
 
-class Alias2TemplateTagsTestCase(BaseAlias2PluginTestCase):
-    alias_template = """{% load djangocms_alias_tags %}{% render_alias2_plugin plugin %}"""  # noqa: E501
+class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
+    alias_template = """{% load djangocms_alias_tags %}{% render_alias_plugin plugin %}"""  # noqa: E501
 
     def test_get_alias_categories(self):
         Category.objects.bulk_create(
@@ -33,7 +33,7 @@ class Alias2TemplateTagsTestCase(BaseAlias2PluginTestCase):
             self.DETAIL_ALIAS_ENDPOINT(alias.pk),
         )
 
-    def test_render_alias2_plugin_no_plugin(self):
+    def test_render_alias_plugin_no_plugin(self):
         output = self.render_template_obj(
             self.alias_template,
             {},
@@ -41,7 +41,7 @@ class Alias2TemplateTagsTestCase(BaseAlias2PluginTestCase):
         )
         self.assertEqual(output, '')
 
-    def test_render_alias2_plugin(self):
+    def test_render_alias_plugin(self):
         alias = self._create_alias()
         alias_plugin = self.alias_plugin_base.replace_placeholder_content_with_alias(  # noqa: E501
             self.placeholder,
@@ -58,7 +58,7 @@ class Alias2TemplateTagsTestCase(BaseAlias2PluginTestCase):
         )
         self.assertEqual(output, 'test')
 
-    def test_render_alias2_plugin_includes_recursed_alias(self):
+    def test_render_alias_plugin_includes_recursed_alias(self):
         alias = self._create_alias()
         add_plugin(
             alias.placeholder,

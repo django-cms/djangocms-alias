@@ -8,7 +8,7 @@ from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
 from cms.utils.conf import get_cms_setting
 
-from djangocms_alias.cms_plugins import Alias2Plugin
+from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.constants import (
     CREATE_ALIAS_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
@@ -19,7 +19,7 @@ from djangocms_alias.models import Category
 from djangocms_alias.utils import alias_plugin_reverse
 
 
-class BaseAlias2PluginTestCase(CMSTestCase):
+class BaseAliasPluginTestCase(CMSTestCase):
     CREATE_ALIAS_ENDPOINT = alias_plugin_reverse(CREATE_ALIAS_URL_NAME)
     LIST_ALIASES_ENDPOINT = alias_plugin_reverse(LIST_ALIASES_URL_NAME)
     DETACH_ALIAS_PLUGIN_ENDPOINT = alias_plugin_reverse(DETACH_ALIAS_PLUGIN_URL_NAME)  # noqa: E501
@@ -48,7 +48,7 @@ class BaseAlias2PluginTestCase(CMSTestCase):
             language=self.language,
             body='test',
         )
-        self.alias_plugin_base = Alias2Plugin()
+        self.alias_plugin_base = Alias()
         self.superuser = self.get_superuser()
 
     def _create_alias(self, plugins=None, name='test alias', category=None):

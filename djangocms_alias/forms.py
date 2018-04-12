@@ -25,7 +25,7 @@ __all__ = [
 
 class BaseCreateAliasForm(forms.Form):
     plugin = forms.ModelChoiceField(
-        queryset=CMSPlugin.objects.exclude(plugin_type='Alias2Plugin'),
+        queryset=CMSPlugin.objects.exclude(plugin_type='Alias'),
         required=False,
         widget=forms.HiddenInput(),
     )
@@ -102,6 +102,6 @@ class CreateAliasWithReplaceForm(CreateAliasForm):
 
 class DetachAliasPluginForm(forms.Form):
     plugin = forms.ModelChoiceField(
-        queryset=CMSPlugin.objects.filter(plugin_type='Alias2Plugin'),
+        queryset=CMSPlugin.objects.filter(plugin_type='Alias'),
         widget=forms.HiddenInput(),
     )

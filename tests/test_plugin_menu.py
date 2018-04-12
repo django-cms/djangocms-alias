@@ -1,10 +1,10 @@
 import json
 from urllib.parse import urlparse
 
-from .base import BaseAlias2PluginTestCase
+from .base import BaseAliasPluginTestCase
 
 
-class Alias2PluginMenuTestCase(BaseAlias2PluginTestCase):
+class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
 
     def test_extra_plugin_items_for_regular_plugins(self):
         extra_items = self.alias_plugin_base.get_extra_plugin_menu_items(

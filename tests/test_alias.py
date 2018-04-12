@@ -3,13 +3,10 @@ from operator import attrgetter
 from cms.api import add_plugin
 from cms.utils.plugins import downcast_plugins
 
-from djangocms_alias.constants import DETAIL_ALIAS_URL_NAME
-from djangocms_alias.utils import alias_plugin_reverse
-
-from .base import BaseAlias2PluginTestCase
+from .base import BaseAliasPluginTestCase
 
 
-class Alias2PluginTestCase(BaseAlias2PluginTestCase):
+class AliasPluginTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_from_plugin_list(self):
         plugins = self.placeholder.get_plugins()
@@ -73,7 +70,7 @@ class Alias2PluginTestCase(BaseAlias2PluginTestCase):
 
         self.assertEqual(
             [plugin.plugin_type for plugin in ordered_plugins],
-            ['TextPlugin', 'Alias2Plugin', 'TextPlugin'],
+            ['TextPlugin', 'Alias', 'TextPlugin'],
         )
 
     def test_replace_placeholder_content_with_alias(self):

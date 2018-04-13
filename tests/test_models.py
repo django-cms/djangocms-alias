@@ -7,9 +7,9 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
 
     def test_alias_placeholder_slot_save_again(self):
         alias = self._create_alias(self.placeholder.get_plugins())
-        slot_name = alias.placeholder.slot
+        slot_name = alias.draft_content.slot
         alias.save()
-        self.assertEqual(alias.placeholder.slot, slot_name)
+        self.assertEqual(alias.draft_content.slot, slot_name)
 
     def test_alias_placeholder_name(self):
         alias = self._create_alias(
@@ -35,7 +35,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             self.placeholder.get_plugins(),
         )
         recursed_alias_plugin = add_plugin(
-            alias.placeholder,
+            alias.draft_content,
             self.alias_plugin_base.__class__,
             language=self.language,
             alias=alias,

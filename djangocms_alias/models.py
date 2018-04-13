@@ -21,7 +21,7 @@ __all__ = [
 def _get_alias_placeholder_slot(alias):
     # TODO come up with something cleverer
     if alias.pk:
-        return alias.placeholder.slot
+        return alias.draft_content.slot
     return 'alias-{}'.format(uuid.uuid4())
 
 
@@ -47,7 +47,9 @@ class AliasPlaceholder(Placeholder):
 
     @cached_property
     def alias(self):
-        return Alias.objects.get(placeholder=self.pk)
+        return Alias.objects.get(
+            Q(draft_content=self.pk) | Q(live_content=self.pk),
+        )
 
     def get_label(self):
         return self.alias.name
@@ -58,8 +60,13 @@ class Alias(models.Model):
         verbose_name=_('name'),
         max_length=120,
     )
-    placeholder = PlaceholderField(
+    draft_content = PlaceholderField(
         slotname=_get_alias_placeholder_slot,
+        related_name='alias_draft',
+    )
+    live_content = PlaceholderField(
+        slotname=_get_alias_placeholder_slot,
+        related_name='live_draft',
     )
     category = models.ForeignKey(
         Category,
@@ -82,7 +89,7 @@ class Alias(models.Model):
 
     @cached_property
     def alias_placeholder(self):
-        placeholder = self.placeholder
+        placeholder = self.draft_content
         placeholder.__class__ = AliasPlaceholder
         return placeholder
 
@@ -100,16 +107,16 @@ class AliasPlugin(CMSPlugin):
         verbose_name_plural = _('alias plugin models')
 
     def __str__(self):
-        return force_text(self.alias.alias_placeholder.get_label())
+        return force_text(self.alias.name)
 
     def is_recursive(self):
-        placeholder_id = self.alias.placeholder_id
+        draft_content_id = self.alias.draft_content_id
 
         plugins = AliasPlugin.objects.filter(
             plugin_type='Alias',
-            placeholder_id=placeholder_id,
+            placeholder_id=draft_content_id,
         )
         plugins = plugins.filter(
-            Q(pk=self) | Q(alias__placeholder=placeholder_id),
+            Q(pk=self) | Q(alias__draft_content=draft_content_id),
         )
         return plugins.exists()

@@ -13,11 +13,11 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias(plugins)
         self.assertEqual(
             plugins[0].plugin_type,
-            alias.placeholder.get_plugins()[0].plugin_type,
+            alias.draft_content.get_plugins()[0].plugin_type,
         )
         self.assertEqual(
             plugins[0].get_plugin_instance()[0].body,
-            alias.placeholder.get_plugins()[0].get_plugin_instance()[0].body,
+            alias.draft_content.get_plugins()[0].get_plugin_instance()[0].body,
         )
 
     def test_replace_plugin_with_alias(self):
@@ -35,7 +35,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             plugins,
         )
         self.assertEqual(plugins[0].get_plugin_instance()[0], alias_plugin)
-        self.assertEqual(alias_plugin.alias.placeholder.get_plugins()[0].get_plugin_instance()[0].body, 'test')  # noqa: E501
+        self.assertEqual(alias_plugin.alias.draft_content.get_plugins()[0].get_plugin_instance()[0].body, 'test')  # noqa: E501
 
     def test_replace_plugin_with_alias_correct_position(self):
         second_plugin = add_plugin(
@@ -89,22 +89,22 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         plugins = self.placeholder.get_plugins()
 
         self.assertEqual(plugins.count(), 1)
-        self.assertEqual(alias.placeholder.get_plugins().count(), 2)
+        self.assertEqual(alias.draft_content.get_plugins().count(), 2)
         self.assertEqual(
-            alias.placeholder.get_plugins()[1].get_plugin_instance()[0].body,
+            alias.draft_content.get_plugins()[1].get_plugin_instance()[0].body,
             'test 2',
         )
 
     def test_detach_alias(self):
         alias = self._create_alias()
         add_plugin(
-            alias.placeholder,
+            alias.draft_content,
             'TextPlugin',
             language=self.language,
             body='test 1',
         )
         add_plugin(
-            alias.placeholder,
+            alias.draft_content,
             'TextPlugin',
             language=self.language,
             body='test 2',
@@ -124,13 +124,13 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
     def test_detach_alias_correct_position(self):
         alias = self._create_alias([])
         add_plugin(
-            alias.placeholder,
+            alias.draft_content,
             'TextPlugin',
             language=self.language,
             body='test 1',
         )
         add_plugin(
-            alias.placeholder,
+            alias.draft_content,
             'TextPlugin',
             language=self.language,
             body='test 2',

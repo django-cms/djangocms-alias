@@ -30,7 +30,7 @@ def detach_alias_plugin_view(request):
 
     if not Alias.can_detach(
         request.user,
-        instance.alias.placeholder.get_plugins(language),
+        instance.alias.draft_content.get_plugins(language),
     ):
         raise PermissionDenied
 

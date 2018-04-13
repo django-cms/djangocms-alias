@@ -61,7 +61,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
     def test_render_alias_plugin_includes_recursed_alias(self):
         alias = self._create_alias()
         add_plugin(
-            alias.placeholder,
+            alias.draft_content,
             self.alias_plugin_base.__class__,
             language=self.language,
             alias=alias,

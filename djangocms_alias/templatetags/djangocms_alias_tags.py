@@ -30,7 +30,7 @@ def render_alias_plugin(context, instance):
     if not instance:
         return ''
 
-    source = instance.alias.placeholder
+    source = instance.alias.draft_content
 
     # TODO This needs to be using draft/live alias feature
     can_see_content = True

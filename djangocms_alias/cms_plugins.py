@@ -101,7 +101,7 @@ class Alias(CMSPluginBase):
     def populate_alias(cls, alias, plugins):
         copy_plugins_to_placeholder(
             plugins,
-            placeholder=alias.placeholder,
+            placeholder=alias.draft_content,
         )
 
     @classmethod
@@ -115,7 +115,7 @@ class Alias(CMSPluginBase):
 
     @classmethod
     def replace_plugin_with_alias(cls, plugin, alias, language):
-        cls.move_plugin(plugin, alias.placeholder, language)
+        cls.move_plugin(plugin, alias.draft_content, language)
 
         new_plugin = add_plugin(
             plugin.placeholder,
@@ -137,7 +137,7 @@ class Alias(CMSPluginBase):
         language,
     ):
         for plugin in placeholder.get_plugins(language):
-            cls.move_plugin(plugin, alias.placeholder, language)
+            cls.move_plugin(plugin, alias.draft_content, language)
         return add_plugin(
             placeholder,
             cls.__name__,
@@ -176,12 +176,12 @@ class Alias(CMSPluginBase):
 
     @classmethod
     def detach_alias_plugin(cls, plugin, language):
-        source_placeholder = plugin.alias.placeholder
+        source_placeholder = plugin.alias.draft_content
         target_placeholder = plugin.placeholder
 
         order = target_placeholder.get_plugin_tree_order(language)
 
-        source_plugins = plugin.alias.placeholder.get_plugins(language)
+        source_plugins = source_placeholder.get_plugins(language)
         copied_plugins = copy_plugins_to_placeholder(
             source_plugins,
             placeholder=target_placeholder,

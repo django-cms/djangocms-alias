@@ -88,8 +88,14 @@ class Alias(models.Model):
         return self.name
 
     @cached_property
-    def alias_placeholder(self):
+    def draft_placeholder(self):
         placeholder = self.draft_content
+        placeholder.__class__ = AliasPlaceholder
+        return placeholder
+
+    @cached_property
+    def live_placeholder(self):
+        placeholder = self.live_content
         placeholder.__class__ = AliasPlaceholder
         return placeholder
 

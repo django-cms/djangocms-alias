@@ -5,12 +5,14 @@ from .constants import (
     DETACH_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
+    PUBLISH_ALIAS_URL_NAME,
 )
 from .views import (
-    alias_detail_view,
+    AliasDetailView,
     alias_list_view,
     create_alias_view,
     detach_alias_plugin_view,
+    publish_alias_view,
 )
 
 
@@ -21,13 +23,18 @@ urlpatterns = [
         name=CREATE_ALIAS_URL_NAME,
     ),
     url(
+        r'^publish-alias/(?P<pk>\d+)/(?P<language>\w+)/$',
+        publish_alias_view,
+        name=PUBLISH_ALIAS_URL_NAME,
+    ),
+    url(
         r'^aliases/$',
         alias_list_view,
         name=LIST_ALIASES_URL_NAME,
     ),
     url(
         r'^aliases/(?P<pk>\d+)/$',
-        alias_detail_view,
+        AliasDetailView.as_view(),
         name=DETAIL_ALIAS_URL_NAME,
     ),
     url(

@@ -3,7 +3,7 @@ import json
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.utils.translation import get_language
 from django.views.generic import DetailView, ListView
 
@@ -37,6 +37,7 @@ def detach_alias_plugin_view(request):
     Alias.detach_alias_plugin(
         plugin=instance,
         language=language,
+        draft=form.cleaned_data.get('draft'),
     )
 
     return HttpResponse(
@@ -46,17 +47,28 @@ def detach_alias_plugin_view(request):
     )
 
 
-def alias_detail_view(request, pk):
-    if not request.user.is_staff:
-        raise PermissionDenied
+class AliasDetailView(DetailView):
+    model = AliasModel
+    context_object_name = 'alias'
+    queryset = AliasModel.objects.all()
+    template_name = 'djangocms_alias/alias_detail.html'
 
-    view = DetailView.as_view(
-        model=AliasModel,
-        context_object_name='alias',
-        queryset=AliasModel.objects.all(),
-        template_name='djangocms_alias/alias_detail.html',
-    )
-    return view(request, pk=pk)
+    def get_context_data(self, **kwargs):
+        draft = 'preview' not in self.request.GET
+        if draft:
+            placeholder = self.object.draft_placeholder
+        else:
+            placeholder = self.object.live_placeholder
+        kwargs.update({
+            'alias_draft': draft,
+            'placeholder': placeholder,
+        })
+        return super().get_context_data(**kwargs)
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
 
 
 def alias_list_view(request):
@@ -211,4 +223,20 @@ def render_replace_response(
         request,
         'djangocms_alias/alias_replace.html',
         context,
+    )
+
+
+def publish_alias_view(request, pk, language):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    if request.method != 'POST':
+        return HttpResponseBadRequest('Requires POST method')
+
+    alias = get_object_or_404(AliasModel, pk=pk)
+    Alias.publish_alias(alias, language)
+    return HttpResponse(
+        '<div><div class="messagelist">'
+        '<div class="success"></div>'
+        '</div></div>'
     )

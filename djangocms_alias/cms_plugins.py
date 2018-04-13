@@ -14,6 +14,7 @@ from .constants import (
     CREATE_ALIAS_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
+    DRAFT_ALIASES_QUERY_KEY,
 )
 from .models import Alias as AliasModel
 from .models import AliasPlugin
@@ -30,6 +31,13 @@ class Alias(CMSPluginBase):
     name = _('Alias')
     model = AliasPlugin
     render_template = 'djangocms_alias/alias.html'
+
+    def render(self, context, instance, placeholder):
+        context.setdefault(
+            'alias_draft',
+            DRAFT_ALIASES_QUERY_KEY in context['request'].GET,
+        )
+        return super().render(context, instance, placeholder)
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):
@@ -54,6 +62,7 @@ class Alias(CMSPluginBase):
                     data={
                         'plugin': plugin.pk,
                         'csrfmiddlewaretoken': get_token(request),
+                        'draft': DRAFT_ALIASES_QUERY_KEY in request.GET,
                     },
                     attributes={
                         'icon': 'alias',
@@ -175,8 +184,11 @@ class Alias(CMSPluginBase):
         )
 
     @classmethod
-    def detach_alias_plugin(cls, plugin, language):
-        source_placeholder = plugin.alias.draft_content
+    def detach_alias_plugin(cls, plugin, language, draft=False):
+        if draft:
+            source_placeholder = plugin.alias.draft_content
+        else:
+            source_placeholder = plugin.alias.live_content
         target_placeholder = plugin.placeholder
 
         order = target_placeholder.get_plugin_tree_order(language)
@@ -203,4 +215,12 @@ class Alias(CMSPluginBase):
             language=language,
             order=order,
             parent_id=plugin.parent_id,
+        )
+
+    @classmethod
+    def publish_alias(cls, alias, language):
+        alias.live_content.clear(language=language)
+        copy_plugins_to_placeholder(
+            alias.draft_content.get_plugins(language=language),
+            placeholder=alias.live_content,
         )

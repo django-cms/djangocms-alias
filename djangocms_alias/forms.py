@@ -14,6 +14,7 @@ from .models import Alias, Category
 __all__ = [
     'BaseCreateAliasForm',
     'CreateAliasForm',
+    'DetachAliasPluginForm',
 ]
 
 
@@ -103,3 +104,4 @@ class DetachAliasPluginForm(forms.Form):
         widget=forms.HiddenInput(),
     )
     draft = forms.BooleanField(required=False)
+    language = forms.CharField(widget=forms.HiddenInput)

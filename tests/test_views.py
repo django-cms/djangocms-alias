@@ -274,7 +274,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             response = self.client.post(
                 self.DETACH_ALIAS_PLUGIN_ENDPOINT,
                 data={
-                    'plugin': plugin.pk
+                    'plugin': plugin.pk,
+                    'language': self.language,
                 },
             )
         self.assertEqual(response.status_code, 403)
@@ -292,6 +293,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 self.DETACH_ALIAS_PLUGIN_ENDPOINT,
                 data={
                     'plugin': self.plugin.pk,
+                    'language': self.language,
                 },
             )
             self.assertEqual(response.status_code, 400)
@@ -317,6 +319,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 self.DETACH_ALIAS_PLUGIN_ENDPOINT,
                 data={
                     'plugin': plugin.pk,
+                    'language': self.language,
                 },
             )
             self.assertEqual(response.status_code, 200)
@@ -349,6 +352,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 self.DETACH_ALIAS_PLUGIN_ENDPOINT,
                 data={
                     'plugin': plugin.pk,
+                    'language': self.language,
                     'draft': True,
                 },
             )

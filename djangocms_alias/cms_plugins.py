@@ -1,4 +1,5 @@
 from django.middleware.csrf import get_token
+from django.utils.translation import get_language
 from django.utils.translation import ugettext_lazy as _
 
 from cms.api import add_plugin
@@ -63,6 +64,7 @@ class Alias(CMSPluginBase):
                         'plugin': plugin.pk,
                         'csrfmiddlewaretoken': get_token(request),
                         'draft': DRAFT_ALIASES_QUERY_KEY in request.GET,
+                        'language': get_language(),
                     },
                     attributes={
                         'icon': 'alias',

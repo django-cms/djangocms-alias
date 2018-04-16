@@ -26,7 +26,7 @@ def detach_alias_plugin_view(request):
 
     plugin = form.cleaned_data['plugin']
     instance = plugin.get_bound_plugin()
-    language = get_language()
+    language = form.cleaned_data['language']
 
     if not Alias.can_detach(
         request.user,

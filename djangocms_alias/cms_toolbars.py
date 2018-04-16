@@ -125,7 +125,6 @@ class AliasToolbar(CMSToolbar):
         alias_menu = admin_menu.get_or_create_menu(
             ADMIN_ALIAS_MENU_IDENTIFIER,
             self.plural_name,
-            url=alias_plugin_reverse(LIST_ALIASES_URL_NAME),
             position=self.get_insert_position(admin_menu, self.plural_name),
         )
         alias_menu.add_link_item(

@@ -6,7 +6,10 @@ from cms.models import Placeholder
 from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 
-from djangocms_alias.constants import DETAIL_ALIAS_URL_NAME
+from djangocms_alias.constants import (
+    DETAIL_ALIAS_URL_NAME,
+    PUBLISH_ALIAS_URL_NAME,
+)
 from djangocms_alias.models import Alias, Category
 from djangocms_alias.utils import alias_plugin_reverse
 
@@ -302,6 +305,12 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             alias=alias,
         )
         self.alias_plugin_base.publish_alias(plugin.alias, self.language)
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 2',
+        )
 
         with self.login_user_context(self.superuser):
             response = self.client.post(
@@ -314,6 +323,39 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         plugins = self.placeholder.get_plugins()
         self.assertEqual(plugins.count(), 2)
+        self.assertEqual(
+            plugins[0].get_plugin_instance()[0].body,
+            plugins[1].get_plugin_instance()[0].body,
+        )
+
+    def test_detach_view_draft(self):
+        alias = self._create_alias([self.plugin])
+        plugin = add_plugin(
+            self.placeholder,
+            self.alias_plugin_base.__class__,
+            language='en',
+            alias=alias,
+        )
+        self.alias_plugin_base.publish_alias(plugin.alias, self.language)
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 2',
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                self.DETACH_ALIAS_PLUGIN_ENDPOINT,
+                data={
+                    'plugin': plugin.pk,
+                    'draft': True,
+                },
+            )
+            self.assertEqual(response.status_code, 200)
+
+        plugins = self.placeholder.get_plugins()
+        self.assertEqual(plugins.count(), 3)
         self.assertEqual(
             plugins[0].get_plugin_instance()[0].body,
             plugins[1].get_plugin_instance()[0].body,
@@ -379,6 +421,34 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_detail_view(self):
         alias = self._create_alias([self.plugin])
+        self.alias_plugin_base.publish_alias(alias, self.language)
+        plugin2 = add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 2',
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk]),
+                data={'preview': True},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.plugin.body)
+        self.assertNotContains(response, plugin2.body)
+
+    def test_detail_view_draft(self):
+        alias = self._create_alias([self.plugin])
+        self.alias_plugin_base.publish_alias(alias, self.language)
+        plugin2 = add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 2',
+        )
+
         with self.login_user_context(self.superuser):
             response = self.client.get(
                 alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk]),
@@ -386,6 +456,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.plugin.body)
+        self.assertContains(response, plugin2.body)
 
     def test_detail_view_standard_user(self):
         alias = self._create_alias([self.plugin])
@@ -458,3 +529,68 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                     alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk]),  # noqa: E501
                 )
         self.assertEqual(response.status_code, 200)
+
+    def test_publish_view_no_permissions(self):
+        alias = self._create_alias([self.plugin])
+        with self.login_user_context(self.get_standard_user()):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    PUBLISH_ALIAS_URL_NAME,
+                    args=[alias.pk, self.language],
+                ),
+            )
+        self.assertEqual(response.status_code, 403)
+
+    def test_publish_view_get(self):
+        alias = self._create_alias([self.plugin])
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    PUBLISH_ALIAS_URL_NAME,
+                    args=[alias.pk, self.language],
+                ),
+            )
+        self.assertEqual(response.status_code, 400)
+
+    def test_publish_view_alias_does_not_exist(self):
+        alias = self._create_alias([self.plugin])
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    PUBLISH_ALIAS_URL_NAME,
+                    args=[alias.pk + 1000, self.language],
+                ),
+            )
+        self.assertEqual(response.status_code, 404)
+
+    def test_publish_view(self):
+        alias = self._create_alias()
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 1',
+        )
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 2',
+        )
+        live_plugins = alias.live_content.get_plugins()
+        self.assertEqual(live_plugins.count(), 0)
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    PUBLISH_ALIAS_URL_NAME,
+                    args=[alias.pk, self.language],
+                ),
+            )
+        self.assertEqual(response.status_code, 200)
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 3',
+        )
+        self.assertEqual(live_plugins.count(), 2)

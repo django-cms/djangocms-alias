@@ -118,10 +118,54 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             alias=alias,
         )
         self.alias_plugin_base.publish_alias(alias_plugin.alias, self.language)
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 3',
+        )
 
         self.assertEqual(plugins.count(), 2)
         self.alias_plugin_base.detach_alias_plugin(alias_plugin, self.language)
         self.assertEqual(plugins.count(), 3)
+
+    def test_detach_alias_from_draft(self):
+        alias = self._create_alias()
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 1',
+        )
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 2',
+        )
+        plugins = self.placeholder.get_plugins()
+        self.assertEqual(plugins.count(), 1)
+        alias_plugin = add_plugin(
+            self.placeholder,
+            self.alias_plugin_base.__class__,
+            language=self.language,
+            alias=alias,
+        )
+        self.alias_plugin_base.publish_alias(alias_plugin.alias, self.language)
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 3',
+        )
+
+        self.assertEqual(plugins.count(), 2)
+        self.alias_plugin_base.detach_alias_plugin(
+            alias_plugin,
+            self.language,
+            draft=True,
+        )
+        self.assertEqual(plugins.count(), 4)
 
     def test_detach_alias_correct_position(self):
         alias = self._create_alias([])
@@ -187,3 +231,28 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         ))
 
         self.assertIn('?structure', edit_menu_item.url)
+
+    def test_publish_alias(self):
+        alias = self._create_alias()
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 1',
+        )
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 2',
+        )
+        live_plugins = alias.live_content.get_plugins()
+        self.assertEqual(live_plugins.count(), 0)
+        self.alias_plugin_base.publish_alias(alias, self.language)
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test 3',
+        )
+        self.assertEqual(live_plugins.count(), 2)

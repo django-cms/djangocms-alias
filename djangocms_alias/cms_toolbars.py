@@ -15,6 +15,7 @@ from cms.utils.urlutils import admin_reverse
 from .constants import (
     CREATE_ALIAS_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
+    DRAFT_ALIASES_QUERY_KEY,
     LIST_ALIASES_URL_NAME,
     PUBLISH_ALIAS_URL_NAME,
 )
@@ -28,6 +29,7 @@ __all__ = [
 
 
 ALIAS_MENU_IDENTIFIER = 'alias'
+ADMIN_ALIAS_MENU_IDENTIFIER = 'admin-alias'
 ALIAS_MENU_CREATE_IDENTIFIER = 'alias-add'
 
 
@@ -114,10 +116,28 @@ class AliasToolbar(CMSToolbar):
 
     def add_aliases_link_to_admin_menu(self):
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
-        admin_menu.add_link_item(
+        alias_menu = admin_menu.get_or_create_menu(
+            ADMIN_ALIAS_MENU_IDENTIFIER,
             self.plural_name,
-            url=alias_plugin_reverse(LIST_ALIASES_URL_NAME),
             position=get_insert_position(admin_menu, self.plural_name),
+        )
+        alias_menu.add_link_item(
+            _('List of Aliases'),
+            url=alias_plugin_reverse(LIST_ALIASES_URL_NAME),
+        )
+
+        params = self.request.GET.copy()
+        if DRAFT_ALIASES_QUERY_KEY not in self.request.GET:
+            params[DRAFT_ALIASES_QUERY_KEY] = ''
+            text = _('Enable draft version of Aliases')
+        else:
+            del params[DRAFT_ALIASES_QUERY_KEY]
+            text = _('Disable draft version of Aliases')
+
+        url = self.toolbar.request_path + '?' + params.urlencode()
+        alias_menu.add_link_item(
+            text,
+            url=url,
         )
 
     def add_alias_menu(self):

@@ -301,6 +301,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             language='en',
             alias=alias,
         )
+        self.alias_plugin_base.publish_alias(plugin.alias, self.language)
+
         with self.login_user_context(self.superuser):
             response = self.client.post(
                 self.DETACH_ALIAS_PLUGIN_ENDPOINT,
@@ -337,11 +339,13 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             name='Alias 1',
             category=category1,
         )
+        self.alias_plugin_base.publish_alias(alias1, self.language)
         alias2 = self._create_alias(
             [plugin],
             name='Alias 2',
             category=category2,
         )
+        self.alias_plugin_base.publish_alias(alias2, self.language)
 
         with self.login_user_context(self.superuser):
             response = self.client.get(self.LIST_ALIASES_ENDPOINT)

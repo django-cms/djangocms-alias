@@ -9,7 +9,7 @@ from .constants import (
 )
 from .views import (
     AliasDetailView,
-    alias_list_view,
+    AliasListView,
     create_alias_view,
     detach_alias_plugin_view,
     publish_alias_view,
@@ -29,7 +29,7 @@ urlpatterns = [
     ),
     url(
         r'^aliases/$',
-        alias_list_view,
+        AliasListView.as_view(),
         name=LIST_ALIASES_URL_NAME,
     ),
     url(

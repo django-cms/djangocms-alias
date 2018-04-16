@@ -71,19 +71,23 @@ class AliasDetailView(DetailView):
         return super().dispatch(request, *args, **kwargs)
 
 
-def alias_list_view(request):
-    if not request.user.is_staff:
-        raise PermissionDenied
+class AliasListView(ListView):
+    model = Category
+    context_object_name = 'categories'
+    queryset = Category.objects.prefetch_related('aliases').order_by('name')
+    template_name = 'djangocms_alias/aliases_list.html'
 
-    queryset = Category.objects.prefetch_related('aliases').order_by('name')  # noqa: E501
+    def get_context_data(self, **kwargs):
+        draft = 'preview' not in self.request.GET
+        kwargs.update({
+            'alias_draft': draft,
+        })
+        return super().get_context_data(**kwargs)
 
-    view = ListView.as_view(
-        model=Category,
-        context_object_name='categories',
-        queryset=queryset,
-        template_name='djangocms_alias/aliases_list.html',
-    )
-    return view(request)
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
 
 
 def create_alias_view(request):

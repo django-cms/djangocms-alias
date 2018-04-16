@@ -41,6 +41,23 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
         )
         self.assertEqual(output, '')
 
+    def test_render_alias_plugin_nopublished(self):
+        alias = self._create_alias()
+        alias_plugin = self.alias_plugin_base.replace_placeholder_content_with_alias(  # noqa: E501
+            self.placeholder,
+            alias,
+            self.language,
+        )
+
+        output = self.render_template_obj(
+            self.alias_template,
+            {
+                'plugin': alias_plugin,
+            },
+            self.get_request('/'),
+        )
+        self.assertEqual(output, '')
+
     def test_render_alias_plugin_published(self):
         alias = self._create_alias()
         alias_plugin = self.alias_plugin_base.replace_placeholder_content_with_alias(  # noqa: E501
@@ -72,6 +89,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             alias,
             self.language,
         )
+        self.alias_plugin_base.publish_alias(alias_plugin.alias, self.language)
 
         output = self.render_template_obj(
             self.alias_template,

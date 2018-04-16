@@ -117,6 +117,8 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
+        self.alias_plugin_base.publish_alias(alias_plugin.alias, self.language)
+
         self.assertEqual(plugins.count(), 2)
         self.alias_plugin_base.detach_alias_plugin(alias_plugin, self.language)
         self.assertEqual(plugins.count(), 3)
@@ -143,6 +145,8 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
+        self.alias_plugin_base.publish_alias(alias_plugin.alias, self.language)
+
         add_plugin(
             self.placeholder,
             'TextPlugin',

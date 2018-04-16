@@ -23,6 +23,13 @@ def get_alias_url(alias):
 
 @register.simple_tag(takes_context=True)
 def render_alias_plugin(context, instance, draft=False):
+    if not instance:
+        return ''
+    return render_alias(context, instance.alias, draft)
+
+
+@register.simple_tag(takes_context=True)
+def render_alias(context, instance, draft=False):
     request = context['request']
     toolbar = get_toolbar_from_request(request)
     renderer = toolbar.content_renderer
@@ -31,9 +38,9 @@ def render_alias_plugin(context, instance, draft=False):
         return ''
 
     if draft:
-        source = instance.alias.draft_content
+        source = instance.draft_content
     else:
-        source = instance.alias.live_content
+        source = instance.live_content
 
     # TODO This needs to be using draft/live alias feature
     can_see_content = True

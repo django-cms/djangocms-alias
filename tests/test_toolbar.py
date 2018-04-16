@@ -8,13 +8,11 @@ from .base import BaseAliasPluginTestCase
 
 class AliasToolbarTestCase(BaseAliasPluginTestCase):
 
-    def test_add_aliases_link_to_admin_menu(self):
+    def test_add_aliases_submenu_to_admin_menu(self):
         with self.login_user_context(self.get_standard_user()):
             response = self.client.get(self.page.get_absolute_url())
 
-        self.assertNotContains(response, '<a href="{}"><span>Aliases'.format(
-            self.LIST_ALIASES_ENDPOINT,
-        ))
+        self.assertNotContains(response, '<span>Aliases')
 
         page_structure_url = self.get_obj_structure_url(
             self.page.get_absolute_url(),
@@ -22,9 +20,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             response = self.client.get(page_structure_url)
 
-        self.assertContains(response, '<a href="{}"><span>Aliases'.format(
-            self.LIST_ALIASES_ENDPOINT,
-        ))
+        self.assertContains(response, '<span>Aliases')
 
     def test_aliases_link_placement(self):
         request = self.get_page_request(self.page, self.superuser)

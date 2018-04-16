@@ -1,3 +1,4 @@
+from django.http import QueryDict
 from django.test.client import RequestFactory
 
 from cms.api import add_plugin, create_page
@@ -79,10 +80,11 @@ class BaseAliasPluginTestCase(CMSTestCase):
         request.session = {}
         request.user = user
         request.LANGUAGE_CODE = lang_code
+        request.GET = QueryDict('', mutable=True)
         if edit:
-            request.GET = {'edit': None}
+            request.GET['edit'] = None
         else:
-            request.GET = {'edit_off': None}
+            request.GET['edit_off'] = None
         if disable:
             request.GET[get_cms_setting('CMS_TOOLBAR_URL__DISABLE')] = None
         request.current_page = page

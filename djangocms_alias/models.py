@@ -9,6 +9,9 @@ from django.utils.translation import ugettext_lazy as _
 from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderField
 
+from .constants import DETAIL_ALIAS_URL_NAME
+from .utils import alias_plugin_reverse
+
 
 __all__ = [
     'Category',
@@ -98,6 +101,9 @@ class Alias(models.Model):
         placeholder = self.live_content
         placeholder.__class__ = AliasPlaceholder
         return placeholder
+
+    def get_absolute_url(self):
+        return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[self.pk])
 
 
 class AliasPlugin(CMSPlugin):

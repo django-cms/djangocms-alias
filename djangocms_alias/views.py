@@ -4,12 +4,14 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse_lazy
 from django.utils.translation import get_language
-from django.views.generic import DetailView, ListView
+from django.views.generic import DeleteView, DetailView, ListView
 
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 
 from .cms_plugins import Alias
+from .constants import LIST_ALIASES_URL_NAME
 from .forms import BaseCreateAliasForm, CreateAliasForm, DetachAliasPluginForm
 from .models import Alias as AliasModel
 from .models import Category
@@ -69,6 +71,11 @@ class AliasDetailView(DetailView):
         if not request.user.is_staff:
             raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
+
+
+class AliasDeleteView(DeleteView):
+    model = AliasModel
+    success_url = reverse_lazy(LIST_ALIASES_URL_NAME)
 
 
 class AliasListView(ListView):

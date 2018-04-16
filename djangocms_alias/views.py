@@ -25,7 +25,7 @@ def detach_alias_plugin_view(request):
         return HttpResponseBadRequest('Form received unexpected values')
 
     plugin = form.cleaned_data['plugin']
-    instance = plugin.get_plugin_instance()[0]
+    instance = plugin.get_bound_plugin()
     language = get_language()
 
     if not Alias.can_detach(

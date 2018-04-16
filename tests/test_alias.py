@@ -16,8 +16,8 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             alias.draft_content.get_plugins()[0].plugin_type,
         )
         self.assertEqual(
-            plugins[0].get_plugin_instance()[0].body,
-            alias.draft_content.get_plugins()[0].get_plugin_instance()[0].body,
+            plugins[0].get_bound_plugin().body,
+            alias.draft_content.get_plugins()[0].get_bound_plugin().body,
         )
 
     def test_replace_plugin_with_alias(self):
@@ -34,8 +34,8 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             self.plugin,
             plugins,
         )
-        self.assertEqual(plugins[0].get_plugin_instance()[0], alias_plugin)
-        self.assertEqual(alias_plugin.alias.draft_content.get_plugins()[0].get_plugin_instance()[0].body, 'test')  # noqa: E501
+        self.assertEqual(plugins[0].get_bound_plugin(), alias_plugin)
+        self.assertEqual(alias_plugin.alias.draft_content.get_plugins()[0].get_bound_plugin().body, 'test')  # noqa: E501
 
     def test_replace_plugin_with_alias_correct_position(self):
         second_plugin = add_plugin(
@@ -61,7 +61,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             self.plugin,
             plugins,
         )
-        self.assertEqual(plugins[1].get_plugin_instance()[0], alias_plugin)
+        self.assertEqual(plugins[1].get_bound_plugin(), alias_plugin)
 
         ordered_plugins = sorted(
             downcast_plugins(plugins),
@@ -91,7 +91,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.assertEqual(plugins.count(), 1)
         self.assertEqual(alias.draft_content.get_plugins().count(), 2)
         self.assertEqual(
-            alias.draft_content.get_plugins()[1].get_plugin_instance()[0].body,
+            alias.draft_content.get_plugins()[1].get_bound_plugin().body,
             'test 2',
         )
 

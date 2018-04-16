@@ -89,7 +89,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(alias_plugins.count(), 1)
         self.assertEqual(alias_plugins[0].plugin_type, self.plugin.plugin_type)
         self.assertEqual(
-            alias_plugins[0].get_plugin_instance()[0].body,
+            alias_plugins[0].get_bound_plugin().body,
             self.plugin.body,
         )
 
@@ -109,7 +109,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(plugins.count(), 1)
         self.assertEqual(plugins[0].plugin_type, self.plugin.plugin_type)
         self.assertEqual(
-            plugins[0].get_plugin_instance()[0].body,
+            plugins[0].get_bound_plugin().body,
             self.plugin.body,
         )
 
@@ -173,7 +173,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         # Source plugins are kept in original placeholder
         plugins = self.placeholder.get_plugins()
         self.assertEqual(plugins.count(), 1)
-        plugin_in_placeholder = plugins[0].get_plugin_instance()[0]
+        plugin_in_placeholder = plugins[0].get_bound_plugin()
         self.assertEqual(self.plugin, plugin_in_placeholder)
 
         alias = Alias.objects.last()
@@ -185,8 +185,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         for source, target in zip(source_plugins, alias_plugins):
             self.assertEqual(source.plugin_type, target.plugin_type)
             self.assertEqual(
-                source.get_plugin_instance()[0].body,
-                target.get_plugin_instance()[0].body,
+                source.get_bound_plugin().body,
+                target.get_bound_plugin().body,
             )
 
     def test_create_alias_view_post_placeholder_replace(self):
@@ -212,7 +212,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(alias_plugins.count(), 2)
         self.assertEqual(alias_plugins[0].plugin_type, self.plugin.plugin_type)
         self.assertEqual(
-            alias_plugins[0].get_plugin_instance()[0].body,
+            alias_plugins[0].get_bound_plugin().body,
             self.plugin.body,
         )
 
@@ -220,7 +220,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(placeholder_plugins.count(), 1)
 
         self.assertEqual(
-            placeholder_plugins[0].get_plugin_instance()[0].alias,
+            placeholder_plugins[0].get_bound_plugin().alias,
             alias,
         )
 
@@ -324,8 +324,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         plugins = self.placeholder.get_plugins()
         self.assertEqual(plugins.count(), 2)
         self.assertEqual(
-            plugins[0].get_plugin_instance()[0].body,
-            plugins[1].get_plugin_instance()[0].body,
+            plugins[0].get_bound_plugin().body,
+            plugins[1].get_bound_plugin().body,
         )
 
     def test_detach_view_draft(self):
@@ -357,8 +357,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         plugins = self.placeholder.get_plugins()
         self.assertEqual(plugins.count(), 3)
         self.assertEqual(
-            plugins[0].get_plugin_instance()[0].body,
-            plugins[1].get_plugin_instance()[0].body,
+            plugins[0].get_bound_plugin().body,
+            plugins[1].get_bound_plugin().body,
         )
 
     def test_list_view(self):

@@ -66,9 +66,9 @@ class AliasDraftLiveTestCase(BaseAliasPluginTestCase):
             alias=alias,
         )
         self.page.publish(self.language)
+        self.client.post(self.SET_ALIAS_DRAFT_ENDPOINT, data={'enable': True})
         response = self.client.get(
             self.page.get_absolute_url(),
-            data={'draft_aliases': ''},
         )
         self.assertContains(response, 'test 1')
         self.assertContains(response, 'test 2')

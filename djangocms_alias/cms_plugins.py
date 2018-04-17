@@ -15,7 +15,7 @@ from .constants import (
     CREATE_ALIAS_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
-    DRAFT_ALIASES_QUERY_KEY,
+    DRAFT_ALIASES_SESSION_KEY,
 )
 from .models import Alias as AliasModel
 from .models import AliasPlugin
@@ -32,13 +32,6 @@ class Alias(CMSPluginBase):
     name = _('Alias')
     model = AliasPlugin
     render_template = 'djangocms_alias/alias.html'
-
-    def render(self, context, instance, placeholder):
-        context.setdefault(
-            'alias_draft',
-            DRAFT_ALIASES_QUERY_KEY in context['request'].GET,
-        )
-        return super().render(context, instance, placeholder)
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):
@@ -63,7 +56,9 @@ class Alias(CMSPluginBase):
                     data={
                         'plugin': plugin.pk,
                         'csrfmiddlewaretoken': get_token(request),
-                        'draft': DRAFT_ALIASES_QUERY_KEY in request.GET,
+                        'draft': request.session.get(
+                            DRAFT_ALIASES_SESSION_KEY,
+                        ),
                         'language': get_language(),
                     },
                     attributes={

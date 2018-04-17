@@ -11,7 +11,7 @@ from django.views.generic import DeleteView, DetailView, ListView
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 
 from .cms_plugins import Alias
-from .constants import LIST_ALIASES_URL_NAME
+from .constants import DRAFT_ALIASES_SESSION_KEY, LIST_ALIASES_URL_NAME
 from .forms import BaseCreateAliasForm, CreateAliasForm, DetachAliasPluginForm
 from .models import Alias as AliasModel
 from .models import Category
@@ -56,14 +56,8 @@ class AliasDetailView(DetailView):
     template_name = 'djangocms_alias/alias_detail.html'
 
     def get_context_data(self, **kwargs):
-        draft = 'preview' not in self.request.GET
-        if draft:
-            placeholder = self.object.draft_placeholder
-        else:
-            placeholder = self.object.live_placeholder
         kwargs.update({
-            'alias_draft': draft,
-            'placeholder': placeholder,
+            'use_draft': 'preview' not in self.request.GET,
         })
         return super().get_context_data(**kwargs)
 
@@ -89,9 +83,7 @@ class AliasListView(ListView):
         )
 
     def get_context_data(self, **kwargs):
-        draft = 'preview' not in self.request.GET
         kwargs.update({
-            'alias_draft': draft,
             'category': get_object_or_404(
                 Category,
                 pk=self.kwargs['category_pk'],
@@ -266,6 +258,21 @@ def publish_alias_view(request, pk, language):
 
     alias = get_object_or_404(AliasModel, pk=pk)
     Alias.publish_alias(alias, language)
+    return HttpResponse(
+        '<div><div class="messagelist">'
+        '<div class="success"></div>'
+        '</div></div>'
+    )
+
+
+def set_alias_draft_mode_view(request):
+    if request.method != 'POST':
+        return HttpResponseBadRequest('Requires POST method')
+
+    request.session[DRAFT_ALIASES_SESSION_KEY] = bool(
+        request.POST.get('enable'),
+    )
+
     return HttpResponse(
         '<div><div class="messagelist">'
         '<div class="success"></div>'

@@ -7,5 +7,6 @@ DETACH_ALIAS_PLUGIN_URL_NAME = '{}_detach_plugin'.format(PLUGIN_URL_NAME_PREFIX)
 DETAIL_ALIAS_URL_NAME = '{}_detail'.format(PLUGIN_URL_NAME_PREFIX)
 LIST_ALIASES_URL_NAME = '{}_list'.format(PLUGIN_URL_NAME_PREFIX)
 CATEGORY_LIST_URL_NAME = '{}_category_list'.format(PLUGIN_URL_NAME_PREFIX)
+SET_ALIAS_DRAFT_URL_NAME = '{}_alias_draft'.format(PLUGIN_URL_NAME_PREFIX)
 
-DRAFT_ALIASES_QUERY_KEY = 'draft_aliases'
+DRAFT_ALIASES_SESSION_KEY = 'cms_alias_draft_mode'

@@ -15,8 +15,9 @@ from .constants import (
     CATEGORY_LIST_URL_NAME,
     DELETE_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
-    DRAFT_ALIASES_QUERY_KEY,
+    DRAFT_ALIASES_SESSION_KEY,
     PUBLISH_ALIAS_URL_NAME,
+    SET_ALIAS_DRAFT_URL_NAME,
 )
 from .models import AliasPlaceholder
 from .utils import alias_plugin_reverse
@@ -132,18 +133,16 @@ class AliasToolbar(CMSToolbar):
             url=alias_plugin_reverse(CATEGORY_LIST_URL_NAME),
         )
 
-        params = self.request.GET.copy()
-        if DRAFT_ALIASES_QUERY_KEY not in self.request.GET:
-            params[DRAFT_ALIASES_QUERY_KEY] = ''
-            text = _('Enable draft version of Aliases')
-        else:
-            del params[DRAFT_ALIASES_QUERY_KEY]
+        use_draft_aliases = self.request.session.get(DRAFT_ALIASES_SESSION_KEY)
+        if use_draft_aliases:
             text = _('Disable draft version of Aliases')
+        else:
+            text = _('Enable draft version of Aliases')
 
-        url = self.toolbar.request_path + '?' + params.urlencode()
-        alias_menu.add_link_item(
+        alias_menu.add_ajax_item(
             text,
-            url=url,
+            action=alias_plugin_reverse(SET_ALIAS_DRAFT_URL_NAME),
+            data={'enable': not use_draft_aliases},
         )
 
     def add_alias_menu(self):

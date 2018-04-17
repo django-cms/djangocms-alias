@@ -8,6 +8,7 @@ from .constants import (
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
     PUBLISH_ALIAS_URL_NAME,
+    SET_ALIAS_DRAFT_URL_NAME,
 )
 from .views import (
     AliasDeleteView,
@@ -17,6 +18,7 @@ from .views import (
     create_alias_view,
     detach_alias_plugin_view,
     publish_alias_view,
+    set_alias_draft_mode_view,
 )
 
 
@@ -55,5 +57,10 @@ urlpatterns = [
         r'^delete-alias/(?P<pk>\d+)/$',
         AliasDeleteView.as_view(),
         name=DELETE_ALIAS_PLUGIN_URL_NAME,
+    ),
+    url(
+        r'^draft-aliases-mode/$',
+        set_alias_draft_mode_view,
+        name=SET_ALIAS_DRAFT_URL_NAME,
     ),
 ]

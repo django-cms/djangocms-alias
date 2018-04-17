@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 
 from cms.toolbar.utils import get_toolbar_from_request
 
-from ..constants import DETAIL_ALIAS_URL_NAME
+from ..constants import DETAIL_ALIAS_URL_NAME, DRAFT_ALIASES_SESSION_KEY
 from ..models import Category
 from ..utils import alias_plugin_reverse
 
@@ -22,25 +22,36 @@ def get_alias_url(alias):
 
 
 @register.simple_tag(takes_context=True)
-def render_alias_plugin(context, instance, draft=False):
+def render_alias_plugin(context, instance):
     if not instance:
         return ''
-    return render_alias(context, instance.alias, draft)
+    return render_alias(context, instance.alias)
 
 
 @register.simple_tag(takes_context=True)
-def render_alias(context, instance, draft=False):
+def render_alias(context, instance, use_draft=None, editable=False):
     request = context['request']
     toolbar = get_toolbar_from_request(request)
-    renderer = toolbar.content_renderer
+
+    if editable:
+        renderer = toolbar.get_content_renderer()
+    else:
+        renderer = toolbar.content_renderer
+
+    editable = editable and renderer._placeholders_are_editable
 
     if not instance:
         return ''
 
-    if draft:
-        source = instance.draft_content
+    if use_draft is None:
+        draft = request.session.get(DRAFT_ALIASES_SESSION_KEY)
     else:
-        source = instance.live_content
+        draft = use_draft
+
+    if draft:
+        source = instance.draft_placeholder
+    else:
+        source = instance.live_placeholder
 
     # TODO This needs to be using draft/live alias feature
     can_see_content = True
@@ -49,7 +60,7 @@ def render_alias(context, instance, draft=False):
         content = renderer.render_placeholder(
             placeholder=source,
             context=context,
-            editable=False,
+            editable=editable,
         )
         return mark_safe(content)
     return ''

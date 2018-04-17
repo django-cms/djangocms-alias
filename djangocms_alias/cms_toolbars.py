@@ -13,14 +13,12 @@ from cms.toolbar_pool import toolbar_pool
 
 from .constants import (
     CATEGORY_LIST_URL_NAME,
-    DELETE_ALIAS_PLUGIN_URL_NAME,
-    DETAIL_ALIAS_URL_NAME,
     DRAFT_ALIASES_SESSION_KEY,
     PUBLISH_ALIAS_URL_NAME,
     SET_ALIAS_DRAFT_URL_NAME,
 )
 from .models import AliasPlaceholder
-from .utils import alias_plugin_reverse
+from .utils import alias_plugin_reverse, is_detail_alias_view
 
 
 __all__ = [
@@ -48,11 +46,10 @@ class AliasToolbar(CMSToolbar):
         if self.is_current_app:
             self.alias_placeholder = self.get_alias_placeholder()
             self.is_draft = self.is_alias_placeholder_draft(self.alias_placeholder)  # noqa: E501
-            self.add_delete_alias_button()
             self.add_publish_button()
 
     def get_alias_placeholder(self):
-        if not self.is_detail_alias_view():
+        if not is_detail_alias_view(self.request):
             return
         renderer = self.toolbar.get_content_renderer()
         placeholder = next(
@@ -64,10 +61,6 @@ class AliasToolbar(CMSToolbar):
             None,
         )
         return placeholder
-
-    def is_detail_alias_view(self):
-        match = self.request.resolver_match
-        return match.url_name == DETAIL_ALIAS_URL_NAME
 
     def is_alias_placeholder_draft(self, alias_placeholder):
         return (
@@ -151,22 +144,6 @@ class AliasToolbar(CMSToolbar):
             self.name,
             position=1,
         )
-
-    def add_delete_alias_button(self):
-        alias_menu = self.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
-
-        if self.is_detail_alias_view():
-            match = self.request.resolver_match
-            alias_menu.add_modal_item(
-                _('Delete Alias'),
-                url=alias_plugin_reverse(
-                    DELETE_ALIAS_PLUGIN_URL_NAME,
-                    args=(
-                        match.kwargs['pk'],
-                    ),
-                ),
-                position=0,
-            )
 
     @classmethod
     def get_insert_position(cls, admin_menu, item_name):

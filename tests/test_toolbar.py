@@ -2,8 +2,6 @@ from cms.cms_toolbars import ADMIN_MENU_IDENTIFIER, ADMINISTRATION_BREAK
 from cms.toolbar.items import Break
 
 from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
-from djangocms_alias.constants import DELETE_ALIAS_PLUGIN_URL_NAME
-from djangocms_alias.utils import alias_plugin_reverse
 
 from .base import BaseAliasPluginTestCase
 
@@ -49,29 +47,3 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             )
             alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
             self.assertEqual(alias_menu.name, 'Alias')
-
-    def test_delete_alias_button(self):
-        alias = self._create_alias([self.plugin])
-        request = self.get_alias_request(alias, user=self.superuser)
-        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
-
-        self.assertTrue(len(alias_menu.items) >= 1)
-        self.assertIn('Delete Alias', alias_menu.items[0].name)
-        self.assertIn(
-            alias_plugin_reverse(DELETE_ALIAS_PLUGIN_URL_NAME, args=[alias.pk]),  # noqa: E501
-            alias_menu.items[0].url,
-        )
-        self.assertIn('modal', alias_menu.items[0].template)
-        self.assertIn(str(alias.pk), alias_menu.items[0].url)
-
-    def test_delete_alias_button_no_showing_on_list_of_aliases(self):
-        request = self.get_alias_request(
-            alias=None,
-            path=self.CATEGORY_LIST_ENDPOINT,
-            user=self.superuser,
-        )
-        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
-        self.assertNotIn(
-            'Delete Alias',
-            [item.name for item in alias_menu.items]
-        )

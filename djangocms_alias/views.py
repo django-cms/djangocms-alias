@@ -2,16 +2,17 @@ import json
 
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse_lazy
 from django.utils.translation import get_language
+from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DeleteView, DetailView, ListView
 
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 
 from .cms_plugins import Alias
-from .constants import DRAFT_ALIASES_SESSION_KEY, LIST_ALIASES_URL_NAME
+from .constants import DRAFT_ALIASES_SESSION_KEY
 from .forms import BaseCreateAliasForm, CreateAliasForm, DetachAliasPluginForm
 from .models import Alias as AliasModel
 from .models import Category
@@ -69,7 +70,46 @@ class AliasDetailView(DetailView):
 
 class AliasDeleteView(DeleteView):
     model = AliasModel
-    success_url = reverse_lazy(LIST_ALIASES_URL_NAME)
+
+    def get_success_url(self):
+        # redirectiong to success_url was handled by PluginMenuItem and cms
+        # frontend
+        return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        obj = kwargs['object']
+
+        context = dict(
+            title=obj.name,
+            object_name=_('Alias'),
+            object=obj,
+            pages_using_alias=obj.pages_using_this_alias,
+            has_perm=self.has_perm_to_delete(self.request, obj)
+        )
+        return context
+
+    def has_perm_to_delete(self, request, obj=None):
+        if not obj:
+            return False
+        return Alias.can_delete_alias(request.user, obj)
+
+    @transaction.atomic
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        if not self.has_perm_to_delete(request, self.object):
+            raise PermissionDenied
+
+        Alias.delete_alias(self.object)
+
+        # redirectiong to success_url was handled by PluginMenuItem and cms
+        # frontend
+        return HttpResponse(
+            '<div><div class="messagelist">'
+            '<div class="success"></div>'
+            '</div></div>'
+        )
 
 
 class AliasListView(ListView):

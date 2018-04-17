@@ -20,3 +20,8 @@ def alias_plugin_reverse(viewname, *args, **kwargs):
 
     reversed_url = admin_reverse(viewname, *args, **kwargs)
     return add_url_parameters(reversed_url, **parameters)
+
+
+def is_detail_alias_view(request):
+    match = request.resolver_match
+    return match.url_name == DETAIL_ALIAS_URL_NAME

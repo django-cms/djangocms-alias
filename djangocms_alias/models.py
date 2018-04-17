@@ -105,6 +105,19 @@ class Alias(models.Model):
         placeholder.__class__ = AliasPlaceholder
         return placeholder
 
+    @cached_property
+    def is_in_use(self):
+        return self.cms_plugins.exists()
+
+    @cached_property
+    def pages_using_this_alias(self):
+        # TODO: list of pages model objects (?) then in template you can show
+        # name and link to it
+        # TODO handle nested aliases and overall nested plugins
+        # TODO handle also public/draft of pages (show indicator), alias can be
+        # used in live version but not in draft (was detached)
+        return []
+
     def get_absolute_url(self):
         return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[self.pk])
 

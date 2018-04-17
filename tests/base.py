@@ -32,10 +32,10 @@ class BaseAliasPluginTestCase(CMSTestCase):
             args=[alias_pk],
         )
 
-    def LIST_ALIASES_ENDPOINT(self, alias_pk):
+    def LIST_ALIASES_ENDPOINT(self, category_pk):
         return alias_plugin_reverse(
             LIST_ALIASES_URL_NAME,
-            args=[alias_pk],
+            args=[category_pk],
         )
 
     def setUp(self):

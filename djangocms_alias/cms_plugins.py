@@ -3,6 +3,7 @@ from django.utils.translation import get_language
 from django.utils.translation import ugettext_lazy as _
 
 from cms.api import add_plugin
+from cms.cache.permissions import clear_permission_cache
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
 from cms.utils.permissions import (
@@ -13,13 +14,15 @@ from cms.utils.plugins import copy_plugins_to_placeholder, reorder_plugins
 
 from .constants import (
     CREATE_ALIAS_URL_NAME,
+    DELETE_ALIAS_PLUGIN_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     DRAFT_ALIASES_SESSION_KEY,
+    LIST_ALIASES_URL_NAME,
 )
 from .models import Alias as AliasModel
 from .models import AliasPlugin
-from .utils import alias_plugin_reverse
+from .utils import alias_plugin_reverse, is_detail_alias_view
 
 
 __all__ = [
@@ -84,7 +87,9 @@ class Alias(CMSPluginBase):
     def get_extra_placeholder_menu_items(cls, request, placeholder):
         data = {'placeholder': placeholder.pk}
         endpoint = alias_plugin_reverse(CREATE_ALIAS_URL_NAME, parameters=data)
-        return [
+
+        menu_items = []
+        menu_items.append(
             PluginMenuItem(
                 _("Create Alias"),
                 endpoint,
@@ -92,8 +97,29 @@ class Alias(CMSPluginBase):
                 attributes={
                     'icon': 'alias',
                 },
-            ),
-        ]
+            )
+        )
+
+        if is_detail_alias_view(request):
+            menu_items.append(
+                PluginMenuItem(
+                    _('Delete Alias'),
+                    alias_plugin_reverse(
+                        DELETE_ALIAS_PLUGIN_URL_NAME,
+                        args=(placeholder.alias.pk, ),
+                    ),
+                    action='modal',
+                    attributes={
+                        'icon': 'alias',
+                        'on-close': alias_plugin_reverse(
+                            LIST_ALIASES_URL_NAME,
+                            args=(placeholder.alias.category.pk,),
+                        ),
+                    },
+                )
+            )
+
+        return menu_items
 
     @classmethod
     def create_alias(cls, name, category):
@@ -167,6 +193,25 @@ class Alias(CMSPluginBase):
         )
 
     @classmethod
+    def can_delete_alias(cls, user, alias):
+        if not all([
+            user.has_perm(
+                get_model_permission_codename(AliasModel, 'delete'),
+            ),
+            user.has_perm(
+                get_model_permission_codename(AliasModel, 'add'),
+            )
+        ]):
+            return False
+
+        if user.is_superuser:
+            return True
+
+        # user that has permission to delete but is not superuser
+        # can only delete when alias is not in use on pages
+        return not alias.is_in_use
+
+    @classmethod
     def can_replace_with_alias(cls, user):
         return has_plugin_permission(user, cls.__name__, 'add')
 
@@ -221,3 +266,16 @@ class Alias(CMSPluginBase):
             alias.draft_content.get_plugins(language=language),
             placeholder=alias.live_content,
         )
+
+    @classmethod
+    def clear_alias_cache(cls, alias):
+        # TODO: Is there need to clear cache (?)
+        pass
+
+    @classmethod
+    def delete_alias(cls, alias):
+        cls.clear_alias_cache(alias)
+        clear_permission_cache()
+        # this will delete alias and all alias plugins
+        alias.delete()
+        clear_permission_cache()

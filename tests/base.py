@@ -9,6 +9,7 @@ from cms.utils.conf import get_cms_setting
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.constants import (
+    CATEGORY_LIST_URL_NAME,
     CREATE_ALIAS_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
@@ -20,12 +21,18 @@ from djangocms_alias.utils import alias_plugin_reverse
 
 class BaseAliasPluginTestCase(CMSTestCase):
     CREATE_ALIAS_ENDPOINT = alias_plugin_reverse(CREATE_ALIAS_URL_NAME)
-    LIST_ALIASES_ENDPOINT = alias_plugin_reverse(LIST_ALIASES_URL_NAME)
+    CATEGORY_LIST_ENDPOINT = alias_plugin_reverse(CATEGORY_LIST_URL_NAME)
     DETACH_ALIAS_PLUGIN_ENDPOINT = alias_plugin_reverse(DETACH_ALIAS_PLUGIN_URL_NAME)  # noqa: E501
 
     def DETAIL_ALIAS_ENDPOINT(self, alias_pk):
         return alias_plugin_reverse(
             DETAIL_ALIAS_URL_NAME,
+            args=[alias_pk],
+        )
+
+    def LIST_ALIASES_ENDPOINT(self, alias_pk):
+        return alias_plugin_reverse(
+            LIST_ALIASES_URL_NAME,
             args=[alias_pk],
         )
 

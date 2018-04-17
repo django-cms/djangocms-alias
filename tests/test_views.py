@@ -394,33 +394,70 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.alias_plugin_base.publish_alias(alias2, self.language)
 
         with self.login_user_context(self.superuser):
-            response = self.client.get(self.LIST_ALIASES_ENDPOINT)
+            response = self.client.get(
+                self.LIST_ALIASES_ENDPOINT(category1.pk),
+            )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, category1.name)
-        self.assertContains(response, category2.name)
+        self.assertNotContains(response, category2.name)
         self.assertContains(response, alias1.name)
         self.assertContains(
             response,
             alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias1.pk])
         )
-        self.assertContains(
+        self.assertNotContains(
             response,
             alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias2.pk])
         )
-        self.assertContains(response, alias2.name)
+        self.assertNotContains(response, alias2.name)
         self.assertContains(response, 'This is basic content')
 
     def test_list_view_standard_user(self):
+        category = Category.objects.create(
+            name='Category 1',
+        )
+
         with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.LIST_ALIASES_ENDPOINT)
+            response = self.client.get(self.LIST_ALIASES_ENDPOINT(category.pk))
         self.assertEqual(response.status_code, 403)
 
     def test_list_view_standard_staff_user(self):
+        category = Category.objects.create(
+            name='Category 1',
+        )
+
         with self.login_user_context(
             self.get_staff_user_with_std_permissions(),
         ):
-            response = self.client.get(self.LIST_ALIASES_ENDPOINT)
+            response = self.client.get(self.LIST_ALIASES_ENDPOINT(category.pk))
+        self.assertEqual(response.status_code, 200)
+
+    def test_category_list_view(self):
+        category1 = Category.objects.create(
+            name='Category 1',
+        )
+        category2 = Category.objects.create(
+            name='Category 2',
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, category1.name)
+        self.assertContains(response, category2.name)
+
+    def test_category_list_view_standard_user(self):
+        with self.login_user_context(self.get_standard_user()):
+            response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+        self.assertEqual(response.status_code, 403)
+
+    def test_category_list_view_standard_staff_user(self):
+        with self.login_user_context(
+            self.get_staff_user_with_std_permissions(),
+        ):
+            response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
         self.assertEqual(response.status_code, 200)
 
     def test_detail_view(self):

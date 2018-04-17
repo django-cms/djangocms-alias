@@ -38,7 +38,8 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
 
         alias = self._create_alias([self.plugin])
         for endpoint in [
-            self.LIST_ALIASES_ENDPOINT,
+            self.CATEGORY_LIST_ENDPOINT,
+            self.LIST_ALIASES_ENDPOINT(alias.category_id),
             self.DETAIL_ALIAS_ENDPOINT(alias.pk),
         ]:
             request = self.get_page_request(
@@ -66,7 +67,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
     def test_delete_alias_button_no_showing_on_list_of_aliases(self):
         request = self.get_alias_request(
             alias=None,
-            path=self.LIST_ALIASES_ENDPOINT,
+            path=self.CATEGORY_LIST_ENDPOINT,
             user=self.superuser,
         )
         alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)

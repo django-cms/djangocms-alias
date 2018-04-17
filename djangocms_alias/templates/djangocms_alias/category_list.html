@@ -1,0 +1,15 @@
+{% extends "djangocms_alias/base.html" %}
+{% load cms_tags i18n djangocms_alias_tags %}
+
+{% block aliases_content %}
+    <div class="cms-aliases-page container">
+      <h1 class="cms-aliases-page-h1">{% trans 'Aliases' %}</h1>
+        {% for category in categories %}
+            <h2 class="cms-aliases-page-heading" id="{{ category.name|slugify }}">
+                <span class="cms-aliases-page-heading-inner">
+                    <a class="cms-aliases-page-heading-link" href="{{ category.get_absolute_url }}">{{ category.name }}</a>
+                </span>
+            </h2>
+        {% endfor %}
+    </div>
+{% endblock %}

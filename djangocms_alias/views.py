@@ -79,17 +79,37 @@ class AliasDeleteView(DeleteView):
 
 
 class AliasListView(ListView):
-    model = Category
-    context_object_name = 'categories'
-    queryset = Category.objects.prefetch_related('aliases').order_by('name')
-    template_name = 'djangocms_alias/aliases_list.html'
+    model = AliasModel
+    context_object_name = 'aliases'
+    template_name = 'djangocms_alias/alias_list.html'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            category_id=self.kwargs['category_pk'],
+        )
 
     def get_context_data(self, **kwargs):
         draft = 'preview' not in self.request.GET
         kwargs.update({
             'alias_draft': draft,
+            'category': get_object_or_404(
+                Category,
+                pk=self.kwargs['category_pk'],
+            ),
         })
         return super().get_context_data(**kwargs)
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
+
+
+class CategoryListView(ListView):
+    model = Category
+    context_object_name = 'categories'
+    queryset = Category.objects.order_by('name')
+    template_name = 'djangocms_alias/category_list.html'
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:

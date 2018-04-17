@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
 from .constants import (
+    CATEGORY_LIST_URL_NAME,
     CREATE_ALIAS_URL_NAME,
     DELETE_ALIAS_PLUGIN_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
@@ -12,6 +13,7 @@ from .views import (
     AliasDeleteView,
     AliasDetailView,
     AliasListView,
+    CategoryListView,
     create_alias_view,
     detach_alias_plugin_view,
     publish_alias_view,
@@ -31,6 +33,11 @@ urlpatterns = [
     ),
     url(
         r'^aliases/$',
+        CategoryListView.as_view(),
+        name=CATEGORY_LIST_URL_NAME,
+    ),
+    url(
+        r'^aliases/category/(?P<category_pk>\d+)/$',
         AliasListView.as_view(),
         name=LIST_ALIASES_URL_NAME,
     ),

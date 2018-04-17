@@ -12,10 +12,10 @@ from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 
 from .constants import (
+    CATEGORY_LIST_URL_NAME,
     DELETE_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     DRAFT_ALIASES_QUERY_KEY,
-    LIST_ALIASES_URL_NAME,
     PUBLISH_ALIAS_URL_NAME,
 )
 from .models import AliasPlaceholder
@@ -129,7 +129,7 @@ class AliasToolbar(CMSToolbar):
         )
         alias_menu.add_link_item(
             _('List of Aliases'),
-            url=alias_plugin_reverse(LIST_ALIASES_URL_NAME),
+            url=alias_plugin_reverse(CATEGORY_LIST_URL_NAME),
         )
 
         params = self.request.GET.copy()

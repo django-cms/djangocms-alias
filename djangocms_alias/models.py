@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderField
+from cms.utils.plugins import copy_plugins_to_placeholder
 
 from .constants import DETAIL_ALIAS_URL_NAME, LIST_ALIASES_URL_NAME
 from .utils import alias_plugin_reverse
@@ -120,6 +121,13 @@ class Alias(models.Model):
 
     def get_absolute_url(self):
         return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[self.pk])
+
+    def publish(self, language):
+        self.live_content.clear(language=language)
+        copy_plugins_to_placeholder(
+            self.draft_content.get_plugins(language=language),
+            placeholder=self.live_content,
+        )
 
 
 class AliasPlugin(CMSPlugin):

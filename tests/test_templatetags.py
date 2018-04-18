@@ -65,7 +65,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             alias,
             self.language,
         )
-        self.alias_plugin_base.publish_alias(alias_plugin.alias, self.language)
+        alias.publish(self.language)
 
         output = self.render_template_obj(
             self.alias_template,
@@ -89,7 +89,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             alias,
             self.language,
         )
-        self.alias_plugin_base.publish_alias(alias_plugin.alias, self.language)
+        alias.publish(self.language)
 
         output = self.render_template_obj(
             self.alias_template,

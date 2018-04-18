@@ -19,7 +19,7 @@ class AliasDraftLiveTestCase(BaseAliasPluginTestCase):
             language=self.language,
             body='test 2',
         )
-        self.alias_plugin_base.publish_alias(alias, self.language)
+        alias.publish(self.language)
         add_plugin(
             alias.draft_content,
             'TextPlugin',
@@ -52,7 +52,7 @@ class AliasDraftLiveTestCase(BaseAliasPluginTestCase):
             language=self.language,
             body='test 2',
         )
-        self.alias_plugin_base.publish_alias(alias, self.language)
+        alias.publish(self.language)
         add_plugin(
             alias.draft_content,
             'TextPlugin',

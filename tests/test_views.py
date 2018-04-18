@@ -306,7 +306,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             language='en',
             alias=alias,
         )
-        self.alias_plugin_base.publish_alias(plugin.alias, self.language)
+        alias.publish(self.language)
         add_plugin(
             alias.draft_content,
             'TextPlugin',
@@ -339,7 +339,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             language='en',
             alias=alias,
         )
-        self.alias_plugin_base.publish_alias(plugin.alias, self.language)
+        alias.publish(self.language)
         add_plugin(
             alias.draft_content,
             'TextPlugin',
@@ -385,13 +385,13 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             name='Alias 1',
             category=category1,
         )
-        self.alias_plugin_base.publish_alias(alias1, self.language)
+        alias1.publish(self.language)
         alias2 = self._create_alias(
             [plugin],
             name='Alias 2',
             category=category2,
         )
-        self.alias_plugin_base.publish_alias(alias2, self.language)
+        alias2.publish(self.language)
 
         with self.login_user_context(self.superuser):
             response = self.client.get(
@@ -462,7 +462,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_detail_view(self):
         alias = self._create_alias([self.plugin])
-        self.alias_plugin_base.publish_alias(alias, self.language)
+        alias.publish(self.language)
         plugin2 = add_plugin(
             alias.draft_content,
             'TextPlugin',
@@ -482,7 +482,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_detail_view_draft(self):
         alias = self._create_alias([self.plugin])
-        self.alias_plugin_base.publish_alias(alias, self.language)
+        alias.publish(self.language)
         plugin2 = add_plugin(
             alias.draft_content,
             'TextPlugin',

@@ -117,7 +117,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
-        self.alias_plugin_base.publish_alias(alias_plugin.alias, self.language)
+        alias.publish(self.language)
         add_plugin(
             alias.draft_content,
             'TextPlugin',
@@ -151,7 +151,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
-        self.alias_plugin_base.publish_alias(alias_plugin.alias, self.language)
+        alias.publish(self.language)
         add_plugin(
             alias.draft_content,
             'TextPlugin',
@@ -189,7 +189,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
-        self.alias_plugin_base.publish_alias(alias_plugin.alias, self.language)
+        alias.publish(self.language)
 
         add_plugin(
             self.placeholder,
@@ -248,7 +248,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         )
         live_plugins = alias.live_content.get_plugins()
         self.assertEqual(live_plugins.count(), 0)
-        self.alias_plugin_base.publish_alias(alias, self.language)
+        alias.publish(self.language)
         add_plugin(
             alias.draft_content,
             'TextPlugin',

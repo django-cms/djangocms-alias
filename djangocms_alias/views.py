@@ -292,7 +292,7 @@ def publish_alias_view(request, pk, language):
         return HttpResponseBadRequest('Requires POST method')
 
     alias = get_object_or_404(AliasModel, pk=pk)
-    Alias.publish_alias(alias, language)
+    alias.publish(language)
     return HttpResponse(
         '<div><div class="messagelist">'
         '<div class="success"></div>'

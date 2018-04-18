@@ -254,14 +254,6 @@ class Alias(CMSPluginBase):
         )
 
     @classmethod
-    def publish_alias(cls, alias, language):
-        alias.live_content.clear(language=language)
-        copy_plugins_to_placeholder(
-            alias.draft_content.get_plugins(language=language),
-            placeholder=alias.live_content,
-        )
-
-    @classmethod
     def clear_alias_cache(cls, alias):
         # TODO: Is there need to clear cache (?)
         pass

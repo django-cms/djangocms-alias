@@ -31,3 +31,6 @@ class AliasAdmin(PlaceholderAdminMixin, admin.ModelAdmin):
 
     def get_urls(self):
         return urlpatterns + super().get_urls()
+
+    def has_add_permission(self, request):
+        return False

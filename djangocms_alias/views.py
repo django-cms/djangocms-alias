@@ -31,10 +31,12 @@ def detach_alias_plugin_view(request):
     instance = plugin.get_bound_plugin()
     language = form.cleaned_data['language']
 
-    if not Alias.can_detach(
+    can_detach = Alias.can_detach(
         request.user,
         instance.alias.draft_content.get_plugins(language),
-    ):
+    )
+
+    if not can_detach:
         raise PermissionDenied
 
     Alias.detach_alias_plugin(

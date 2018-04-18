@@ -8,18 +8,19 @@ from .forms import CreateAliasWizardForm
 from .models import Alias as AliasModel
 
 
-class AliasWizard(Wizard):
+class CreateAliasWizard(Wizard):
 
     def user_has_add_permission(self, user, **kwargs):
         return Alias.can_create_alias(user)
 
 
-alias_wizard = AliasWizard(
+create_alias_wizard = CreateAliasWizard(
     title=_('New alias'),
     weight=200,
     form=CreateAliasWizardForm,
     model=AliasModel,
-    description=_('Create a new alias.')
+    description=_('Create a new alias.'),
+    edit_mode_on_success=True,
 )
 
-wizard_pool.register(alias_wizard)
+wizard_pool.register(create_alias_wizard)

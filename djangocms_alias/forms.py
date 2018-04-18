@@ -7,15 +7,37 @@ from django.contrib.admin.widgets import (
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
+from cms.utils.permissions import get_model_permission_codename
 
-from .models import Alias, Category
+from .cms_plugins import Alias
+from .models import Alias as AliasModel
+from .models import Category
 
 
 __all__ = [
     'BaseCreateAliasForm',
     'CreateAliasForm',
+    'CreateAliasWizardForm',
     'DetachAliasPluginForm',
 ]
+
+
+def get_category_widget(formfield, user):
+    dbfield = AliasModel._meta.get_field('category')
+    return RelatedFieldWidgetWrapper(
+        formfield.widget,
+        dbfield.rel,
+        admin_site=admin.site,
+        can_add_related=user.has_perm(
+            get_model_permission_codename(Category, 'add'),
+        ),
+        can_change_related=user.has_perm(
+            get_model_permission_codename(Category, 'change'),
+        ),
+        can_delete_related=user.has_perm(
+            get_model_permission_codename(Category, 'delete'),
+        ),
+    )
 
 
 class BaseCreateAliasForm(forms.Form):
@@ -66,26 +88,18 @@ class CreateAliasForm(BaseCreateAliasForm):
 
     def __init__(self, *args, **kwargs):
         can_replace = kwargs.pop('can_replace')
+        self.user = kwargs.pop('user')
+
         super().__init__(*args, **kwargs)
+
         if not can_replace:
             self.fields['replace'].widget = forms.HiddenInput()
 
-    def set_category_widget(self, request):
-        related_modeladmin = admin.site._registry.get(Category)
-        dbfield = Alias._meta.get_field('category')
+        self.set_category_widget(self.user)
+
+    def set_category_widget(self, user):
         formfield = self.fields['category']
-        formfield.widget = RelatedFieldWidgetWrapper(
-            formfield.widget,
-            dbfield.rel,
-            admin_site=admin.site,
-            can_add_related=related_modeladmin.has_add_permission(request),
-            can_change_related=related_modeladmin.has_change_permission(
-                request,
-            ),
-            can_delete_related=related_modeladmin.has_delete_permission(
-                request,
-            ),
-        )
+        formfield.widget = get_category_widget(formfield, user)
 
     def get_plugins(self):
         plugin = self.cleaned_data.get('plugin')
@@ -98,8 +112,29 @@ class CreateAliasForm(BaseCreateAliasForm):
         return list(plugins)
 
 
-class CreateAliasWizardForm(BaseCreateAliasForm):
-    pass
+class CreateAliasWizardForm(forms.ModelForm):
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        required=True,
+    )
+
+    class Meta:
+        model = AliasModel
+        fields = [
+            'name',
+            'category',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.set_category_widget(self.user)
+
+    def media(self):
+        return Alias().media
+
+    def set_category_widget(self, user):
+        formfield = self.fields['category']
+        formfield.widget = get_category_widget(formfield, user)
 
 
 class DetachAliasPluginForm(forms.Form):

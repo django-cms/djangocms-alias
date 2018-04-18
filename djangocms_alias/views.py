@@ -179,8 +179,8 @@ def create_alias_view(request):
         request.POST or None,
         initial=initial_data,
         can_replace=can_replace,
+        user=user,
     )
-    create_form.set_category_widget(request)
 
     if not create_form.is_valid():
         opts = Alias.model._meta

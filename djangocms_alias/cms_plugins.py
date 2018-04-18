@@ -1,5 +1,5 @@
 from django.middleware.csrf import get_token
-from django.utils.translation import get_language
+from django.utils.translation import get_language_from_request
 from django.utils.translation import ugettext_lazy as _
 
 from cms.api import add_plugin
@@ -62,7 +62,10 @@ class Alias(CMSPluginBase):
                         'use_draft': request.session.get(
                             DRAFT_ALIASES_SESSION_KEY,
                         ),
-                        'language': get_language(),
+                        'language': get_language_from_request(
+                            request,
+                            use_path=True,
+                        ),
                     },
                     attributes={
                         'icon': 'alias',

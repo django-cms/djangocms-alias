@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
-from django.utils.translation import get_language
+from django.utils.translation import get_language_from_request
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DeleteView, DetailView, ListView
 
@@ -212,7 +212,7 @@ def create_alias_view(request):
     if replace:
         plugin = create_form.cleaned_data.get('plugin')
         placeholder = create_form.cleaned_data.get('placeholder')
-        language = get_language()
+        language = get_language_from_request(request, use_path=True)
         if plugin:
             new_plugin = Alias.replace_plugin_with_alias(
                 plugin,

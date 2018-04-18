@@ -105,7 +105,7 @@ class AliasDeleteView(DeleteView):
         if not self.has_perm_to_delete(request, self.object):
             raise PermissionDenied
 
-        Alias.delete_alias(self.object)
+        self.object.delete()
 
         # redirectiong to success_url was handled by PluginMenuItem and cms
         # frontend

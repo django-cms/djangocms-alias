@@ -3,7 +3,6 @@ from django.utils.translation import get_language_from_request
 from django.utils.translation import ugettext_lazy as _
 
 from cms.api import add_plugin
-from cms.cache.permissions import clear_permission_cache
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
 from cms.utils.permissions import (
@@ -252,16 +251,3 @@ class Alias(CMSPluginBase):
             order=order,
             parent_id=plugin.parent_id,
         )
-
-    @classmethod
-    def clear_alias_cache(cls, alias):
-        # TODO: Is there need to clear cache (?)
-        pass
-
-    @classmethod
-    def delete_alias(cls, alias):
-        cls.clear_alias_cache(alias)
-        clear_permission_cache()
-        # this will delete alias and all alias plugins
-        alias.delete()
-        clear_permission_cache()

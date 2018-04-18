@@ -7,6 +7,7 @@ from django.contrib.admin.widgets import (
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
+from cms.utils.permissions import has_plugin_permission
 from cms.utils.permissions import get_model_permission_codename
 
 from .cms_plugins import Alias
@@ -88,12 +89,11 @@ class CreateAliasForm(BaseCreateAliasForm):
     )
 
     def __init__(self, *args, **kwargs):
-        can_replace = kwargs.pop('can_replace')
         self.user = kwargs.pop('user')
 
         super().__init__(*args, **kwargs)
 
-        if not can_replace:
+        if not has_plugin_permission(self.user, Alias.__name__, 'add'):
             self.fields['replace'].widget = forms.HiddenInput()
 
         self.set_category_widget(self.user)
@@ -113,7 +113,7 @@ class CreateAliasForm(BaseCreateAliasForm):
         return list(plugins)
 
     def save(self, language):
-        alias = Alias.create_alias(
+        alias = AliasModel.objects.create(
             name=self.cleaned_data.get('name'),
             category=self.cleaned_data.get('category'),
         )
@@ -129,7 +129,7 @@ class CreateAliasForm(BaseCreateAliasForm):
             language=language,
             plugins=self.get_plugins(),
         )
-        return alias, new_plugin
+        return new_plugin
 
 
 class CreateAliasWizardForm(forms.ModelForm):

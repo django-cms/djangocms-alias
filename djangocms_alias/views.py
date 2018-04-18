@@ -21,6 +21,13 @@ from .models import Alias as AliasModel
 from .models import Category
 
 
+JAVASCRIPT_SUCCESS_RESPONSE = """
+    <div><div class="messagelist">
+    <div class="success"></div>
+    </div></div>
+"""
+
+
 @require_POST
 def detach_alias_plugin_view(request):
     if not request.user.is_staff:
@@ -49,11 +56,7 @@ def detach_alias_plugin_view(request):
         use_draft=form.cleaned_data.get('use_draft'),
     )
 
-    return HttpResponse(
-        '<div><div class="messagelist">'
-        '<div class="success"></div>'
-        '</div></div>'
-    )
+    return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
 
 
 class AliasDetailView(DetailView):
@@ -117,11 +120,7 @@ class AliasDeleteView(DeleteView):
 
         # redirectiong to success_url was handled by PluginMenuItem and cms
         # frontend
-        return HttpResponse(
-            '<div><div class="messagelist">'
-            '<div class="success"></div>'
-            '</div></div>'
-        )
+        return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
 
 
 class AliasListView(ListView):
@@ -134,6 +133,7 @@ class AliasListView(ListView):
 
     def get_context_data(self, **kwargs):
         kwargs.update({
+            'use_draft': self.request.toolbar.edit_mode_active,
             'category': self.category,
         })
         return super().get_context_data(**kwargs)
@@ -175,13 +175,10 @@ def create_alias_view(request):
         return HttpResponseBadRequest('Form received unexpected values')
 
     user = request.user
-    has_plugin_permission
-    can_replace = has_plugin_permission(user, Alias.__name__, 'add')
 
     create_form = CreateAliasForm(
         request.POST or None,
         initial=initial_data,
-        can_replace=can_replace,
         user=user,
     )
 
@@ -210,14 +207,14 @@ def create_alias_view(request):
 
     replace = create_form.cleaned_data.get('replace')
 
-    if replace and not can_replace:
+    if replace and not has_plugin_permission(user, Alias.__name__, 'add'):
         raise PermissionDenied
 
     language = get_language_from_request(request, check_path=True)
 
-    alias, new_plugin = create_form.save(language)
+    new_plugin = create_form.save(language)
 
-    if new_plugin:
+    if replace:
         plugin = create_form.cleaned_data.get('plugin')
         placeholder = create_form.cleaned_data.get('placeholder')
         return render_replace_response(
@@ -227,11 +224,7 @@ def create_alias_view(request):
             source_plugin=plugin,
         )
 
-    return HttpResponse(
-        '<div><div class="messagelist">'
-        '<div class="success"></div>'
-        '</div></div>'
-    )
+    return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
 
 
 def render_replace_response(
@@ -289,21 +282,16 @@ def publish_alias_view(request, pk, language):
 
     alias = get_object_or_404(AliasModel, pk=pk)
     alias.publish(language)
-    return HttpResponse(
-        '<div><div class="messagelist">'
-        '<div class="success"></div>'
-        '</div></div>'
-    )
+    return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
 
 
 @require_POST
 def set_alias_draft_mode_view(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
     request.session[DRAFT_ALIASES_SESSION_KEY] = bool(
         request.POST.get('enable'),
     )
 
-    return HttpResponse(
-        '<div><div class="messagelist">'
-        '<div class="success"></div>'
-        '</div></div>'
-    )
+    return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)

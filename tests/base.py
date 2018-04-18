@@ -16,6 +16,7 @@ from djangocms_alias.constants import (
     LIST_ALIASES_URL_NAME,
     SET_ALIAS_DRAFT_URL_NAME,
 )
+from djangocms_alias.models import Alias as AliasModel
 from djangocms_alias.models import Category
 from djangocms_alias.utils import alias_plugin_reverse
 
@@ -64,7 +65,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
             category = self.category
         if plugins is None:
             plugins = []
-        alias = self.alias_plugin_base.create_alias(
+        alias = AliasModel.objects.create(
             name=name,
             category=category,
         )

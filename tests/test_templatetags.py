@@ -33,14 +33,6 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             self.DETAIL_ALIAS_ENDPOINT(alias.pk),
         )
 
-    def test_render_alias_no_plugin(self):
-        output = self.render_template_obj(
-            self.alias_template,
-            {},
-            self.get_request('/'),
-        )
-        self.assertEqual(output, '')
-
     def test_render_alias_nopublished(self):
         alias = self._create_alias()
         alias_plugin = self.alias_plugin_base.replace_placeholder_content_with_alias(  # noqa: E501

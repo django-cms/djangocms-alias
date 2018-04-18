@@ -59,7 +59,7 @@ class Alias(CMSPluginBase):
                     data={
                         'plugin': plugin.pk,
                         'csrfmiddlewaretoken': get_token(request),
-                        'draft': request.session.get(
+                        'use_draft': request.session.get(
                             DRAFT_ALIASES_SESSION_KEY,
                         ),
                         'language': get_language(),
@@ -226,8 +226,8 @@ class Alias(CMSPluginBase):
         )
 
     @classmethod
-    def detach_alias_plugin(cls, plugin, language, draft=False):
-        if draft:
+    def detach_alias_plugin(cls, plugin, language, use_draft=False):
+        if use_draft:
             source_placeholder = plugin.alias.draft_content
         else:
             source_placeholder = plugin.alias.live_content

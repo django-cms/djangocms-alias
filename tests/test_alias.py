@@ -163,7 +163,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.alias_plugin_base.detach_alias_plugin(
             alias_plugin,
             self.language,
-            draft=True,
+            use_draft=True,
         )
         self.assertEqual(plugins.count(), 4)
 

@@ -353,7 +353,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 data={
                     'plugin': plugin.pk,
                     'language': self.language,
-                    'draft': True,
+                    'use_draft': True,
                 },
             )
             self.assertEqual(response.status_code, 200)

@@ -103,5 +103,5 @@ class DetachAliasPluginForm(forms.Form):
         queryset=CMSPlugin.objects.filter(plugin_type='Alias'),
         widget=forms.HiddenInput(),
     )
-    draft = forms.BooleanField(required=False)
+    use_draft = forms.BooleanField(required=False)
     language = forms.CharField(widget=forms.HiddenInput)

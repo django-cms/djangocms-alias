@@ -40,7 +40,7 @@ def detach_alias_plugin_view(request):
     Alias.detach_alias_plugin(
         plugin=instance,
         language=language,
-        draft=form.cleaned_data.get('draft'),
+        use_draft=form.cleaned_data.get('use_draft'),
     )
 
     return HttpResponse(

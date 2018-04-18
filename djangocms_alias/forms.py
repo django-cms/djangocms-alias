@@ -98,6 +98,10 @@ class CreateAliasForm(BaseCreateAliasForm):
         return list(plugins)
 
 
+class CreateAliasWizardForm(BaseCreateAliasForm):
+    pass
+
+
 class DetachAliasPluginForm(forms.Form):
     plugin = forms.ModelChoiceField(
         queryset=CMSPlugin.objects.filter(plugin_type='Alias'),

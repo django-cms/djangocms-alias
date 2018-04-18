@@ -171,11 +171,14 @@ class Alias(CMSPluginBase):
         )
 
     @classmethod
-    def can_create_alias(cls, user, plugins):
+    def can_create_alias(cls, user, plugins=None):
         if not user.has_perm(
             get_model_permission_codename(AliasModel, 'add'),
         ):
             return False
+
+        if plugins is None:
+            return True
 
         return all(
             has_plugin_permission(

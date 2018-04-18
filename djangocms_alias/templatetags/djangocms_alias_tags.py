@@ -32,16 +32,9 @@ def render_alias_plugin(context, instance):
 def render_alias(context, instance, use_draft=None, editable=False):
     request = context['request']
     toolbar = get_toolbar_from_request(request)
-
-    if editable:
-        renderer = toolbar.get_content_renderer()
-    else:
-        renderer = toolbar.content_renderer
+    renderer = toolbar.get_content_renderer()
 
     editable = editable and renderer._placeholders_are_editable
-
-    if not instance:
-        return ''
 
     if use_draft is None:
         draft = request.session.get(DRAFT_ALIASES_SESSION_KEY)

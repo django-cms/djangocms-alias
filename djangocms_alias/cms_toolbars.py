@@ -2,6 +2,7 @@ import itertools
 
 from django.utils.encoding import force_text
 from django.utils.translation import override
+from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
 
 from cms.cms_toolbars import (
@@ -176,7 +177,7 @@ class AliasToolbar(CMSToolbar):
         # There will always be this button, because we are in the context of
         # alias app views
         create_wizard_button = [
-            button for button in buttons if button.name == 'Create'
+            button for button in buttons if button.name == ugettext('Create')
         ][0]
 
         from cms.wizards.wizard_pool import entry_choices

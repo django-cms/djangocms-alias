@@ -112,6 +112,25 @@ class CreateAliasForm(BaseCreateAliasForm):
             plugins = plugin.get_tree(plugin).order_by('path')
         return list(plugins)
 
+    def save(self, language):
+        alias = Alias.create_alias(
+            name=self.cleaned_data.get('name'),
+            category=self.cleaned_data.get('category'),
+        )
+        if self.cleaned_data.get('replace'):
+            placeholder = self.cleaned_data.get('placeholder')
+            plugin = self.cleaned_data.get('plugin')
+        else:
+            placeholder, plugin = None, None
+        new_plugin = Alias.populate_alias(
+            alias=alias,
+            replaced_placeholder=placeholder,
+            replaced_plugin=plugin,
+            language=language,
+            plugins=self.get_plugins(),
+        )
+        return alias, new_plugin
+
 
 class CreateAliasWizardForm(forms.ModelForm):
     category = forms.ModelChoiceField(

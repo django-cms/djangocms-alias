@@ -24,10 +24,10 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias(
             [self.plugin],
         )
-        alias_plugin = self.alias_plugin_base.replace_plugin_with_alias(
-            self.plugin,
+        alias_plugin = self.alias_plugin_base.populate_alias(
             alias,
-            self.language,
+            replaced_plugin=self.plugin,
+            language=self.language,
         )
         plugins = self.placeholder.get_plugins()
         self.assertNotIn(
@@ -51,10 +51,10 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             body='test 3',
         )
         alias = self._create_alias()
-        alias_plugin = self.alias_plugin_base.replace_plugin_with_alias(
-            second_plugin,
+        alias_plugin = self.alias_plugin_base.populate_alias(
             alias,
-            self.language,
+            language=self.language,
+            replaced_plugin=second_plugin,
         )
         plugins = self.placeholder.get_plugins()
         self.assertNotIn(
@@ -81,10 +81,10 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             body='test 2',
         )
         alias = self._create_alias()
-        self.alias_plugin_base.replace_placeholder_content_with_alias(
-            self.placeholder,
+        self.alias_plugin_base.populate_alias(
             alias,
-            self.language,
+            language=self.language,
+            replaced_placeholder=self.placeholder,
         )
         plugins = self.placeholder.get_plugins()
 

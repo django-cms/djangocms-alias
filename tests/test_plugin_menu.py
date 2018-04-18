@@ -20,11 +20,11 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
         self.assertEqual(parsed_url.query, 'plugin={}'.format(self.plugin.pk))
 
     def test_extra_plugin_items_for_alias_plugins(self):
-        alias = self._create_alias(self.placeholder.get_plugins())
-        alias_plugin = self.alias_plugin_base.replace_placeholder_content_with_alias(  # noqa: E501
-            self.placeholder,
+        alias = self._create_alias()
+        alias_plugin = self.alias_plugin_base.populate_alias(
             alias,
-            self.language,
+            language=self.language,
+            replaced_placeholder=self.placeholder,
         )
 
         extra_items = self.alias_plugin_base.get_extra_plugin_menu_items(

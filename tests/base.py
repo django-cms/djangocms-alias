@@ -69,7 +69,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
             category=category,
         )
         if plugins:
-            self.alias_plugin_base.populate_alias(alias, plugins)
+            self.alias_plugin_base.populate_alias(alias, plugins=plugins)
         return alias
 
     def _get_instance_request(self, instance, user, path=None, edit=False,

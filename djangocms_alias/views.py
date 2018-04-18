@@ -213,34 +213,19 @@ def create_alias_view(request):
     if replace and not can_replace:
         raise PermissionDenied
 
-    alias = Alias.create_alias(
-        name=create_form.cleaned_data.get('name'),
-        category=create_form.cleaned_data.get('category'),
-    )
-    if replace:
+    language = get_language_from_request(request, check_path=True)
+
+    alias, new_plugin = create_form.save(language)
+
+    if new_plugin:
         plugin = create_form.cleaned_data.get('plugin')
         placeholder = create_form.cleaned_data.get('placeholder')
-        language = get_language_from_request(request, check_path=True)
-        if plugin:
-            new_plugin = Alias.replace_plugin_with_alias(
-                plugin,
-                alias,
-                language=language,
-            )
-        else:
-            new_plugin = Alias.replace_placeholder_content_with_alias(
-                placeholder,
-                alias,
-                language=language,
-            )
         return render_replace_response(
             request,
             new_plugin=new_plugin,
             source_placeholder=placeholder,
             source_plugin=plugin,
         )
-    else:
-        Alias.populate_alias(alias, plugins)
 
     return HttpResponse(
         '<div><div class="messagelist">'

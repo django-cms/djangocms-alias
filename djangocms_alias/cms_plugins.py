@@ -123,11 +123,41 @@ class Alias(CMSPluginBase):
         return alias
 
     @classmethod
-    def populate_alias(cls, alias, plugins):
-        copy_plugins_to_placeholder(
-            plugins,
-            placeholder=alias.draft_content,
-        )
+    def populate_alias(
+        cls,
+        alias,
+        replaced_placeholder=None,
+        replaced_plugin=None,
+        language=None,
+        plugins=None,
+    ):
+        if replaced_placeholder:
+            for plugin in replaced_placeholder.get_plugins(language):
+                cls.move_plugin(plugin, alias.draft_content, language)
+            return add_plugin(
+                replaced_placeholder,
+                plugin_type=cls.__name__,
+                alias=alias,
+                language=language,
+            )
+        elif replaced_plugin:
+            cls.move_plugin(replaced_plugin, alias.draft_content, language)
+            new_plugin = add_plugin(
+                replaced_plugin.placeholder,
+                plugin_type=cls.__name__,
+                target=replaced_plugin,
+                position='left',
+                language=language,
+                alias=alias,
+            )
+            new_plugin.position = replaced_plugin.position
+            new_plugin.save(update_fields=['position'])
+            return new_plugin
+        else:
+            copy_plugins_to_placeholder(
+                plugins,
+                placeholder=alias.draft_content,
+            )
 
     @classmethod
     def move_plugin(cls, plugin, target_placeholder, language):
@@ -137,38 +167,6 @@ class Alias(CMSPluginBase):
         }
         plugin.update(refresh=True, **plugin_data)
         plugin.get_descendants().update(**plugin_data)
-
-    @classmethod
-    def replace_plugin_with_alias(cls, plugin, alias, language):
-        cls.move_plugin(plugin, alias.draft_content, language)
-
-        new_plugin = add_plugin(
-            plugin.placeholder,
-            plugin_type=cls.__name__,
-            target=plugin,
-            position='left',
-            language=language,
-            alias=alias,
-        )
-        new_plugin.position = plugin.position
-        new_plugin.save(update_fields=['position'])
-        return new_plugin
-
-    @classmethod
-    def replace_placeholder_content_with_alias(
-        cls,
-        placeholder,
-        alias,
-        language,
-    ):
-        for plugin in placeholder.get_plugins(language):
-            cls.move_plugin(plugin, alias.draft_content, language)
-        return add_plugin(
-            placeholder,
-            plugin_type=cls.__name__,
-            alias=alias,
-            language=language,
-        )
 
     @classmethod
     def can_create_alias(cls, user, plugins=None):

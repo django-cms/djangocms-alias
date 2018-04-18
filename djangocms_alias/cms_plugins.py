@@ -189,29 +189,6 @@ class Alias(CMSPluginBase):
         )
 
     @classmethod
-    def can_delete_alias(cls, user, alias):
-        if not all([
-            user.has_perm(
-                get_model_permission_codename(AliasModel, 'delete'),
-            ),
-            user.has_perm(
-                get_model_permission_codename(AliasModel, 'add'),
-            )
-        ]):
-            return False
-
-        if user.is_superuser:
-            return True
-
-        # user that has permission to delete but is not superuser
-        # can only delete when alias is not in use on pages
-        return not alias.is_in_use
-
-    @classmethod
-    def can_replace_with_alias(cls, user):
-        return has_plugin_permission(user, cls.__name__, 'add')
-
-    @classmethod
     def can_detach(cls, user, plugins):
         return all(
             has_plugin_permission(

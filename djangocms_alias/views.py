@@ -1,5 +1,6 @@
 import json
 
+from django.contrib import admin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -11,6 +12,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import DeleteView, DetailView, ListView
 
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
+from cms.utils.permissions import has_plugin_permission
 
 from .cms_plugins import Alias
 from .constants import DRAFT_ALIASES_SESSION_KEY
@@ -102,7 +104,7 @@ class AliasDeleteView(DeleteView):
     def has_perm_to_delete(self, request, obj=None):
         if not obj:
             return False
-        return Alias.can_delete_alias(request.user, obj)
+        return admin.site._registry[AliasModel].has_delete_permission(request, obj)  # noqa: E501
 
     @transaction.atomic
     def delete(self, request, *args, **kwargs):
@@ -173,7 +175,8 @@ def create_alias_view(request):
         return HttpResponseBadRequest('Form received unexpected values')
 
     user = request.user
-    can_replace = Alias.can_replace_with_alias(user)
+    has_plugin_permission
+    can_replace = has_plugin_permission(user, Alias.__name__, 'add')
 
     create_form = CreateAliasForm(
         request.POST or None,

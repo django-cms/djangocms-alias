@@ -83,30 +83,6 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
             ),
         )
 
-    def test_can_replace_with_alias(self):
-        user = self.get_staff_user_with_no_permissions()
-        user.user_permissions.add(
-            Permission.objects.get(
-                content_type=ContentType.objects.get_for_model(
-                    self.alias_plugin_base.model,
-                ),
-                codename='add_aliasplugin',
-            )
-        )
-        self.assertTrue(
-            self.alias_plugin_base.can_replace_with_alias(
-                user,
-            ),
-        )
-
-    def test_can_replace_with_alias_no_permission(self):
-        user = self.get_staff_user_with_no_permissions()
-        self.assertFalse(
-            self.alias_plugin_base.can_replace_with_alias(
-                user,
-            ),
-        )
-
     def test_can_detach_no_permission(self):
         user = self.get_staff_user_with_no_permissions()
         alias = self._create_alias(self.placeholder.get_plugins())

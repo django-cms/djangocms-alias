@@ -7,6 +7,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.utils.translation import get_language_from_request
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.http import require_POST
 from django.views.generic import DeleteView, DetailView, ListView
 
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
@@ -18,13 +19,14 @@ from .models import Alias as AliasModel
 from .models import Category
 
 
+@require_POST
 def detach_alias_plugin_view(request):
     if not request.user.is_staff:
         raise PermissionDenied
 
     form = DetachAliasPluginForm(request.POST)
 
-    if request.method == 'GET' or not form.is_valid():
+    if not form.is_valid():
         return HttpResponseBadRequest('Form received unexpected values')
 
     plugin = form.cleaned_data['plugin']
@@ -286,12 +288,10 @@ def render_replace_response(
     )
 
 
+@require_POST
 def publish_alias_view(request, pk, language):
     if not request.user.is_staff:
         raise PermissionDenied
-
-    if request.method != 'POST':
-        return HttpResponseBadRequest('Requires POST method')
 
     alias = get_object_or_404(AliasModel, pk=pk)
     alias.publish(language)
@@ -302,10 +302,8 @@ def publish_alias_view(request, pk, language):
     )
 
 
+@require_POST
 def set_alias_draft_mode_view(request):
-    if request.method != 'POST':
-        return HttpResponseBadRequest('Requires POST method')
-
     request.session[DRAFT_ALIASES_SESSION_KEY] = bool(
         request.POST.get('enable'),
     )

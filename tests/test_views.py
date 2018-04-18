@@ -253,13 +253,13 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             self.assertEqual(response.status_code, 403)
 
     def test_detach_view_no_permission_to_add_plugins_from_alias(self):
-        response = self.client.get(self.DETACH_ALIAS_PLUGIN_ENDPOINT)
+        response = self.client.post(self.DETACH_ALIAS_PLUGIN_ENDPOINT)
         self.assertEqual(response.status_code, 403)
 
     def test_detach_view_get(self):
         with self.login_user_context(self.superuser):
             response = self.client.get(self.DETACH_ALIAS_PLUGIN_ENDPOINT)
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 405)
 
     def test_detach_view_non_staff_denied_access(self):
         alias = self._create_alias([self.plugin])
@@ -574,7 +574,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
     def test_publish_view_no_permissions(self):
         alias = self._create_alias([self.plugin])
         with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(
+            response = self.client.post(
                 alias_plugin_reverse(
                     PUBLISH_ALIAS_URL_NAME,
                     args=[alias.pk, self.language],
@@ -591,7 +591,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                     args=[alias.pk, self.language],
                 ),
             )
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 405)
 
     def test_publish_view_alias_does_not_exist(self):
         alias = self._create_alias([self.plugin])

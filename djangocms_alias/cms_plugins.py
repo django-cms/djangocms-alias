@@ -48,7 +48,7 @@ class Alias(CMSPluginBase):
                 PluginMenuItem(
                     _("Edit Alias"),
                     edit_endpoint,
-                    action='??',  # TODO get a hold of proper value here
+                    action='',
                     attributes={
                         'icon': 'alias',
                     },

@@ -1,3 +1,5 @@
+import itertools
+
 from django.utils.encoding import force_text
 from django.utils.translation import override
 from django.utils.translation import ugettext_lazy as _
@@ -47,6 +49,7 @@ class AliasToolbar(CMSToolbar):
             self.alias_placeholder = self.get_alias_placeholder()
             self.is_draft = self.is_alias_placeholder_draft(self.alias_placeholder)  # noqa: E501
             self.add_publish_button()
+            self.enable_create_wizard_button()
 
     def get_alias_placeholder(self):
         if not is_detail_alias_view(self.request):
@@ -169,3 +172,31 @@ class AliasToolbar(CMSToolbar):
                 # Some item types do not have a 'name' attribute.
                 pass
         return end.index
+
+    def enable_create_wizard_button(self):
+        button_lists = [
+            result.item
+            for result in self.toolbar.find_items(item_type=ButtonList)
+        ]
+        buttons = list(
+            # flatten the list
+            itertools.chain.from_iterable([
+                item.buttons
+                for item in button_lists
+            ])
+        )
+
+        # There will always be this button, because we are in the context of
+        # alias app views
+        create_wizard_button = [
+            button for button in buttons if button.name == 'Create'
+        ][0]
+
+        from cms.wizards.wizard_pool import entry_choices
+        # we enable this button when user has permissions to perform actions on
+        # wizard
+        enable_create_wizard_button = bool(
+            # entry_choices gets required argument page
+            list(entry_choices(self.request.user, page=None))
+        )
+        create_wizard_button.disabled = not enable_create_wizard_button

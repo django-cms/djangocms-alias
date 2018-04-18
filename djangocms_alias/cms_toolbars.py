@@ -20,7 +20,6 @@ from .constants import (
     SET_ALIAS_DRAFT_URL_NAME,
 )
 from .models import Alias as AliasModel
-from .models import AliasPlaceholder
 from .utils import alias_plugin_reverse
 
 
@@ -48,7 +47,6 @@ class AliasToolbar(CMSToolbar):
     def post_template_populate(self):
         if self.is_current_app:
             self.alias_placeholder = self.get_alias_placeholder()
-            self.is_draft = self.is_alias_placeholder_draft(self.alias_placeholder)  # noqa: E501
             self.add_publish_button()
             self.enable_create_wizard_button()
 
@@ -56,25 +54,12 @@ class AliasToolbar(CMSToolbar):
         if not isinstance(self.toolbar.obj, AliasModel):
             return
 
-        renderer = self.toolbar.get_content_renderer()
-        placeholder = next(
-            (
-                placeholder
-                for placeholder in renderer.get_rendered_placeholders()
-                if placeholder.__class__ == AliasPlaceholder
-            ),
-            None,
-        )
-        return placeholder
-
-    def is_alias_placeholder_draft(self, alias_placeholder):
-        return (
-            alias_placeholder and
-            alias_placeholder == alias_placeholder.alias.draft_placeholder
-        )
+        if self.toolbar.edit_mode_active:
+            return self.toolbar.obj.draft_placeholder
+        return self.toolbar.obj.live_placeholder
 
     def has_publish_permission(self):
-        return self.alias_placeholder and self.is_draft
+        return self.alias_placeholder and self.toolbar.edit_mode_active
 
     def has_dirty_objects(self):
         return True

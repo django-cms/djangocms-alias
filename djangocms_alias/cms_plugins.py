@@ -21,7 +21,7 @@ from .constants import (
 )
 from .models import Alias as AliasModel
 from .models import AliasPlugin
-from .utils import alias_plugin_reverse, is_detail_alias_view
+from .utils import alias_plugin_reverse
 
 
 __all__ = [
@@ -93,7 +93,7 @@ class Alias(CMSPluginBase):
             ),
         ]
 
-        if is_detail_alias_view(request):
+        if isinstance(request.toolbar.obj, AliasModel):
             menu_items.append(
                 PluginMenuItem(
                     _('Delete Alias'),

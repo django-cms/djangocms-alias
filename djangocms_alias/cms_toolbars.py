@@ -19,8 +19,9 @@ from .constants import (
     PUBLISH_ALIAS_URL_NAME,
     SET_ALIAS_DRAFT_URL_NAME,
 )
+from .models import Alias as AliasModel
 from .models import AliasPlaceholder
-from .utils import alias_plugin_reverse, is_detail_alias_view
+from .utils import alias_plugin_reverse
 
 
 __all__ = [
@@ -52,8 +53,9 @@ class AliasToolbar(CMSToolbar):
             self.enable_create_wizard_button()
 
     def get_alias_placeholder(self):
-        if not is_detail_alias_view(self.request):
+        if not isinstance(self.toolbar.obj, AliasModel):
             return
+
         renderer = self.toolbar.get_content_renderer()
         placeholder = next(
             (

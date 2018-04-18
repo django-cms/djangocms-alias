@@ -79,7 +79,7 @@ class Alias(models.Model):
         Category,
         verbose_name=_('category'),
         related_name='aliases',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
     position = models.PositiveIntegerField(
         verbose_name=_('position'),

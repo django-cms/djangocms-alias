@@ -58,7 +58,7 @@ class AliasDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         kwargs.update({
-            'use_draft': 'preview' not in self.request.GET,
+            'use_draft': self.request.toolbar.edit_mode_active,
         })
         return super().get_context_data(**kwargs)
 
@@ -118,22 +118,21 @@ class AliasListView(ListView):
     template_name = 'djangocms_alias/alias_list.html'
 
     def get_queryset(self):
-        return super().get_queryset().filter(
-            category_id=self.kwargs['category_pk'],
-        )
+        return self.category.aliases.all()
 
     def get_context_data(self, **kwargs):
         kwargs.update({
-            'category': get_object_or_404(
-                Category,
-                pk=self.kwargs['category_pk'],
-            ),
+            'category': self.category,
         })
         return super().get_context_data(**kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:
             raise PermissionDenied
+        self.category = get_object_or_404(
+            Category,
+            pk=self.kwargs['category_pk'],
+        )
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -184,11 +183,7 @@ def create_alias_view(request):
             'app_label': opts.app_label,
             'media': (Alias().media + create_form.media),
         }
-        return render(
-            request,
-            'djangocms_alias/create_alias.html',
-            context,
-        )
+        return render(request, 'djangocms_alias/create_alias.html', context)
 
     plugins = create_form.get_plugins()
 
@@ -212,7 +207,7 @@ def create_alias_view(request):
     if replace:
         plugin = create_form.cleaned_data.get('plugin')
         placeholder = create_form.cleaned_data.get('placeholder')
-        language = get_language_from_request(request, use_path=True)
+        language = get_language_from_request(request, check_path=True)
         if plugin:
             new_plugin = Alias.replace_plugin_with_alias(
                 plugin,

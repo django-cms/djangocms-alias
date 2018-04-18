@@ -59,7 +59,7 @@ HELPER_SETTINGS = {
             },
             {
                 'code': 'it',
-                'fallbacks': ['fr', ],  # FOR TESTING, LEAVE AS ONLY 'fr'
+                'fallbacks': ['fr'],  # FOR TESTING, LEAVE AS ONLY 'fr'
                 'hide_untranslated': False,
             },
         ],

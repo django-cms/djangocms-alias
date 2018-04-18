@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderField
 
-from .constants import LIST_ALIASES_URL_NAME, DETAIL_ALIAS_URL_NAME
+from .constants import DETAIL_ALIAS_URL_NAME, LIST_ALIASES_URL_NAME
 from .utils import alias_plugin_reverse
 
 

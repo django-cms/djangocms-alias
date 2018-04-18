@@ -46,15 +46,13 @@ class Alias(CMSPluginBase):
 
             return [
                 PluginMenuItem(
-                    _("Edit Alias"),
+                    _('Edit Alias'),
                     edit_endpoint,
                     action='',
-                    attributes={
-                        'icon': 'alias',
-                    },
+                    attributes={'icon': 'alias'},
                 ),
                 PluginMenuItem(
-                    _("Detach Alias"),
+                    _('Detach Alias'),
                     alias_plugin_reverse(DETACH_ALIAS_PLUGIN_URL_NAME),
                     data={
                         'plugin': plugin.pk,
@@ -64,12 +62,10 @@ class Alias(CMSPluginBase):
                         ),
                         'language': get_language_from_request(
                             request,
-                            use_path=True,
+                            check_path=True,
                         ),
                     },
-                    attributes={
-                        'icon': 'alias',
-                    },
+                    attributes={'icon': 'alias'},
                 ),
             ]
 
@@ -77,12 +73,10 @@ class Alias(CMSPluginBase):
         endpoint = alias_plugin_reverse(CREATE_ALIAS_URL_NAME, parameters=data)
         return [
             PluginMenuItem(
-                _("Create Alias"),
+                _('Create Alias'),
                 endpoint,
                 action='modal',
-                attributes={
-                    'icon': 'alias',
-                },
+                attributes={'icon': 'alias'},
             ),
         ]
 
@@ -91,17 +85,14 @@ class Alias(CMSPluginBase):
         data = {'placeholder': placeholder.pk}
         endpoint = alias_plugin_reverse(CREATE_ALIAS_URL_NAME, parameters=data)
 
-        menu_items = []
-        menu_items.append(
+        menu_items = [
             PluginMenuItem(
-                _("Create Alias"),
+                _('Create Alias'),
                 endpoint,
                 action='modal',
-                attributes={
-                    'icon': 'alias',
-                },
-            )
-        )
+                attributes={'icon': 'alias'},
+            ),
+        ]
 
         if is_detail_alias_view(request):
             menu_items.append(
@@ -154,7 +145,7 @@ class Alias(CMSPluginBase):
 
         new_plugin = add_plugin(
             plugin.placeholder,
-            cls.__name__,
+            plugin_type=cls.__name__,
             target=plugin,
             position='left',
             language=language,
@@ -175,7 +166,7 @@ class Alias(CMSPluginBase):
             cls.move_plugin(plugin, alias.draft_content, language)
         return add_plugin(
             placeholder,
-            cls.__name__,
+            plugin_type=cls.__name__,
             alias=alias,
             language=language,
         )

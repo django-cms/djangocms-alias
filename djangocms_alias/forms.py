@@ -18,6 +18,7 @@ __all__ = [
     'BaseCreateAliasForm',
     'CreateAliasForm',
     'CreateAliasWizardForm',
+    'CreateCategoryWizardForm',
     'DetachAliasPluginForm',
 ]
 
@@ -135,6 +136,17 @@ class CreateAliasWizardForm(forms.ModelForm):
     def set_category_widget(self, user):
         formfield = self.fields['category']
         formfield.widget = get_category_widget(formfield, user)
+
+
+class CreateCategoryWizardForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = [
+            'name',
+        ]
+
+    def media(self):
+        return Alias().media
 
 
 class DetachAliasPluginForm(forms.Form):

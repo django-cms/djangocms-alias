@@ -126,7 +126,7 @@ class AliasToolbar(CMSToolbar):
         alias_menu.add_ajax_item(
             text,
             action=alias_plugin_reverse(SET_ALIAS_DRAFT_URL_NAME),
-            data={'enable': not use_draft_aliases},
+            data={'enable': int(not use_draft_aliases)},
         )
 
     def add_alias_menu(self):

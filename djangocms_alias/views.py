@@ -305,8 +305,11 @@ def set_alias_draft_mode_view(request):
     if not request.user.is_staff:
         raise PermissionDenied
 
-    request.session[DRAFT_ALIASES_SESSION_KEY] = bool(
-        request.POST.get('enable'),
-    )
+    try:
+        request.session[DRAFT_ALIASES_SESSION_KEY] = bool(int(
+            request.POST.get('enable'),
+        ))
+    except ValueError:
+        return HttpResponseBadRequest('Form received unexpected values')
 
     return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)

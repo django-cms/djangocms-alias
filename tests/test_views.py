@@ -364,7 +364,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             self.client.post(
                 self.SET_ALIAS_DRAFT_ENDPOINT,
-                data={'enable': True},
+                data={'enable': 1},
             )
             response = self.client.post(
                 self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),

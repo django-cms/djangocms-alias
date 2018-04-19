@@ -69,7 +69,7 @@ class AliasDraftLiveTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             self.client.post(
                 self.SET_ALIAS_DRAFT_ENDPOINT,
-                data={'enable': True},
+                data={'enable': 1},
             )
             response = self.client.get(
                 self.page.get_absolute_url(),

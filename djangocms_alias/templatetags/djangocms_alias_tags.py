@@ -21,7 +21,7 @@ def get_alias_url(alias):
     return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk])
 
 
-@register.simple_tag(takes_context=True)
+@register.inclusion_tag('djangocms_alias/alias_tag.html', takes_context=True)
 def render_alias(context, instance, use_draft=None, editable=False):
     request = context['request']
 
@@ -49,5 +49,7 @@ def render_alias(context, instance, use_draft=None, editable=False):
             context=context,
             editable=editable,
         )
-        return mark_safe(content)
-    return ''
+        return {
+            'content': mark_safe(content),
+            'draft': draft,
+        }

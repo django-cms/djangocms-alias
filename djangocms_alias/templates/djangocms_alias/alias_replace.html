@@ -31,6 +31,9 @@ window.CMS || window.parent.CMS || document.write(
                 var moveData = {{ moved_plugin|safe }};
                 Window.CMS.API.StructureBoard.invalidateState('MOVE', moveData);
                 {% endfor %}
+
+                Window.CMS.API.StructureBoard._requestcontent = null;
+                Window.CMS.API.StructureBoard.updateContent();
             }, 100);
         });
     })(window.parent || window);

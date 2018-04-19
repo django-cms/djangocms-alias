@@ -126,6 +126,7 @@ class AliasToolbar(CMSToolbar):
         alias_menu.add_ajax_item(
             text,
             action=alias_plugin_reverse(SET_ALIAS_DRAFT_URL_NAME),
+            on_success='REFRESH_PAGE',
             data={'enable': int(not use_draft_aliases)},
         )
 

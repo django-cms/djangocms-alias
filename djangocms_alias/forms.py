@@ -76,7 +76,7 @@ class BaseCreateAliasForm(forms.Form):
         return cleaned_data
 
 
-class CreateAliasForm(BaseCreateAliasForm):
+class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
     name = forms.CharField(required=True, widget=AdminTextInputWidget())
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
@@ -87,6 +87,13 @@ class CreateAliasForm(BaseCreateAliasForm):
         help_text=_('Replace current plugin with alias'),
         required=False,
     )
+
+    class Meta:
+        model = AliasModel
+        fields = [
+            'name',
+            'category',
+        ]
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')

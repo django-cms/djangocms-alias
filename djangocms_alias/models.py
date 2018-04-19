@@ -90,6 +90,9 @@ class Alias(models.Model):
         verbose_name = _('alias')
         verbose_name_plural = _('aliases')
         ordering = ['position']
+        unique_together = [
+            ('name', 'category'),
+        ]
 
     def __str__(self):
         return self.name

@@ -31,6 +31,7 @@ create_alias_wizard = CreateAliasWizard(
     model=AliasModel,
     description=_('Create a new alias.'),
     edit_mode_on_success=True,
+    template_name='djangocms_alias/wizards/create.html',
 )
 create_alias_category_wizard = CreateAliasCategoryWizard(
     title=_('New alias category'),
@@ -39,6 +40,7 @@ create_alias_category_wizard = CreateAliasCategoryWizard(
     model=Category,
     description=_('Create a new alias category.'),
     edit_mode_on_success=True,
+    template_name='djangocms_alias/wizards/create.html',
 )
 
 wizard_pool.register(create_alias_wizard)

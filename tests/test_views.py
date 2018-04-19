@@ -125,6 +125,28 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias = Alias.objects.last()
         self.assertEqual(alias.name, 'test alias')
 
+    def test_create_alias_name_unique_per_category(self):
+        self._create_alias(
+            name='test alias',
+            category=self.category,
+        )
+        with self.login_user_context(self.superuser):
+            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+                'plugin': self.plugin.pk,
+                'category': self.category.pk,
+                'name': 'test alias',
+            })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Alias with this Name and Category already exists.',
+        )
+        self.assertEqual(
+            Alias.objects.filter(name='test alias', category=self.category).count(),  # noqa: E501
+            1,
+        )
+
     def test_create_alias_view_post_no_plugin_or_placeholder(self):
         with self.login_user_context(self.superuser):
             response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={

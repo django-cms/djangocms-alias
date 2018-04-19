@@ -20,7 +20,6 @@ __all__ = [
     'CreateAliasForm',
     'CreateAliasWizardForm',
     'CreateCategoryWizardForm',
-    'DetachAliasPluginForm',
 ]
 
 
@@ -173,12 +172,3 @@ class CreateCategoryWizardForm(forms.ModelForm):
 
     def media(self):
         return Alias().media
-
-
-class DetachAliasPluginForm(forms.Form):
-    plugin = forms.ModelChoiceField(
-        queryset=CMSPlugin.objects.filter(plugin_type='Alias'),
-        widget=forms.HiddenInput(),
-    )
-    use_draft = forms.BooleanField(required=False)
-    language = forms.CharField(widget=forms.HiddenInput)

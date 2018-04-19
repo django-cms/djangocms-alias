@@ -30,7 +30,7 @@ urlpatterns = [
         name=constants.DETAIL_ALIAS_URL_NAME,
     ),
     url(
-        r'^detach-alias/$',
+        r'^detach-alias/(?P<plugin_pk>\d+)/$',
         views.detach_alias_plugin_view,
         name=constants.DETACH_ALIAS_PLUGIN_URL_NAME,
     ),

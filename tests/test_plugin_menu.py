@@ -38,13 +38,11 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
         self.assertEqual(first.url, self.DETAIL_ALIAS_ENDPOINT(alias.pk))
 
         self.assertEqual(second.name, 'Detach Alias')
-        self.assertEqual(second.action, 'ajax')
-        data = json.loads(second.data)
-        self.assertIn('plugin', data)
-        self.assertEqual(data['plugin'], alias_plugin.pk)
-
-        parsed_url = urlparse(second.url)
-        self.assertEqual(parsed_url.path, self.DETACH_ALIAS_PLUGIN_ENDPOINT)
+        self.assertEqual(second.action, 'modal')
+        self.assertEqual(
+            second.url,
+            self.DETACH_ALIAS_PLUGIN_ENDPOINT(alias_plugin.pk),
+        )
 
     def test_extra_plugin_items_for_placeholder(self):
         extra_items = self.alias_plugin_base.get_extra_placeholder_menu_items(

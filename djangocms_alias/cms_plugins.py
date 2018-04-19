@@ -42,6 +42,10 @@ class Alias(CMSPluginBase):
                 DETAIL_ALIAS_URL_NAME,
                 args=[plugin.alias_id],
             )
+            detach_endpoint = alias_plugin_reverse(
+                DETACH_ALIAS_PLUGIN_URL_NAME,
+                args=[plugin.pk],
+            )
 
             return [
                 PluginMenuItem(
@@ -52,18 +56,8 @@ class Alias(CMSPluginBase):
                 ),
                 PluginMenuItem(
                     _('Detach Alias'),
-                    alias_plugin_reverse(DETACH_ALIAS_PLUGIN_URL_NAME),
-                    data={
-                        'plugin': plugin.pk,
-                        'csrfmiddlewaretoken': get_token(request),
-                        'use_draft': request.session.get(
-                            DRAFT_ALIASES_SESSION_KEY,
-                        ),
-                        'language': get_language_from_request(
-                            request,
-                            check_path=True,
-                        ),
-                    },
+                    detach_endpoint,
+                    action='modal',
                     attributes={'icon': 'alias'},
                 ),
             ]
@@ -207,3 +201,5 @@ class Alias(CMSPluginBase):
             order=order,
             parent_id=plugin.parent_id,
         )
+
+        return copied_plugins

@@ -22,11 +22,15 @@ window.CMS || window.parent.CMS || document.write(
                 {% else %}
                 Window.CMS.API.StructureBoard.invalidateState('DELETE', {{ replaced_plugin|safe }});
                 {% endif %}
+                {% for added_plugin, structure in added_plugins %}
                 var addedPlugin = {{ added_plugin|safe }};
-                addedPlugin.structure = {{ added_plugin_structure|safe }};
+                addedPlugin.structure = {{ structure|safe }};
                 Window.CMS.API.StructureBoard.invalidateState('ADD', addedPlugin);
-                var moveData = {{ move_data|safe }};
+                {% endfor %}
+                {% for moved_plugin in moved_plugins %}
+                var moveData = {{ moved_plugin|safe }};
                 Window.CMS.API.StructureBoard.invalidateState('MOVE', moveData);
+                {% endfor %}
             }, 100);
         });
     })(window.parent || window);

@@ -16,9 +16,9 @@ from cms.utils.permissions import has_plugin_permission
 
 from .cms_plugins import Alias
 from .constants import DRAFT_ALIASES_SESSION_KEY
-from .forms import BaseCreateAliasForm, CreateAliasForm, DetachAliasPluginForm
+from .forms import BaseCreateAliasForm, CreateAliasForm
 from .models import Alias as AliasModel
-from .models import Category
+from .models import AliasPlugin, Category
 
 
 JAVASCRIPT_SUCCESS_RESPONSE = """
@@ -28,19 +28,26 @@ JAVASCRIPT_SUCCESS_RESPONSE = """
 """
 
 
-@require_POST
-def detach_alias_plugin_view(request):
+def detach_alias_plugin_view(request, plugin_pk):
     if not request.user.is_staff:
         raise PermissionDenied
 
-    form = DetachAliasPluginForm(request.POST)
+    instance = get_object_or_404(AliasPlugin, pk=plugin_pk)
 
-    if not form.is_valid():
-        return HttpResponseBadRequest('Form received unexpected values')
+    if request.method == 'GET':
+        opts = Alias.model._meta
+        context = {
+            'has_change_permission': True,
+            'opts': opts,
+            'root_path': reverse('admin:index'),
+            'is_popup': True,
+            'app_label': opts.app_label,
+            'object_name': _('Alias'),
+            'object': instance.alias,
+        }
+        return render(request, 'djangocms_alias/detach_alias.html', context)
 
-    plugin = form.cleaned_data['plugin']
-    instance = plugin.get_bound_plugin()
-    language = form.cleaned_data['language']
+    language = get_language_from_request(request, check_path=True)
 
     can_detach = Alias.can_detach(
         request.user,
@@ -50,13 +57,17 @@ def detach_alias_plugin_view(request):
     if not can_detach:
         raise PermissionDenied
 
-    Alias.detach_alias_plugin(
+    copied_plugins = Alias.detach_alias_plugin(
         plugin=instance,
         language=language,
-        use_draft=form.cleaned_data.get('use_draft'),
+        use_draft=request.session.get(DRAFT_ALIASES_SESSION_KEY),
     )
 
-    return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
+    return render_replace_response(
+        request,
+        new_plugins=copied_plugins,
+        source_plugin=instance,
+    )
 
 
 class AliasDetailView(DetailView):
@@ -219,7 +230,7 @@ def create_alias_view(request):
         placeholder = create_form.cleaned_data.get('placeholder')
         return render_replace_response(
             request,
-            new_plugin=new_plugin,
+            new_plugins=[new_plugin],
             source_placeholder=placeholder,
             source_plugin=plugin,
         )
@@ -229,34 +240,38 @@ def create_alias_view(request):
 
 def render_replace_response(
     request,
-    new_plugin,
+    new_plugins,
     source_placeholder=None,
     source_plugin=None,
 ):
-    try:
+    move_plugins, add_plugins = [], []
+    for plugin in new_plugins:
         root = (
-            new_plugin.parent.get_bound_plugin()
-            if new_plugin.parent else new_plugin
+            plugin.parent.get_bound_plugin()
+            if plugin.parent else plugin
         )
-    except ObjectDoesNotExist:
-        root = new_plugin
 
-    plugins = [root] + list(root.get_descendants().order_by('path'))
+        plugins = [root] + list(root.get_descendants().order_by('path'))
 
-    move_data = get_plugin_toolbar_info(new_plugin)
-    move_data['plugin_order'] = new_plugin.placeholder.get_plugin_tree_order(  # noqa: E501
-        new_plugin.language,
-        parent_id=new_plugin.parent_id,
-    )
-    plugin_tree = get_plugin_tree_as_json(
-        request,
-        plugins,
-    )
-    move_data.update(json.loads(plugin_tree))
+        plugin_order = plugin.placeholder.get_plugin_tree_order(
+            plugin.language,
+            parent_id=plugin.parent_id,
+        )
+        plugin_tree = get_plugin_tree_as_json(
+            request,
+            plugins,
+        )
+        move_data = get_plugin_toolbar_info(plugin)
+        move_data['plugin_order'] = plugin_order
+        move_data.update(json.loads(plugin_tree))
+        move_plugins.append(json.dumps(move_data))
+        add_plugins.append((
+            json.dumps(get_plugin_toolbar_info(plugin)),
+            plugin_tree,
+        ))
     context = {
-        'added_plugin': json.dumps(get_plugin_toolbar_info(new_plugin)),
-        'added_plugin_structure': plugin_tree,
-        'move_data': json.dumps(move_data),
+        'added_plugins': add_plugins,
+        'moved_plugins': move_plugins,
         'is_popup': True,
     }
     if source_plugin is not None:

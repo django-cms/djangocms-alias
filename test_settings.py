@@ -7,6 +7,13 @@ HELPER_SETTINGS = {
         'parler',
         'djangocms_alias.test_utils.text',
     ],
+    'MIGRATION_MODULES': {
+        'auth': None,
+        'cms': None,
+        'menus': None,
+        'text': None,
+        'djangocms_alias': None,
+    },
     'CMS_PERMISSION': True,
     # At present, testing requires bootstrap to be disabled.
     # 'ALDRYN_BOILERPLATE_NAME': 'bootstrap3',

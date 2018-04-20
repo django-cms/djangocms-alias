@@ -3,7 +3,7 @@ from django.contrib import admin
 from cms.admin.placeholderadmin import PlaceholderAdminMixin
 from cms.utils.permissions import get_model_permission_codename
 
-from .models import Alias, AliasPlugin, Category
+from .models import Alias, Category
 from .urls import urlpatterns
 
 

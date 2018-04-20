@@ -5,18 +5,18 @@
 
 {% block content %}
 <p>
-  {% if has_perm %}
-    {% blocktrans with escaped_object=object %}Are you sure you want to delete the {{ object_name }} "{{ escaped_object }}"?{% endblocktrans %}
-  {% else %}
+  {% if perms_needed or protected %}
     {% blocktrans with escaped_object=object %}You don't have permissions to delete {{ object_name }} "{{ escaped_object }}". Please request your site admin to add permissions to delete alias, or delete alias from all places that it being used.{% endblocktrans %}
+  {% else %}
+    {% blocktrans with escaped_object=object %}Are you sure you want to delete the {{ object_name }} "{{ escaped_object }}"?{% endblocktrans %}
   {% endif %}
 </p>
 
 <br/>
 
-{% if pages_using_alias %}
+{% if object.pages_using_this_alias %}
   {% blocktrans with escaped_object=object %}This alias is used on this pages:{% endblocktrans %}
-  <ul>{{ pages_using_alias|unordered_list }}</ul>
+  <ul>{{ object.pages_using_this_alias|unordered_list }}</ul>
 {% else %}
   {% blocktrans with escaped_object=object %}This alias wasn't used on any page.{% endblocktrans %}
 {% endif %}
@@ -24,7 +24,7 @@
 <form method="post">{% csrf_token %}
   <div>
     <input type="hidden" name="post" value="yes" />
-    {% if has_perm %}
+    {% if not perms_needed and not protected %}
       <input type="submit" value="{% trans "Yes, I'm sure" %}" />
     {% endif %}
     <a href="#" class="button cancel-link">{% trans "No, take me back" %}</a>

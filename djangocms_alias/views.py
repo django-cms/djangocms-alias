@@ -1,15 +1,14 @@
 import json
 
 from django.contrib import admin
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.utils.translation import get_language_from_request
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.http import require_POST
-from django.views.generic import DeleteView, DetailView, ListView
+from django.views.generic import DetailView, ListView
 
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 from cms.utils.permissions import has_plugin_permission
@@ -102,44 +101,17 @@ class AliasDetailView(DetailView):
         return self.render_to_response(context)
 
 
-class AliasDeleteView(DeleteView):
-    model = AliasModel
+def delete_alias_view(request, pk, *args, **kwargs):
+    from djangocms_alias.admin import AliasAdmin
 
-    def get_success_url(self):
-        # redirectiong to success_url was handled by PluginMenuItem and cms
-        # frontend
-        return None
+    response = AliasAdmin(
+        model=AliasModel,
+        admin_site=admin.site,
+    ).delete_view(request, pk)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        obj = kwargs['object']
-
-        context = dict(
-            title=obj.name,
-            object_name=_('Alias'),
-            object=obj,
-            pages_using_alias=obj.pages_using_this_alias,
-            has_perm=self.has_perm_to_delete(self.request, obj)
-        )
-        return context
-
-    def has_perm_to_delete(self, request, obj=None):
-        if not obj:
-            return False
-        return admin.site._registry[AliasModel].has_delete_permission(request, obj)  # noqa: E501
-
-    @transaction.atomic
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-
-        if not self.has_perm_to_delete(request, self.object):
-            raise PermissionDenied
-
-        self.object.delete()
-
-        # redirectiong to success_url was handled by PluginMenuItem and cms
-        # frontend
+    if request.POST and response.status_code == 200:
         return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
+    return response
 
 
 class AliasListView(ListView):

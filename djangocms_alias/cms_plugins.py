@@ -1,5 +1,3 @@
-from django.middleware.csrf import get_token
-from django.utils.translation import get_language_from_request
 from django.utils.translation import ugettext_lazy as _
 
 from cms.api import add_plugin
@@ -16,7 +14,6 @@ from .constants import (
     DELETE_ALIAS_PLUGIN_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
-    DRAFT_ALIASES_SESSION_KEY,
     LIST_ALIASES_URL_NAME,
 )
 from .models import Alias as AliasModel

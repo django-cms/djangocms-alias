@@ -36,7 +36,7 @@ urlpatterns = [
     ),
     url(
         r'^delete-alias/(?P<pk>\d+)/$',
-        views.AliasDeleteView.as_view(),
+        views.delete_alias_view,
         name=constants.DELETE_ALIAS_PLUGIN_URL_NAME,
     ),
     url(

@@ -129,7 +129,7 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
             source_plugins = None
         else:
             placeholder, plugin = None, None
-            source_plugins = self.get_plugins(language)
+            source_plugins = self.get_plugins()
         new_plugin = Alias.populate_alias(
             alias=alias,
             replaced_placeholder=placeholder,

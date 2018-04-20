@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
@@ -127,6 +127,13 @@ class Alias(models.Model):
             self.draft_content.get_plugins(language=language),
             placeholder=self.live_content,
         )
+
+    @transaction.atomic
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        # deletion of placeholders and all cms_plugins in it
+        self.draft_content.delete()
+        self.live_content.delete()
 
 
 class AliasPlugin(CMSPlugin):

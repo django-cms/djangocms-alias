@@ -10,4 +10,3 @@ class TextPlugin(CMSPluginBase):
     name = 'Text'
     allow_children = True
     render_template = 'text/text.html'
-

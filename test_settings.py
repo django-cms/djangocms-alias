@@ -5,7 +5,7 @@ HELPER_SETTINGS = {
     ],
     'INSTALLED_APPS': [
         'parler',
-        'djangocms_text_ckeditor',
+        'djangocms_alias.test_utils.text',
     ],
     'CMS_PERMISSION': True,
     # At present, testing requires bootstrap to be disabled.

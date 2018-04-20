@@ -48,7 +48,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             },
             self.get_request('/'),
         )
-        self.assertEqual(output, '')
+        self.assertEqual(output, '<div class="cms-alias"></div>\n')
 
     def test_render_alias_published(self):
         alias = self._create_alias()
@@ -66,7 +66,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             },
             self.get_request('/'),
         )
-        self.assertEqual(output, 'test')
+        self.assertEqual(output, '<div class="cms-alias">test\n</div>\n')
 
     def test_render_alias_includes_recursed_alias(self):
         alias = self._create_alias()
@@ -90,4 +90,4 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             },
             self.get_request('/'),
         )
-        self.assertEqual(output, 'test\n')
+        self.assertEqual(output, '<div class="cms-alias">test\n\n</div>\n')

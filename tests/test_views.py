@@ -302,6 +302,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             language='en',
             alias=alias,
         )
+        alias.publish(self.language)
         user = self.get_staff_user_with_no_permissions()
         with self.login_user_context(user):
             response = self.client.post(

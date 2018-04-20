@@ -48,10 +48,18 @@ def detach_alias_plugin_view(request, plugin_pk):
         return render(request, 'djangocms_alias/detach_alias.html', context)
 
     language = get_language_from_request(request, check_path=True)
+    use_draft = request.session.get(DRAFT_ALIASES_SESSION_KEY)
+
+    if use_draft:
+        source_placeholder = instance.alias.draft_content
+    else:
+        source_placeholder = instance.alias.live_content
+
+    plugins = source_placeholder.get_plugins(language)
 
     can_detach = Alias.can_detach(
         request.user,
-        instance.alias.draft_content.get_plugins(language),
+        plugins,
     )
 
     if not can_detach:
@@ -60,7 +68,7 @@ def detach_alias_plugin_view(request, plugin_pk):
     copied_plugins = Alias.detach_alias_plugin(
         plugin=instance,
         language=language,
-        use_draft=request.session.get(DRAFT_ALIASES_SESSION_KEY),
+        use_draft=use_draft,
     )
 
     return render_replace_response(

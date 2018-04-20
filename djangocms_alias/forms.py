@@ -126,14 +126,16 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
         if self.cleaned_data.get('replace'):
             placeholder = self.cleaned_data.get('placeholder')
             plugin = self.cleaned_data.get('plugin')
+            source_plugins = None
         else:
             placeholder, plugin = None, None
+            source_plugins = self.get_plugins(language)
         new_plugin = Alias.populate_alias(
             alias=alias,
             replaced_placeholder=placeholder,
             replaced_plugin=plugin,
             language=language,
-            plugins=self.get_plugins(),
+            plugins=source_plugins,
         )
         return new_plugin
 
@@ -155,6 +157,7 @@ class CreateAliasWizardForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.set_category_widget(self.user)
 
+    @property
     def media(self):
         return Alias().media
 
@@ -170,5 +173,6 @@ class CreateCategoryWizardForm(forms.ModelForm):
             'name',
         ]
 
+    @property
     def media(self):
         return Alias().media

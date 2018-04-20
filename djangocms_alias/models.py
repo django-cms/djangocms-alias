@@ -1,9 +1,8 @@
-import uuid
-
 from django.db import models
 from django.db.models import Q
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
@@ -23,10 +22,7 @@ __all__ = [
 
 
 def _get_alias_placeholder_slot(alias):
-    # TODO come up with something cleverer
-    if alias.pk:
-        return alias.draft_content.slot
-    return 'alias-{}'.format(uuid.uuid4())
+    return slugify(alias.name)
 
 
 class Category(models.Model):
@@ -152,7 +148,6 @@ class AliasPlugin(CMSPlugin):
         draft_content_id = self.alias.draft_content_id
 
         plugins = AliasPlugin.objects.filter(
-            plugin_type='Alias',
             placeholder_id=draft_content_id,
         )
         plugins = plugins.filter(

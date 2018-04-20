@@ -223,14 +223,14 @@ def create_alias_view(request):
 
     language = get_language_from_request(request, check_path=True)
 
-    new_plugin = create_form.save(language)
+    alias_plugin = create_form.save(language)
 
     if replace:
         plugin = create_form.cleaned_data.get('plugin')
         placeholder = create_form.cleaned_data.get('placeholder')
         return render_replace_response(
             request,
-            new_plugins=[new_plugin],
+            new_plugins=[alias_plugin],
             source_placeholder=placeholder,
             source_plugin=plugin,
         )

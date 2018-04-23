@@ -1,0 +1,10 @@
+{% extends "djangocms_alias/base.html" %}
+{% load i18n cms_tags djangocms_alias_tags %}
+
+{% block aliases_content %}
+    <div class="cms-aliases-page container">
+        <div class="cms-aliases-detail">
+            {% render_alias alias use_draft=use_draft editable=True %}
+        </div>
+    </div>
+{% endblock aliases_content %}

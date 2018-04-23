@@ -1,3 +1,4 @@
+from django.utils.translation import get_language_from_request
 from django.utils.translation import ugettext_lazy as _
 
 from cms.api import add_plugin
@@ -59,7 +60,10 @@ class Alias(CMSPluginBase):
                 ),
             ]
 
-        data = {'plugin': plugin.pk}
+        data = {
+            'plugin': plugin.pk,
+            'language': get_language_from_request(request, check_path=True),
+        }
         endpoint = alias_plugin_reverse(CREATE_ALIAS_URL_NAME, parameters=data)
         return [
             PluginMenuItem(
@@ -72,7 +76,10 @@ class Alias(CMSPluginBase):
 
     @classmethod
     def get_extra_placeholder_menu_items(cls, request, placeholder):
-        data = {'placeholder': placeholder.pk}
+        data = {
+            'placeholder': placeholder.pk,
+            'language': get_language_from_request(request, check_path=True),
+        }
         endpoint = alias_plugin_reverse(CREATE_ALIAS_URL_NAME, parameters=data)
 
         menu_items = [
@@ -97,7 +104,7 @@ class Alias(CMSPluginBase):
                         'icon': 'alias',
                         'on-close': alias_plugin_reverse(
                             LIST_ALIASES_URL_NAME,
-                            args=(placeholder.alias.category.pk,),
+                            args=(placeholder.alias.category.pk, ),
                         ),
                     },
                 )

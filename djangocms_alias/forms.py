@@ -86,6 +86,7 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
         help_text=_('Replace current plugin with alias'),
         required=False,
     )
+    language = forms.CharField(widget=forms.HiddenInput())
 
     class Meta:
         model = AliasModel
@@ -113,12 +114,14 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
         placeholder = self.cleaned_data.get('placeholder')
 
         if placeholder:
-            plugins = placeholder.get_plugins()
+            plugins = placeholder.get_plugins(
+                self.cleaned_data.get('language'),
+            )
         else:
             plugins = plugin.get_tree(plugin).order_by('path')
         return list(plugins)
 
-    def save(self, language):
+    def save(self):
         alias = AliasModel.objects.create(
             name=self.cleaned_data.get('name'),
             category=self.cleaned_data.get('category'),
@@ -134,7 +137,7 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
             alias=alias,
             replaced_placeholder=placeholder,
             replaced_plugin=plugin,
-            language=language,
+            language=self.cleaned_data.get('language'),
             plugins=source_plugins,
         )
         return new_plugin

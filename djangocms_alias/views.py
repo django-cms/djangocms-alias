@@ -56,10 +56,7 @@ def detach_alias_plugin_view(request, plugin_pk):
 
     plugins = source_placeholder.get_plugins(language)
 
-    can_detach = Alias.can_detach(
-        request.user,
-        plugins,
-    )
+    can_detach = Alias.can_detach(request.user, plugins)
 
     if not can_detach:
         raise PermissionDenied
@@ -201,9 +198,7 @@ def create_alias_view(request):
     if replace and not has_plugin_permission(user, Alias.__name__, 'add'):
         raise PermissionDenied
 
-    language = get_language_from_request(request, check_path=True)
-
-    alias_plugin = create_form.save(language)
+    alias_plugin = create_form.save()
 
     if replace:
         plugin = create_form.cleaned_data.get('plugin')
@@ -218,18 +213,11 @@ def create_alias_view(request):
     return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
 
 
-def render_replace_response(
-    request,
-    new_plugins,
-    source_placeholder=None,
-    source_plugin=None,
-):
+def render_replace_response(request, new_plugins, source_placeholder=None,
+                            source_plugin=None):
     move_plugins, add_plugins = [], []
     for plugin in new_plugins:
-        root = (
-            plugin.parent.get_bound_plugin()
-            if plugin.parent else plugin
-        )
+        root = plugin.parent.get_bound_plugin() if plugin.parent else plugin
 
         plugins = [root] + list(root.get_descendants().order_by('path'))
 
@@ -237,10 +225,7 @@ def render_replace_response(
             plugin.language,
             parent_id=plugin.parent_id,
         )
-        plugin_tree = get_plugin_tree_as_json(
-            request,
-            plugins,
-        )
+        plugin_tree = get_plugin_tree_as_json(request, plugins)
         move_data = get_plugin_toolbar_info(plugin)
         move_data['plugin_order'] = plugin_order
         move_data.update(json.loads(plugin_tree))
@@ -263,11 +248,7 @@ def render_replace_response(
             'placeholder_id': source_placeholder.pk,
             'deleted': True,
         })
-    return render(
-        request,
-        'djangocms_alias/alias_replace.html',
-        context,
-    )
+    return render(request, 'djangocms_alias/alias_replace.html', context)
 
 
 @require_POST

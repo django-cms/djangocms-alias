@@ -31,6 +31,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             response = self.client.get(self.CREATE_ALIAS_ENDPOINT, data={
                 'plugin': self.plugin.pk,
+                'language': self.language,
             })
             self.assertEqual(response.status_code, 200)
             self.assertEqual(
@@ -42,6 +43,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             response = self.client.get(self.CREATE_ALIAS_ENDPOINT, data={
                 'placeholder': self.placeholder.pk,
+                'language': self.language,
             })
             self.assertEqual(response.status_code, 200)
             self.assertEqual(
@@ -62,6 +64,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(user):
             response = self.client.get(self.CREATE_ALIAS_ENDPOINT, data={
                 'plugin': self.plugin.pk,
+                'language': self.language,
             })
             self.assertEqual(response.status_code, 200)
             self.assertTrue(
@@ -73,6 +76,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
+                'language': self.language,
                 'name': 'test alias',
             })
             self.assertEqual(response.status_code, 200)
@@ -99,6 +103,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
+                'language': self.language,
                 'replace': True,
             })
             self.assertEqual(response.status_code, 200)
@@ -119,6 +124,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
+                'language': self.language,
             })
             self.assertEqual(response.status_code, 200)
 
@@ -135,6 +141,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
+                'language': self.language,
             })
 
         self.assertEqual(response.status_code, 200)
@@ -152,6 +159,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
                 'category': self.category.pk,
                 'name': 'test alias',
+                'language': self.language,
             })
             self.assertEqual(response.status_code, 200)
             self.assertFalse(response.context['form'].is_valid())
@@ -163,6 +171,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 'placeholder': self.placeholder.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
+                'language': self.language,
             })
             self.assertEqual(response.status_code, 200)
             self.assertFalse(response.context['form'].is_valid())
@@ -176,6 +185,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 'placeholder': placeholder.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
+                'language': self.language,
             })
             self.assertEqual(response.status_code, 400)
             self.assertEqual(
@@ -189,6 +199,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 'placeholder': self.placeholder.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
+                'language': self.language,
             })
             self.assertEqual(response.status_code, 200)
 
@@ -224,6 +235,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 'placeholder': self.placeholder.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
+                'language': self.language,
                 'replace': True,
             })
             self.assertEqual(response.status_code, 200)
@@ -252,6 +264,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
+                'language': self.language,
             })
             self.assertEqual(response.status_code, 403)
 
@@ -270,6 +283,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
+                'language': self.language,
                 'replace': True,
             })
             self.assertEqual(response.status_code, 403)

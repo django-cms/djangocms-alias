@@ -17,6 +17,7 @@ from .constants import (
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
 )
+from .forms import AliasPluginForm
 from .models import Alias as AliasModel
 from .models import AliasPlugin
 from .utils import alias_plugin_reverse
@@ -32,6 +33,7 @@ class Alias(CMSPluginBase):
     name = _('Alias')
     model = AliasPlugin
     render_template = 'djangocms_alias/alias.html'
+    form = AliasPluginForm
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):

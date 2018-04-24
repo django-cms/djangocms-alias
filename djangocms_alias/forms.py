@@ -5,17 +5,20 @@ from django.contrib.admin.widgets import (
     RelatedFieldWidgetWrapper,
 )
 from django.utils.translation import ugettext_lazy as _
+from django_select2.forms import Select2Widget, ModelSelect2Widget
 
 from cms.models import CMSPlugin, Placeholder
 from cms.utils.permissions import has_plugin_permission
 from cms.utils.permissions import get_model_permission_codename
 
-from .cms_plugins import Alias
+from .constants import SELECT2_ALIAS_URL_NAME
 from .models import Alias as AliasModel
-from .models import Category
+from .models import AliasPlugin, Category
+from .utils import alias_plugin_reverse
 
 
 __all__ = [
+    'AliasPluginForm',
     'BaseCreateAliasForm',
     'CreateAliasForm',
     'CreateAliasWizardForm',
@@ -100,7 +103,7 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        if not has_plugin_permission(self.user, Alias.__name__, 'add'):
+        if not has_plugin_permission(self.user, 'Alias', 'add'):
             self.fields['replace'].widget = forms.HiddenInput()
 
         self.set_category_widget(self.user)
@@ -122,6 +125,8 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
         return list(plugins)
 
     def save(self):
+        from .cms_plugins import Alias
+
         alias = AliasModel.objects.create(
             name=self.cleaned_data.get('name'),
             category=self.cleaned_data.get('category'),
@@ -162,6 +167,7 @@ class CreateAliasWizardForm(forms.ModelForm):
 
     @property
     def media(self):
+        from .cms_plugins import Alias
         return Alias().media
 
     def set_category_widget(self, user):
@@ -178,4 +184,46 @@ class CreateCategoryWizardForm(forms.ModelForm):
 
     @property
     def media(self):
+        from .cms_plugins import Alias
         return Alias().media
+
+
+class AliasSelect2Widget(ModelSelect2Widget):
+
+    def get_url(self):
+        return alias_plugin_reverse(SELECT2_ALIAS_URL_NAME)
+
+
+class AliasPluginForm(forms.ModelForm):
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        widget=Select2Widget(
+            attrs={
+                'data-placeholder': _('Select category to restrict the list of aliases below'),  # noqa: E501
+            },
+        ),
+        required=False,
+    )
+    alias = forms.ModelChoiceField(
+        queryset=AliasModel.objects.all(),
+        widget=AliasSelect2Widget(
+            model=AliasModel,
+            dependent_fields={'category': 'category'},
+            search_fields=('name__icontains', ),
+            attrs={
+                'data-placeholder': _('Select an alias'),
+            },
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['category'].initial = self.instance.alias.category_id
+
+    class Meta:
+        model = AliasPlugin
+        fields = (
+            'category',
+            'alias',
+        )

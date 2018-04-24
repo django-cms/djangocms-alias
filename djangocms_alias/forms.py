@@ -52,6 +52,7 @@ class BaseCreateAliasForm(forms.Form):
         required=False,
         widget=forms.HiddenInput(),
     )
+    language = forms.CharField(widget=forms.HiddenInput())
 
     def clean(self):
         cleaned_data = super().clean()
@@ -86,7 +87,6 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
         help_text=_('Replace current plugin with alias'),
         required=False,
     )
-    language = forms.CharField(widget=forms.HiddenInput())
 
     class Meta:
         model = AliasModel

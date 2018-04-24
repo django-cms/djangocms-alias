@@ -121,6 +121,17 @@ class Alias(models.Model):
     def get_absolute_url(self):
         return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[self.pk])
 
+    def get_plugins(self, language, use_draft):
+        key = (language, use_draft)
+        if not hasattr(self, '_plugins_cache'):
+            self._plugins_cache = {}
+        if key not in self._plugins_cache:
+            placeholder = (
+                self.draft_content if use_draft else self.live_content
+            )
+            self._plugins_cache[key] = placeholder.get_plugins(language)
+        return self._plugins_cache.get(key)
+
     def publish(self, language):
         self.live_content.clear(language=language)
         copy_plugins_to_placeholder(

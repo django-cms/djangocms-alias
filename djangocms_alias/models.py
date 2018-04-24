@@ -90,6 +90,10 @@ class Alias(models.Model):
             ('name', 'category'),
         ]
 
+    def __init__(self, *args, **kwargs):
+        self._plugins_cache = {}
+        super().__init__(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
@@ -120,6 +124,17 @@ class Alias(models.Model):
 
     def get_absolute_url(self):
         return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[self.pk])
+
+    def get_plugins(self, language, use_draft=False):
+        key = (language, use_draft)
+        try:
+            return self._plugins_cache[key]
+        except KeyError:
+            placeholder = (
+                self.draft_content if use_draft else self.live_content
+            )
+            self._plugins_cache[key] = placeholder.get_plugins_list(language)
+            return self._plugins_cache[key]
 
     def publish(self, language):
         self.live_content.clear(language=language)

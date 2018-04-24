@@ -49,12 +49,7 @@ def detach_alias_plugin_view(request, plugin_pk):
     language = get_language_from_request(request, check_path=True)
     use_draft = request.session.get(DRAFT_ALIASES_SESSION_KEY)
 
-    if use_draft:
-        source_placeholder = instance.alias.draft_content
-    else:
-        source_placeholder = instance.alias.live_content
-
-    plugins = source_placeholder.get_plugins(language)
+    plugins = instance.alias.get_plugins(language, use_draft)
 
     can_detach = Alias.can_detach(request.user, plugins)
 

@@ -182,7 +182,7 @@ class Alias(CMSPluginBase):
 
         order = target_placeholder.get_plugin_tree_order(language)
 
-        source_plugins = source_placeholder.get_plugins(language)
+        source_plugins = plugin.alias.get_plugins(language, use_draft)
         copied_plugins = copy_plugins_to_placeholder(
             source_plugins,
             placeholder=target_placeholder,

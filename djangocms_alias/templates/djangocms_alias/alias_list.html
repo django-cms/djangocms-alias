@@ -1,5 +1,5 @@
 {% extends "djangocms_alias/base.html" %}
-{% load cms_tags i18n djangocms_alias_tags %}
+{% load cms_tags cms_static i18n djangocms_alias_tags %}
 
 {% block aliases_content %}
     <div class="cms-aliases-page container">
@@ -10,18 +10,118 @@
             </span>
         </h2>
         <div class="cms-aliases-category">
+          <ol class="cms-aliases-sortable">
           {% for alias in aliases %}
-            <h3 class="cms-alias-heading" id="{{ alias.name|slugify }}">
-                <span class="cms-alias-heading-inner">
-                    <a class="cms-alias-heading-link" href="#{{ alias.name|slugify }}">#</a>
-                    {{ alias.name }}
-                    <a class="cms-alias-heading-edit-link" href="{% get_alias_url alias %}">Edit</a>
-                </span>
-            </h3>
-            <div class="cms-alias-placeholder">
-              {% render_alias alias use_draft=use_draft %}
-            </div>
+            <li data-alias-id={{ alias.pk }}>
+              <div class="cms-alias-draggable">
+                <h3 class="cms-alias-heading" id="{{ alias.name|slugify }}">
+                    <span class="cms-alias-heading-inner">
+                      <a href="{% get_alias_url alias %}">
+                        {{ alias.name }}
+                      </a>
+                      <a href="javascript:void(0)" class="cms-alias-sortable-show-hide-button">{% trans 'show' %}</a>
+                    </span>
+                </h3>
+                <div class="cms-alias-placeholder">
+                  {% render_alias alias use_draft=use_draft %}
+                </div>
+              </div>
+            </li>
           {% endfor %}
+          <ul>
         </div>
     </div>
+
+<script>
+  window.CMS || document.write(
+      '<script src="{% static_with_version "cms/js/dist/bundle.admin.base.min.js" %}" type="text/javascript"><\/script>'
+  );
+</script>
+<style>
+  .cms-alias-sortable-collapsed div.cms-alias-placeholder {
+    display: none;
+  }
+  .cms-alias-sortable-expanded div.cms-alias-placeholder {
+    display: block;
+  }
+</style>
+<script>
+window.onload = function () {
+    var $ = window.CMS.$;
+
+    $(document).ready(function () {
+        $('.cms-aliases-sortable').nestedSortable({
+            forcePlaceholderSize: true,
+            items: 'li',
+            handle: 'div.cms-alias-draggable',
+            listType: 'ol',
+            maxLevels: 1,
+            opacity: .6,
+            stop: function(evt, object){
+                // cancel request if already in progress
+                if (window.CMS.API.locked) {
+                    return false;
+                }
+                window.CMS.API.locked = true;
+
+                var $item = object.item;
+                var aliasId = $item.data('aliasId');
+                var position = $item.index();
+
+                $.ajax({
+                    method: 'POST',
+                    url: '{{ ajax_set_alias_position_url }}',
+                    data: {
+                        alias_id: aliasId,
+                        position: position,
+                        csrfmiddlewaretoken: window.CMS.config.csrf,
+                    },
+                    success: function() {
+                        // enable actions again
+                        window.CMS.API.locked = false;
+                    },
+                    error: function(jqXHR) {
+                        window.CMS.API.locked = false;
+                        var msg = window.CMS.config.lang.error;
+
+                        // revert position because of error
+                        var $sortableRoot = $('.cms-aliases-sortable');
+                        $sortableRoot.sortable('cancel');
+
+                        // trigger error
+                        window.CMS.API.Messages.open({
+                            message: msg + jqXHR.responseText || jqXHR.status + ' ' + jqXHR.statusText,
+                            error: true
+                        });
+                    },
+                });
+            },
+        });
+
+        // Custom collapsing/extending
+        var collapsedClass = 'cms-alias-sortable-collapsed';
+        var expandedClass = 'cms-alias-sortable-expanded';
+        var showText = "{% trans 'show' %}";
+        var hideText = "{% trans 'hide' %}";
+
+        // start collapsed
+        $('.cms-aliases-sortable > li').each(function() {
+            $(this).addClass(collapsedClass);
+        });
+
+        $('.cms-alias-sortable-show-hide-button').on('click', function(evt) {
+            $btn = $(this);
+            $li = $btn.parents('li');
+
+            if ($li.hasClass(collapsedClass)) {
+                $li.removeClass(collapsedClass).addClass(expandedClass);
+                $btn.html(hideText);
+            } else {
+                $li.removeClass(expandedClass).addClass(collapsedClass);
+                $btn.html(showText);
+            }
+        });
+    });
+}
+</script>
 {% endblock %}

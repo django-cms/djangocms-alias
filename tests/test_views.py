@@ -7,6 +7,7 @@ from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.constants import (
+    CHANGE_ALIAS_POSITION_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     PUBLISH_ALIAS_URL_NAME,
 )
@@ -663,3 +664,114 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             body='test 3',
         )
         self.assertEqual(live_plugins.count(), 2)
+
+    def test_change_alias_position_view(self):
+        alias1 = self._create_alias(name='1')  # 0
+        alias2 = self._create_alias(name='2')  # 1
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    CHANGE_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias_id': alias1.pk, 'position': 1},
+            )
+
+        alias1.refresh_from_db()
+        alias2.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(alias2.position, 0)
+        self.assertEqual(alias1.position, 1)
+
+    def test_change_alias_position_view_only_staff_users(self):
+        alias = self._create_alias(name='1')
+        with self.login_user_context(self.get_standard_user()):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    CHANGE_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias_id': alias.pk, 'position': 0},
+            )
+        self.assertEqual(response.status_code, 403)
+
+        with self.login_user_context(self.get_staff_user_with_std_permissions()):  # noqa: E501
+            response = self.client.post(
+                alias_plugin_reverse(
+                    CHANGE_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias_id': alias.pk, 'position': 0},
+            )
+        self.assertEqual(response.status_code, 200)
+
+    def test_change_alias_position_view_bad_request_wrong_position(self):
+        alias = self._create_alias(name='1')
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    CHANGE_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias_id': alias.pk},
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'\'position\' is a required parameter and has to be integer.',
+            response.content,
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    CHANGE_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias_id': alias.pk, 'position': 1},
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'Invalid position in category list, available positions are: [0]',
+            response.content,
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    CHANGE_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias_id': alias.pk, 'position': -5},
+            )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'Argument position should be positive integer number',
+            response.content,
+        )
+
+    def test_change_alias_position_view_bad_request_wrong_alias_id(self):
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    CHANGE_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias_id': 'test', 'position': 0},
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'\'alias_id\' is a required parameter and has to be integer.',
+            response.content,
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    CHANGE_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias_id': 5, 'position': 0},
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'Alias with that id doesn\'t exist.',
+            response.content,
+        )

@@ -1,4 +1,7 @@
 from cms.api import add_plugin
+from cms.models import Placeholder
+
+from djangocms_alias.models import _get_alias_placeholder_slot
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.models import Category
@@ -171,4 +174,22 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(
             self._get_aliases_positions(alias1.category),
             {0: alias2.pk, 1: alias3.pk, 2: alias4.pk, 3: alias1.pk},
+        )
+
+    def test_delete(self):
+        alias = self._create_alias([self.plugin])
+        add_plugin(
+            self.placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+        )
+        alias.delete()
+        self.assertNotIn(alias, alias.__class__.objects.all())
+        self.assertEqual(alias.cms_plugins.count(), 0)
+        self.assertEqual(
+            Placeholder.objects.filter(
+                slot=_get_alias_placeholder_slot(alias),
+            ).count(),
+            0,
         )

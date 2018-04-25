@@ -7,6 +7,7 @@ from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.constants import (
+    DELETE_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     PUBLISH_ALIAS_URL_NAME,
     SELECT2_ALIAS_URL_NAME,
@@ -528,6 +529,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.plugin.body)
         self.assertContains(response, plugin2.body)
+        self.assertContains(response, 'Publish alias changes')
 
     def test_detail_view_standard_user(self):
         alias = self._create_alias([self.plugin])
@@ -987,3 +989,151 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             [a['id'] for a in response.json()['results']],
             [alias1.pk],
         )
+
+    def test_delete_alias_view_get(self):
+        alias = self._create_alias([self.plugin])
+        add_plugin(
+            self.placeholder,
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Are you sure you want to delete the alias "{}"?'.format(alias.name),  # noqa: E501
+        )
+        # TODO: if we implement `pages_using_this_alias` than we can test it
+        # right here
+        # self.assertContains(response, 'This alias is used on this pages:')
+
+    def test_delete_alias_view_get_alias_not_used_on_any_page(self):
+        alias = self._create_alias([self.plugin])
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertContains(response, 'This alias wasn\'t used on any page.')
+
+    def test_delete_alias_view_post(self):
+        from djangocms_alias.views import JAVASCRIPT_SUCCESS_RESPONSE
+
+        alias = self._create_alias([self.plugin])
+        self.assertIn(alias, Alias.objects.all())
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, JAVASCRIPT_SUCCESS_RESPONSE)
+        self.assertNotIn(alias, Alias.objects.all())
+
+    def test_delete_alias_view_user_with_no_perms(self):
+        alias = self._create_alias([self.plugin])
+        staff_user = self.get_staff_user_with_no_permissions()
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertContains(
+            response,
+            'You don\'t have permissions to delete alias "{}". Please request '
+            'your site admin to add permissions to delete alias, or delete '
+            'alias from all places that it being used.'.format(alias.name),
+        )
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.post(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_alias_view_user_with_perms_to_delete_no_pages_using_alias(self):  # noqa: E501
+        alias = self._create_alias([self.plugin])
+        staff_user = self.get_staff_user_with_alias_permissions()
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Are you sure you want to delete')
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.post(  # noqa
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(alias, Alias.objects.all())
+
+    def test_delete_alias_view_user_with_perms_to_delete_some_pages_using_alias(self):  # noqa: E501
+        alias = self._create_alias([self.plugin])
+        add_plugin(
+            self.placeholder,
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        staff_user = self.get_staff_user_with_no_permissions()
+        self.add_permission(staff_user, 'add_alias')
+        self.add_permission(staff_user, 'delete_alias')
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+
+        # TODO: when will be implemented `pages_using_this_alias`
+        # self.assertEqual(response.status_code, 200)
+        # self.assertContains(
+        #     response,
+        #     'You don\'t have permissions to delete alias "{}". Please request '  # noqa: E501
+        #     'your site admin to add permissions to delete alias, or delete '
+        #     'alias from all places that it being used.'.format(alias.name),
+        # )
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.post(  # noqa
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+        # TODO: when will be implemented `pages_using_this_alias`
+        # self.assertEqual(response.status_code, 403)

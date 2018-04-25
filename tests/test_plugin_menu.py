@@ -59,3 +59,35 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
             'placeholder={}'.format(self.placeholder.pk),
             parsed_url.query,
         )
+
+    def test_delete_button_show_on_edit_alias_view(self):
+        alias = self._create_alias()
+        extra_items = Alias.get_extra_placeholder_menu_items(
+            self.get_alias_request(
+                alias,
+                path=self.DETAIL_ALIAS_ENDPOINT(alias.pk),
+                user=self.superuser,
+                edit=True,
+                toolbar_object=alias,
+            ),
+            alias.draft_content,
+        )
+        self.assertEqual(len(extra_items), 2)
+        extra_item = extra_items[1]
+        self.assertEqual(extra_item.name, 'Delete Alias')
+        self.assertEqual(extra_item.action, 'modal')
+        self.assertEqual(extra_item.url, self.DELETE_ALIAS_ENDPOINT(alias.pk))
+        self.assertEqual(
+            extra_item.attributes['on-close'],
+            self.LIST_ALIASES_ENDPOINT(alias.category_id),
+        )
+
+        extra_items = Alias.get_extra_placeholder_menu_items(
+            self.get_alias_request(
+                alias,
+                path=self.LIST_ALIASES_ENDPOINT(alias.category_id),
+                user=self.superuser,
+            ),
+            alias.draft_content,
+        )
+        self.assertEqual(len(extra_items), 1)

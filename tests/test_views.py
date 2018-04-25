@@ -674,23 +674,35 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 alias_plugin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
                 ),
-                data={'alias_id': alias1.pk, 'position': 1},
+                data={'alias': alias1.pk, 'position': 1},
             )
+
+        ordered_aliases = list(
+            alias1.category.aliases.order_by('position').values_list('pk', flat=True)  # noqa: E501
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ordered_aliases, [alias2.pk, alias1.pk])
 
         with self.login_user_context(self.superuser):
             response = self.client.post(
                 alias_plugin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
                 ),
-                data={'alias_id': alias1.pk, 'position': 0},
+                data={'alias': alias1.pk, 'position': 0},
             )
+
+        ordered_aliases = list(
+            alias1.category.aliases.order_by('position').values_list('pk', flat=True)  # noqa: E501
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ordered_aliases, [alias1.pk, alias2.pk])
 
         with self.login_user_context(self.superuser):
             response = self.client.post(
                 alias_plugin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
                 ),
-                data={'alias_id': alias1.pk, 'position': 1},
+                data={'alias': alias1.pk, 'position': 1},
             )
 
         ordered_aliases = list(
@@ -709,7 +721,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 alias_plugin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
                 ),
-                data={'alias_id': alias.pk, 'position': 1},
+                data={'alias': alias.pk, 'position': 1},
             )
         self.assertEqual(response.status_code, 403)
 
@@ -718,7 +730,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 alias_plugin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
                 ),
-                data={'alias_id': alias.pk, 'position': 1},
+                data={'alias': alias.pk, 'position': 1},
             )
         self.assertEqual(response.status_code, 200)
 
@@ -730,7 +742,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 alias_plugin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
                 ),
-                data={'alias_id': alias.pk},
+                data={'alias': alias.pk},
             )
 
         self.assertEqual(response.status_code, 400)
@@ -744,7 +756,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 alias_plugin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
                 ),
-                data={'alias_id': alias.pk, 'position': 2},
+                data={'alias': alias.pk, 'position': 2},
             )
 
         self.assertEqual(response.status_code, 400)
@@ -758,7 +770,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 alias_plugin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
                 ),
-                data={'alias_id': alias.pk, 'position': -5},
+                data={'alias': alias.pk, 'position': -5},
             )
         self.assertEqual(response.status_code, 400)
         self.assertIn(
@@ -773,12 +785,12 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 alias_plugin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
                 ),
-                data={'alias_id': alias.pk, 'position': 0},
+                data={'alias': alias.pk, 'position': 0},
             )
 
         self.assertEqual(response.status_code, 400)
         self.assertIn(
-            b'Argument position have to be different then actual position of alias',  # noqa: E501
+            b'Argument position have to be different than current alias position',  # noqa: E501
             response.content,
         )
 
@@ -793,7 +805,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertIn(
-            b'Alias with that id doesn\'t exist.',
+            b'This field is required.',
             response.content,
         )
 
@@ -802,12 +814,12 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 alias_plugin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
                 ),
-                data={'alias_id': 'test', 'position': 0},
+                data={'alias': 'test', 'position': 0},
             )
 
         self.assertEqual(response.status_code, 400)
         self.assertIn(
-            b'Alias with that id doesn\'t exist.',
+            b'Select a valid choice. That choice is not one of the available choices.',  # noqa: E501
             response.content,
         )
 
@@ -816,11 +828,11 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 alias_plugin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
                 ),
-                data={'alias_id': 5, 'position': 0},
+                data={'alias': 5, 'position': 0},
             )
 
         self.assertEqual(response.status_code, 400)
         self.assertIn(
-            b'Alias with that id doesn\'t exist.',
+            b'Select a valid choice. That choice is not one of the available choices.',  # noqa: E501
             response.content,
         )

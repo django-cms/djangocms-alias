@@ -278,20 +278,7 @@ def set_alias_position_view(request):
     if not request.user.is_staff:
         raise PermissionDenied
 
-    pk = request.POST.get('alias_id', None)
-    try:
-        alias = AliasModel.objects.get(pk=int(pk))
-    except (AliasModel.DoesNotExist, TypeError, ValueError):
-        return JsonResponse(
-            {
-                'errors': [
-                    {'alias_id': _('Alias with that id doesn\'t exist.')}
-                ],
-            },
-            status=400,
-        )
-
-    form = SetAliasPositionForm(request.POST or None, instance=alias)
+    form = SetAliasPositionForm(request.POST or None)
 
     if not form.is_valid():
         return JsonResponse({'errors': form.errors}, status=400)

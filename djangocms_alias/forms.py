@@ -184,35 +184,36 @@ class CreateCategoryWizardForm(forms.ModelForm):
 
 
 class SetAliasPositionForm(forms.Form):
+    alias = forms.ModelChoiceField(queryset=AliasModel.objects.all())
     position = forms.IntegerField(min_value=0)
 
-    def __init__(self, *args, **kwargs):
-        self.instance = kwargs.pop('instance')
-        super().__init__(*args, **kwargs)
+    def clean(self):
+        cleaned_data = super().clean()
+        position = cleaned_data.get('position')
+        alias = cleaned_data.get('alias')
 
-    def clean_position(self):
-        position = self.cleaned_data.get('position')
+        if position is not None and alias:
+            if position == alias.position:
+                raise forms.ValidationError({
+                    'position': _(
+                        'Argument position have to be different than current '
+                        'alias position'
+                    ),
+                })
 
-        if position == self.instance.position:
-            raise forms.ValidationError(
-                _(
-                    'Argument position have to be different then actual '
-                    'position of alias'
-                )
-            )
+            alias_count = alias.category.aliases.count()
+            if position > alias_count - 1:
+                raise forms.ValidationError({
+                    'position': _(
+                        'Invalid position in category list, '
+                        'available positions are: {}'
+                    ).format([i for i in range(0, alias_count)])
+                })
 
-        alias_count = self.instance.category.aliases.count()
-        if position > alias_count - 1:
-            raise forms.ValidationError(
-                _(
-                    'Invalid position in category list, available positions '
-                    'are: {}'.format([i for i in range(0, alias_count)])
-                )
-            )
-
-        return position
+        return cleaned_data
 
     def save(self, *args, **kwargs):
-        position = self.cleaned_data.get('position')
-        self.instance.set_position(position)
-        return self.instance
+        position = self.cleaned_data['position']
+        alias = self.cleaned_data['alias']
+        alias._set_position(position)
+        return alias

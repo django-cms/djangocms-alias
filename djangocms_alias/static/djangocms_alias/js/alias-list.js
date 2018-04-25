@@ -24,7 +24,7 @@
                     method: 'POST',
                     url: ajaxUrl,
                     data: {
-                        alias_id: aliasId,
+                        alias: aliasId,
                         position: position,
                         csrfmiddlewaretoken: window.CMS.config.csrf
                     },

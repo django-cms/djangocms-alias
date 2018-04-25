@@ -155,15 +155,12 @@ class Alias(models.Model):
         self.draft_content.delete()
         self.live_content.delete()
 
-    @transaction.atomic
     def save(self, *args, **kwargs):
         if self._state.adding:
             self.position = self.category.aliases.count()
-
         return super().save(*args, **kwargs)
 
-    @transaction.atomic
-    def set_position(self, position):
+    def _set_position(self, position):
         previous_position = self.position
 
         if previous_position > position:  # moving up

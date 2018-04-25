@@ -20,8 +20,7 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
 
     def test_extra_plugin_items_for_alias_plugins(self):
         alias = self._create_alias()
-        alias_plugin = self.alias_plugin_base.populate_alias(
-            alias,
+        alias_plugin = alias.populate(
             language=self.language,
             replaced_placeholder=self.placeholder,
         )

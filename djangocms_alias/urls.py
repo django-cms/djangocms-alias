@@ -44,4 +44,9 @@ urlpatterns = [
         views.set_alias_draft_mode_view,
         name=constants.SET_ALIAS_DRAFT_URL_NAME,
     ),
+    url(
+        r'^select2/',
+        views.AliasSelect2View.as_view(),
+        name=constants.SELECT2_ALIAS_URL_NAME,
+    ),
 ]

@@ -1,7 +1,6 @@
 from django.utils.translation import get_language_from_request
 from django.utils.translation import ugettext_lazy as _
 
-from cms.api import add_plugin
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
 from cms.utils.permissions import (
@@ -17,6 +16,7 @@ from .constants import (
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
 )
+from .forms import AliasPluginForm
 from .models import Alias as AliasModel
 from .models import AliasPlugin
 from .utils import alias_plugin_reverse
@@ -32,6 +32,7 @@ class Alias(CMSPluginBase):
     name = _('Alias')
     model = AliasPlugin
     render_template = 'djangocms_alias/alias.html'
+    form = AliasPluginForm
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):
@@ -111,38 +112,6 @@ class Alias(CMSPluginBase):
             )
 
         return menu_items
-
-    @classmethod
-    def populate_alias(cls, alias, replaced_placeholder=None,
-                       replaced_plugin=None, language=None, plugins=None):
-        if not replaced_placeholder and not replaced_plugin:
-            copy_plugins_to_placeholder(
-                plugins,
-                placeholder=alias.draft_content,
-            )
-            return
-
-        if replaced_placeholder:
-            plugins = replaced_placeholder.get_plugins(language)
-            placeholder = replaced_placeholder
-        elif replaced_plugin:
-            plugins = replaced_plugin.get_tree(replaced_plugin)
-            placeholder = replaced_plugin.placeholder
-
-        plugins.update(placeholder=alias.draft_content, language=language)
-
-        new_plugin = add_plugin(
-            placeholder,
-            plugin_type=cls.__name__,
-            target=replaced_plugin,
-            position='left',
-            language=language,
-            alias=alias,
-        )
-        if replaced_plugin:
-            new_plugin.position = replaced_plugin.position
-            new_plugin.save(update_fields=['position'])
-        return new_plugin
 
     @classmethod
     def can_create_alias(cls, user, plugins=None):

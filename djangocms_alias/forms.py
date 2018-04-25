@@ -5,7 +5,6 @@ from django.contrib.admin.widgets import (
     RelatedFieldWidgetWrapper,
 )
 from django.utils.translation import ugettext_lazy as _
-from django_select2.forms import Select2Widget, ModelSelect2Widget
 
 from cms.models import CMSPlugin, Placeholder
 from cms.utils.permissions import has_plugin_permission
@@ -188,28 +187,51 @@ class CreateCategoryWizardForm(forms.ModelForm):
         return Alias().media
 
 
-class AliasSelect2Widget(ModelSelect2Widget):
+class Select2Mixin:
+
+    class Media:
+        css = {
+            'all': ('cms/js/select2/select2.css', ),
+        }
+        js = (
+            'cms/js/select2/select2.js',
+            'djangocms_alias/js/create_alias_plugin.js',
+        )
+
+
+class CategoryWidget(Select2Mixin, forms.Select):
+    pass
+
+
+class AliasWidget(Select2Mixin, forms.TextInput):
+
+    def __init__(self, *args, **kwargs):
+        self.data_view = kwargs.pop('data_view', None)
+        super().__init__(*args, **kwargs)
 
     def get_url(self):
         return alias_plugin_reverse(SELECT2_ALIAS_URL_NAME)
+
+    def build_attrs(self, *args, **kwargs):
+        attrs = super().build_attrs(*args, **kwargs)
+        attrs.setdefault('data-select2-url', self.get_url())
+        return attrs
 
 
 class AliasPluginForm(forms.ModelForm):
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
-        widget=Select2Widget(
+        widget=CategoryWidget(
             attrs={
                 'data-placeholder': _('Select category to restrict the list of aliases below'),  # noqa: E501
             },
         ),
+        empty_label='',
         required=False,
     )
     alias = forms.ModelChoiceField(
         queryset=AliasModel.objects.all(),
-        widget=AliasSelect2Widget(
-            model=AliasModel,
-            dependent_fields={'category': 'category'},
-            search_fields=('name__icontains', ),
+        widget=AliasWidget(
             attrs={
                 'data-placeholder': _('Select an alias'),
             },

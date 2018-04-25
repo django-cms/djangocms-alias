@@ -3,13 +3,13 @@ import json
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.db.models import Q
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils.translation import get_language_from_request
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
-from django_select2.views import AutoResponseView
 
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 from cms.utils.permissions import has_plugin_permission
@@ -272,9 +272,41 @@ def set_alias_draft_mode_view(request):
     return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
 
 
-class AliasSelect2View(AutoResponseView):
+class AliasSelect2View(ListView):
+    model = AliasModel
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        return JsonResponse({
+            'results': [
+                {
+                    'text': str(obj),
+                    'id': obj.pk,
+                }
+                for obj in context['object_list']
+            ],
+            'more': context['page_obj'].has_next(),
+        })
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:
             raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        term = self.request.GET.get('term')
+        category = self.request.GET.get('category')
+        pk = self.request.GET.get('pk')
+        q = Q()
+        if term:
+            q |= Q(name__icontains=term)
+        if category:
+            q |= Q(category=category)
+        if pk:
+            q |= Q(pk=pk)
+        return queryset.filter(q)
+
+    def get_paginate_by(self, queryset):
+        return self.request.GET.get('limit', 30)

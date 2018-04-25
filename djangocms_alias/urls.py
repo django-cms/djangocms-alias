@@ -1,5 +1,4 @@
-import django_select2.urls
-from django.conf.urls import include, url
+from django.conf.urls import url
 
 from . import constants, views
 

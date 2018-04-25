@@ -298,7 +298,10 @@ class AliasSelect2View(ListView):
         queryset = super().get_queryset()
         term = self.request.GET.get('term')
         category = self.request.GET.get('category')
-        pk = self.request.GET.get('pk')
+        try:
+            pk = int(self.request.GET.get('pk'))
+        except (TypeError, ValueError):
+            pk = None
         q = Q()
         if term:
             q |= Q(name__icontains=term)

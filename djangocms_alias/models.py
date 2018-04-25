@@ -156,7 +156,7 @@ class Alias(models.Model):
         if replaced_placeholder:
             plugins = replaced_placeholder.get_plugins(language)
             placeholder = replaced_placeholder
-        elif replaced_plugin:
+        else:
             plugins = replaced_plugin.get_tree(replaced_plugin)
             placeholder = replaced_plugin.placeholder
 

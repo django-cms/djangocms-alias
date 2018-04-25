@@ -7,8 +7,10 @@ from django.contrib.admin.widgets import (
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
-from cms.utils.permissions import has_plugin_permission
-from cms.utils.permissions import get_model_permission_codename
+from cms.utils.permissions import (
+    get_model_permission_codename,
+    has_plugin_permission,
+)
 
 from .constants import SELECT2_ALIAS_URL_NAME
 from .models import Alias as AliasModel
@@ -186,11 +188,11 @@ class Select2Mixin:
         )
 
 
-class CategoryWidget(Select2Mixin, forms.Select):
+class CategorySelectWidget(Select2Mixin, forms.Select):
     pass
 
 
-class AliasWidget(Select2Mixin, forms.TextInput):
+class AliasSelectWidget(Select2Mixin, forms.TextInput):
 
     def get_url(self):
         return alias_plugin_reverse(SELECT2_ALIAS_URL_NAME)
@@ -203,8 +205,9 @@ class AliasWidget(Select2Mixin, forms.TextInput):
 
 class AliasPluginForm(forms.ModelForm):
     category = forms.ModelChoiceField(
+        label=_('Category'),
         queryset=Category.objects.all(),
-        widget=CategoryWidget(
+        widget=CategorySelectWidget(
             attrs={
                 'data-placeholder': _('Select category to restrict the list of aliases below'),  # noqa: E501
             },
@@ -213,8 +216,9 @@ class AliasPluginForm(forms.ModelForm):
         required=False,
     )
     alias = forms.ModelChoiceField(
+        label=_('Alias'),
         queryset=AliasModel.objects.all(),
-        widget=AliasWidget(
+        widget=AliasSelectWidget(
             attrs={
                 'data-placeholder': _('Select an alias'),
             },

@@ -15,14 +15,10 @@ from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 from cms.utils.permissions import has_plugin_permission
 
 from .cms_plugins import Alias
-from .constants import (
-    CHANGE_ALIAS_POSITION_URL_NAME,
-    DRAFT_ALIASES_SESSION_KEY,
-)
-from .forms import BaseCreateAliasForm, CreateAliasForm
+from .constants import DRAFT_ALIASES_SESSION_KEY
+from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
 from .models import Alias as AliasModel
 from .models import AliasPlugin, Category
-from .utils import alias_plugin_reverse
 
 
 JAVASCRIPT_SUCCESS_RESPONSE = """
@@ -123,9 +119,6 @@ class AliasListView(ListView):
         kwargs.update({
             'use_draft': self.request.toolbar.edit_mode_active,
             'category': self.category,
-            'ajax_set_alias_position_url': alias_plugin_reverse(
-                CHANGE_ALIAS_POSITION_URL_NAME,
-            ),
         })
         return super().get_context_data(**kwargs)
 
@@ -281,44 +274,27 @@ def set_alias_draft_mode_view(request):
 
 @require_POST
 @transaction.atomic
-def change_alias_position_view(request):
+def set_alias_position_view(request):
     if not request.user.is_staff:
         raise PermissionDenied
 
+    pk = request.POST.get('alias_id', None)
     try:
-        alias_id = int(request.POST.get('alias_id', '-'))
-    except ValueError:
+        alias = AliasModel.objects.get(pk=int(pk))
+    except (AliasModel.DoesNotExist, TypeError, ValueError):
         return JsonResponse(
             {
-                'error':
-                '\'alias_id\' is a required parameter and has to be integer.'
+                'errors': [
+                    {'alias_id': _('Alias with that id doesn\'t exist.')}
+                ],
             },
             status=400,
         )
 
-    try:
-        position = int(request.POST.get('position', '-'))
-    except ValueError:
-        return JsonResponse(
-            {
-                'error':
-                '\'position\' is a required parameter and has to be integer.'
-            },
-            status=400,
-        )
+    form = SetAliasPositionForm(request.POST or None, instance=alias)
 
-    try:
-        alias = AliasModel.objects.get(pk=alias_id)
-    except AliasModel.DoesNotExist:
-        return JsonResponse(
-            {'error': 'Alias with that id doesn\'t exist.'},
-            status=400,
-        )
+    if not form.is_valid():
+        return JsonResponse({'errors': form.errors}, status=400)
 
-    try:
-        alias.change_position(position)
-    except ValueError as e:
-        return JsonResponse({'error': str(e)}, status=400)
-
-    response_data = {'alias_id': alias_id, 'position': position}
-    return JsonResponse(response_data)
+    alias = form.save()
+    return JsonResponse({'alias_id': alias.pk, 'position': alias.position})

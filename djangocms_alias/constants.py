@@ -8,6 +8,6 @@ DETAIL_ALIAS_URL_NAME = '{}_detail'.format(PLUGIN_URL_NAME_PREFIX)
 LIST_ALIASES_URL_NAME = '{}_list'.format(PLUGIN_URL_NAME_PREFIX)
 CATEGORY_LIST_URL_NAME = '{}_category_list'.format(PLUGIN_URL_NAME_PREFIX)
 SET_ALIAS_DRAFT_URL_NAME = '{}_alias_draft'.format(PLUGIN_URL_NAME_PREFIX)
-CHANGE_ALIAS_POSITION_URL_NAME = '{}_set_alias_position'.format(PLUGIN_URL_NAME_PREFIX)  # noqa: E501
+SET_ALIAS_POSITION_URL_NAME = '{}_set_alias_position'.format(PLUGIN_URL_NAME_PREFIX)  # noqa: E501
 
 DRAFT_ALIASES_SESSION_KEY = 'cms_alias_draft_mode'

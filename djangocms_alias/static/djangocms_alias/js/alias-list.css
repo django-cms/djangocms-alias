@@ -1,0 +1,6 @@
+.cms-alias-sortable-collapsed div.cms-alias-placeholder {
+  display: none;
+}
+.cms-alias-sortable-expanded div.cms-alias-placeholder {
+  display: block;
+}

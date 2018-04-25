@@ -45,8 +45,8 @@ urlpatterns = [
         name=constants.SET_ALIAS_DRAFT_URL_NAME,
     ),
     url(
-        r'^change-alias-position/$',
-        views.change_alias_position_view,
-        name=constants.CHANGE_ALIAS_POSITION_URL_NAME,
+        r'^set-alias-position/$',
+        views.set_alias_position_view,
+        name=constants.SET_ALIAS_POSITION_URL_NAME,
     ),
 ]

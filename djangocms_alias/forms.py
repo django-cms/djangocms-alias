@@ -20,6 +20,7 @@ __all__ = [
     'CreateAliasForm',
     'CreateAliasWizardForm',
     'CreateCategoryWizardForm',
+    'SetAliasPositionForm',
 ]
 
 
@@ -170,6 +171,7 @@ class CreateAliasWizardForm(forms.ModelForm):
 
 
 class CreateCategoryWizardForm(forms.ModelForm):
+
     class Meta:
         model = Category
         fields = [
@@ -179,3 +181,38 @@ class CreateCategoryWizardForm(forms.ModelForm):
     @property
     def media(self):
         return Alias().media
+
+
+class SetAliasPositionForm(forms.Form):
+    position = forms.IntegerField(min_value=0)
+
+    def __init__(self, *args, **kwargs):
+        self.instance = kwargs.pop('instance')
+        super().__init__(*args, **kwargs)
+
+    def clean_position(self):
+        position = self.cleaned_data.get('position')
+
+        if position == self.instance.position:
+            raise forms.ValidationError(
+                _(
+                    'Argument position have to be different then actual '
+                    'position of alias'
+                )
+            )
+
+        alias_count = self.instance.category.aliases.count()
+        if position > alias_count - 1:
+            raise forms.ValidationError(
+                _(
+                    'Invalid position in category list, available positions '
+                    'are: {}'.format([i for i in range(0, alias_count)])
+                )
+            )
+
+        return position
+
+    def save(self, *args, **kwargs):
+        position = self.cleaned_data.get('position')
+        self.instance.set_position(position)
+        return self.instance

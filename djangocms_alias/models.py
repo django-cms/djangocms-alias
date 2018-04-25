@@ -148,77 +148,39 @@ class Alias(models.Model):
     @transaction.atomic
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
-        self._decrement_position_after_deletion()
+        self.category.aliases.filter(position__gt=self.position).update(
+            position=F('position') - 1,
+        )
         # deletion of placeholders and all cms_plugins in it
         self.draft_content.delete()
         self.live_content.delete()
 
-    def _decrement_position_after_deletion(self):
-        position = self.position
-        self.category.aliases.filter(position__gt=position).update(
-            position=F('position') - 1,
-        )
-
     @transaction.atomic
     def save(self, *args, **kwargs):
-        self._increment_position_for_newly_created_instances()
+        if self._state.adding:
+            self.position = self.category.aliases.count()
+
         return super().save(*args, **kwargs)
 
-    def _increment_position_for_newly_created_instances(self):
-        is_new_instance = not self.__class__.objects.filter(pk=self.pk).exists()  # noqa: E501
-
-        if is_new_instance:
-            # it will always be at the end of list
-            first_not_taken_position = max(
-                list(self.category.aliases.values_list('position', flat=True)),
-                default=-1,
-            ) + 1
-
-            self.position = first_not_taken_position
-
     @transaction.atomic
-    def change_position(self, position):
-        """Change position within category"""
+    def set_position(self, position):
         previous_position = self.position
 
-        if position < 0:
-            raise ValueError(
-                'Argument position should be positive integer number'
-            )
-
-        count_of_aliases_in_category = self.category.aliases.count()
-        if position > count_of_aliases_in_category - 1:
-            raise ValueError(
-                'Invalid position in category list, available positions are: {}'.format(  # noqa: E501
-                    [i for i in range(0, count_of_aliases_in_category)],
-                ),
-            )
-
         if previous_position > position:  # moving up
-            action = 'add'
-            filter_dict = {
-                'position__gte': position,
-                'position__lte': previous_position,
-            }
-        elif previous_position < position:  # moving down
-            action = 'sub'
-            filter_dict = {
-                'position__gte': previous_position,
-                'position__lte': position,
-            }
-        else:
-            return
+            op = operator.add
+            position_range = (position, previous_position)
+        else:  # moving down
+            op = operator.sub
+            position_range = (previous_position, position)
+
+        filters = [
+            ~Q(pk=self.pk),
+            Q(position__range=position_range),
+        ]
 
         self.position = position
         self.save()
-
-        self.category.aliases.filter(
-            **filter_dict,
-        ).exclude(pk=self.pk).update(
-            position=getattr(operator, action)(F('position'), 1),
-        )
-        # add here calling save signals for updated instances if it will be
-        # necessery
+        self.category.aliases.filter(*filters).update(position=op(F('position'), 1))  # noqa: E501
 
 
 class AliasPlugin(CMSPlugin):

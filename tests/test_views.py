@@ -299,7 +299,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias([self.plugin])
         plugin = add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            'Alias',
             language='en',
             alias=alias,
         )
@@ -313,7 +313,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias([self.plugin])
         plugin = add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            'Alias',
             language='en',
             alias=alias,
         )
@@ -336,7 +336,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias([self.plugin])
         plugin = add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            'Alias',
             language='en',
             alias=alias,
         )
@@ -365,7 +365,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias([self.plugin])
         plugin = add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            'Alias',
             language='en',
             alias=alias,
         )

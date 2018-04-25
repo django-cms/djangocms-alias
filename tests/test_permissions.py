@@ -3,7 +3,8 @@ from django.contrib.contenttypes.models import ContentType
 
 from cms.api import add_plugin
 
-from djangocms_alias.models import Alias
+from djangocms_alias.cms_plugins import Alias
+from djangocms_alias.models import Alias as AliasModel
 
 from .base import BaseAliasPluginTestCase
 
@@ -12,7 +13,7 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
 
     def test_can_create_alias_superuser(self):
         self.assertTrue(
-            self.alias_plugin_base.can_create_alias(
+            Alias.can_create_alias(
                 self.get_superuser(),
                 [self.plugin],
             ),
@@ -20,7 +21,7 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
 
     def test_can_create_alias_standard_user(self):
         self.assertFalse(
-            self.alias_plugin_base.can_create_alias(
+            Alias.can_create_alias(
                 self.get_standard_user(),
                 [self.plugin],
             ),
@@ -28,7 +29,7 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
 
     def test_can_create_alias_staff_no_permissions(self):
         self.assertFalse(
-            self.alias_plugin_base.can_create_alias(
+            Alias.can_create_alias(
                 self.get_staff_user_with_no_permissions(),
                 [self.plugin],
             ),
@@ -39,7 +40,7 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
         user.user_permissions.add(
             Permission.objects.get(
                 content_type=ContentType.objects.get_for_model(
-                    Alias,
+                    AliasModel,
                 ),
                 codename='add_alias',
             )
@@ -47,7 +48,7 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
         user.user_permissions.add(
             Permission.objects.get(
                 content_type=ContentType.objects.get_for_model(
-                    self.alias_plugin_base.model,
+                    Alias.model,
                 ),
                 codename='add_aliasplugin',
             )
@@ -55,12 +56,12 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias(self.placeholder.get_plugins())
         add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            Alias,
             language=self.language,
             alias=alias,
         )
         self.assertFalse(
-            self.alias_plugin_base.can_create_alias(
+            Alias.can_create_alias(
                 user,
                 self.placeholder.get_plugins(),
             ),
@@ -71,13 +72,13 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
         user.user_permissions.add(
             Permission.objects.get(
                 content_type=ContentType.objects.get_for_model(
-                    Alias,
+                    AliasModel,
                 ),
                 codename='add_alias',
             )
         )
         self.assertTrue(
-            self.alias_plugin_base.can_create_alias(
+            Alias.can_create_alias(
                 user,
                 self.placeholder.get_plugins(),
             ),
@@ -87,7 +88,7 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
         user = self.get_staff_user_with_no_permissions()
         alias = self._create_alias(self.placeholder.get_plugins())
         self.assertFalse(
-            self.alias_plugin_base.can_detach(
+            Alias.can_detach(
                 user,
                 alias.draft_content.get_plugins(),
             ),
@@ -97,7 +98,7 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
         user = self.get_staff_user_with_std_permissions()
         alias = self._create_alias(self.placeholder.get_plugins())
         self.assertTrue(
-            self.alias_plugin_base.can_detach(
+            Alias.can_detach(
                 user,
                 alias.draft_content.get_plugins(),
             ),

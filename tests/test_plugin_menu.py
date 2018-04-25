@@ -1,12 +1,14 @@
 from urllib.parse import urlparse
 
+from djangocms_alias.cms_plugins import Alias
+
 from .base import BaseAliasPluginTestCase
 
 
 class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
 
     def test_extra_plugin_items_for_regular_plugins(self):
-        extra_items = self.alias_plugin_base.get_extra_plugin_menu_items(
+        extra_items = Alias.get_extra_plugin_menu_items(
             self.get_request(self.page.get_absolute_url()),
             self.plugin,
         )
@@ -25,7 +27,7 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
             replaced_placeholder=self.placeholder,
         )
 
-        extra_items = self.alias_plugin_base.get_extra_plugin_menu_items(
+        extra_items = Alias.get_extra_plugin_menu_items(
             self.get_request(self.page.get_absolute_url()),
             alias_plugin,
         )
@@ -43,7 +45,7 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
         )
 
     def test_extra_plugin_items_for_placeholder(self):
-        extra_items = self.alias_plugin_base.get_extra_placeholder_menu_items(
+        extra_items = Alias.get_extra_placeholder_menu_items(
             self.get_page_request(self.page, self.superuser),
             self.placeholder,
         )

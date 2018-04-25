@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils.translation import get_language_from_request
@@ -285,3 +286,46 @@ def set_alias_position_view(request):
 
     alias = form.save()
     return JsonResponse({'alias_id': alias.pk, 'position': alias.position})
+
+
+class AliasSelect2View(ListView):
+    model = AliasModel
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        return JsonResponse({
+            'results': [
+                {
+                    'text': str(obj),
+                    'id': obj.pk,
+                }
+                for obj in context['object_list']
+            ],
+            'more': context['page_obj'].has_next(),
+        })
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        term = self.request.GET.get('term')
+        category = self.request.GET.get('category')
+        try:
+            pk = int(self.request.GET.get('pk'))
+        except (TypeError, ValueError):
+            pk = None
+        q = Q()
+        if term:
+            q |= Q(name__icontains=term)
+        if category:
+            q |= Q(category=category)
+        if pk:
+            q |= Q(pk=pk)
+        return queryset.filter(q)
+
+    def get_paginate_by(self, queryset):
+        return self.request.GET.get('limit', 30)

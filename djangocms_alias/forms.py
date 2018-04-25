@@ -7,15 +7,19 @@ from django.contrib.admin.widgets import (
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
-from cms.utils.permissions import has_plugin_permission
-from cms.utils.permissions import get_model_permission_codename
+from cms.utils.permissions import (
+    get_model_permission_codename,
+    has_plugin_permission,
+)
 
-from .cms_plugins import Alias
+from .constants import SELECT2_ALIAS_URL_NAME
 from .models import Alias as AliasModel
-from .models import Category
+from .models import AliasPlugin, Category
+from .utils import alias_plugin_reverse
 
 
 __all__ = [
+    'AliasPluginForm',
     'BaseCreateAliasForm',
     'CreateAliasForm',
     'CreateAliasWizardForm',
@@ -101,7 +105,7 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        if not has_plugin_permission(self.user, Alias.__name__, 'add'):
+        if not has_plugin_permission(self.user, 'Alias', 'add'):
             self.fields['replace'].widget = forms.HiddenInput()
 
         self.set_category_widget(self.user)
@@ -134,8 +138,7 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
         else:
             placeholder, plugin = None, None
             source_plugins = self.get_plugins()
-        new_plugin = Alias.populate_alias(
-            alias=alias,
+        new_plugin = alias.populate(
             replaced_placeholder=placeholder,
             replaced_plugin=plugin,
             language=self.cleaned_data.get('language'),
@@ -161,10 +164,6 @@ class CreateAliasWizardForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.set_category_widget(self.user)
 
-    @property
-    def media(self):
-        return Alias().media
-
     def set_category_widget(self, user):
         formfield = self.fields['category']
         formfield.widget = get_category_widget(formfield, user)
@@ -177,10 +176,6 @@ class CreateCategoryWizardForm(forms.ModelForm):
         fields = [
             'name',
         ]
-
-    @property
-    def media(self):
-        return Alias().media
 
 
 class SetAliasPositionForm(forms.Form):
@@ -217,3 +212,65 @@ class SetAliasPositionForm(forms.Form):
         alias = self.cleaned_data['alias']
         alias._set_position(position)
         return alias
+
+
+class Select2Mixin:
+
+    class Media:
+        css = {
+            'all': ('cms/js/select2/select2.css', ),
+        }
+        js = (
+            'cms/js/select2/select2.js',
+            'djangocms_alias/js/create_alias_plugin.js',
+        )
+
+
+class CategorySelectWidget(Select2Mixin, forms.Select):
+    pass
+
+
+class AliasSelectWidget(Select2Mixin, forms.TextInput):
+
+    def get_url(self):
+        return alias_plugin_reverse(SELECT2_ALIAS_URL_NAME)
+
+    def build_attrs(self, *args, **kwargs):
+        attrs = super().build_attrs(*args, **kwargs)
+        attrs.setdefault('data-select2-url', self.get_url())
+        return attrs
+
+
+class AliasPluginForm(forms.ModelForm):
+    category = forms.ModelChoiceField(
+        label=_('Category'),
+        queryset=Category.objects.all(),
+        widget=CategorySelectWidget(
+            attrs={
+                'data-placeholder': _('Select category to restrict the list of aliases below'),  # noqa: E501
+            },
+        ),
+        empty_label='',
+        required=False,
+    )
+    alias = forms.ModelChoiceField(
+        label=_('Alias'),
+        queryset=AliasModel.objects.all(),
+        widget=AliasSelectWidget(
+            attrs={
+                'data-placeholder': _('Select an alias'),
+            },
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['category'].initial = self.instance.alias.category_id
+
+    class Meta:
+        model = AliasPlugin
+        fields = (
+            'category',
+            'alias',
+        )

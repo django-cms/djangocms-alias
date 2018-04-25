@@ -7,9 +7,9 @@ from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.constants import (
-    SET_ALIAS_POSITION_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     PUBLISH_ALIAS_URL_NAME,
+    SET_ALIAS_POSITION_URL_NAME,
 )
 from djangocms_alias.models import Alias, Category
 from djangocms_alias.utils import alias_plugin_reverse

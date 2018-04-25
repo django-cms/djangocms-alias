@@ -24,8 +24,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias(
             [self.plugin],
         )
-        alias_plugin = self.alias_plugin_base.populate_alias(
-            alias,
+        alias_plugin = alias.populate(
             replaced_plugin=self.plugin,
             language=self.language,
         )
@@ -51,8 +50,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             body='test 3',
         )
         alias = self._create_alias()
-        alias_plugin = self.alias_plugin_base.populate_alias(
-            alias,
+        alias_plugin = alias.populate(
             language=self.language,
             replaced_plugin=second_plugin,
         )
@@ -81,8 +79,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             body='test 2',
         )
         alias = self._create_alias()
-        self.alias_plugin_base.populate_alias(
-            alias,
+        alias.populate(
             language=self.language,
             replaced_placeholder=self.placeholder,
         )

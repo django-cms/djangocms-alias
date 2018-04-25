@@ -3,6 +3,7 @@ import json
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -16,7 +17,7 @@ from cms.utils.permissions import has_plugin_permission
 
 from .cms_plugins import Alias
 from .constants import DRAFT_ALIASES_SESSION_KEY
-from .forms import BaseCreateAliasForm, CreateAliasForm
+from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
 from .models import Alias as AliasModel
 from .models import AliasPlugin, Category
 
@@ -270,6 +271,21 @@ def set_alias_draft_mode_view(request):
         return HttpResponseBadRequest('Form received unexpected values')
 
     return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
+
+
+@require_POST
+@transaction.atomic
+def set_alias_position_view(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
+    form = SetAliasPositionForm(request.POST or None)
+
+    if not form.is_valid():
+        return JsonResponse({'errors': form.errors}, status=400)
+
+    alias = form.save()
+    return JsonResponse({'alias_id': alias.pk, 'position': alias.position})
 
 
 class AliasSelect2View(ListView):

@@ -1,5 +1,5 @@
 {% extends "djangocms_alias/base.html" %}
-{% load cms_tags i18n djangocms_alias_tags %}
+{% load static i18n djangocms_alias_tags sekizai_tags %}
 
 {% block aliases_content %}
     <div class="cms-aliases-page container">
@@ -10,18 +10,28 @@
             </span>
         </h2>
         <div class="cms-aliases-category">
+          <ol class="cms-aliases-sortable" data-show-text="{% trans 'show' %}" data-hide-text="{% trans 'hide' %}" data-ajax-url="{% url 'admin:djangocms_alias_set_alias_position' %}">
           {% for alias in aliases %}
-            <h3 class="cms-alias-heading" id="{{ alias.name|slugify }}">
-                <span class="cms-alias-heading-inner">
-                    <a class="cms-alias-heading-link" href="#{{ alias.name|slugify }}">#</a>
-                    {{ alias.name }}
-                    <a class="cms-alias-heading-edit-link" href="{% get_alias_url alias %}">Edit</a>
-                </span>
-            </h3>
-            <div class="cms-alias-placeholder">
-              {% render_alias alias use_draft=use_draft %}
-            </div>
+            <li data-alias-id={{ alias.pk }} class="cms-aliases-list-item">
+              <div class="cms-alias-draggable">
+                <h3 class="cms-alias-heading" id="{{ alias.name|slugify }}">
+                    <span class="cms-alias-heading-inner">
+                      <a href="{% get_alias_url alias %}">
+                        {{ alias.name }}
+                      </a>
+                      <a href="javascript:void(0)" class="cms-alias-sortable-show-hide-button">{% trans 'show' %}</a>
+                    </span>
+                </h3>
+                <div class="cms-alias-placeholder">
+                  {% render_alias alias use_draft=use_draft %}
+                </div>
+              </div>
+            </li>
           {% endfor %}
+          </ol>
         </div>
     </div>
+
+{% addtoblock "css" %}<link href="{% static 'djangocms_alias/js/alias-list.css' %}" media="screen" rel="stylesheet" type="text/css" />{% endaddtoblock %}
+{% addtoblock "js" %}<script type="text/javascript" src="{% static 'djangocms_alias/js/alias-list.js' %}"></script>{% endaddtoblock %}
 {% endblock %}

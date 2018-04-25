@@ -1,5 +1,7 @@
+import operator
+
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import F, Q
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
 from django.utils.text import slugify
@@ -178,9 +180,36 @@ class Alias(models.Model):
     @transaction.atomic
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
+        self.category.aliases.filter(position__gt=self.position).update(
+            position=F('position') - 1,
+        )
         # deletion of placeholders and all cms_plugins in it
         self.draft_content.delete()
         self.live_content.delete()
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.position = self.category.aliases.count()
+        return super().save(*args, **kwargs)
+
+    def _set_position(self, position):
+        previous_position = self.position
+
+        if previous_position > position:  # moving up
+            op = operator.add
+            position_range = (position, previous_position)
+        else:  # moving down
+            op = operator.sub
+            position_range = (previous_position, position)
+
+        filters = [
+            ~Q(pk=self.pk),
+            Q(position__range=position_range),
+        ]
+
+        self.position = position
+        self.save()
+        self.category.aliases.filter(*filters).update(position=op(F('position'), 1))  # noqa: E501
 
 
 class AliasPlugin(CMSPlugin):

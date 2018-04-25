@@ -9,6 +9,7 @@ from cms.utils.plugins import downcast_plugins
 from djangocms_alias.constants import (
     DETAIL_ALIAS_URL_NAME,
     PUBLISH_ALIAS_URL_NAME,
+    SET_ALIAS_POSITION_URL_NAME,
 )
 from djangocms_alias.models import Alias, Category
 from djangocms_alias.utils import alias_plugin_reverse
@@ -663,3 +664,175 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             body='test 3',
         )
         self.assertEqual(live_plugins.count(), 2)
+
+    def test_set_alias_position_view(self):
+        alias1 = self._create_alias(name='1')  # 0
+        alias2 = self._create_alias(name='2')  # 1
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias': alias1.pk, 'position': 1},
+            )
+
+        ordered_aliases = list(
+            alias1.category.aliases.order_by('position').values_list('pk', flat=True)  # noqa: E501
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ordered_aliases, [alias2.pk, alias1.pk])
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias': alias1.pk, 'position': 0},
+            )
+
+        ordered_aliases = list(
+            alias1.category.aliases.order_by('position').values_list('pk', flat=True)  # noqa: E501
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ordered_aliases, [alias1.pk, alias2.pk])
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias': alias1.pk, 'position': 1},
+            )
+
+        ordered_aliases = list(
+            alias1.category.aliases.order_by('position').values_list('pk', flat=True)  # noqa: E501
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ordered_aliases, [alias2.pk, alias1.pk])
+
+    def test_set_alias_position_view_only_staff_users(self):
+        alias = self._create_alias(name='1')
+        self._create_alias(name='2')
+
+        with self.login_user_context(self.get_standard_user()):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias': alias.pk, 'position': 1},
+            )
+        self.assertEqual(response.status_code, 403)
+
+        with self.login_user_context(self.get_staff_user_with_std_permissions()):  # noqa: E501
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias': alias.pk, 'position': 1},
+            )
+        self.assertEqual(response.status_code, 200)
+
+    def test_set_alias_position_view_bad_request_wrong_position(self):
+        alias = self._create_alias(name='1')
+        self._create_alias(name='2')
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias': alias.pk},
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'This field is required',
+            response.content,
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias': alias.pk, 'position': 2},
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'Invalid position in category list, available positions are: [0, 1]',  # noqa: E501
+            response.content,
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias': alias.pk, 'position': -5},
+            )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'Ensure this value is greater than or equal to 0.',
+            response.content,
+        )
+
+    def test_set_alias_position_view_bad_request_the_same_position(self):
+        alias = self._create_alias(name='1')
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias': alias.pk, 'position': 0},
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'Argument position have to be different than current alias position',  # noqa: E501
+            response.content,
+        )
+
+    def test_set_alias_position_view_bad_request_wrong_alias_id(self):
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'position': 0},
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'This field is required.',
+            response.content,
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias': 'test', 'position': 0},
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'Select a valid choice. That choice is not one of the available choices.',  # noqa: E501
+            response.content,
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    SET_ALIAS_POSITION_URL_NAME,
+                ),
+                data={'alias': 5, 'position': 0},
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            b'Select a valid choice. That choice is not one of the available choices.',  # noqa: E501
+            response.content,
+        )

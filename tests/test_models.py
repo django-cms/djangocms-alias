@@ -1,5 +1,6 @@
 from cms.api import add_plugin
 
+from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.models import Category
 
 from .base import BaseAliasPluginTestCase
@@ -29,7 +30,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
         alias_plugin = add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            Alias,
             language=self.language,
             alias=alias,
         )
@@ -41,7 +42,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
         recursed_alias_plugin = add_plugin(
             alias.draft_content,
-            self.alias_plugin_base.__class__,
+            Alias,
             language=self.language,
             alias=alias,
         )

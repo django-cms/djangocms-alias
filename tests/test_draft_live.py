@@ -1,5 +1,7 @@
 from cms.api import add_plugin
 
+from djangocms_alias.cms_plugins import Alias
+
 from .base import BaseAliasPluginTestCase
 
 
@@ -28,7 +30,7 @@ class AliasDraftLiveTestCase(BaseAliasPluginTestCase):
         )
         add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            Alias,
             language=self.language,
             alias=alias,
         )
@@ -61,7 +63,7 @@ class AliasDraftLiveTestCase(BaseAliasPluginTestCase):
         )
         add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            Alias,
             language=self.language,
             alias=alias,
         )

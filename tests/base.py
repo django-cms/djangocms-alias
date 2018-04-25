@@ -7,7 +7,6 @@ from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
 from cms.utils.conf import get_cms_setting
 
-from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.constants import (
     CATEGORY_LIST_URL_NAME,
     CREATE_ALIAS_URL_NAME,
@@ -62,7 +61,6 @@ class BaseAliasPluginTestCase(CMSTestCase):
             language=self.language,
             body='test',
         )
-        self.alias_plugin_base = Alias()
         self.superuser = self.get_superuser()
 
     def _create_alias(self, plugins=None, name='test alias', category=None):

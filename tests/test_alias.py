@@ -3,6 +3,8 @@ from operator import attrgetter
 from cms.api import add_plugin
 from cms.utils.plugins import downcast_plugins
 
+from djangocms_alias.cms_plugins import Alias
+
 from .base import BaseAliasPluginTestCase
 
 
@@ -110,7 +112,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.assertEqual(plugins.count(), 1)
         alias_plugin = add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            Alias,
             language=self.language,
             alias=alias,
         )
@@ -123,7 +125,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         )
 
         self.assertEqual(plugins.count(), 2)
-        self.alias_plugin_base.detach_alias_plugin(alias_plugin, self.language)
+        Alias.detach_alias_plugin(alias_plugin, self.language)
         self.assertEqual(plugins.count(), 3)
 
     def test_detach_alias_from_draft(self):
@@ -144,7 +146,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.assertEqual(plugins.count(), 1)
         alias_plugin = add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            Alias,
             language=self.language,
             alias=alias,
         )
@@ -157,7 +159,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         )
 
         self.assertEqual(plugins.count(), 2)
-        self.alias_plugin_base.detach_alias_plugin(
+        Alias.detach_alias_plugin(
             alias_plugin,
             self.language,
             use_draft=True,
@@ -182,7 +184,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.assertEqual(plugins.count(), 1)
         alias_plugin = add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            Alias,
             language=self.language,
             alias=alias,
         )
@@ -195,7 +197,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             body='test 3',
         )
         self.assertEqual(plugins.count(), 3)
-        self.alias_plugin_base.detach_alias_plugin(alias_plugin, self.language)
+        Alias.detach_alias_plugin(alias_plugin, self.language)
         self.assertEqual(plugins.count(), 4)
 
         ordered_plugins = sorted(
@@ -211,13 +213,13 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias([])
         alias_plugin = add_plugin(
             self.placeholder,
-            self.alias_plugin_base.__class__,
+            Alias,
             language=self.language,
             alias=alias,
         )
         request = self.get_request('/')
 
-        alias_plugin_menu_items = self.alias_plugin_base.__class__.get_extra_plugin_menu_items(  # noqa: E501
+        alias_plugin_menu_items = Alias.get_extra_plugin_menu_items(
             request,
             alias_plugin,
         )

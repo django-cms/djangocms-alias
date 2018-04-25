@@ -1,5 +1,6 @@
 from cms.api import add_plugin
 
+from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.models import Category
 from djangocms_alias.templatetags.djangocms_alias_tags import (
     get_alias_categories,
@@ -70,7 +71,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias()
         add_plugin(
             alias.draft_content,
-            self.alias_plugin_base.__class__,
+            Alias,
             language=self.language,
             alias=alias,
         )

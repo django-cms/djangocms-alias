@@ -192,10 +192,6 @@ class CategoryWidget(Select2Mixin, forms.Select):
 
 class AliasWidget(Select2Mixin, forms.TextInput):
 
-    def __init__(self, *args, **kwargs):
-        self.data_view = kwargs.pop('data_view', None)
-        super().__init__(*args, **kwargs)
-
     def get_url(self):
         return alias_plugin_reverse(SELECT2_ALIAS_URL_NAME)
 

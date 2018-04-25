@@ -92,20 +92,25 @@ class Alias(CMSPluginBase):
             ),
         ]
 
-        if isinstance(request.toolbar.obj, AliasModel):
+        placeholder_alias = getattr(placeholder, 'alias', None)
+        if (
+            isinstance(request.toolbar.obj, AliasModel) and
+            placeholder_alias and
+            placeholder_alias == request.toolbar.obj
+        ):
             menu_items.append(
                 PluginMenuItem(
                     _('Delete Alias'),
                     alias_plugin_reverse(
                         DELETE_ALIAS_PLUGIN_URL_NAME,
-                        args=(placeholder.alias.pk, ),
+                        args=(request.toolbar.obj.pk, ),
                     ),
                     action='modal',
                     attributes={
                         'icon': 'alias',
                         'on-close': alias_plugin_reverse(
                             LIST_ALIASES_URL_NAME,
-                            args=(placeholder.alias.category.pk, ),
+                            args=(request.toolbar.obj.category_id, ),
                         ),
                     },
                 )

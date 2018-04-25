@@ -23,7 +23,7 @@ CLASSIFIERS = [
 
 INSTALL_REQUIREMENTS = [
     'Django>=1.11,<2.0',  # django cms 3.5 dont support django 2.0 yet
-    'django-cms>=3.5<3.7',
+    'django-cms>=3.5,<3.7',
     'django-parler>=1.4',
 ]
 

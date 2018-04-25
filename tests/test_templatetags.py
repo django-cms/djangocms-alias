@@ -35,8 +35,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
 
     def test_render_alias_nopublished(self):
         alias = self._create_alias()
-        alias_plugin = self.alias_plugin_base.populate_alias(
-            alias,
+        alias_plugin = alias.populate(
             language=self.language,
             replaced_placeholder=self.placeholder,
         )
@@ -52,8 +51,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
 
     def test_render_alias_published(self):
         alias = self._create_alias()
-        alias_plugin = self.alias_plugin_base.populate_alias(
-            alias,
+        alias_plugin = alias.populate(
             language=self.language,
             replaced_placeholder=self.placeholder,
         )
@@ -76,8 +74,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
-        alias_plugin = self.alias_plugin_base.populate_alias(
-            alias,
+        alias_plugin = alias.populate(
             language=self.language,
             replaced_placeholder=self.placeholder,
         )

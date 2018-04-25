@@ -6,7 +6,6 @@ HELPER_SETTINGS = {
     'INSTALLED_APPS': [
         'parler',
         'djangocms_alias.test_utils.text',
-        'django_select2',
     ],
     'MIGRATION_MODULES': {
         'auth': None,

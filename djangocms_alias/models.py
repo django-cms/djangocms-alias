@@ -5,6 +5,7 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
+from cms.api import add_plugin
 from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderField
 from cms.utils.plugins import copy_plugins_to_placeholder
@@ -142,6 +143,37 @@ class Alias(models.Model):
             self.draft_content.get_plugins(language=language),
             placeholder=self.live_content,
         )
+
+    def populate(self, replaced_placeholder=None, replaced_plugin=None,
+                 language=None, plugins=None):
+        if not replaced_placeholder and not replaced_plugin:
+            copy_plugins_to_placeholder(
+                plugins,
+                placeholder=self.draft_content,
+            )
+            return
+
+        if replaced_placeholder:
+            plugins = replaced_placeholder.get_plugins(language)
+            placeholder = replaced_placeholder
+        elif replaced_plugin:
+            plugins = replaced_plugin.get_tree(replaced_plugin)
+            placeholder = replaced_plugin.placeholder
+
+        plugins.update(placeholder=self.draft_content, language=language)
+
+        new_plugin = add_plugin(
+            placeholder,
+            plugin_type='Alias',
+            target=replaced_plugin,
+            position='left',
+            language=language,
+            alias=self,
+        )
+        if replaced_plugin:
+            new_plugin.position = replaced_plugin.position
+            new_plugin.save(update_fields=['position'])
+        return new_plugin
 
     @transaction.atomic
     def delete(self, *args, **kwargs):

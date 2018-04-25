@@ -124,8 +124,6 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
         return list(plugins)
 
     def save(self):
-        from .cms_plugins import Alias
-
         alias = AliasModel.objects.create(
             name=self.cleaned_data.get('name'),
             category=self.cleaned_data.get('category'),
@@ -137,8 +135,7 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
         else:
             placeholder, plugin = None, None
             source_plugins = self.get_plugins()
-        new_plugin = Alias.populate_alias(
-            alias=alias,
+        new_plugin = alias.populate(
             replaced_placeholder=placeholder,
             replaced_plugin=plugin,
             language=self.cleaned_data.get('language'),
@@ -164,11 +161,6 @@ class CreateAliasWizardForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.set_category_widget(self.user)
 
-    @property
-    def media(self):
-        from .cms_plugins import Alias
-        return Alias().media
-
     def set_category_widget(self, user):
         formfield = self.fields['category']
         formfield.widget = get_category_widget(formfield, user)
@@ -180,11 +172,6 @@ class CreateCategoryWizardForm(forms.ModelForm):
         fields = [
             'name',
         ]
-
-    @property
-    def media(self):
-        from .cms_plugins import Alias
-        return Alias().media
 
 
 class Select2Mixin:

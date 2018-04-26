@@ -9,26 +9,19 @@ from .urls import urlpatterns
 
 __all__ = [
     'AliasAdmin',
-    'AliasInlineAdmin',
     'CategoryAdmin',
 ]
-
-
-class AliasInlineAdmin(admin.StackedInline):
-    model = Alias
-    fields = ('position', )
-    extra = 0
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name']
-    inlines = [AliasInlineAdmin]
 
 
 @admin.register(Alias)
 class AliasAdmin(PlaceholderAdminMixin, admin.ModelAdmin):
     list_display = ['name']
+    fields = ['name', 'category']
 
     def get_urls(self):
         return urlpatterns + super().get_urls()

@@ -92,11 +92,9 @@ class Alias(CMSPluginBase):
             ),
         ]
 
-        placeholder_alias = getattr(placeholder, 'alias', None)
         if (
-            isinstance(request.toolbar.obj, AliasModel) and
-            placeholder_alias and
-            placeholder_alias == request.toolbar.obj
+            isinstance(request.toolbar.obj, AliasModel)
+            and placeholder.pk == request.toolbar.obj.draft_content_id
         ):
             menu_items.append(
                 PluginMenuItem(

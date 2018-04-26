@@ -289,7 +289,7 @@ def set_alias_position_view(request):
 
 
 class AliasSelect2View(ListView):
-    model = AliasModel
+    queryset = AliasModel.objects.order_by('category__name', 'position')
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
@@ -320,11 +320,11 @@ class AliasSelect2View(ListView):
             pk = None
         q = Q()
         if term:
-            q |= Q(name__icontains=term)
+            q &= Q(name__icontains=term)
         if category:
-            q |= Q(category=category)
+            q &= Q(category=category)
         if pk:
-            q |= Q(pk=pk)
+            q &= Q(pk=pk)
         return queryset.filter(q)
 
     def get_paginate_by(self, queryset):

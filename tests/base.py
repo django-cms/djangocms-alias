@@ -63,7 +63,8 @@ class BaseAliasPluginTestCase(CMSTestCase):
         )
         self.superuser = self.get_superuser()
 
-    def _create_alias(self, plugins=None, name='test alias', category=None):
+    def _create_alias(self, plugins=None, name='test alias', category=None,
+                      position=0):
         if category is None:
             category = self.category
         if plugins is None:
@@ -71,6 +72,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         alias = AliasModel.objects.create(
             name=name,
             category=category,
+            position=position,
         )
         if plugins:
             alias.populate(plugins=plugins)

@@ -1,5 +1,6 @@
 from cms.api import add_plugin
 
+from djangocms_alias.constants import DRAFT_ALIASES_SESSION_KEY
 from djangocms_alias.cms_plugins import Alias
 
 from .base import BaseAliasPluginTestCase
@@ -79,3 +80,38 @@ class AliasDraftLiveTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, 'test 1')
         self.assertContains(response, 'test 2')
         self.assertContains(response, 'test 3')
+
+    def test_set_draft_view_no_permission(self):
+        response = self.client.post(
+            self.SET_ALIAS_DRAFT_ENDPOINT,
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_set_draft_view_no_param(self):
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                self.SET_ALIAS_DRAFT_ENDPOINT,
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_set_draft_view_enable(self):
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                self.SET_ALIAS_DRAFT_ENDPOINT,
+                data={'enable': 1},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(
+                self.client.session[DRAFT_ALIASES_SESSION_KEY],
+            )
+
+    def test_set_draft_view_disable(self):
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                self.SET_ALIAS_DRAFT_ENDPOINT,
+                data={'enable': 0},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertFalse(
+                self.client.session.get(DRAFT_ALIASES_SESSION_KEY, False),
+            )

@@ -285,7 +285,7 @@ def set_alias_position_view(request):
         return JsonResponse({'errors': form.errors}, status=400)
 
     alias = form.save()
-    return JsonResponse({'alias_id': alias.pk, 'position': alias.position})
+    return JsonResponse({'alias': alias.pk, 'position': alias.position})
 
 
 class AliasSelect2View(ListView):

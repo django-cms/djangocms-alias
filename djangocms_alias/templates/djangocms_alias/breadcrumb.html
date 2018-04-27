@@ -2,9 +2,9 @@
 {% for item in items %}
   <li class="cms-alias-breadcrumb-item">
   {% if not forloop.last %}
-    <a href="{{ item.url }}">{{ item.label }}</a> <span class="cms-alias-breadcrumb-separator">&raquo;</span>
+    <a href="{{ item.url }}" class="cms-alias-breadcrumb-link">{{ item.label }}</a> <span class="cms-alias-breadcrumb-separator">&raquo;</span>
   {% else %}
-    <span class="active">{{ item.label }}</span>
+    <span class="cms-alias-breadcrumb-active">{{ item.label }}</span>
   {% endif %}
   </li>
 {% endfor %}

@@ -395,7 +395,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             plugins[1].get_bound_plugin().body,
         )
 
-    def test_list_view(self):
+    def test_category_detail_view(self):
         category1 = Category.objects.create(
             name='Category 1',
         )
@@ -425,7 +425,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             response = self.client.get(
-                self.LIST_ALIASES_ENDPOINT(category1.pk),
+                self.DETAIL_CATEGORY_ENDPOINT(category1.pk),
             )
 
         self.assertEqual(response.status_code, 200)
@@ -443,16 +443,16 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertNotContains(response, alias2.name)
         self.assertContains(response, 'This is basic content')
 
-    def test_list_view_standard_user(self):
+    def test_category_detail_view_standard_user(self):
         category = Category.objects.create(
             name='Category 1',
         )
 
         with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.LIST_ALIASES_ENDPOINT(category.pk))
+            response = self.client.get(self.DETAIL_CATEGORY_ENDPOINT(category.pk))  # noqa: E501
         self.assertEqual(response.status_code, 403)
 
-    def test_list_view_standard_staff_user(self):
+    def test_category_detail_view_standard_staff_user(self):
         category = Category.objects.create(
             name='Category 1',
         )
@@ -460,7 +460,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(
             self.get_staff_user_with_std_permissions(),
         ):
-            response = self.client.get(self.LIST_ALIASES_ENDPOINT(category.pk))
+            response = self.client.get(self.DETAIL_CATEGORY_ENDPOINT(category.pk))  # noqa: E501
         self.assertEqual(response.status_code, 200)
 
     def test_category_list_view(self):
@@ -472,7 +472,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
 
         with self.login_user_context(self.superuser):
-            response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+            response = self.client.get(self.LIST_CATEGORY_ENDPOINT)
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, category1.name)
@@ -480,14 +480,14 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_category_list_view_standard_user(self):
         with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+            response = self.client.get(self.LIST_CATEGORY_ENDPOINT)
         self.assertEqual(response.status_code, 403)
 
     def test_category_list_view_standard_staff_user(self):
         with self.login_user_context(
             self.get_staff_user_with_std_permissions(),
         ):
-            response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+            response = self.client.get(self.LIST_CATEGORY_ENDPOINT)
         self.assertEqual(response.status_code, 200)
 
     def test_detail_view(self):

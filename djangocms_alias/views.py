@@ -74,7 +74,7 @@ def detach_alias_plugin_view(request, plugin_pk):
 class AliasDetailView(DetailView):
     model = AliasModel
     context_object_name = 'alias'
-    queryset = AliasModel.objects.all()
+    queryset = AliasModel.objects.select_related('category')
     template_name = 'djangocms_alias/alias_detail.html'
 
     def get_context_data(self, **kwargs):
@@ -108,28 +108,21 @@ def delete_alias_view(request, pk, *args, **kwargs):
     return response
 
 
-class AliasListView(ListView):
-    model = AliasModel
-    context_object_name = 'aliases'
-    template_name = 'djangocms_alias/alias_list.html'
-
-    def get_queryset(self):
-        return self.category.aliases.all()
+class CategoryDetailView(DetailView):
+    model = Category
+    context_object_name = 'category'
+    template_name = 'djangocms_alias/category_detail.html'
+    queryset = Category.objects.prefetch_related('aliases')
 
     def get_context_data(self, **kwargs):
         kwargs.update({
             'use_draft': self.request.toolbar.edit_mode_active,
-            'category': self.category,
         })
         return super().get_context_data(**kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:
             raise PermissionDenied
-        self.category = get_object_or_404(
-            Category,
-            pk=self.kwargs['category_pk'],
-        )
         return super().dispatch(request, *args, **kwargs)
 
 

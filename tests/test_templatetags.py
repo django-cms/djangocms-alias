@@ -12,6 +12,7 @@ from .base import BaseAliasPluginTestCase
 
 class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
     alias_template = """{% load djangocms_alias_tags %}{% render_alias plugin.alias %}"""  # noqa: E501
+    breadcrumb_template = """{% load djangocms_alias_tags %}{% show_alias_breadcrumb %}"""  # noqa: E501
 
     def test_get_alias_categories(self):
         Category.objects.bulk_create(
@@ -89,3 +90,42 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             self.get_request('/'),
         )
         self.assertEqual(output, '<div class="cms-alias">test\n</div>\n')
+
+    def test_show_alias_breadcrumb(self):
+        alias = self._create_alias()
+
+        output = self.render_template_obj(
+            self.breadcrumb_template,
+            {'object': alias},
+            self.get_alias_request(alias, user=self.superuser),
+        )
+        self.assertIn('Categories', output)
+        self.assertIn(self.LIST_CATEGORY_ENDPOINT, output)
+        self.assertIn(alias.category.name, output)
+        self.assertIn(self.DETAIL_CATEGORY_ENDPOINT(alias.category.pk), output)
+        self.assertIn(alias.name, output)
+        self.assertNotIn(self.DETAIL_ALIAS_ENDPOINT(alias.pk), output)
+
+        output = self.render_template_obj(
+            self.breadcrumb_template,
+            {'object': alias.category},
+            self.get_alias_request(alias, user=self.superuser),
+        )
+        self.assertIn('Categories', output)
+        self.assertIn(self.LIST_CATEGORY_ENDPOINT, output)
+        self.assertIn(alias.category.name, output)
+        self.assertNotIn(self.DETAIL_CATEGORY_ENDPOINT(alias.category.pk), output)  # noqa: E501
+        self.assertNotIn(alias.name, output)
+        self.assertNotIn(self.DETAIL_ALIAS_ENDPOINT(alias.pk), output)
+
+        output = self.render_template_obj(
+            self.breadcrumb_template,
+            {},
+            self.get_alias_request(alias, user=self.superuser),
+        )
+        self.assertIn('Categories', output)
+        self.assertNotIn(self.LIST_CATEGORY_ENDPOINT, output)
+        self.assertNotIn(alias.category.name, output)
+        self.assertNotIn(self.DETAIL_CATEGORY_ENDPOINT(alias.category.pk), output)  # noqa: E501
+        self.assertNotIn(alias.name, output)
+        self.assertNotIn(self.DETAIL_ALIAS_ENDPOINT(alias.pk), output)

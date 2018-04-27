@@ -12,7 +12,7 @@ from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderField
 from cms.utils.plugins import copy_plugins_to_placeholder
 
-from .constants import DETAIL_ALIAS_URL_NAME, LIST_ALIASES_URL_NAME
+from .constants import DETAIL_ALIAS_URL_NAME, DETAIL_CATEGORY_URL_NAME
 from .utils import alias_plugin_reverse
 
 
@@ -43,7 +43,7 @@ class Category(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return alias_plugin_reverse(LIST_ALIASES_URL_NAME, args=[self.pk])
+        return alias_plugin_reverse(DETAIL_CATEGORY_URL_NAME, args=[self.pk])
 
 
 class AliasPlaceholder(Placeholder):

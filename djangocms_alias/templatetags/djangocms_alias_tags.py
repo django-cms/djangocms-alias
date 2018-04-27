@@ -5,9 +5,9 @@ from django.utils.translation import ugettext_lazy as _
 from cms.toolbar.utils import get_toolbar_from_request
 
 from ..constants import (
-    LIST_CATEGORY_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     DRAFT_ALIASES_SESSION_KEY,
+    LIST_CATEGORY_URL_NAME,
     PLUGIN_URL_NAME_PREFIX,
 )
 from ..models import Category

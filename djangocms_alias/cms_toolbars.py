@@ -14,8 +14,8 @@ from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 
 from .constants import (
-    LIST_CATEGORY_URL_NAME,
     DRAFT_ALIASES_SESSION_KEY,
+    LIST_CATEGORY_URL_NAME,
     PUBLISH_ALIAS_URL_NAME,
     SET_ALIAS_DRAFT_URL_NAME,
 )

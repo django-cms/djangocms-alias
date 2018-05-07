@@ -9,6 +9,7 @@ from cms.utils.plugins import downcast_plugins
 from djangocms_alias.constants import (
     DETAIL_ALIAS_URL_NAME,
     PUBLISH_ALIAS_URL_NAME,
+    SELECT2_ALIAS_URL_NAME,
     SET_ALIAS_POSITION_URL_NAME,
 )
 from djangocms_alias.models import Alias, Category
@@ -835,4 +836,154 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertIn(
             b'Select a valid choice. That choice is not one of the available choices.',  # noqa: E501
             response.content,
+        )
+
+    def test_select2_view_no_permission(self):
+        response = self.client.get(
+            alias_plugin_reverse(
+                SELECT2_ALIAS_URL_NAME,
+            ),
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_select2_view(self):
+        alias1 = self._create_alias(name='test 2')
+        alias2 = self._create_alias(name='foo', position=1)
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [alias1.pk, alias2.pk],
+        )
+
+    def test_select2_view_order_by_category_and_position(self):
+        category2 = Category.objects.create(name='foo')
+        alias1 = self._create_alias(name='test 2')
+        alias2 = self._create_alias(name='foo', position=1)
+        alias3 = self._create_alias(name='bar', category=category2)
+        alias4 = self._create_alias(name='baz', category=category2, position=1)
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [alias3.pk, alias4.pk, alias1.pk, alias2.pk],
+        )
+
+    def test_select2_view_set_limit(self):
+        self._create_alias(name='test 2')
+        self._create_alias(name='foo', position=1)
+        self._create_alias(name='three', position=2)
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+                data={'limit': 2},
+            )
+
+        content = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(content['more'])
+        self.assertEqual(len(content['results']), 2)
+
+    def test_select2_view_text_repr(self):
+        alias1 = self._create_alias(name='test 2')
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json()['results'][0]['text'],
+            alias1.name,
+        )
+
+    def test_select2_view_term(self):
+        alias1 = self._create_alias(name='test 2')
+        self._create_alias(name='foo', position=1)
+        alias3 = self._create_alias(name='three', position=2)
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+                data={'term': 't'},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [alias1.pk, alias3.pk],
+        )
+
+    def test_select2_view_category(self):
+        category2 = Category.objects.create(name='test 2')
+        alias1 = self._create_alias(name='test 2', category=category2)
+        alias2 = self._create_alias(name='foo', category=category2, position=1)
+        self._create_alias(name='three')
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+                data={'category': category2.pk},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [alias1.pk, alias2.pk],
+        )
+
+    def test_select2_view_category_and_term(self):
+        category2 = Category.objects.create(name='test 2')
+        alias1 = self._create_alias(name='test 2', category=category2)
+        self._create_alias(name='foo', category=category2, position=1)
+        self._create_alias(name='three')
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+                data={'category': category2.pk, 'term': 't'},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [alias1.pk],
+        )
+
+    def test_select2_view_pk(self):
+        alias1 = self._create_alias(name='test 2')
+        self._create_alias(name='foo', position=1)
+        self._create_alias(name='three')
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+                data={'pk': alias1.pk},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [alias1.pk],
         )

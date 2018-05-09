@@ -293,7 +293,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_detach_view_no_permission_to_add_plugins_from_alias(self):
         response = self.client.post(
-            self.DETACH_ALIAS_PLUGIN_ENDPOINT(self.plugin.pk),
+            self.get_detach_alias_plugin_endpoint(self.plugin.pk),
         )
         self.assertEqual(response.status_code, 403)
 
@@ -307,7 +307,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
         with self.login_user_context(self.superuser):
             response = self.client.get(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
             self.assertEqual(response.status_code, 200)
 
@@ -323,14 +323,14 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         user = self.get_staff_user_with_no_permissions()
         with self.login_user_context(user):
             response = self.client.post(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
         self.assertEqual(response.status_code, 403)
 
     def test_detach_view_non_alias_plugin(self):
         with self.login_user_context(self.superuser):
             response = self.client.post(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(self.plugin.pk),
+                self.get_detach_alias_plugin_endpoint(self.plugin.pk),
             )
             self.assertEqual(response.status_code, 404)
 
@@ -352,7 +352,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             response = self.client.post(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
             self.assertEqual(response.status_code, 200)
 
@@ -385,7 +385,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 data={'enable': 1},
             )
             response = self.client.post(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
             self.assertEqual(response.status_code, 200)
 
@@ -426,7 +426,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             response = self.client.get(
-                self.LIST_ALIASES_ENDPOINT(category1.pk),
+                self.get_list_aliases_endpoint(category1.pk),
             )
 
         self.assertEqual(response.status_code, 200)
@@ -450,7 +450,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
 
         with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.LIST_ALIASES_ENDPOINT(category.pk))
+            response = self.client.get(self.get_list_aliases_endpoint(category.pk))  # noqa: E501
         self.assertEqual(response.status_code, 403)
 
     def test_list_view_standard_staff_user(self):
@@ -461,7 +461,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(
             self.get_staff_user_with_std_permissions(),
         ):
-            response = self.client.get(self.LIST_ALIASES_ENDPOINT(category.pk))
+            response = self.client.get(self.get_list_aliases_endpoint(category.pk))  # noqa: E501
         self.assertEqual(response.status_code, 200)
 
     def test_category_list_view(self):
@@ -1042,7 +1042,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, JAVASCRIPT_SUCCESS_RESPONSE)
-        self.assertNotIn(alias, Alias.objects.all())
+        self.assertFalse(Alias.objects.filter(pk=alias.pk).exists())
 
     def test_delete_alias_view_user_with_no_perms(self):
         alias = self._create_alias([self.plugin])
@@ -1072,7 +1072,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
         self.assertEqual(response.status_code, 403)
 
-    def test_delete_alias_view_user_with_perms_to_delete_no_pages_using_alias(self):  # noqa: E501
+    def test_delete_alias_view_alias_not_being_used(self):
         alias = self._create_alias([self.plugin])
         staff_user = self.get_staff_user_with_alias_permissions()
 
@@ -1096,9 +1096,9 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 data={'post': 'yes'},
             )
         self.assertEqual(response.status_code, 200)
-        self.assertNotIn(alias, Alias.objects.all())
+        self.assertFalse(Alias.objects.filter(pk=alias.pk).exists())
 
-    def test_delete_alias_view_user_with_perms_to_delete_some_pages_using_alias(self):  # noqa: E501
+    def test_delete_alias_view_alias_being_used_on_pages(self):
         alias = self._create_alias([self.plugin])
         add_plugin(
             self.placeholder,
@@ -1106,6 +1106,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
+        # this user only can delete alias when alias not being used anywhere
         staff_user = self.get_staff_user_with_no_permissions()
         self.add_permission(staff_user, 'add_alias')
         self.add_permission(staff_user, 'delete_alias')

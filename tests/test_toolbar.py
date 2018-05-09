@@ -58,8 +58,8 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias([self.plugin])
         for endpoint in [
             self.CATEGORY_LIST_ENDPOINT,
-            self.LIST_ALIASES_ENDPOINT(alias.category_id),
-            self.DETAIL_ALIAS_ENDPOINT(alias.pk),
+            self.get_list_aliases_endpoint(alias.category_id),
+            self.get_detail_alias_endpoint(alias.pk),
         ]:
             request = self.get_page_request(
                 page=None,
@@ -73,10 +73,9 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias([self.plugin])
         request = self.get_alias_request(
             alias,
-            path=self.DETAIL_ALIAS_ENDPOINT(alias.pk),
+            path=self.get_detail_alias_endpoint(alias.pk),
             user=self.superuser,
             edit=True,
-            toolbar_object=alias,
         )
         button_list = request.toolbar.find_first(
             item_type=ButtonList,
@@ -85,7 +84,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertEqual(button_list.item.buttons[0].name, 'Publish alias changes')  # noqa: E501
         self.assertEqual(
             button_list.item.buttons[0].url,
-            self.PUBLISH_ALIAS_ENDPOINT(alias.pk),
+            self.get_publish_alias_endpoint(alias.pk),
         )
         self.assertEqual(
             button_list.item.buttons[0].disabled,
@@ -100,13 +99,12 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             button_list.item.buttons[0].extra_classes,
         )
 
-    def test_add_publish_button_dont_add_when_is_not_alias_edit(self):
+    def test_no_publish_button_when_not_in_alias_edit(self):
         alias = self._create_alias([self.plugin])
         request = self.get_alias_request(
             alias,
-            path=self.DETAIL_ALIAS_ENDPOINT(alias.pk),
+            path=self.get_detail_alias_endpoint(alias.pk),
             user=self.superuser,
-            toolbar_object=alias,
         )
         button_list = request.toolbar.find_first(
             item_type=ButtonList,
@@ -116,7 +114,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
 
         request = self.get_alias_request(
             alias,
-            path=self.LIST_ALIASES_ENDPOINT(alias.category.pk),
+            path=self.get_list_aliases_endpoint(alias.category.pk),
             user=self.superuser,
         )
         button_list = request.toolbar.find_first(
@@ -135,7 +133,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         )
         self.assertEqual(button_list, None)
 
-    def test_enable_create_wizard_button(self):
+    def test_create_wizard_button_enabled(self):
         request = self.get_page_request(
             page=None,
             path=self.CATEGORY_LIST_ENDPOINT,

@@ -31,7 +31,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
         )
         self.assertEqual(
             get_alias_url(alias),
-            self.DETAIL_ALIAS_ENDPOINT(alias.pk),
+            self.get_detail_alias_endpoint(alias.pk),
         )
 
     def test_render_alias_nopublished(self):

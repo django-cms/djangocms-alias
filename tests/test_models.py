@@ -185,7 +185,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             alias=alias,
         )
         alias.delete()
-        self.assertNotIn(alias, alias.__class__.objects.all())
+        self.assertFalse(alias.__class__.objects.filter(pk=alias.pk).exists())
         self.assertEqual(alias.cms_plugins.count(), 0)
         self.assertEqual(
             Placeholder.objects.filter(

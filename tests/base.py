@@ -28,7 +28,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
     CATEGORY_LIST_ENDPOINT = alias_plugin_reverse(CATEGORY_LIST_URL_NAME)
     SET_ALIAS_DRAFT_ENDPOINT = alias_plugin_reverse(SET_ALIAS_DRAFT_URL_NAME)
 
-    def PUBLISH_ALIAS_ENDPOINT(self, alias_pk, language=None):
+    def get_publish_alias_endpoint(self, alias_pk, language=None):
         return alias_plugin_reverse(
             PUBLISH_ALIAS_URL_NAME,
             args=(
@@ -37,25 +37,25 @@ class BaseAliasPluginTestCase(CMSTestCase):
             ),
         )
 
-    def DETACH_ALIAS_PLUGIN_ENDPOINT(self, plugin_pk):
+    def get_detach_alias_plugin_endpoint(self, plugin_pk):
         return alias_plugin_reverse(
             DETACH_ALIAS_PLUGIN_URL_NAME,
             args=[plugin_pk],
         )
 
-    def DETAIL_ALIAS_ENDPOINT(self, alias_pk):
+    def get_detail_alias_endpoint(self, alias_pk):
         return alias_plugin_reverse(
             DETAIL_ALIAS_URL_NAME,
             args=[alias_pk],
         )
 
-    def DELETE_ALIAS_ENDPOINT(self, alias_pk):
+    def get_delete_alias_endpoint(self, alias_pk):
         return alias_plugin_reverse(
             DELETE_ALIAS_PLUGIN_URL_NAME,
             args=[alias_pk],
         )
 
-    def LIST_ALIASES_ENDPOINT(self, category_pk):
+    def get_list_aliases_endpoint(self, category_pk):
         return alias_plugin_reverse(
             LIST_ALIASES_URL_NAME,
             args=[category_pk],
@@ -140,10 +140,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
     def get_alias_request(self, alias, *args, **kwargs):  # noqa: E501
         request = self._get_instance_request(alias, *args, **kwargs)
         request.current_page = None
-        request = self._process_request_by_toolbar_middleware(
-            request,
-            kwargs.get('toolbar_object', None),
-        )
+        request = self._process_request_by_toolbar_middleware(request, alias)
         return request
 
     def get_page_request(self, page, *args, **kwargs):  # noqa: E501

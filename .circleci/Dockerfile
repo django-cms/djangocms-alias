@@ -3,5 +3,5 @@ FROM circleci/python:$PYTHON_VERSION
 
 WORKDIR /home/circleci/app/
 COPY . /home/circleci/app/
-RUN sudo chown -R circleci:circleci *
+RUN sudo chown -R circleci:circleci .
 RUN sudo pip install tox

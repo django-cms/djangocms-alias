@@ -4,11 +4,7 @@ from django.utils.encoding import force_text
 from django.utils.translation import override, ugettext
 from django.utils.translation import ugettext_lazy as _
 
-from cms.cms_toolbars import (
-    ADMIN_MENU_IDENTIFIER,
-    ADMINISTRATION_BREAK,
-    SHORTCUTS_BREAK,
-)
+from cms.cms_toolbars import ADMIN_MENU_IDENTIFIER, ADMINISTRATION_BREAK, SHORTCUTS_BREAK
 from cms.toolbar.items import Break, ButtonList
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool

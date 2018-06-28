@@ -5,7 +5,6 @@ from djangocms_alias.constants import SELECT2_ALIAS_URL_NAME
 from djangocms_alias.forms import AliasPluginForm, AliasSelectWidget
 from djangocms_alias.utils import alias_plugin_reverse
 
-
 from .base import BaseAliasPluginTestCase
 
 

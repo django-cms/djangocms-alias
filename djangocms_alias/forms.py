@@ -1,16 +1,10 @@
 from django import forms
 from django.contrib import admin
-from django.contrib.admin.widgets import (
-    AdminTextInputWidget,
-    RelatedFieldWidgetWrapper,
-)
+from django.contrib.admin.widgets import AdminTextInputWidget, RelatedFieldWidgetWrapper
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
-from cms.utils.permissions import (
-    get_model_permission_codename,
-    has_plugin_permission,
-)
+from cms.utils.permissions import get_model_permission_codename, has_plugin_permission
 
 from .constants import SELECT2_ALIAS_URL_NAME
 from .models import Alias as AliasModel

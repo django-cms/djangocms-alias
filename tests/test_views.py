@@ -7,6 +7,7 @@ from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.constants import (
+    DELETE_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     PUBLISH_ALIAS_URL_NAME,
     SELECT2_ALIAS_URL_NAME,
@@ -292,7 +293,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_detach_view_no_permission_to_add_plugins_from_alias(self):
         response = self.client.post(
-            self.DETACH_ALIAS_PLUGIN_ENDPOINT(self.plugin.pk),
+            self.get_detach_alias_plugin_endpoint(self.plugin.pk),
         )
         self.assertEqual(response.status_code, 403)
 
@@ -306,7 +307,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
         with self.login_user_context(self.superuser):
             response = self.client.get(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
             self.assertEqual(response.status_code, 200)
 
@@ -322,14 +323,14 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         user = self.get_staff_user_with_no_permissions()
         with self.login_user_context(user):
             response = self.client.post(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
         self.assertEqual(response.status_code, 403)
 
     def test_detach_view_non_alias_plugin(self):
         with self.login_user_context(self.superuser):
             response = self.client.post(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(self.plugin.pk),
+                self.get_detach_alias_plugin_endpoint(self.plugin.pk),
             )
             self.assertEqual(response.status_code, 404)
 
@@ -351,7 +352,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             response = self.client.post(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
             self.assertEqual(response.status_code, 200)
 
@@ -384,7 +385,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 data={'enable': 1},
             )
             response = self.client.post(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
             self.assertEqual(response.status_code, 200)
 
@@ -425,7 +426,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             response = self.client.get(
-                self.LIST_ALIASES_ENDPOINT(category1.pk),
+                self.get_list_aliases_endpoint(category1.pk),
             )
 
         self.assertEqual(response.status_code, 200)
@@ -449,7 +450,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
 
         with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.LIST_ALIASES_ENDPOINT(category.pk))
+            response = self.client.get(self.get_list_aliases_endpoint(category.pk))  # noqa: E501
         self.assertEqual(response.status_code, 403)
 
     def test_list_view_standard_staff_user(self):
@@ -460,7 +461,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(
             self.get_staff_user_with_std_permissions(),
         ):
-            response = self.client.get(self.LIST_ALIASES_ENDPOINT(category.pk))
+            response = self.client.get(self.get_list_aliases_endpoint(category.pk))  # noqa: E501
         self.assertEqual(response.status_code, 200)
 
     def test_category_list_view(self):
@@ -528,6 +529,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.plugin.body)
         self.assertContains(response, plugin2.body)
+        self.assertContains(response, 'Publish alias changes')
 
     def test_detail_view_standard_user(self):
         alias = self._create_alias([self.plugin])
@@ -987,3 +989,152 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             [a['id'] for a in response.json()['results']],
             [alias1.pk],
         )
+
+    def test_delete_alias_view_get(self):
+        alias = self._create_alias([self.plugin])
+        add_plugin(
+            self.placeholder,
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Are you sure you want to delete the alias "{}"?'.format(alias.name),  # noqa: E501
+        )
+        # TODO: if we implement `pages_using_this_alias` than we can test it
+        # right here
+        # self.assertContains(response, 'This alias is used on this pages:')
+
+    def test_delete_alias_view_get_alias_not_used_on_any_page(self):
+        alias = self._create_alias([self.plugin])
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertContains(response, 'This alias wasn\'t used on any page.')
+
+    def test_delete_alias_view_post(self):
+        from djangocms_alias.views import JAVASCRIPT_SUCCESS_RESPONSE
+
+        alias = self._create_alias([self.plugin])
+        self.assertIn(alias, Alias.objects.all())
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, JAVASCRIPT_SUCCESS_RESPONSE)
+        self.assertFalse(Alias.objects.filter(pk=alias.pk).exists())
+
+    def test_delete_alias_view_user_with_no_perms(self):
+        alias = self._create_alias([self.plugin])
+        staff_user = self.get_staff_user_with_no_permissions()
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertContains(
+            response,
+            'You don\'t have permissions to delete alias "{}". Please request '
+            'your site admin to add permissions to delete alias, or delete '
+            'alias from all places that it being used.'.format(alias.name),
+        )
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.post(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_alias_view_alias_not_being_used(self):
+        alias = self._create_alias([self.plugin])
+        staff_user = self.get_staff_user_with_alias_permissions()
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Are you sure you want to delete')
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.post(  # noqa
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Alias.objects.filter(pk=alias.pk).exists())
+
+    def test_delete_alias_view_alias_being_used_on_pages(self):
+        alias = self._create_alias([self.plugin])
+        add_plugin(
+            self.placeholder,
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        # this user only can delete alias when alias not being used anywhere
+        staff_user = self.get_staff_user_with_no_permissions()
+        self.add_permission(staff_user, 'add_alias')
+        self.add_permission(staff_user, 'delete_alias')
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+
+        # TODO: when will be implemented `pages_using_this_alias`
+        # self.assertEqual(response.status_code, 200)
+        # self.assertContains(
+        #     response,
+        #     'You don\'t have permissions to delete alias "{}". Please request '  # noqa: E501
+        #     'your site admin to add permissions to delete alias, or delete '
+        #     'alias from all places that it being used.'.format(alias.name),
+        # )
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.post(  # noqa
+                alias_plugin_reverse(
+                    DELETE_ALIAS_PLUGIN_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+        # TODO: when will be implemented `pages_using_this_alias`
+        # self.assertEqual(response.status_code, 403)

@@ -1,3 +1,4 @@
+from django.contrib.auth import get_permission_codename
 from django.http import QueryDict
 from django.test.client import RequestFactory
 from django.urls import resolve
@@ -10,9 +11,11 @@ from cms.utils.conf import get_cms_setting
 from djangocms_alias.constants import (
     CATEGORY_LIST_URL_NAME,
     CREATE_ALIAS_URL_NAME,
+    DELETE_ALIAS_PLUGIN_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
+    PUBLISH_ALIAS_URL_NAME,
     SET_ALIAS_DRAFT_URL_NAME,
 )
 from djangocms_alias.models import Alias as AliasModel
@@ -25,19 +28,34 @@ class BaseAliasPluginTestCase(CMSTestCase):
     CATEGORY_LIST_ENDPOINT = alias_plugin_reverse(CATEGORY_LIST_URL_NAME)
     SET_ALIAS_DRAFT_ENDPOINT = alias_plugin_reverse(SET_ALIAS_DRAFT_URL_NAME)
 
-    def DETACH_ALIAS_PLUGIN_ENDPOINT(self, plugin_pk):
+    def get_publish_alias_endpoint(self, alias_pk, language=None):
+        return alias_plugin_reverse(
+            PUBLISH_ALIAS_URL_NAME,
+            args=(
+                alias_pk,
+                language or self.language,
+            ),
+        )
+
+    def get_detach_alias_plugin_endpoint(self, plugin_pk):
         return alias_plugin_reverse(
             DETACH_ALIAS_PLUGIN_URL_NAME,
             args=[plugin_pk],
         )
 
-    def DETAIL_ALIAS_ENDPOINT(self, alias_pk):
+    def get_detail_alias_endpoint(self, alias_pk):
         return alias_plugin_reverse(
             DETAIL_ALIAS_URL_NAME,
             args=[alias_pk],
         )
 
-    def LIST_ALIASES_ENDPOINT(self, category_pk):
+    def get_delete_alias_endpoint(self, alias_pk):
+        return alias_plugin_reverse(
+            DELETE_ALIAS_PLUGIN_URL_NAME,
+            args=[alias_pk],
+        )
+
+    def get_list_aliases_endpoint(self, category_pk):
         return alias_plugin_reverse(
             LIST_ALIASES_URL_NAME,
             args=[category_pk],
@@ -81,7 +99,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
 
     def _get_instance_request(self, instance, user, path=None, edit=False,
                               preview=False, structure=False, lang_code='en',
-                              disable=False):
+                              disable=False, **kwargs):
         if not path:
             path = instance.get_absolute_url()
 
@@ -108,10 +126,12 @@ class BaseAliasPluginTestCase(CMSTestCase):
 
         return request
 
-    def _process_request_by_toolbar_middleware(self, request):
+    def _process_request_by_toolbar_middleware(self, request, toolbar_object=None):  # noqa: E501
         midleware = ToolbarMiddleware()
         midleware.process_request(request)
         if hasattr(request, 'toolbar'):
+            if toolbar_object:
+                request.toolbar.set_object(toolbar_object)
             request.toolbar.populate()
             request.resolver_match = resolve(request.path)
             request.toolbar.post_template_populate()
@@ -120,7 +140,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
     def get_alias_request(self, alias, *args, **kwargs):  # noqa: E501
         request = self._get_instance_request(alias, *args, **kwargs)
         request.current_page = None
-        request = self._process_request_by_toolbar_middleware(request)
+        request = self._process_request_by_toolbar_middleware(request, alias)
         return request
 
     def get_page_request(self, page, *args, **kwargs):  # noqa: E501
@@ -128,3 +148,11 @@ class BaseAliasPluginTestCase(CMSTestCase):
         request.current_page = page
         request = self._process_request_by_toolbar_middleware(request)
         return request
+
+    def get_staff_user_with_alias_permissions(self):
+        staff_user = self._create_user("alias staff", is_staff=True, is_superuser=False)  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename('add', AliasModel._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename('change', AliasModel._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename('delete', AliasModel._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename('add', Category._meta))  # noqa: E501
+        return staff_user

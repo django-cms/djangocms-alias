@@ -98,13 +98,35 @@ class AliasDetailView(DetailView):
 def delete_alias_view(request, pk, *args, **kwargs):
     from djangocms_alias.admin import AliasAdmin
 
-    response = AliasAdmin(
-        model=AliasModel,
-        admin_site=admin.site,
-    ).delete_view(request, pk)
+    try:
+        response = AliasAdmin(
+            model=AliasModel,
+            admin_site=admin.site,
+        ).delete_view(request, pk)
+    except PermissionDenied as e:
+        if request.method == 'GET':
+            opts = Alias.model._meta
+            context = {
+                'perms_needed': True,
+                'protected': True,
+                'opts': opts,
+                'root_path': reverse('admin:index'),
+                'is_popup': True,
+                'app_label': opts.app_label,
+                'object_name': _('alias'),
+                'object': AliasModel.objects.get(pk=pk),
+            }
+            return render(
+                request,
+                'admin/djangocms_alias/alias/delete_confirmation.html',
+                context,
+            )
+        else:
+            raise e
 
-    if request.POST and response.status_code == 200:
+    if request.method == 'POST' and response.status_code == 302:
         return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
+
     return response
 
 

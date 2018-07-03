@@ -13,8 +13,7 @@ from cms.utils.permissions import (
 )
 
 from .constants import SELECT2_ALIAS_URL_NAME
-from .models import Alias as AliasModel
-from .models import AliasPlugin, Category
+from .models import Alias as AliasModel, AliasPlugin, Category
 from .utils import alias_plugin_reverse
 
 

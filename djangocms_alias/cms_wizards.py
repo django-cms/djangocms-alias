@@ -6,8 +6,7 @@ from cms.wizards.wizard_pool import wizard_pool
 
 from .cms_plugins import Alias
 from .forms import CreateAliasWizardForm, CreateCategoryWizardForm
-from .models import Alias as AliasModel
-from .models import Category
+from .models import Alias as AliasModel, Category
 
 
 class CreateAliasWizard(Wizard):

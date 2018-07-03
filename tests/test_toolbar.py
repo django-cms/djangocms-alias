@@ -36,8 +36,8 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
 
         alias = self._create_alias([self.plugin])
         for endpoint in [
-            self.CATEGORY_LIST_ENDPOINT,
-            self.LIST_ALIASES_ENDPOINT(alias.category_id),
+            self.LIST_CATEGORY_ENDPOINT,
+            self.DETAIL_CATEGORY_ENDPOINT(alias.category_id),
             self.DETAIL_ALIAS_ENDPOINT(alias.pk),
         ]:
             request = self.get_page_request(

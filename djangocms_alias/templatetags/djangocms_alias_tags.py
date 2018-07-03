@@ -1,9 +1,15 @@
 from django import template
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext_lazy as _
 
 from cms.toolbar.utils import get_toolbar_from_request
 
-from ..constants import DETAIL_ALIAS_URL_NAME, DRAFT_ALIASES_SESSION_KEY
+from ..constants import (
+    DETAIL_ALIAS_URL_NAME,
+    DRAFT_ALIASES_SESSION_KEY,
+    LIST_CATEGORY_URL_NAME,
+    PLUGIN_URL_NAME_PREFIX,
+)
 from ..models import Category
 from ..utils import alias_plugin_reverse
 
@@ -53,3 +59,32 @@ def render_alias(context, instance, use_draft=None, editable=False):
             'content': mark_safe(content),
             'draft': draft,
         }
+
+
+class Breadcrumb:
+
+    def __init__(self, label, url):
+        self.label = label
+        self.url = url
+
+    @classmethod
+    def from_model_instance(cls, instance):
+        return cls(instance.name, instance.get_absolute_url())
+
+
+@register.inclusion_tag('djangocms_alias/breadcrumb.html', takes_context=True)
+def show_alias_breadcrumb(context):
+    if context['request'].toolbar.app_name != PLUGIN_URL_NAME_PREFIX:
+        return {'items': []}
+
+    items = [
+        Breadcrumb(_('Categories'), alias_plugin_reverse(LIST_CATEGORY_URL_NAME)),  # noqa: E501
+    ]
+
+    obj = context.get('object', None)
+    if obj:
+        if hasattr(obj, 'category'):
+            items.append(Breadcrumb.from_model_instance(obj.category))
+        items.append(Breadcrumb.from_model_instance(obj))
+
+    return {'items': items}

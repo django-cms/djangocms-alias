@@ -11,7 +11,7 @@
         </h2>
         <div class="cms-aliases-category">
           <ol class="cms-aliases-sortable" data-show-text="{% trans 'show' %}" data-hide-text="{% trans 'hide' %}" data-ajax-url="{% url 'admin:djangocms_alias_set_alias_position' %}">
-          {% for alias in aliases %}
+          {% for alias in category.aliases.all %}
             <li data-alias-id={{ alias.pk }} class="cms-aliases-list-item">
               <div class="cms-alias-draggable">
                 <h3 class="cms-alias-heading" id="{{ alias.name|slugify }}">
@@ -32,6 +32,6 @@
         </div>
     </div>
 
-{% addtoblock "css" %}<link href="{% static 'djangocms_alias/js/alias-list.css' %}" media="screen" rel="stylesheet" type="text/css" />{% endaddtoblock %}
-{% addtoblock "js" %}<script type="text/javascript" src="{% static 'djangocms_alias/js/alias-list.js' %}"></script>{% endaddtoblock %}
+{% addtoblock "css" %}<link href="{% static 'djangocms_alias/js/category-detail.css' %}" media="screen" rel="stylesheet" type="text/css" />{% endaddtoblock %}
+{% addtoblock "js" %}<script type="text/javascript" src="{% static 'djangocms_alias/js/category-detail.js' %}"></script>{% endaddtoblock %}
 {% endblock %}

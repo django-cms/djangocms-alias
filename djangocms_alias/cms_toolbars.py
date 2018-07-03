@@ -14,8 +14,8 @@ from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 
 from .constants import (
-    CATEGORY_LIST_URL_NAME,
     DRAFT_ALIASES_SESSION_KEY,
+    LIST_CATEGORY_URL_NAME,
     PUBLISH_ALIAS_URL_NAME,
     SET_ALIAS_DRAFT_URL_NAME,
 )
@@ -113,7 +113,7 @@ class AliasToolbar(CMSToolbar):
         )
         alias_menu.add_link_item(
             _('List of Aliases'),
-            url=alias_plugin_reverse(CATEGORY_LIST_URL_NAME),
+            url=alias_plugin_reverse(LIST_CATEGORY_URL_NAME),
         )
 
         use_draft_aliases = self.request.session.get(DRAFT_ALIASES_SESSION_KEY)

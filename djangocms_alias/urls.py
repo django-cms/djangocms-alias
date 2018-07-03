@@ -15,14 +15,14 @@ urlpatterns = [
         name=constants.PUBLISH_ALIAS_URL_NAME,
     ),
     url(
-        r'^aliases/$',
+        r'^categories/$',
         views.CategoryListView.as_view(),
-        name=constants.CATEGORY_LIST_URL_NAME,
+        name=constants.LIST_CATEGORY_URL_NAME,
     ),
     url(
-        r'^aliases/category/(?P<category_pk>\d+)/$',
-        views.AliasListView.as_view(),
-        name=constants.LIST_ALIASES_URL_NAME,
+        r'^category/(?P<pk>\d+)/$',
+        views.CategoryDetailView.as_view(),
+        name=constants.DETAIL_CATEGORY_URL_NAME,
     ),
     url(
         r'^aliases/(?P<pk>\d+)/$',
@@ -37,7 +37,7 @@ urlpatterns = [
     url(
         r'^delete-alias/(?P<pk>\d+)/$',
         views.delete_alias_view,
-        name=constants.DELETE_ALIAS_PLUGIN_URL_NAME,
+        name=constants.DELETE_ALIAS_URL_NAME,
     ),
     url(
         r'^draft-aliases-mode/$',

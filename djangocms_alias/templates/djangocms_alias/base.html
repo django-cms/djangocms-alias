@@ -1,9 +1,10 @@
 {% extends "base.html" %}
-{% load i18n static sekizai_tags %}
+{% load i18n static sekizai_tags djangocms_alias_tags %}
 
 {% block title %}{% trans "Aliases" %}{% endblock %}
 
 {% block content %}
+    {% show_alias_breadcrumb %}
     <div class="aliases">
         {% block aliases_content %}
         {% endblock aliases_content %}

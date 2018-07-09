@@ -8,4 +8,7 @@
         {% block aliases_content %}
         {% endblock aliases_content %}
     </div>
+
+    {% addtoblock "css" %}<link href="{% static 'djangocms_alias/css/djangocms-alias.css' %}" media="screen" rel="stylesheet" type="text/css" />{% endaddtoblock %}
+    {% addtoblock "js" %}<script type="text/javascript" src="{% static 'djangocms_alias/js/dist/bundle.alias.min.js' %}"></script>{% endaddtoblock %}
 {% endblock content %}

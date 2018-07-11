@@ -1,7 +1,7 @@
 from cms.api import add_plugin
 
-from djangocms_alias.constants import DRAFT_ALIASES_SESSION_KEY
 from djangocms_alias.cms_plugins import Alias
+from djangocms_alias.constants import DRAFT_ALIASES_SESSION_KEY
 
 from .base import BaseAliasPluginTestCase
 

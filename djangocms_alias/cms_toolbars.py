@@ -1,8 +1,7 @@
 import itertools
 
 from django.utils.encoding import force_text
-from django.utils.translation import override, ugettext
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import override, ugettext, ugettext_lazy as _
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,

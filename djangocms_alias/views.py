@@ -7,8 +7,10 @@ from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.utils.translation import get_language_from_request
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import (
+    get_language_from_request,
+    ugettext_lazy as _,
+)
 from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView
 
@@ -18,8 +20,7 @@ from cms.utils.permissions import has_plugin_permission
 from .cms_plugins import Alias
 from .constants import DRAFT_ALIASES_SESSION_KEY
 from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
-from .models import Alias as AliasModel
-from .models import AliasPlugin, Category
+from .models import Alias as AliasModel, AliasPlugin, Category
 
 
 JAVASCRIPT_SUCCESS_RESPONSE = """

@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
-from . import constants, views
+
+from . import constants, views  # isort:skip
 
 
 urlpatterns = [

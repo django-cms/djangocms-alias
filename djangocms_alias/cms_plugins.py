@@ -1,5 +1,7 @@
-from django.utils.translation import get_language_from_request
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import (
+    get_language_from_request,
+    ugettext_lazy as _,
+)
 
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
@@ -17,8 +19,7 @@ from .constants import (
     LIST_ALIASES_URL_NAME,
 )
 from .forms import AliasPluginForm
-from .models import Alias as AliasModel
-from .models import AliasPlugin
+from .models import Alias as AliasModel, AliasPlugin
 from .utils import alias_plugin_reverse
 
 

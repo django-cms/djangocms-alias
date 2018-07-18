@@ -3,12 +3,10 @@
 
 {% block aliases_content %}
     <div class="cms-aliases-page container">
-      <h1 class="cms-aliases-page-h1">{% trans 'Aliases' %}</h1>
+        <h1 class="cms-aliases-page-h1">{% trans 'Alias administration' %}</h1>
         {% for category in categories %}
-            <h2 class="cms-aliases-page-heading" id="{{ category.name|slugify }}">
-                <span class="cms-aliases-page-heading-inner">
-                    <a class="cms-aliases-page-heading-link" href="{{ category.get_absolute_url }}">{{ category.name }}</a>
-                </span>
+            <h2 class="cms-alias-item" id="{{ category.name|slugify }}">
+                <a class="cms-alias-item-category-link" href="{{ category.get_absolute_url }}">{{ category.name }}</a>
             </h2>
         {% endfor %}
     </div>

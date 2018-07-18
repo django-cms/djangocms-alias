@@ -1,0 +1,11 @@
+.cms-aliases-sortable {
+    list-style-type: none;
+}
+
+.cms-alias-sortable-collapsed .cms-alias-placeholder {
+    display: none;
+}
+
+.cms-alias-sortable-expanded .cms-alias-placeholder {
+    display: block;
+}

@@ -3,35 +3,31 @@
 
 {% block aliases_content %}
     <div class="cms-aliases-page container">
-      <h1 class="cms-aliases-page-h1">{% trans 'Aliases' %}</h1>
         <h2 class="cms-aliases-page-heading" id="{{ category.name|slugify }}">
             <span class="cms-aliases-page-heading-inner">
                 {{ category.name }}
             </span>
+            <a href="../.." class="cms-aliases-page-back cms-alias-btn">{% trans "Back" %}</a>
         </h2>
         <div class="cms-aliases-category">
-          <ol class="cms-aliases-sortable" data-show-text="{% trans 'show' %}" data-hide-text="{% trans 'hide' %}" data-ajax-url="{% url 'admin:djangocms_alias_set_alias_position' %}">
-          {% for alias in aliases %}
-            <li data-alias-id={{ alias.pk }} class="cms-aliases-list-item">
-              <div class="cms-alias-draggable">
-                <h3 class="cms-alias-heading" id="{{ alias.name|slugify }}">
-                    <span class="cms-alias-heading-inner">
-                      <a href="{% get_alias_url alias %}">
-                        {{ alias.name }}
-                      </a>
-                      <a href="javascript:void(0)" class="cms-alias-sortable-show-hide-button">{% trans 'show' %}</a>
-                    </span>
-                </h3>
-                <div class="cms-alias-placeholder">
-                  {% render_alias alias use_draft=use_draft %}
-                </div>
-              </div>
-            </li>
-          {% endfor %}
-          </ol>
+            <div class="cms-aliases-sortable" data-ajax-url="{% url 'admin:djangocms_alias_set_alias_position' %}">
+                {% for alias in aliases %}
+                    <div data-alias-id={{ alias.pk }} class="cms-aliases-list-item cms-alias-sortable-collapsed">
+                        <div class="cms-alias-draggable">
+                            <h3 class="cms-alias-item" id="{{ alias.name|slugify }}">
+                                <span class="cms-alias-title cms-alias-sortable-show-hide-button">
+                                    {{ alias.name }}
+                                </span>
+                                <a href="{% get_alias_url alias %}" class="cms-alias-btn"><span
+                                        class="cms-icon cms-icon-pencil"></span></a>
+                            </h3>
+                            <div class="cms-alias-placeholder">
+                                {% render_alias alias use_draft=use_draft %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
-
-{% addtoblock "css" %}<link href="{% static 'djangocms_alias/js/alias-list.css' %}" media="screen" rel="stylesheet" type="text/css" />{% endaddtoblock %}
-{% addtoblock "js" %}<script type="text/javascript" src="{% static 'djangocms_alias/js/alias-list.js' %}"></script>{% endaddtoblock %}
 {% endblock %}

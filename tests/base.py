@@ -113,10 +113,12 @@ class BaseAliasPluginTestCase(CMSTestCase):
 
         return request
 
-    def _process_request_by_toolbar_middleware(self, request):
+    def _process_request_by_toolbar_middleware(self, request, obj=None):
         midleware = ToolbarMiddleware()
         midleware.process_request(request)
         if hasattr(request, 'toolbar'):
+            if obj:
+                request.toolbar.set_object(obj)
             request.toolbar.populate()
             request.resolver_match = resolve(request.path)
             request.toolbar.post_template_populate()
@@ -125,11 +127,11 @@ class BaseAliasPluginTestCase(CMSTestCase):
     def get_alias_request(self, alias, *args, **kwargs):  # noqa: E501
         request = self._get_instance_request(alias, *args, **kwargs)
         request.current_page = None
-        request = self._process_request_by_toolbar_middleware(request)
+        request = self._process_request_by_toolbar_middleware(request, obj=alias)
         return request
 
-    def get_page_request(self, page, *args, **kwargs):  # noqa: E501
+    def get_page_request(self, page, obj=None, *args, **kwargs):  # noqa: E501
         request = self._get_instance_request(page, *args, **kwargs)
         request.current_page = page
-        request = self._process_request_by_toolbar_middleware(request)
+        request = self._process_request_by_toolbar_middleware(request, obj)
         return request

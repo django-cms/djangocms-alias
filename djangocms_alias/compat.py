@@ -3,8 +3,7 @@ from distutils.version import LooseVersion
 import cms
 
 
-# CMS_VERSION = cms.__version__
-CMS_VERSION = '4.0'
+CMS_VERSION = cms.__version__
 
 CMS_36 = LooseVersion(CMS_VERSION) < LooseVersion('3.7')
 

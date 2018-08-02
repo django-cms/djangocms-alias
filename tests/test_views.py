@@ -885,13 +885,36 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             [alias1.pk],
         )
 
-    # def test_aliascontent_add_view(self):
-    #     with self.login_user_context(self.superuser):
-    #         response = self.client.post(
-    #             alias_plugin_reverse(
-    #                 SELECT2_ALIAS_URL_NAME,
-    #             ),
-    #             data={'pk': alias1.pk},
-    #         )
+    def test_aliascontent_add_view(self):
+        alias = Alias.objects.create(category=self.category)
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse('djangocms_alias_aliascontent_add'),
+                data={
+                    'language': 'de',
+                    'name': 'alias test de 1',
+                    'alias': alias.pk,
+                },
+            )
 
-    #     self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(alias.contents.count(), 1)
+        alias_content = alias.contents.first()
+        self.assertEqual(alias_content.language, 'de')
+        self.assertEqual(alias_content.name, 'alias test de 1')
+
+    def test_aliascontent_add_view_get(self):
+        alias = Alias.objects.create(category=self.category)
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    'djangocms_alias_aliascontent_add',
+                    parameters={
+                        'language': 'fr',
+                        'alias': alias.pk,
+                    },
+                ),
+            )
+
+        self.assertContains(response, 'type="hidden" name="language" value="fr"')
+        self.assertContains(response, 'type="hidden" name="alias" value="{}"'.format(alias.pk))

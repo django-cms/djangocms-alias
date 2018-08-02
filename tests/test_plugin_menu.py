@@ -45,7 +45,7 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
 
     def test_extra_plugin_items_for_placeholder(self):
         extra_items = Alias.get_extra_placeholder_menu_items(
-            self.get_page_request(self.page, self.superuser),
+            self.get_page_request(page=self.page, user=self.superuser),
             self.placeholder,
         )
         self.assertEqual(len(extra_items), 1)

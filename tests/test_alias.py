@@ -1,6 +1,9 @@
 from operator import attrgetter
 
-from cms.api import add_plugin
+from django.contrib.sites.models import Site
+from django.test.utils import override_settings
+
+from cms.api import add_plugin, create_page
 from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.cms_plugins import Alias
@@ -255,3 +258,64 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             body='test 3',
         )
         self.assertEqual(live_plugins.count(), 2)
+
+    def test_alias_multisite_support(self):
+        site1 = Site.objects.create(domain='site1.com', name='1')
+        site2 = Site.objects.create(domain='site2.com', name='2')
+        alias = self._create_alias()
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='test alias multisite',
+        )
+        alias.publish(self.language)
+
+        site1_page = create_page(
+            title='Site1',
+            template='page.html',
+            language=self.language,
+            published=True,
+            in_navigation=True,
+            site=site1,
+        )
+        site2_page = create_page(
+            title='Site2',
+            template='page.html',
+            language=self.language,
+            published=True,
+            in_navigation=True,
+            site=site2,
+        )
+        add_plugin(
+            site1_page.placeholders.get(slot='content'),
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        add_plugin(
+            site2_page.placeholders.get(slot='content'),
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        site1_page.publish(self.language)
+        site2_page.publish(self.language)
+
+        add_plugin(
+            alias.draft_content,
+            'TextPlugin',
+            language=self.language,
+            body='Another alias plugin',
+        )
+        alias.publish(self.language)
+
+        with override_settings(SITE_ID=site1.pk):
+            response = self.client.get(site1_page.get_absolute_url())
+        self.assertContains(response, 'test alias multisite')
+        self.assertContains(response, 'Another alias plugin')
+
+        with override_settings(SITE_ID=site2.pk):
+            response = self.client.get(site2_page.get_absolute_url())
+        self.assertContains(response, 'test alias multisite')
+        self.assertContains(response, 'Another alias plugin')

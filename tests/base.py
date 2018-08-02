@@ -13,16 +13,14 @@ from djangocms_alias.constants import (
     DETACH_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
-    SET_ALIAS_DRAFT_URL_NAME,
 )
-from djangocms_alias.models import Alias as AliasModel, Category
+from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import alias_plugin_reverse
 
 
 class BaseAliasPluginTestCase(CMSTestCase):
     CREATE_ALIAS_ENDPOINT = alias_plugin_reverse(CREATE_ALIAS_URL_NAME)
     CATEGORY_LIST_ENDPOINT = alias_plugin_reverse(CATEGORY_LIST_URL_NAME)
-    SET_ALIAS_DRAFT_ENDPOINT = alias_plugin_reverse(SET_ALIAS_DRAFT_URL_NAME)
 
     def DETACH_ALIAS_PLUGIN_ENDPOINT(self, plugin_pk):
         return alias_plugin_reverse(
@@ -54,7 +52,10 @@ class BaseAliasPluginTestCase(CMSTestCase):
         self.category = Category.objects.create(
             name='test category',
         )
-        self.placeholder = self.page.placeholders.get(slot='content')
+        try:
+            self.placeholder = self.page.placeholders.get(slot='content')
+        except AttributeError:
+            self.placeholder = self.page.get_placeholders(self.language).get(slot='content')
         self.plugin = add_plugin(
             self.placeholder,
             'TextPlugin',
@@ -63,19 +64,24 @@ class BaseAliasPluginTestCase(CMSTestCase):
         )
         self.superuser = self.get_superuser()
 
-    def _create_alias(self, plugins=None, name='test alias', category=None,
-                      position=0):
+    def _create_alias(self, plugins=None, name='test alias', category=None, position=0, language=None):
+        if language is None:
+            language = self.language
         if category is None:
             category = self.category
         if plugins is None:
             plugins = []
         alias = AliasModel.objects.create(
-            name=name,
             category=category,
             position=position,
         )
+        alias_content = AliasContent.objects.create(
+            alias=alias,
+            name=name,
+            language=language,
+        )
         if plugins:
-            alias.populate(plugins=plugins)
+            alias_content.populate(plugins=plugins)
         return alias
 
     def _get_instance_request(self, instance, user, path=None, edit=False,

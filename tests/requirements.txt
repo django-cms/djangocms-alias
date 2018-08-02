@@ -2,3 +2,6 @@ coverage
 djangocms_helper
 flake8
 isort
+
+https://github.com/divio/django-cms/archive/release/4.0.x.zip
+https://github.com/divio/djangocms-versioning/archive/master.zip

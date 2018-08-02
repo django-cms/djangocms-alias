@@ -4,10 +4,13 @@ HELPER_SETTINGS = {
         'djangocms_alias',
     ],
     'INSTALLED_APPS': [
+        # 'djangocms_versioning',
         'parler',
         'djangocms_alias.test_utils.text',
     ],
     'MIGRATION_MODULES': {
+        'sites': None,
+        'contenttypes': None,
         'auth': None,
         'cms': None,
         'menus': None,

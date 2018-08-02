@@ -1,7 +1,7 @@
 from cms.api import add_plugin
 
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.models import Category
+from djangocms_alias.models import Alias as AliasModel, Category
 
 from .base import BaseAliasPluginTestCase
 
@@ -13,9 +13,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
 
     def test_alias_placeholder_slot_save_again(self):
         alias = self._create_alias(self.placeholder.get_plugins())
-        slot_name = alias.draft_content.slot
+        alias_placeholder = alias.get_placeholder(self.language)
+        slot_name = alias_placeholder.slot
         alias.save()
-        self.assertEqual(alias.draft_content.slot, slot_name)
+        self.assertEqual(alias_placeholder.slot, slot_name)
 
     def test_alias_placeholder_name(self):
         alias = self._create_alias(
@@ -41,7 +42,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             self.placeholder.get_plugins(),
         )
         recursed_alias_plugin = add_plugin(
-            alias.draft_content,
+            alias.get_placeholder(self.language),
             Alias,
             language=self.language,
             alias=alias,
@@ -55,10 +56,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         category2 = Category.objects.create(
             name='Cat 2',
         )
-        alias1cat1 = self._create_alias(name='1', category=category1)
-        alias1cat2 = self._create_alias(name='1', category=category2)
-        alias2cat2 = self._create_alias(name='2', category=category2)
-        alias2cat1 = self._create_alias(name='2', category=category1)
+        alias1cat1 = AliasModel.objects.create(category=category1)
+        alias1cat2 = AliasModel.objects.create(category=category2)
+        alias2cat2 = AliasModel.objects.create(category=category2)
+        alias2cat1 = AliasModel.objects.create(category=category1)
 
         self.assertEqual(
             self._get_aliases_positions(alias1cat1.category),
@@ -70,10 +71,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_save_and_delete_inc_dec_of_position_delete_first(self):
-        alias1 = self._create_alias(name='1')
-        alias2 = self._create_alias(name='2')
-        alias3 = self._create_alias(name='3')
-        alias4 = self._create_alias(name='4')
+        alias1 = AliasModel.objects.create(category=self.category)
+        alias2 = AliasModel.objects.create(category=self.category)
+        alias3 = AliasModel.objects.create(category=self.category)
+        alias4 = AliasModel.objects.create(category=self.category)
 
         alias1.delete()
         self.assertEqual(
@@ -82,9 +83,9 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_save_and_delete_inc_dec_of_position_delete_in_the_middle(self):
-        alias1 = self._create_alias(name='1')
-        alias2 = self._create_alias(name='2')
-        alias3 = self._create_alias(name='3')
+        alias1 = AliasModel.objects.create(category=self.category)
+        alias2 = AliasModel.objects.create(category=self.category)
+        alias3 = AliasModel.objects.create(category=self.category)
 
         alias2.delete()
         self.assertEqual(
@@ -93,9 +94,9 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_save_and_delete_inc_dec_of_position_delete_last(self):
-        alias1 = self._create_alias(name='1')
-        alias2 = self._create_alias(name='2')
-        alias3 = self._create_alias(name='3')
+        alias1 = AliasModel.objects.create(category=self.category)
+        alias2 = AliasModel.objects.create(category=self.category)
+        alias3 = AliasModel.objects.create(category=self.category)
 
         alias3.delete()
         self.assertEqual(
@@ -110,10 +111,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         category2 = Category.objects.create(
             name='Cat 2',
         )
-        alias1cat1 = self._create_alias(name='1', category=category1)  # 0
-        alias2cat1 = self._create_alias(name='2', category=category1)  # 1
-        alias1cat2 = self._create_alias(name='1', category=category2)  # 0
-        alias2cat2 = self._create_alias(name='2', category=category2)  # 1
+        alias1cat1 = AliasModel.objects.create(category=category1)  # 0
+        alias2cat1 = AliasModel.objects.create(category=category1)  # 1
+        alias1cat2 = AliasModel.objects.create(category=category2)  # 0
+        alias2cat2 = AliasModel.objects.create(category=category2)  # 1
 
         alias1cat1._set_position(alias2cat1.position)
         self.assertEqual(
@@ -126,10 +127,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_set_position_moving_up(self):
-        alias1 = self._create_alias(name='1')  # 0
-        alias2 = self._create_alias(name='2')  # 1
-        alias3 = self._create_alias(name='3')  # 2
-        alias4 = self._create_alias(name='4')  # 3
+        alias1 = AliasModel.objects.create(category=self.category)  # 0
+        alias2 = AliasModel.objects.create(category=self.category)  # 1
+        alias3 = AliasModel.objects.create(category=self.category)  # 2
+        alias4 = AliasModel.objects.create(category=self.category)  # 3
 
         alias3._set_position(1)
         self.assertEqual(
@@ -138,10 +139,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_set_position_moving_down(self):
-        alias1 = self._create_alias(name='1')  # 0
-        alias2 = self._create_alias(name='2')  # 1
-        alias3 = self._create_alias(name='3')  # 2
-        alias4 = self._create_alias(name='4')  # 3
+        alias1 = AliasModel.objects.create(category=self.category)  # 0
+        alias2 = AliasModel.objects.create(category=self.category)  # 1
+        alias3 = AliasModel.objects.create(category=self.category)  # 2
+        alias4 = AliasModel.objects.create(category=self.category)  # 3
 
         alias2._set_position(2)
         self.assertEqual(
@@ -150,10 +151,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_set_position_moving_up_from_end_to_start(self):
-        alias1 = self._create_alias(name='1')  # 0
-        alias2 = self._create_alias(name='2')  # 1
-        alias3 = self._create_alias(name='3')  # 2
-        alias4 = self._create_alias(name='4')  # 3
+        alias1 = AliasModel.objects.create(category=self.category)  # 0
+        alias2 = AliasModel.objects.create(category=self.category)  # 1
+        alias3 = AliasModel.objects.create(category=self.category)  # 2
+        alias4 = AliasModel.objects.create(category=self.category)  # 3
 
         alias4._set_position(0)
         self.assertEqual(
@@ -162,10 +163,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_set_position_moving_down_from_start_to_end(self):
-        alias1 = self._create_alias(name='1')  # 0
-        alias2 = self._create_alias(name='2')  # 1
-        alias3 = self._create_alias(name='3')  # 2
-        alias4 = self._create_alias(name='4')  # 3
+        alias1 = AliasModel.objects.create(category=self.category)  # 0
+        alias2 = AliasModel.objects.create(category=self.category)  # 1
+        alias3 = AliasModel.objects.create(category=self.category)  # 2
+        alias4 = AliasModel.objects.create(category=self.category)  # 3
 
         alias1._set_position(3)
         self.assertEqual(

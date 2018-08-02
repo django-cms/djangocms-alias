@@ -1,5 +1,6 @@
 import operator
 
+from django.conf import settings
 from django.db import models, transaction
 from django.db.models import F, Q
 from django.utils.encoding import force_text
@@ -8,18 +9,20 @@ from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from cms.api import add_plugin
-from cms.models import CMSPlugin, Placeholder
+from cms.models import CMSPlugin
 from cms.models.fields import PlaceholderField
+from cms.utils.i18n import get_current_language
 from cms.utils.plugins import copy_plugins_to_placeholder
 
+from .compat import CMS_36
 from .constants import DETAIL_ALIAS_URL_NAME, LIST_ALIASES_URL_NAME
 from .utils import alias_plugin_reverse
 
 
 __all__ = [
     'Category',
-    'AliasPlaceholder',
     'Alias',
+    'AliasContent',
     'AliasPlugin',
 ]
 
@@ -46,34 +49,15 @@ class Category(models.Model):
         return alias_plugin_reverse(LIST_ALIASES_URL_NAME, args=[self.pk])
 
 
-class AliasPlaceholder(Placeholder):
+class AliasQuerySet(models.QuerySet):
 
-    class Meta:
-        proxy = True
-
-    @cached_property
-    def alias(self):
-        return Alias.objects.get(
-            Q(draft_content=self.pk) | Q(live_content=self.pk),
+    def current_language(self):
+        return self.filter(
+            contents__language=get_current_language(),
         )
-
-    def get_label(self):
-        return self.alias.name
 
 
 class Alias(models.Model):
-    name = models.CharField(
-        verbose_name=_('name'),
-        max_length=120,
-    )
-    draft_content = PlaceholderField(
-        slotname=_get_alias_placeholder_slot,
-        related_name='alias_draft',
-    )
-    live_content = PlaceholderField(
-        slotname=_get_alias_placeholder_slot,
-        related_name='live_draft',
-    )
     category = models.ForeignKey(
         Category,
         verbose_name=_('category'),
@@ -85,13 +69,12 @@ class Alias(models.Model):
         default=0,
     )
 
+    objects = AliasQuerySet.as_manager()
+
     class Meta:
         verbose_name = _('alias')
         verbose_name_plural = _('aliases')
         ordering = ['position']
-        unique_together = [
-            ('name', 'category'),
-        ]
 
     def __init__(self, *args, **kwargs):
         self._plugins_cache = {}
@@ -101,16 +84,9 @@ class Alias(models.Model):
         return self.name
 
     @cached_property
-    def draft_placeholder(self):
-        placeholder = self.draft_content
-        placeholder.__class__ = AliasPlaceholder
-        return placeholder
-
-    @cached_property
-    def live_placeholder(self):
-        placeholder = self.live_content
-        placeholder.__class__ = AliasPlaceholder
-        return placeholder
+    def name(self):
+        """Show alias name for current language"""
+        return self.get_name() or ''
 
     @cached_property
     def is_in_use(self):
@@ -118,64 +94,33 @@ class Alias(models.Model):
 
     @cached_property
     def pages_using_this_alias(self):
-        # TODO: list of pages model objects (?) then in template you can show
-        # name and link to it
-        # TODO handle nested aliases and overall nested plugins
-        # TODO handle also public/draft of pages (show indicator), alias can be
-        # used in live version but not in draft (was detached)
+        # TODO
         return []
+
+    def get_name(self, language=None):
+        return getattr(self.get_content(language), 'name', '')
 
     def get_absolute_url(self):
         return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[self.pk])
 
-    def get_plugins(self, language, use_draft=False):
-        key = (language, use_draft)
+    def get_content(self, language=None):
+        if not language:
+            language = get_current_language()
+        return self.contents.filter(language=language).first()
+
+    def get_placeholder(self, language=None):
+        return getattr(self.get_content(language), 'placeholder', None)
+
+    def get_plugins(self, language):
         try:
-            return self._plugins_cache[key]
+            return self._plugins_cache[language]
         except KeyError:
-            placeholder = (
-                self.draft_content if use_draft else self.live_content
-            )
-            self._plugins_cache[key] = placeholder.get_plugins_list(language)
-            return self._plugins_cache[key]
+            placeholder = self.get_placeholder(language)
+            self._plugins_cache[language] = placeholder.get_plugins_list()
+            return self._plugins_cache[language]
 
-    def publish(self, language):
-        self.live_content.clear(language=language)
-        copy_plugins_to_placeholder(
-            self.draft_content.get_plugins(language=language),
-            placeholder=self.live_content,
-        )
-
-    def populate(self, replaced_placeholder=None, replaced_plugin=None,
-                 language=None, plugins=None):
-        if not replaced_placeholder and not replaced_plugin:
-            copy_plugins_to_placeholder(
-                plugins,
-                placeholder=self.draft_content,
-            )
-            return
-
-        if replaced_placeholder:
-            plugins = replaced_placeholder.get_plugins(language)
-            placeholder = replaced_placeholder
-        else:
-            plugins = replaced_plugin.get_tree(replaced_plugin)
-            placeholder = replaced_plugin.placeholder
-
-        plugins.update(placeholder=self.draft_content, language=language)
-
-        new_plugin = add_plugin(
-            placeholder,
-            plugin_type='Alias',
-            target=replaced_plugin,
-            position='left',
-            language=language,
-            alias=self,
-        )
-        if replaced_plugin:
-            new_plugin.position = replaced_plugin.position
-            new_plugin.save(update_fields=['position'])
-        return new_plugin
+    def get_languages(self):
+        return self.contents.values_list('language', flat=True)
 
     @transaction.atomic
     def delete(self, *args, **kwargs):
@@ -183,9 +128,6 @@ class Alias(models.Model):
         self.category.aliases.filter(position__gt=self.position).update(
             position=F('position') - 1,
         )
-        # deletion of placeholders and all cms_plugins in it
-        self.draft_content.delete()
-        self.live_content.delete()
 
     def save(self, *args, **kwargs):
         if self._state.adding:
@@ -212,6 +154,86 @@ class Alias(models.Model):
         self.category.aliases.filter(*filters).update(position=op(F('position'), 1))  # noqa: E501
 
 
+class AliasContent(models.Model):
+    alias = models.ForeignKey(
+        Alias,
+        on_delete=models.CASCADE,
+        related_name='contents',
+    )
+    name = models.CharField(
+        verbose_name=_('name'),
+        max_length=120,
+    )
+    placeholder = PlaceholderField(
+        slotname=_get_alias_placeholder_slot,
+        related_name='alias_contents',
+    )
+    language = models.CharField(
+        max_length=10,
+        choices=settings.LANGUAGES,
+        default=get_current_language,
+    )
+
+    class Meta:
+        verbose_name = _('alias content')
+        verbose_name_plural = _('alias contents')
+
+    def __str__(self):
+        return self.name
+
+    @transaction.atomic
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.alias.cms_plugins.filter(language=self.language).delete()
+        self.placeholder.delete()
+
+    @transaction.atomic
+    def populate(self, replaced_placeholder=None, replaced_plugin=None, plugins=None):
+        if not replaced_placeholder and not replaced_plugin:
+            copy_plugins_to_placeholder(
+                plugins,
+                placeholder=self.placeholder,
+            )
+            return
+
+        if replaced_placeholder:
+            plugins = replaced_placeholder.get_plugins(self.language)
+            placeholder = replaced_placeholder
+            add_plugin_kwargs = {}
+        else:
+            if CMS_36:
+                plugins = replaced_plugin.get_tree(replaced_plugin)
+            else:
+                plugins = CMSPlugin.objects.filter(
+                    id__in=[replaced_plugin.pk] + replaced_plugin._get_descendants_ids(),
+                )
+            placeholder = replaced_plugin.placeholder
+            add_plugin_kwargs = {'position': 'left', 'target': replaced_plugin}
+
+        if CMS_36:
+            plugins.update(placeholder=self.placeholder, language=self.language)
+        else:
+            copy_plugins_to_placeholder(
+                plugins,
+                placeholder=self.placeholder,
+                language=self.language,
+            )
+            plugins.delete()
+            placeholder._recalculate_plugin_positions(self.language)
+
+        new_plugin = add_plugin(
+            placeholder,
+            plugin_type='Alias',
+            language=self.language,
+            alias=self.alias,
+            **add_plugin_kwargs
+        )
+        if replaced_plugin:
+            new_plugin.position = replaced_plugin.position
+            new_plugin.save(update_fields=['position'])
+        return new_plugin
+
+
 class AliasPlugin(CMSPlugin):
     alias = models.ForeignKey(
         Alias,
@@ -227,13 +249,13 @@ class AliasPlugin(CMSPlugin):
     def __str__(self):
         return force_text(self.alias.name)
 
-    def is_recursive(self):
-        draft_content_id = self.alias.draft_content_id
+    def is_recursive(self, language=None):
+        placeholder = self.alias.get_placeholder(language)
 
         plugins = AliasPlugin.objects.filter(
-            placeholder_id=draft_content_id,
+            placeholder_id=placeholder,
         )
         plugins = plugins.filter(
-            Q(pk=self) | Q(alias__draft_content=draft_content_id),
+            Q(pk=self) | Q(alias__contents__placeholder=placeholder),
         )
         return plugins.exists()

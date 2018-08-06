@@ -5,6 +5,7 @@
 .tox/
 .eggs/
 dist/
+!djangocms_alias/static/djangocms_alias/js/dist/
 build/
 .env
 local.sqlite

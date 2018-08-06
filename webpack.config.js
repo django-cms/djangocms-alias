@@ -62,12 +62,6 @@ module.exports = function (opts) {
                 __DEV__: 'false'
             }),
             new webpack.optimize.ModuleConcatenationPlugin(),
-            new webpack.optimize.UglifyJsPlugin({
-                comments: false,
-                compressor: {
-                    drop_console: true // eslint-disable-line
-                }
-            })
         ]);
     }
 

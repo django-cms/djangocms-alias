@@ -1,29 +1,13 @@
 from cms.api import add_plugin
 
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.models import Category
-from djangocms_alias.templatetags.djangocms_alias_tags import (
-    get_alias_categories,
-    get_alias_url,
-)
+from djangocms_alias.templatetags.djangocms_alias_tags import get_alias_url
 
 from .base import BaseAliasPluginTestCase
 
 
 class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
     alias_template = """{% load djangocms_alias_tags %}{% render_alias plugin.alias %}"""  # noqa: E501
-
-    def test_get_alias_categories(self):
-        Category.objects.bulk_create(
-            Category(name=name) for name in (
-                'foo', 'bar', 'baz',
-            )
-        )
-        categories = get_alias_categories()
-        self.assertEqual(
-            list(categories.values_list('name', flat=True)),
-            ['bar', 'baz', 'foo', 'test category'],
-        )
 
     def test_get_alias_url(self):
         alias = self._create_alias([self.plugin])

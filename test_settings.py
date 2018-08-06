@@ -5,7 +5,8 @@ HELPER_SETTINGS = {
     ],
     'INSTALLED_APPS': [
         'parler',
-        'djangocms_alias.test_utils.text',
+        # 'djangocms_alias.test_utils.text',
+        'djangocms_text_ckeditor',
     ],
     'MIGRATION_MODULES': {
         'sites': None,

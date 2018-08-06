@@ -127,7 +127,7 @@ class AliasListView(ListView):
 class CategoryListView(ListView):
     model = Category
     context_object_name = 'categories'
-    queryset = Category.objects.order_by('name')
+    queryset = Category.objects.order_by('translations__name')
     template_name = 'djangocms_alias/category_list.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -255,7 +255,7 @@ def set_alias_position_view(request):
 
 
 class AliasSelect2View(ListView):
-    queryset = AliasModel.objects.order_by('category__name', 'position')
+    queryset = AliasModel.objects.order_by('category__translations__name', 'position')
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()

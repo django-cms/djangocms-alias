@@ -3,6 +3,8 @@ from django.contrib import admin
 from cms.admin.placeholderadmin import PlaceholderAdminMixin
 from cms.utils.permissions import get_model_permission_codename
 
+from parler.admin import TranslatableAdmin
+
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
@@ -15,7 +17,7 @@ __all__ = [
 
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(TranslatableAdmin):
     list_display = ['name']
 
 

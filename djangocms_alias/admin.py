@@ -41,5 +41,4 @@ class AliasAdmin(PlaceholderAdminMixin, admin.ModelAdmin):
 
 @admin.register(AliasContent)
 class AliasContentAdmin(admin.ModelAdmin):
-    view_on_site = False
     form = AliasContentForm

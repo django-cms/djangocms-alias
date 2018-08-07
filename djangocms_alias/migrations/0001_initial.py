@@ -2,6 +2,7 @@
 
 import cms.models.fields
 import cms.utils.i18n
+from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 import djangocms_alias.models
@@ -33,7 +34,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=120, verbose_name='name')),
-                ('language', models.CharField(choices=[('en', 'English'), ('de', 'German'), ('fr', 'French'), ('it', 'Italiano')], default=cms.utils.i18n.get_current_language, max_length=10)),
+                ('language', models.CharField(choices=settings.LANGUAGES, default=cms.utils.i18n.get_current_language, max_length=10)),
                 ('alias', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='contents', to='djangocms_alias.Alias')),
                 ('placeholder', cms.models.fields.PlaceholderField(editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='alias_contents', slotname=djangocms_alias.models._get_alias_placeholder_slot, to='cms.Placeholder')),
             ],

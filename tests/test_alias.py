@@ -302,6 +302,14 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         site1_page.publish(self.language)
         site2_page.publish(self.language)
 
+        with override_settings(SITE_ID=site1.pk):
+            response = self.client.get(site1_page.get_absolute_url())
+        self.assertContains(response, 'test alias multisite')
+
+        with override_settings(SITE_ID=site2.pk):
+            response = self.client.get(site2_page.get_absolute_url())
+        self.assertContains(response, 'test alias multisite')
+
         add_plugin(
             alias.draft_content,
             'TextPlugin',
@@ -309,6 +317,8 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             body='Another alias plugin',
         )
         alias.publish(self.language)
+        site1_page.publish(self.language)
+        site2_page.publish(self.language)
 
         with override_settings(SITE_ID=site1.pk):
             response = self.client.get(site1_page.get_absolute_url())

@@ -8,7 +8,6 @@ from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
-from cms.utils.i18n import get_current_language
 from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
@@ -167,7 +166,9 @@ class CreateAliasWizardForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.set_category_widget(self._request.user)
+        if not getattr(self, 'user', None):
+            self.user = self._request.user
+        self.set_category_widget(self.user)
 
     def set_category_widget(self, user):
         formfield = self.fields['category']
@@ -181,7 +182,7 @@ class CreateAliasWizardForm(forms.Form):
         AliasContent.objects.create(
             alias=alias,
             name=self.cleaned_data.get('name'),
-            language=get_current_language(),
+            language=self.language_code,
         )
         return alias
 

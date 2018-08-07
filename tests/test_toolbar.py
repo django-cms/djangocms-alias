@@ -125,11 +125,17 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             ))
             for key, menu in language_menu.menus.items()
         }
-        self.assertEqual(
-            # First item is Deutsche... for Add Translation
-            '/en/admin/djangocms_alias/aliascontent/add/?language=de&alias={}'.format(
-                alias.pk,
-            ),
+        # First item is Deutsche... for Add Translation
+        self.assertIn(
+            '/en/admin/djangocms_alias/aliascontent/add/',
+            language_menu_first_items['Add Translation'].url,
+        )
+        self.assertIn(
+            'language=de',
+            language_menu_first_items['Add Translation'].url,
+        )
+        self.assertIn(
+            'alias={}'.format(alias.pk),
             language_menu_first_items['Add Translation'].url,
         )
         self.assertEqual(

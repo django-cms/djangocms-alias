@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('cms', '0022_auto_20180620_1551'),
+        ('cms', '0020_old_tree_cleanup'),
     ]
 
     operations = [

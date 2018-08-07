@@ -180,6 +180,10 @@ class Alias(CMSPluginBase):
                 parent_id=plugin.parent_id,
             )
         else:
+            # Deleting uses a copy of a plugin to preserve pk on existing
+            # ``plugin`` object. This is done due to
+            # plugin.get_plugin_toolbar_info requiring a PK in a passed
+            # instance.
             source_placeholder.delete_plugin(copy(plugin))
             target_placeholder._shift_plugin_positions(
                 language,

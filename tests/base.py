@@ -7,6 +7,7 @@ from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
 from cms.utils.conf import get_cms_setting
 
+from djangocms_alias.compat import get_page_placeholders
 from djangocms_alias.constants import (
     CATEGORY_LIST_URL_NAME,
     CREATE_ALIAS_URL_NAME,
@@ -52,10 +53,10 @@ class BaseAliasPluginTestCase(CMSTestCase):
         self.category = Category.objects.create(
             name='test category',
         )
-        try:
-            self.placeholder = self.page.placeholders.get(slot='content')
-        except AttributeError:
-            self.placeholder = self.page.get_placeholders(self.language).get(slot='content')
+
+        self.placeholder = get_page_placeholders(self.page, self.language).get(
+            slot='content',
+        )
         self.plugin = add_plugin(
             self.placeholder,
             'TextPlugin',

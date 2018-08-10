@@ -6,6 +6,7 @@ from django.test.utils import override_settings
 from cms.api import add_plugin, create_page
 from cms.utils.plugins import downcast_plugins
 
+from djangocms_alias.compat import get_page_placeholders
 from djangocms_alias.cms_plugins import Alias
 
 from .base import BaseAliasPluginTestCase
@@ -192,13 +193,13 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         site1 = Site.objects.create(domain='site1.com', name='1')
         site2 = Site.objects.create(domain='site2.com', name='2')
         alias = self._create_alias()
+        alias_placeholder = alias.get_placeholder(self.language)
         add_plugin(
-            alias.draft_content,
+            alias_placeholder,
             'TextPlugin',
             language=self.language,
             body='test alias multisite',
         )
-        alias.publish(self.language)
 
         site1_page = create_page(
             title='Site1',
@@ -217,13 +218,13 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             site=site2,
         )
         add_plugin(
-            site1_page.placeholders.get(slot='content'),
+            get_page_placeholders(site1_page, self.language).get(slot='content'),
             'Alias',
             language=self.language,
             alias=alias,
         )
         add_plugin(
-            site2_page.placeholders.get(slot='content'),
+            get_page_placeholders(site2_page, self.language).get(slot='content'),
             'Alias',
             language=self.language,
             alias=alias,
@@ -240,12 +241,11 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, 'test alias multisite')
 
         add_plugin(
-            alias.draft_content,
+            alias_placeholder,
             'TextPlugin',
             language=self.language,
             body='Another alias plugin',
         )
-        alias.publish(self.language)
         site1_page.publish(self.language)
         site2_page.publish(self.language)
 

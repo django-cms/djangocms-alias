@@ -145,7 +145,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             ),
             language_menu_first_items['Delete Translation'].url,
         )
-        self.assertEqual(
-            '/en/admin/djangocms_alias/alias/copy-plugins/',
+        self.assertRegexpMatches(
             language_menu_first_items['Copy all plugins'].action,
+            'en\/admin\/([\w\/]+)\/copy-plugins\/',
         )

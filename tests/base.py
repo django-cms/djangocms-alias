@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Permission
 from django.http import QueryDict
 from django.test.client import RequestFactory
 from django.urls import resolve
@@ -136,3 +137,14 @@ class BaseAliasPluginTestCase(CMSTestCase):
         request.current_page = page
         request = self._process_request_by_toolbar_middleware(request, obj)
         return request
+
+    def _add_default_permissions(self, user):
+        # Text plugin permissions
+        user.user_permissions.add(Permission.objects.get(codename='add_text'))
+        user.user_permissions.add(Permission.objects.get(codename='delete_text'))
+        user.user_permissions.add(Permission.objects.get(codename='change_text'))
+        # Page permissions
+        user.user_permissions.add(Permission.objects.get(codename='publish_page'))
+        user.user_permissions.add(Permission.objects.get(codename='add_page'))
+        user.user_permissions.add(Permission.objects.get(codename='change_page'))
+        user.user_permissions.add(Permission.objects.get(codename='delete_page'))

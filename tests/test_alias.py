@@ -6,8 +6,8 @@ from django.test.utils import override_settings
 from cms.api import add_plugin, create_page
 from cms.utils.plugins import downcast_plugins
 
-from djangocms_alias.compat import get_page_placeholders
 from djangocms_alias.cms_plugins import Alias
+from djangocms_alias.compat import get_page_placeholders
 
 from .base import BaseAliasPluginTestCase
 

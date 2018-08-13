@@ -1,5 +1,6 @@
 import itertools
 
+from django.urls import NoReverseMatch
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext, ugettext_lazy as _
 
@@ -197,7 +198,10 @@ class AliasToolbar(CMSToolbar):
                 title = _('from %s')
                 question = _('Are you sure you want to copy all plugins from %s?')
 
-                copy_url = admin_reverse('djangocms_alias_alias_copy_plugins')
+                try:
+                    copy_url = admin_reverse('cms_placeholder_copy_plugins')
+                except NoReverseMatch:
+                    copy_url = admin_reverse('djangocms_alias_alias_copy_plugins')
 
                 for code, name in copy:
                     copy_plugins_menu.add_ajax_item(

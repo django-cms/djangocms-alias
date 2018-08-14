@@ -26,18 +26,14 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_get_alias_url(self):
-        alias = self._create_alias(
-            [self.plugin],
-        )
+        alias = self._create_alias([self.plugin])
         self.assertEqual(
             get_alias_url(alias),
             self.DETAIL_ALIAS_ENDPOINT(alias.pk),
         )
 
-    def test_render_alias_nopublished(self):
         alias = self._create_alias()
-        alias_plugin = alias.populate(
-            language=self.language,
+        alias_plugin = alias.get_content(self.language).populate(
             replaced_placeholder=self.placeholder,
         )
 
@@ -48,15 +44,13 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             },
             self.get_request('/'),
         )
-        self.assertEqual(output, '')
+        self.assertEqual(output, 'test')
 
-    def test_render_alias_published(self):
+    def test_render_alias(self):
         alias = self._create_alias()
-        alias_plugin = alias.populate(
-            language=self.language,
+        alias_plugin = alias.get_content(self.language).populate(
             replaced_placeholder=self.placeholder,
         )
-        alias.publish(self.language)
 
         output = self.render_template_obj(
             self.alias_template,
@@ -69,17 +63,15 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
 
     def test_render_alias_includes_recursed_alias(self):
         alias = self._create_alias()
+        alias_plugin = alias.get_content(self.language).populate(
+            replaced_placeholder=self.placeholder,
+        )
         add_plugin(
-            alias.draft_content,
+            alias.get_placeholder(self.language),
             Alias,
             language=self.language,
             alias=alias,
         )
-        alias_plugin = alias.populate(
-            language=self.language,
-            replaced_placeholder=self.placeholder,
-        )
-        alias.publish(self.language)
 
         output = self.render_template_obj(
             self.alias_template,

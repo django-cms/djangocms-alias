@@ -18,13 +18,14 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.6',
     'Framework :: Django',
     'Framework :: Django :: 1.11',
-    # 'Framework :: Django :: 2.0',
+    'Framework :: Django :: 2.0',
+    'Framework :: Django :: 2.1',
 ]
 
 INSTALL_REQUIREMENTS = [
-    'Django>=1.11,<2.0',  # django cms 3.5 dont support django 2.0 yet
-    'django-cms>=3.5,<3.7',
+    'Django>=1.11,<2.2',
     'django-parler>=1.4',
+    # 'django-cms>=3.6',  # not released
 ]
 
 setup(

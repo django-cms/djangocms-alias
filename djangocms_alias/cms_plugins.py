@@ -1,3 +1,5 @@
+from copy import copy
+
 from django.utils.translation import (
     get_language_from_request,
     ugettext_lazy as _,
@@ -9,8 +11,9 @@ from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
 )
-from cms.utils.plugins import copy_plugins_to_placeholder, reorder_plugins
+from cms.utils.plugins import copy_plugins_to_placeholder
 
+from .compat import CMS_36, reorder_plugins
 from .constants import (
     CREATE_ALIAS_URL_NAME,
     DELETE_ALIAS_PLUGIN_URL_NAME,
@@ -95,7 +98,7 @@ class Alias(CMSPluginBase):
 
         if (
             isinstance(request.toolbar.obj, AliasModel)
-            and placeholder.pk == request.toolbar.obj.draft_content_id
+            and placeholder.pk == getattr(request.toolbar.obj.get_placeholder(), 'pk', None)
         ):
             menu_items.append(
                 PluginMenuItem(
@@ -146,37 +149,51 @@ class Alias(CMSPluginBase):
         )
 
     @classmethod
-    def detach_alias_plugin(cls, plugin, language, use_draft=False):
-        if use_draft:
-            source_placeholder = plugin.alias.draft_content
-        else:
-            source_placeholder = plugin.alias.live_content
+    def detach_alias_plugin(cls, plugin, language):
+        source_placeholder = plugin.alias.get_placeholder(language)
         target_placeholder = plugin.placeholder
+        source_plugins = plugin.alias.get_plugins(language)
 
-        order = target_placeholder.get_plugin_tree_order(language)
+        if CMS_36:
+            order = target_placeholder.get_plugin_tree_order(language)
 
-        source_plugins = plugin.alias.get_plugins(language, use_draft)
-        copied_plugins = copy_plugins_to_placeholder(
-            source_plugins,
-            placeholder=target_placeholder,
-        )
-        pk_map = {
-            source.pk: copy.pk
-            for (source, copy) in zip(source_plugins, copied_plugins)
-        }
+            copied_plugins = copy_plugins_to_placeholder(
+                source_plugins,
+                placeholder=target_placeholder,
+            )
+            pk_map = {
+                source.pk: copy.pk
+                for (source, copy) in zip(source_plugins, copied_plugins)
+            }
 
-        source_order = source_placeholder.get_plugin_tree_order(language)
+            source_order = source_placeholder.get_plugin_tree_order(language)
 
-        target_pos = order.index(plugin.pk)
-        order[target_pos:target_pos + 1] = [pk_map[pk] for pk in source_order]
+            target_pos = order.index(plugin.pk)
+            order[target_pos:target_pos + 1] = [pk_map[pk] for pk in source_order]
 
-        plugin.delete()
+            plugin.delete()
 
-        reorder_plugins(
-            target_placeholder,
-            language=language,
-            order=order,
-            parent_id=plugin.parent_id,
-        )
-
+            reorder_plugins(
+                target_placeholder,
+                language=language,
+                order=order,
+                parent_id=plugin.parent_id,
+            )
+        else:
+            # Deleting uses a copy of a plugin to preserve pk on existing
+            # ``plugin`` object. This is done due to
+            # plugin.get_plugin_toolbar_info requiring a PK in a passed
+            # instance.
+            source_placeholder.delete_plugin(copy(plugin))
+            target_placeholder._shift_plugin_positions(
+                language,
+                plugin.position,
+                offset=target_placeholder.get_last_plugin_position(language),
+            )
+            copied_plugins = copy_plugins_to_placeholder(
+                source_plugins,
+                placeholder=target_placeholder,
+                language=language,
+                start_positions={language: plugin.position},
+            )
         return copied_plugins

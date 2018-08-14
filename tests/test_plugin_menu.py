@@ -22,9 +22,8 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
 
     def test_extra_plugin_items_for_alias_plugins(self):
         alias = self._create_alias()
-        alias_plugin = alias.populate(
-            language=self.language,
-            replaced_placeholder=self.placeholder,
+        alias_plugin = alias.get_content(self.language).populate(
+            replaced_placeholder=self.placeholder
         )
 
         extra_items = Alias.get_extra_plugin_menu_items(
@@ -46,7 +45,7 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
 
     def test_extra_plugin_items_for_placeholder(self):
         extra_items = Alias.get_extra_placeholder_menu_items(
-            self.get_page_request(self.page, self.superuser),
+            self.get_page_request(page=self.page, user=self.superuser),
             self.placeholder,
         )
         self.assertEqual(len(extra_items), 1)

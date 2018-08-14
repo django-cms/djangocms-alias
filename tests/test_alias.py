@@ -7,6 +7,7 @@ from cms.api import add_plugin, create_page
 from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.cms_plugins import Alias
+from djangocms_alias.compat import get_page_placeholders
 
 from .base import BaseAliasPluginTestCase
 
@@ -18,20 +19,18 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias(plugins)
         self.assertEqual(
             plugins[0].plugin_type,
-            alias.draft_content.get_plugins()[0].plugin_type,
+            alias.get_placeholder(self.language).get_plugins()[0].plugin_type,
         )
         self.assertEqual(
             plugins[0].get_bound_plugin().body,
-            alias.draft_content.get_plugins()[0].get_bound_plugin().body,
+            alias.get_placeholder(self.language).get_plugins()[0].get_bound_plugin().body,
         )
 
     def test_replace_plugin_with_alias(self):
-        alias = self._create_alias(
-            [self.plugin],
-        )
-        alias_plugin = alias.populate(
+        alias = self._create_alias([self.plugin])
+        alias_content = alias.get_content(self.language)
+        alias_plugin = alias_content.populate(
             replaced_plugin=self.plugin,
-            language=self.language,
         )
         plugins = self.placeholder.get_plugins()
         self.assertNotIn(
@@ -39,7 +38,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             plugins,
         )
         self.assertEqual(plugins[0].get_bound_plugin(), alias_plugin)
-        self.assertEqual(alias_plugin.alias.draft_content.get_plugins()[0].get_bound_plugin().body, 'test')  # noqa: E501
+        self.assertEqual(alias_content.placeholder.get_plugins()[0].get_bound_plugin().body, 'test')  # noqa: E501
 
     def test_replace_plugin_with_alias_correct_position(self):
         second_plugin = add_plugin(
@@ -55,10 +54,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             body='test 3',
         )
         alias = self._create_alias()
-        alias_plugin = alias.populate(
-            language=self.language,
-            replaced_plugin=second_plugin,
-        )
+        alias_plugin = alias.get_content(self.language).populate(replaced_plugin=second_plugin)
         plugins = self.placeholder.get_plugins()
         self.assertNotIn(
             self.plugin,
@@ -84,29 +80,28 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             body='test 2',
         )
         alias = self._create_alias()
-        alias.populate(
-            language=self.language,
-            replaced_placeholder=self.placeholder,
-        )
+        alias_content = alias.get_content(self.language)
+        alias_content.populate(replaced_placeholder=self.placeholder)
         plugins = self.placeholder.get_plugins()
 
         self.assertEqual(plugins.count(), 1)
-        self.assertEqual(alias.draft_content.get_plugins().count(), 2)
+        self.assertEqual(alias_content.placeholder.get_plugins().count(), 2)
         self.assertEqual(
-            alias.draft_content.get_plugins()[1].get_bound_plugin().body,
+            alias_content.placeholder.get_plugins()[1].get_bound_plugin().body,
             'test 2',
         )
 
     def test_detach_alias(self):
         alias = self._create_alias()
+        alias_placeholder = alias.get_placeholder(self.language)
         add_plugin(
-            alias.draft_content,
+            alias_placeholder,
             'TextPlugin',
             language=self.language,
             body='test 1',
         )
         add_plugin(
-            alias.draft_content,
+            alias_placeholder,
             'TextPlugin',
             language=self.language,
             body='test 2',
@@ -119,9 +114,8 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
-        alias.publish(self.language)
         add_plugin(
-            alias.draft_content,
+            alias_placeholder,
             'TextPlugin',
             language=self.language,
             body='test 3',
@@ -129,56 +123,19 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
 
         self.assertEqual(plugins.count(), 2)
         Alias.detach_alias_plugin(alias_plugin, self.language)
-        self.assertEqual(plugins.count(), 3)
-
-    def test_detach_alias_from_draft(self):
-        alias = self._create_alias()
-        add_plugin(
-            alias.draft_content,
-            'TextPlugin',
-            language=self.language,
-            body='test 1',
-        )
-        add_plugin(
-            alias.draft_content,
-            'TextPlugin',
-            language=self.language,
-            body='test 2',
-        )
-        plugins = self.placeholder.get_plugins()
-        self.assertEqual(plugins.count(), 1)
-        alias_plugin = add_plugin(
-            self.placeholder,
-            Alias,
-            language=self.language,
-            alias=alias,
-        )
-        alias.publish(self.language)
-        add_plugin(
-            alias.draft_content,
-            'TextPlugin',
-            language=self.language,
-            body='test 3',
-        )
-
-        self.assertEqual(plugins.count(), 2)
-        Alias.detach_alias_plugin(
-            alias_plugin,
-            self.language,
-            use_draft=True,
-        )
         self.assertEqual(plugins.count(), 4)
 
     def test_detach_alias_correct_position(self):
         alias = self._create_alias([])
+        alias_placeholder = alias.get_placeholder(self.language)
         add_plugin(
-            alias.draft_content,
+            alias_placeholder,
             'TextPlugin',
             language=self.language,
             body='test 1',
         )
         add_plugin(
-            alias.draft_content,
+            alias_placeholder,
             'TextPlugin',
             language=self.language,
             body='test 2',
@@ -191,8 +148,6 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
-        alias.publish(self.language)
-
         add_plugin(
             self.placeholder,
             'TextPlugin',
@@ -234,42 +189,17 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
 
         self.assertIn('?structure', edit_menu_item.url)
 
-    def test_publish_alias(self):
-        alias = self._create_alias()
-        add_plugin(
-            alias.draft_content,
-            'TextPlugin',
-            language=self.language,
-            body='test 1',
-        )
-        add_plugin(
-            alias.draft_content,
-            'TextPlugin',
-            language=self.language,
-            body='test 2',
-        )
-        live_plugins = alias.live_content.get_plugins()
-        self.assertEqual(live_plugins.count(), 0)
-        alias.publish(self.language)
-        add_plugin(
-            alias.draft_content,
-            'TextPlugin',
-            language=self.language,
-            body='test 3',
-        )
-        self.assertEqual(live_plugins.count(), 2)
-
     def test_alias_multisite_support(self):
         site1 = Site.objects.create(domain='site1.com', name='1')
         site2 = Site.objects.create(domain='site2.com', name='2')
         alias = self._create_alias()
+        alias_placeholder = alias.get_placeholder(self.language)
         add_plugin(
-            alias.draft_content,
+            alias_placeholder,
             'TextPlugin',
             language=self.language,
             body='test alias multisite',
         )
-        alias.publish(self.language)
 
         site1_page = create_page(
             title='Site1',
@@ -288,13 +218,13 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             site=site2,
         )
         add_plugin(
-            site1_page.placeholders.get(slot='content'),
+            get_page_placeholders(site1_page, self.language).get(slot='content'),
             'Alias',
             language=self.language,
             alias=alias,
         )
         add_plugin(
-            site2_page.placeholders.get(slot='content'),
+            get_page_placeholders(site2_page, self.language).get(slot='content'),
             'Alias',
             language=self.language,
             alias=alias,
@@ -311,12 +241,11 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, 'test alias multisite')
 
         add_plugin(
-            alias.draft_content,
+            alias_placeholder,
             'TextPlugin',
             language=self.language,
             body='Another alias plugin',
         )
-        alias.publish(self.language)
         site1_page.publish(self.language)
         site2_page.publish(self.language)
 

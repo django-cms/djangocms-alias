@@ -3,7 +3,8 @@ from django.contrib import admin
 from cms.admin.placeholderadmin import PlaceholderAdminMixin
 from cms.utils.permissions import get_model_permission_codename
 
-from .models import Alias, Category
+from .forms import AliasContentForm
+from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
 
 
@@ -20,8 +21,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Alias)
 class AliasAdmin(PlaceholderAdminMixin, admin.ModelAdmin):
-    list_display = ['name']
-    fields = ['name', 'category']
+    list_display = ['name', 'category']
 
     def get_urls(self):
         return urlpatterns + super().get_urls()
@@ -37,3 +37,8 @@ class AliasAdmin(PlaceholderAdminMixin, admin.ModelAdmin):
                 get_model_permission_codename(self.model, 'add'),
             )
         return super().has_delete_permission(request, obj)
+
+
+@admin.register(AliasContent)
+class AliasContentAdmin(admin.ModelAdmin):
+    form = AliasContentForm

@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Permission
 from django.http import QueryDict
 from django.test.client import RequestFactory
 from django.urls import resolve
@@ -7,22 +8,21 @@ from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
 from cms.utils.conf import get_cms_setting
 
+from djangocms_alias.compat import get_page_placeholders
 from djangocms_alias.constants import (
     CATEGORY_LIST_URL_NAME,
     CREATE_ALIAS_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
-    SET_ALIAS_DRAFT_URL_NAME,
 )
-from djangocms_alias.models import Alias as AliasModel, Category
+from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import alias_plugin_reverse
 
 
 class BaseAliasPluginTestCase(CMSTestCase):
     CREATE_ALIAS_ENDPOINT = alias_plugin_reverse(CREATE_ALIAS_URL_NAME)
     CATEGORY_LIST_ENDPOINT = alias_plugin_reverse(CATEGORY_LIST_URL_NAME)
-    SET_ALIAS_DRAFT_ENDPOINT = alias_plugin_reverse(SET_ALIAS_DRAFT_URL_NAME)
 
     def DETACH_ALIAS_PLUGIN_ENDPOINT(self, plugin_pk):
         return alias_plugin_reverse(
@@ -54,7 +54,10 @@ class BaseAliasPluginTestCase(CMSTestCase):
         self.category = Category.objects.create(
             name='test category',
         )
-        self.placeholder = self.page.placeholders.get(slot='content')
+
+        self.placeholder = get_page_placeholders(self.page, self.language).get(
+            slot='content',
+        )
         self.plugin = add_plugin(
             self.placeholder,
             'TextPlugin',
@@ -63,19 +66,24 @@ class BaseAliasPluginTestCase(CMSTestCase):
         )
         self.superuser = self.get_superuser()
 
-    def _create_alias(self, plugins=None, name='test alias', category=None,
-                      position=0):
+    def _create_alias(self, plugins=None, name='test alias', category=None, position=0, language=None):
+        if language is None:
+            language = self.language
         if category is None:
             category = self.category
         if plugins is None:
             plugins = []
         alias = AliasModel.objects.create(
-            name=name,
             category=category,
             position=position,
         )
+        alias_content = AliasContent.objects.create(
+            alias=alias,
+            name=name,
+            language=language,
+        )
         if plugins:
-            alias.populate(plugins=plugins)
+            alias_content.populate(plugins=plugins)
         return alias
 
     def _get_instance_request(self, instance, user, path=None, edit=False,
@@ -107,10 +115,12 @@ class BaseAliasPluginTestCase(CMSTestCase):
 
         return request
 
-    def _process_request_by_toolbar_middleware(self, request):
+    def _process_request_by_toolbar_middleware(self, request, obj=None):
         midleware = ToolbarMiddleware()
         midleware.process_request(request)
         if hasattr(request, 'toolbar'):
+            if obj:
+                request.toolbar.set_object(obj)
             request.toolbar.populate()
             request.resolver_match = resolve(request.path)
             request.toolbar.post_template_populate()
@@ -119,11 +129,22 @@ class BaseAliasPluginTestCase(CMSTestCase):
     def get_alias_request(self, alias, *args, **kwargs):  # noqa: E501
         request = self._get_instance_request(alias, *args, **kwargs)
         request.current_page = None
-        request = self._process_request_by_toolbar_middleware(request)
+        request = self._process_request_by_toolbar_middleware(request, obj=alias)
         return request
 
-    def get_page_request(self, page, *args, **kwargs):  # noqa: E501
+    def get_page_request(self, page, obj=None, *args, **kwargs):  # noqa: E501
         request = self._get_instance_request(page, *args, **kwargs)
         request.current_page = page
-        request = self._process_request_by_toolbar_middleware(request)
+        request = self._process_request_by_toolbar_middleware(request, obj)
         return request
+
+    def _add_default_permissions(self, user):
+        # Text plugin permissions
+        user.user_permissions.add(Permission.objects.get(codename='add_text'))
+        user.user_permissions.add(Permission.objects.get(codename='delete_text'))
+        user.user_permissions.add(Permission.objects.get(codename='change_text'))
+        # Page permissions
+        user.user_permissions.add(Permission.objects.get(codename='publish_page'))
+        user.user_permissions.add(Permission.objects.get(codename='add_page'))
+        user.user_permissions.add(Permission.objects.get(codename='change_page'))
+        user.user_permissions.add(Permission.objects.get(codename='delete_page'))

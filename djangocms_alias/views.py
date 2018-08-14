@@ -2,11 +2,11 @@ import json
 
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils.translation import (
     get_language_from_request,
     ugettext_lazy as _,
@@ -18,7 +18,6 @@ from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 from cms.utils.permissions import has_plugin_permission
 
 from .cms_plugins import Alias
-from .constants import DRAFT_ALIASES_SESSION_KEY
 from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
 from .models import Alias as AliasModel, AliasPlugin, Category
 
@@ -50,9 +49,8 @@ def detach_alias_plugin_view(request, plugin_pk):
         return render(request, 'djangocms_alias/detach_alias.html', context)
 
     language = get_language_from_request(request, check_path=True)
-    use_draft = request.session.get(DRAFT_ALIASES_SESSION_KEY)
 
-    plugins = instance.alias.get_plugins(language, use_draft)
+    plugins = instance.alias.get_plugins(language)
 
     can_detach = Alias.can_detach(request.user, plugins)
 
@@ -62,7 +60,6 @@ def detach_alias_plugin_view(request, plugin_pk):
     copied_plugins = Alias.detach_alias_plugin(
         plugin=instance,
         language=language,
-        use_draft=use_draft,
     )
 
     return render_replace_response(
@@ -77,12 +74,6 @@ class AliasDetailView(DetailView):
     context_object_name = 'alias'
     queryset = AliasModel.objects.all()
     template_name = 'djangocms_alias/alias_detail.html'
-
-    def get_context_data(self, **kwargs):
-        kwargs.update({
-            'use_draft': self.request.toolbar.edit_mode_active,
-        })
-        return super().get_context_data(**kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:
@@ -115,11 +106,10 @@ class AliasListView(ListView):
     template_name = 'djangocms_alias/alias_list.html'
 
     def get_queryset(self):
-        return self.category.aliases.all()
+        return self.category.aliases.current_language()
 
     def get_context_data(self, **kwargs):
         kwargs.update({
-            'use_draft': self.request.toolbar.edit_mode_active,
             'category': self.category,
         })
         return super().get_context_data(**kwargs)
@@ -217,7 +207,7 @@ def render_replace_response(request, new_plugins, source_placeholder=None,
     for plugin in new_plugins:
         root = plugin.parent.get_bound_plugin() if plugin.parent else plugin
 
-        plugins = [root] + list(root.get_descendants().order_by('path'))
+        plugins = [root] + list(root.get_descendants())
 
         plugin_order = plugin.placeholder.get_plugin_tree_order(
             plugin.language,
@@ -247,31 +237,6 @@ def render_replace_response(request, new_plugins, source_placeholder=None,
             'deleted': True,
         })
     return render(request, 'djangocms_alias/alias_replace.html', context)
-
-
-@require_POST
-def publish_alias_view(request, pk, language):
-    if not request.user.is_staff:
-        raise PermissionDenied
-
-    alias = get_object_or_404(AliasModel, pk=pk)
-    alias.publish(language)
-    return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
-
-
-@require_POST
-def set_alias_draft_mode_view(request):
-    if not request.user.is_staff:
-        raise PermissionDenied
-
-    try:
-        request.session[DRAFT_ALIASES_SESSION_KEY] = bool(int(
-            request.POST.get('enable'),
-        ))
-    except (TypeError, ValueError):
-        return HttpResponseBadRequest('Form received unexpected values')
-
-    return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
 
 
 @require_POST
@@ -312,7 +277,7 @@ class AliasSelect2View(ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().current_language()
         term = self.request.GET.get('term')
         category = self.request.GET.get('category')
         try:
@@ -321,7 +286,7 @@ class AliasSelect2View(ListView):
             pk = None
         q = Q()
         if term:
-            q &= Q(name__icontains=term)
+            q &= Q(contents__name__icontains=term)
         if category:
             q &= Q(category=category)
         if pk:

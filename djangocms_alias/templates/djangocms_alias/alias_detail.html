@@ -10,7 +10,7 @@
             <a href="{{ alias.category.get_absolute_url }}" class="cms-aliases-page-back cms-alias-btn">{% trans "Back" %}</a>
         </h2>
         <div class="cms-aliases-detail">
-            {% render_alias alias use_draft=use_draft editable=True %}
+            {% render_alias alias editable=True %}
         </div>
     </div>
 {% endblock aliases_content %}

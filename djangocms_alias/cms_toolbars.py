@@ -1,24 +1,24 @@
 import itertools
 
+from django.urls import NoReverseMatch
 from django.utils.encoding import force_text
-from django.utils.translation import override, ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
     ADMINISTRATION_BREAK,
+    LANGUAGE_MENU_IDENTIFIER,
     SHORTCUTS_BREAK,
 )
 from cms.toolbar.items import Break, ButtonList
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
+from cms.utils.i18n import get_language_dict
+from cms.utils.permissions import get_model_permission_codename
+from cms.utils.urlutils import add_url_parameters, admin_reverse
 
-from .constants import (
-    CATEGORY_LIST_URL_NAME,
-    DRAFT_ALIASES_SESSION_KEY,
-    PUBLISH_ALIAS_URL_NAME,
-    SET_ALIAS_DRAFT_URL_NAME,
-)
-from .models import Alias as AliasModel
+from .constants import CATEGORY_LIST_URL_NAME
+from .models import Alias
 from .utils import alias_plugin_reverse
 
 
@@ -30,6 +30,7 @@ __all__ = [
 ALIAS_MENU_IDENTIFIER = 'alias'
 ADMIN_ALIAS_MENU_IDENTIFIER = 'admin-alias'
 ALIAS_MENU_CREATE_IDENTIFIER = 'alias-add'
+ALIAS_LANGUAGE_BREAK = 'alias-language'
 
 
 @toolbar_pool.register
@@ -42,66 +43,11 @@ class AliasToolbar(CMSToolbar):
 
         if self.is_current_app:
             self.add_alias_menu()
+            self.change_language_menu()
 
     def post_template_populate(self):
         if self.is_current_app:
-            self.alias_placeholder = self.get_alias_placeholder()
-            self.add_publish_button()
             self.enable_create_wizard_button()
-
-    def get_alias_placeholder(self):
-        if not isinstance(self.toolbar.obj, AliasModel):
-            return
-
-        if self.toolbar.edit_mode_active:
-            return self.toolbar.obj.draft_placeholder
-        return self.toolbar.obj.live_placeholder
-
-    def has_publish_permission(self):
-        return self.alias_placeholder and self.toolbar.edit_mode_active
-
-    def has_dirty_objects(self):
-        return True
-
-    def user_can_publish(self):
-        if not self.toolbar.edit_mode_active:
-            return False
-        return self.has_publish_permission() and self.has_dirty_objects()
-
-    def add_publish_button(self, classes=None):
-        if classes is None:
-            classes = ('cms-btn-action', 'cms-btn-publish')
-        if self.user_can_publish():
-            button = self.get_publish_button(classes=classes)
-            self.toolbar.add_item(button)
-
-    def get_publish_button(self, classes=None):
-        dirty = self.has_dirty_objects()
-        classes = list(classes or [])
-
-        if dirty and 'cms-btn-publish-active' not in classes:
-            classes.append('cms-btn-publish-active')
-
-        title = _('Publish alias changes')
-
-        item = ButtonList(side=self.toolbar.RIGHT)
-        item.add_button(
-            title,
-            url=self.get_publish_url(),
-            disabled=not dirty,
-            extra_classes=classes,
-        )
-        return item
-
-    def get_publish_url(self):
-        with override(self.current_lang):
-            return alias_plugin_reverse(
-                PUBLISH_ALIAS_URL_NAME,
-                args=(
-                    self.alias_placeholder.alias.pk,
-                    self.current_lang,
-                ),
-            )
 
     def add_aliases_link_to_admin_menu(self):
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
@@ -115,25 +61,23 @@ class AliasToolbar(CMSToolbar):
             url=alias_plugin_reverse(CATEGORY_LIST_URL_NAME),
         )
 
-        use_draft_aliases = self.request.session.get(DRAFT_ALIASES_SESSION_KEY)
-        if use_draft_aliases:
-            text = _('Disable draft version of Aliases')
-        else:
-            text = _('Enable draft version of Aliases')
-
-        alias_menu.add_ajax_item(
-            text,
-            action=alias_plugin_reverse(SET_ALIAS_DRAFT_URL_NAME),
-            on_success='REFRESH_PAGE',
-            data={'enable': int(not use_draft_aliases)},
-        )
-
     def add_alias_menu(self):
-        self.toolbar.get_or_create_menu(
+        alias_menu = self.toolbar.get_or_create_menu(
             ALIAS_MENU_IDENTIFIER,
             self.name,
             position=1,
         )
+
+        if self.toolbar.obj and self.toolbar.edit_mode_active:
+            alias_content = self.toolbar.obj.get_content(self.toolbar.request_language)
+            if alias_content:
+                alias_menu.add_modal_item(
+                    _('Edit alias details'),
+                    url=admin_reverse(
+                        'djangocms_alias_aliascontent_change',
+                        args=[alias_content.pk],
+                    ),
+                )
 
     @classmethod
     def get_insert_position(cls, admin_menu, item_name):
@@ -187,3 +131,86 @@ class AliasToolbar(CMSToolbar):
             list(entry_choices(self.request.user, page=None))
         )
         create_wizard_button.disabled = not enable_create_wizard_button
+
+    def change_language_menu(self):
+        if self.toolbar.edit_mode_active and isinstance(self.toolbar.obj, Alias):
+            can_change = self.request.user.has_perm(
+                get_model_permission_codename(Alias, 'change'),
+            )
+        else:
+            can_change = False
+
+        if can_change:
+            alias = self.toolbar.obj
+            language_menu = self.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
+            if not language_menu:
+                return None
+
+            languages = get_language_dict(self.current_site.pk)
+            current_placeholder = alias.get_placeholder(self.current_lang)
+
+            remove = [
+                (code, languages.get(code, code))
+                for code in alias.get_languages()
+                if code in languages
+            ]
+            add = [l for l in languages.items() if l not in remove]
+            copy = [
+                (code, name)
+                for code, name in languages.items()
+                if code != self.current_lang and (code, name) in remove and current_placeholder
+            ]
+
+            if add or remove or copy:
+                language_menu.add_break(ALIAS_LANGUAGE_BREAK)
+
+            if add:
+                add_plugins_menu = language_menu.get_or_create_menu(
+                    '{0}-add'.format(LANGUAGE_MENU_IDENTIFIER),
+                    _('Add Translation'),
+                )
+                add_url = admin_reverse('djangocms_alias_aliascontent_add')
+
+                for code, name in add:
+                    url = add_url_parameters(add_url, language=code, alias=alias.pk)
+                    add_plugins_menu.add_modal_item(name, url=url)
+
+            if remove:
+                remove_plugins_menu = language_menu.get_or_create_menu(
+                    '{0}-del'.format(LANGUAGE_MENU_IDENTIFIER),
+                    _('Delete Translation'),
+                )
+                disabled = len(remove) == 1
+                for code, name in remove:
+                    alias_content = alias.get_content(language=code)
+                    translation_delete_url = admin_reverse(
+                        'djangocms_alias_aliascontent_delete',
+                        args=(alias_content.pk,),
+                    )
+                    url = add_url_parameters(translation_delete_url, language=code)
+                    remove_plugins_menu.add_modal_item(name, url=url, disabled=disabled)
+
+            if copy:
+                copy_plugins_menu = language_menu.get_or_create_menu(
+                    '{0}-copy'.format(LANGUAGE_MENU_IDENTIFIER),
+                    _('Copy all plugins')
+                )
+                title = _('from %s')
+                question = _('Are you sure you want to copy all plugins from %s?')
+
+                try:
+                    copy_url = admin_reverse('cms_placeholder_copy_plugins')
+                except NoReverseMatch:
+                    copy_url = admin_reverse('djangocms_alias_alias_copy_plugins')
+
+                for code, name in copy:
+                    copy_plugins_menu.add_ajax_item(
+                        title % name, action=copy_url,
+                        data={
+                            'source_language': code,
+                            'source_placeholder_id': alias.get_placeholder(code).pk,
+                            'target_language': self.current_lang,
+                            'target_placeholder_id': current_placeholder.pk,
+                        },
+                        question=question % name, on_success=self.toolbar.REFRESH_PAGE
+                    )

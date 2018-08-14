@@ -4,6 +4,7 @@ from django.contrib.admin.widgets import (
     AdminTextInputWidget,
     RelatedFieldWidgetWrapper,
 )
+from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
@@ -13,7 +14,7 @@ from cms.utils.permissions import (
 )
 
 from .constants import SELECT2_ALIAS_URL_NAME
-from .models import Alias as AliasModel, AliasPlugin, Category
+from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
 from .utils import alias_plugin_reverse
 
 
@@ -31,7 +32,7 @@ def get_category_widget(formfield, user):
     dbfield = AliasModel._meta.get_field('category')
     return RelatedFieldWidgetWrapper(
         formfield.widget,
-        dbfield.rel,
+        dbfield.remote_field,
         admin_site=admin.site,
         can_add_related=user.has_perm(
             get_model_permission_codename(Category, 'add'),
@@ -80,7 +81,7 @@ class BaseCreateAliasForm(forms.Form):
         return cleaned_data
 
 
-class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
+class CreateAliasForm(BaseCreateAliasForm):
     name = forms.CharField(required=True, widget=AdminTextInputWidget())
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
@@ -92,13 +93,6 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
         required=False,
     )
 
-    class Meta:
-        model = AliasModel
-        fields = [
-            'name',
-            'category',
-        ]
-
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
 
@@ -108,6 +102,20 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
             self.fields['replace'].widget = forms.HiddenInput()
 
         self.set_category_widget(self.user)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if AliasContent.objects.filter(
+            name=cleaned_data.get('name'),
+            language=cleaned_data.get('language'),
+            alias__category=cleaned_data.get('category'),
+        ).exists():
+            raise forms.ValidationError(
+                _('Alias with this Name and Category already exists.')
+            )
+
+        return cleaned_data
 
     def set_category_widget(self, user):
         formfield = self.fields['category']
@@ -122,13 +130,17 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
                 self.cleaned_data.get('language'),
             )
         else:
-            plugins = plugin.get_tree(plugin).order_by('path')
+            plugins = [plugin] + list(plugin.get_descendants())
         return list(plugins)
 
     def save(self):
         alias = AliasModel.objects.create(
-            name=self.cleaned_data.get('name'),
             category=self.cleaned_data.get('category'),
+        )
+        alias_content = AliasContent.objects.create(
+            alias=alias,
+            name=self.cleaned_data.get('name'),
+            language=self.cleaned_data.get('language'),
         )
         if self.cleaned_data.get('replace'):
             placeholder = self.cleaned_data.get('placeholder')
@@ -137,35 +149,42 @@ class CreateAliasForm(BaseCreateAliasForm, forms.ModelForm):
         else:
             placeholder, plugin = None, None
             source_plugins = self.get_plugins()
-        new_plugin = alias.populate(
+        new_plugin = alias_content.populate(
             replaced_placeholder=placeholder,
             replaced_plugin=plugin,
-            language=self.cleaned_data.get('language'),
             plugins=source_plugins,
         )
         return new_plugin
 
 
-class CreateAliasWizardForm(forms.ModelForm):
+class CreateAliasWizardForm(forms.Form):
+    name = forms.CharField(required=True, widget=AdminTextInputWidget())
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
         required=True,
     )
 
-    class Meta:
-        model = AliasModel
-        fields = [
-            'name',
-            'category',
-        ]
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if not getattr(self, 'user', None):
+            self.user = self._request.user
         self.set_category_widget(self.user)
 
     def set_category_widget(self, user):
         formfield = self.fields['category']
         formfield.widget = get_category_widget(formfield, user)
+
+    @transaction.atomic
+    def save(self):
+        alias = AliasModel.objects.create(
+            category=self.cleaned_data.get('category'),
+        )
+        AliasContent.objects.create(
+            alias=alias,
+            name=self.cleaned_data.get('name'),
+            language=self.language_code,
+        )
+        return alias
 
 
 class CreateCategoryWizardForm(forms.ModelForm):
@@ -273,3 +292,17 @@ class AliasPluginForm(forms.ModelForm):
             'category',
             'alias',
         )
+
+
+class AliasContentForm(forms.ModelForm):
+
+    alias = forms.ModelChoiceField(
+        queryset=AliasModel.objects.all(),
+        required=True,
+        widget=forms.HiddenInput(),
+    )
+    language = forms.CharField(widget=forms.HiddenInput())
+
+    class Meta:
+        model = AliasContent
+        fields = ('name',)

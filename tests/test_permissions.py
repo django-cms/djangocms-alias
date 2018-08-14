@@ -90,7 +90,7 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
         self.assertFalse(
             Alias.can_detach(
                 user,
-                alias.draft_content.get_plugins(),
+                alias.get_placeholder(self.language).get_plugins(),
             ),
         )
 
@@ -100,6 +100,6 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
         self.assertTrue(
             Alias.can_detach(
                 user,
-                alias.draft_content.get_plugins(),
+                alias.get_placeholder(self.language).get_plugins(),
             ),
         )

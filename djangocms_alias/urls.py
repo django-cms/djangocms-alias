@@ -11,11 +11,6 @@ urlpatterns = [
         name=constants.CREATE_ALIAS_URL_NAME,
     ),
     url(
-        r'^publish-alias/(?P<pk>\d+)/(?P<language>\w+)/$',
-        views.publish_alias_view,
-        name=constants.PUBLISH_ALIAS_URL_NAME,
-    ),
-    url(
         r'^aliases/$',
         views.CategoryListView.as_view(),
         name=constants.CATEGORY_LIST_URL_NAME,
@@ -39,11 +34,6 @@ urlpatterns = [
         r'^delete-alias/(?P<pk>\d+)/$',
         views.delete_alias_view,
         name=constants.DELETE_ALIAS_PLUGIN_URL_NAME,
-    ),
-    url(
-        r'^draft-aliases-mode/$',
-        views.set_alias_draft_mode_view,
-        name=constants.SET_ALIAS_DRAFT_URL_NAME,
     ),
     url(
         r'^set-alias-position/$',

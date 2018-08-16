@@ -10,7 +10,7 @@ from ..utils import alias_plugin_reverse
 register = template.Library()
 
 
-@register.assignment_tag(takes_context=False)
+@register.simple_tag(takes_context=False)
 def get_alias_url(alias):
     return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[alias.pk])
 

@@ -4,7 +4,7 @@
 {% block aliases_content %}
     <div class="cms-aliases-page container">
         <h1 class="cms-aliases-page-h1">{% trans 'Alias administration' %}</h1>
-        <h3 class="cms-aliases-page-h3">{% trans 'Categories' %}</h1>
+        <h3 class="cms-aliases-page-h3">{% trans 'Categories' %}</h3>
         {% for category in categories %}
             <h2 class="cms-alias-item" id="{{ category.name|slugify }}">
                 <a class="cms-alias-item-category-link" href="{{ category.get_absolute_url }}">{{ category.name }}</a>

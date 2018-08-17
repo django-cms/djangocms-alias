@@ -4,16 +4,10 @@ from django.utils.safestring import mark_safe
 from cms.toolbar.utils import get_toolbar_from_request
 
 from ..constants import DETAIL_ALIAS_URL_NAME
-from ..models import Category
 from ..utils import alias_plugin_reverse
 
 
 register = template.Library()
-
-
-@register.simple_tag(takes_context=False)
-def get_alias_categories():
-    return Category.objects.order_by('name')
 
 
 @register.simple_tag(takes_context=False)

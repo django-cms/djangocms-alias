@@ -13,6 +13,8 @@ from cms.utils.permissions import (
     has_plugin_permission,
 )
 
+from parler.forms import TranslatableModelForm
+
 from .constants import SELECT2_ALIAS_URL_NAME
 from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
 from .utils import alias_plugin_reverse
@@ -187,7 +189,7 @@ class CreateAliasWizardForm(forms.Form):
         return alias
 
 
-class CreateCategoryWizardForm(forms.ModelForm):
+class CreateCategoryWizardForm(TranslatableModelForm):
 
     class Meta:
         model = Category

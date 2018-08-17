@@ -21,8 +21,14 @@ from djangocms_alias.utils import alias_plugin_reverse
 
 
 class BaseAliasPluginTestCase(CMSTestCase):
-    CREATE_ALIAS_ENDPOINT = alias_plugin_reverse(CREATE_ALIAS_URL_NAME)
-    CATEGORY_LIST_ENDPOINT = alias_plugin_reverse(CATEGORY_LIST_URL_NAME)
+
+    @property
+    def CREATE_ALIAS_ENDPOINT(self):
+        return alias_plugin_reverse(CREATE_ALIAS_URL_NAME)
+
+    @property
+    def CATEGORY_LIST_ENDPOINT(self):
+        return alias_plugin_reverse(CATEGORY_LIST_URL_NAME)
 
     def DETACH_ALIAS_PLUGIN_ENDPOINT(self, plugin_pk):
         return alias_plugin_reverse(

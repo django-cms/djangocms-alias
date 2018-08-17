@@ -1,4 +1,5 @@
 import json
+import operator
 
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
@@ -127,8 +128,13 @@ class AliasListView(ListView):
 class CategoryListView(ListView):
     model = Category
     context_object_name = 'categories'
-    queryset = Category.objects.order_by('name')
     template_name = 'djangocms_alias/category_list.html'
+
+    def get_queryset(self):
+        qs = Category.objects.active_translations()
+        # Using `order_by('translations__name')` results in duplicated QuerySet
+        # values.
+        return sorted(qs, key=operator.attrgetter('name'))
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:
@@ -255,7 +261,7 @@ def set_alias_position_view(request):
 
 
 class AliasSelect2View(ListView):
-    queryset = AliasModel.objects.order_by('category__name', 'position')
+    queryset = AliasModel.objects.order_by('category__translations__name', 'position')
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()

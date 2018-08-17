@@ -14,6 +14,8 @@ from cms.models.fields import PlaceholderField
 from cms.utils.i18n import get_current_language
 from cms.utils.plugins import copy_plugins_to_placeholder
 
+from parler.models import TranslatableModel, TranslatedFields
+
 from .compat import CMS_36
 from .constants import DETAIL_ALIAS_URL_NAME, LIST_ALIASES_URL_NAME
 from .utils import alias_plugin_reverse
@@ -31,11 +33,13 @@ def _get_alias_placeholder_slot(alias):
     return slugify(alias.name)
 
 
-class Category(models.Model):
-    name = models.CharField(
-        verbose_name=_('name'),
-        max_length=120,
-        unique=True,
+class Category(TranslatableModel):
+    translations = TranslatedFields(
+        name=models.CharField(
+            verbose_name=_('name'),
+            max_length=120,
+            unique=True,
+        ),
     )
 
     class Meta:

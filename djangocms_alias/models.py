@@ -114,7 +114,6 @@ class Alias(models.Model):
 
     @cached_property
     def pages_using_this_alias(self):
-        # TODO
         return []
 
     def get_name(self, language=None):

@@ -1,4 +1,7 @@
-from cms.api import add_plugin
+from django.contrib.sites.models import Site
+
+from cms.api import add_plugin, create_page
+from cms.test_utils.util.fuzzy_int import FuzzyInt
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.models import Alias as AliasModel, Category
@@ -185,4 +188,111 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(
             self._get_aliases_positions(alias1.category),
             {0: alias2.pk, 1: alias3.pk, 2: alias4.pk, 3: alias1.pk},
+        )
+
+    def test_pages_using_this_alias(self):
+        site1 = Site.objects.create(domain='site1.com', name='1')
+        site2 = Site.objects.create(domain='site2.com', name='2')
+        alias = self._create_alias(name='root alias')
+        nested_alias = self._create_alias(name='nested alias')
+        deep_nested_alias = self._create_alias(name='deep nested alias')
+        add_plugin(
+            alias.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=nested_alias,
+        )
+        add_plugin(
+            nested_alias.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=deep_nested_alias,
+        )
+
+        site1_page = create_page(
+            title='Site1',
+            template='page.html',
+            language=self.language,
+            published=True,
+            in_navigation=True,
+            site=site1,
+        )
+        self.add_alias_plugin_to_page(site1_page, alias)
+        site1_page.publish(self.language)  # Should show on the list
+
+        nested_page1 = create_page(
+            title='Site1 nested page 1',
+            template='page.html',
+            language=self.language,
+            published=True,
+            in_navigation=True,
+            site=site1,
+            parent=site1_page,
+        )
+        self.add_alias_plugin_to_page(nested_page1, alias)
+        self.add_alias_plugin_to_page(nested_page1, alias)
+        nested_page1.publish(self.language)  # Should show on the list only once
+
+        nested_page2 = create_page(
+            title='Site1 nested page 2',
+            template='page.html',
+            language=self.language,
+            published=True,
+            in_navigation=True,
+            site=site1,
+            parent=site1_page,
+        )
+        self.add_alias_plugin_to_page(nested_page2, alias)
+        # Not published change but will be shown on the list. Show all pages
+
+        nested_page3 = create_page(
+            title='Site1 nested page 3',
+            template='page.html',
+            language=self.language,
+            published=True,
+            in_navigation=True,
+            site=site1,
+            parent=site1_page,
+        )  # Not show on the list
+
+        deep_nested_page4 = create_page(
+            title='Site1 deep nested page 4',
+            template='page.html',
+            language='de',
+            published=True,
+            in_navigation=True,
+            site=site1,
+            parent=nested_page3,
+        )
+        self.add_alias_plugin_to_page(deep_nested_page4, alias, 'de')
+        deep_nested_page4.publish('de')  # Should show on the list
+
+        site2_page = create_page(
+            title='Site2',
+            template='page.html',
+            language=self.language,
+            published=True,
+            in_navigation=True,
+            site=site2,
+        )
+        self.add_alias_plugin_to_page(site2_page, alias)
+        site2_page.publish(self.language)  # Should show on the list
+
+        # with self.assertNumQueries(FuzzyInt(0, 2)):
+        alias_pages = alias.pages_using_this_alias
+        self.assertEqual(
+            alias_pages,
+            [site1_page, nested_page1, nested_page2, deep_nested_page4, site2_page],
+        )
+
+        nested_alias_pages = nested_alias.pages_using_this_alias
+        self.assertEqual(
+            nested_alias_pages,
+            [site1_page, nested_page1, nested_page2, deep_nested_page4, site2_page],
+        )
+
+        deep_nested_alias_pages = deep_nested_alias.pages_using_this_alias
+        self.assertEqual(
+            deep_nested_alias_pages,
+            [site1_page, nested_page1, nested_page2, deep_nested_page4, site2_page],
         )

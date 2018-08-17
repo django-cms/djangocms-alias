@@ -8,7 +8,7 @@ from cms.api import add_plugin, create_page
 from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.compat import CMS_36, get_page_placeholders
+from djangocms_alias.compat import CMS_36
 
 from .base import BaseAliasPluginTestCase
 
@@ -219,19 +219,8 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             published=True,
             site=site2,
         )
-        add_plugin(
-            get_page_placeholders(site1_page, self.language).get(slot='content'),
-            'Alias',
-            language=self.language,
-            alias=alias,
-        )
-        add_plugin(
-            get_page_placeholders(site2_page, self.language).get(slot='content'),
-            'Alias',
-            language=self.language,
-            alias=alias,
-        )
-
+        self.add_alias_plugin_to_page(site1_page, alias)
+        self.add_alias_plugin_to_page(site2_page, alias)
         if CMS_36:
             site1_page.publish(self.language)
             site2_page.publish(self.language)

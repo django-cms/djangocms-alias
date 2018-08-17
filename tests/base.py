@@ -154,3 +154,14 @@ class BaseAliasPluginTestCase(CMSTestCase):
         user.user_permissions.add(Permission.objects.get(codename='add_page'))
         user.user_permissions.add(Permission.objects.get(codename='change_page'))
         user.user_permissions.add(Permission.objects.get(codename='delete_page'))
+
+    def add_alias_plugin_to_page(self, page, alias, language=None):
+        if language is None:
+            language = self.language
+
+        add_plugin(
+            get_page_placeholders(page, language).get(slot='content'),
+            'Alias',
+            language=language,
+            alias=alias,
+        )

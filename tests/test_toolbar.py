@@ -4,6 +4,7 @@ from cms.cms_toolbars import (
     LANGUAGE_MENU_IDENTIFIER,
 )
 from cms.toolbar.items import Break
+from cms.utils.urlutils import admin_reverse
 
 from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
 from djangocms_alias.compat import get_object_structure_url
@@ -147,4 +148,33 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertRegexpMatches(
             language_menu_first_items['Copy all plugins'].action,
             'en\/admin\/([\w\/]+)\/copy-plugins\/',
+        )
+
+    def test_alias_change_category_button(self):
+        alias = self._create_alias([self.plugin])
+        request = self.get_alias_request(
+            alias=alias,
+            user=self.superuser,
+            edit=True,
+        )
+
+        alias_menu_items = request.toolbar.get_menu('alias').items
+
+        self.assertEqual(
+            alias_menu_items[1].name,
+            'Change category...',
+        )
+        self.assertEqual(
+            alias_menu_items[1].url,
+            admin_reverse(
+                'djangocms_alias_alias_change',
+                args=[alias.pk],
+            ),
+        )
+        self.assertFalse(alias_menu_items[1].active)
+        self.assertFalse(alias_menu_items[1].disabled)
+        self.assertFalse(alias_menu_items[1].extra_classes)
+        self.assertEqual(
+            alias_menu_items[1].on_close,
+            'REFRESH_PAGE',
         )

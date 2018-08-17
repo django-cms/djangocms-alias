@@ -77,6 +77,13 @@ class AliasToolbar(CMSToolbar):
                         'djangocms_alias_aliascontent_change',
                         args=[alias_content.pk],
                     ),
+                ),
+                alias_menu.add_modal_item(
+                    _('Change category'),
+                    url=admin_reverse(
+                        'djangocms_alias_alias_change',
+                        args=[alias_content.pk],
+                    ),
                 )
 
     @classmethod

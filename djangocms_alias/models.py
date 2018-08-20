@@ -114,7 +114,15 @@ class Alias(models.Model):
 
     @cached_property
     def pages_using_this_alias(self):
-        return []
+        pages = set()
+        alias_plugins = self.cms_plugins.prefetch_related('placeholder__page_set')
+        for plugin in alias_plugins:
+            page_set = plugin.placeholder.page_set.all()
+            if page_set:
+                pages.update(page_set)
+            else:
+                pages.update(plugin.placeholder.alias_contents.first().alias.pages_using_this_alias)
+        return list(pages)
 
     def get_name(self, language=None):
         return getattr(self.get_content(language), 'name', '')

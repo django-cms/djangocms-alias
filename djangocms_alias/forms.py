@@ -296,6 +296,18 @@ class AliasPluginForm(forms.ModelForm):
         )
 
 
+class AliasForm(forms.ModelForm):
+
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        required=True,
+    )
+
+    class Meta:
+        model = AliasModel
+        fields = ('category',)
+
+
 class AliasContentForm(forms.ModelForm):
 
     alias = forms.ModelChoiceField(

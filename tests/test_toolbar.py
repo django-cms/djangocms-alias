@@ -150,15 +150,14 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             'en\/admin\/([\w\/]+)\/copy-plugins\/',
         )
 
-    def test_alias_change_category_button(self):
-        alias = self._create_alias([self.plugin])
+    def test_alias_change_category_button_showing_only_on_alias_edit_view(self):
+        alias = self._create_alias()
         request = self.get_alias_request(
             alias=alias,
             user=self.superuser,
             edit=True,
         )
-
-        alias_menu_items = request.toolbar.get_menu('alias').items
+        alias_menu_items = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER).items
 
         self.assertEqual(
             alias_menu_items[1].name,
@@ -171,10 +170,23 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
                 args=[alias.pk],
             ),
         )
-        self.assertFalse(alias_menu_items[1].active)
-        self.assertFalse(alias_menu_items[1].disabled)
-        self.assertFalse(alias_menu_items[1].extra_classes)
         self.assertEqual(
             alias_menu_items[1].on_close,
             'REFRESH_PAGE',
         )
+
+        for endpoint in [
+            self.CATEGORY_LIST_ENDPOINT,
+            self.LIST_ALIASES_ENDPOINT(alias.category_id),
+            self.DETAIL_ALIAS_ENDPOINT(alias.pk),
+        ]:
+            request = self.get_page_request(
+                page=None,
+                path=endpoint,
+                user=self.superuser,
+            )
+            alias_menu_items = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER).items
+            self.assertNotIn(
+                'Change category...',
+                [alias_item.name for alias_item in alias_menu_items]
+            )

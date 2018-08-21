@@ -23,21 +23,13 @@ class AliasCreatePluginTestCase(BaseAliasPluginTestCase):
         form = AliasPluginForm(instance=alias_plugin)
         self.assertEqual(form.fields['category'].initial, alias.category_id)
 
-    def test_get_render_template(self):
+    def test_get_alias_content_default_render_template(self):
         alias = self._create_alias(
             self.placeholder.get_plugins(),
         )
-        alias_plugin = add_plugin(
-            self.placeholder,
-            Alias,
-            language=self.language,
-            alias=alias,
-        )
+        alias_content = alias.get_content(self.language)
 
-        self.assertEqual(
-            Alias().get_render_template({}, alias_plugin, self.placeholder),
-            'djangocms_alias/alias.html',
-        )
+        self.assertEqual(alias_content.template, 'default')
 
     def test_create_alias_plugin_form_empty_category(self):
         form = AliasPluginForm()

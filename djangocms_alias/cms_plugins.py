@@ -38,7 +38,7 @@ class Alias(CMSPluginBase):
     form = AliasPluginForm
 
     def get_render_template(self, context, instance, placeholder):
-        return 'djangocms_alias/alias.html'
+        return 'djangocms_alias/{}/alias.html'.format(instance.template)
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):

@@ -14,11 +14,11 @@
 
 <br/>
 
-{% if object.pages_using_this_alias %}
-  {% blocktrans with escaped_object=object %}This alias is used on this pages:{% endblocktrans %}
-  <ul>{{ object.pages_using_this_alias|unordered_list }}</ul>
+{% if object.using_objects %}
+  {% blocktrans with escaped_object=object %}This alias is used on this content:{% endblocktrans %}
+  <ul>{{ object.using_objects|unordered_list }}</ul>
 {% else %}
-  {% blocktrans with escaped_object=object %}This alias wasn't used on any page.{% endblocktrans %}
+  {% blocktrans with escaped_object=object %}This alias wasn't used on any content.{% endblocktrans %}
 {% endif %}
 
 <form method="post">{% csrf_token %}

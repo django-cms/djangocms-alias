@@ -302,3 +302,22 @@ class AliasSelect2View(ListView):
 
     def get_paginate_by(self, queryset):
         return self.request.GET.get('limit', 30)
+
+
+def alias_usage_view(self, request, extra_context=None):
+    # TODO: see djangocms-translations - there is a list like that
+    template_name = 'djangocms_alias/alias_usage_view.html'
+
+    cl = ChangeList(request, 
+                    self.model, 
+                    self.list_display, 
+                    self.list_display_links, 
+                    self.list_filter, 
+                    self.date_hierarchy, 
+                    self.search_fields, 
+                    self.list_select_related, 
+                    self.list_per_page,
+                    self.list_max_show_all, 
+                    self.list_editable, 
+                    self) # 3 extra queries
+    return AliasAdmin.changelist_view(request, extra_context=extra_context)

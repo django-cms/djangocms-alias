@@ -2,7 +2,7 @@ import operator
 
 from django.conf import settings
 from django.db import models, transaction
-from django.db.models import F, Q
+from django.db.models import F, Prefetch, Q
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
 from django.utils.text import slugify
@@ -113,16 +113,21 @@ class Alias(models.Model):
         return self.cms_plugins.exists()
 
     @cached_property
-    def pages_using_this_alias(self):
-        pages = set()
-        alias_plugins = self.cms_plugins.prefetch_related('placeholder__page_set')
+    def using_objects(self):
+        objects = set()
+        alias_plugins = self.cms_plugins.select_related('placeholder').prefetch_related(
+            'placeholder__page_set',
+            Prefetch(
+                'placeholder__alias_contents',
+                AliasContent.objects.select_related('alias'),
+            ),
+        )
         for plugin in alias_plugins:
-            page_set = plugin.placeholder.page_set.all()
-            if page_set:
-                pages.update(page_set)
-            else:
-                pages.update(plugin.placeholder.alias_contents.first().alias.pages_using_this_alias)
-        return list(pages)
+            pages = plugin.placeholder.page_set.all()
+            objects.update(pages)
+            alias_contents = plugin.placeholder.alias_contents.all()
+            objects.update([obj.alias for obj in alias_contents])
+        return list(objects)
 
     def get_name(self, language=None):
         return getattr(self.get_content(language), 'name', '')

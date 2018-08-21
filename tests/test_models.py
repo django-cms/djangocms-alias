@@ -4,7 +4,7 @@ from cms.api import add_plugin, create_page
 from cms.test_utils.util.fuzzy_int import FuzzyInt
 
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.models import Alias as AliasModel, Category
+from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 
 from .base import BaseAliasPluginTestCase
 
@@ -190,24 +190,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             {0: alias2.pk, 1: alias3.pk, 2: alias4.pk, 3: alias1.pk},
         )
 
-    def test_pages_using_this_alias(self):
+    def test_pages_using_alias(self):
         site1 = Site.objects.create(domain='site1.com', name='1')
         site2 = Site.objects.create(domain='site2.com', name='2')
-        alias = self._create_alias(name='root alias')
-        nested_alias = self._create_alias(name='nested alias')
-        deep_nested_alias = self._create_alias(name='deep nested alias')
-        add_plugin(
-            alias.get_placeholder(self.language),
-            'Alias',
-            language=self.language,
-            alias=nested_alias,
-        )
-        add_plugin(
-            nested_alias.get_placeholder(self.language),
-            'Alias',
-            language=self.language,
-            alias=deep_nested_alias,
-        )
+        alias = self._create_alias(name='alias')
 
         site1_page = create_page(
             title='Site1',
@@ -278,30 +264,99 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.add_alias_plugin_to_page(site2_page, alias, 'de')
         site2_page.publish('de')  # Should show on the list (draft, public)
 
-        result_list = [
-            site1_page.pk,
-            site1_page.publisher_public.pk,
-            nested_page1.pk,
-            nested_page1.publisher_public.pk,
-            nested_page2.pk,
-            deep_nested_page4.pk,
-            deep_nested_page4.publisher_public.pk,
-            site2_page.pk,
-            site2_page.publisher_public.pk,
-        ]
-
-        with self.assertNumQueries(FuzzyInt(0, 3)):
-            alias_pages = alias.pages_using_this_alias
+        with self.assertNumQueries(FuzzyInt(2, 3)):
+            objects = alias.using_objects
 
         self.assertEqual(
-            [page.pk for page in sorted(alias_pages, key=lambda obj: obj.pk)],
-            result_list,
+            [page.pk for page in sorted(objects, key=lambda obj: obj.pk)],
+            [
+                site1_page.pk,
+                site1_page.publisher_public.pk,
+                nested_page1.pk,
+                nested_page1.publisher_public.pk,
+                nested_page2.pk,
+                deep_nested_page4.pk,
+                deep_nested_page4.publisher_public.pk,
+                site2_page.pk,
+                site2_page.publisher_public.pk,
+            ]
         )
 
-        # with self.assertNumQueries(FuzzyInt(0, 3)):
-        #     nested_alias_pages = nested_alias.pages_using_this_alias
-        # self.assertEqual(nested_alias_pages, result_list)
+    def test_aliases_using_alias(self):
+        root_alias = self._create_alias(name='root alias')
+        AliasContent.objects.create(
+            name='root alias de',
+            alias=root_alias,
+            language='de',
+        )
+        root_alias2 = self._create_alias(name='root alias 2')
 
-        with self.assertNumQueries(FuzzyInt(0, 3)):
-            deep_nested_alias_pages = deep_nested_alias.pages_using_this_alias
-        self.assertEqual(deep_nested_alias_pages, result_list)
+        alias1 = self._create_alias(name='alias 1')
+        alias2 = self._create_alias(name='alias 2')
+        alias3 = self._create_alias(name='alias 3')
+        alias4 = self._create_alias(name='alias 4')
+
+        add_plugin(
+            root_alias.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias1,
+        )
+        add_plugin(
+            root_alias.get_placeholder('de'),
+            'Alias',
+            language='de',
+            alias=alias1,
+        )
+        add_plugin(
+            root_alias.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias2,
+        )
+        add_plugin(
+            root_alias2.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias2,
+        )
+        add_plugin(
+            alias2.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias3,
+        )
+        add_plugin(
+            alias3.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias4,
+        )
+
+        with self.assertNumQueries(FuzzyInt(2, 3)):
+            objects = alias1.using_objects
+        self.assertEqual(
+            [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
+            [root_alias.pk],
+        )
+
+        with self.assertNumQueries(FuzzyInt(2, 3)):
+            objects = alias2.using_objects
+        self.assertEqual(
+            [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
+            [root_alias.pk, root_alias2.pk],
+        )
+
+        with self.assertNumQueries(FuzzyInt(2, 3)):
+            objects = alias3.using_objects
+        self.assertEqual(
+            [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
+            [alias2.pk],
+        )
+
+        with self.assertNumQueries(FuzzyInt(2, 3)):
+            objects = alias4.using_objects
+        self.assertEqual(
+            [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
+            [alias3.pk],
+        )

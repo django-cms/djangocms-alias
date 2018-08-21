@@ -35,8 +35,10 @@ __all__ = [
 class Alias(CMSPluginBase):
     name = _('Alias')
     model = AliasPlugin
-    render_template = 'djangocms_alias/alias.html'
     form = AliasPluginForm
+
+    def get_render_template(self, context, instance, placeholder):
+        return 'djangocms_alias/alias.html'
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):

@@ -80,6 +80,9 @@ HELPER_SETTINGS = {
     },
     'PARLER_ENABLE_CACHING': False,
     'LANGUAGE_CODE': 'en',
+    'DJANGOCMS_ALIAS_TEMPLATES': [
+        ('custom_alias_template', 'Custom Template Name'),
+    ]
 }
 
 

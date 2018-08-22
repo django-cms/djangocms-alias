@@ -193,12 +193,6 @@ class AliasContent(models.Model):
         choices=settings.LANGUAGES,
         default=get_current_language,
     )
-    template = models.CharField(
-        verbose_name=_('Template'),
-        choices=get_templates(),
-        default=TEMPLATE_DEFAULT,
-        max_length=255,
-    )
 
     class Meta:
         verbose_name = _('alias content')
@@ -266,6 +260,12 @@ class AliasPlugin(CMSPlugin):
         verbose_name=_('alias'),
         related_name='cms_plugins',
         on_delete=models.CASCADE,
+    )
+    template = models.CharField(
+        verbose_name=_('template'),
+        choices=get_templates(),
+        default=TEMPLATE_DEFAULT,
+        max_length=255,
     )
 
     class Meta:

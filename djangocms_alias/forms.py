@@ -250,6 +250,10 @@ class CategorySelectWidget(Select2Mixin, forms.Select):
     pass
 
 
+class TemplateSelectWidget(Select2Mixin, forms.Select):
+    pass
+
+
 class AliasSelectWidget(Select2Mixin, forms.TextInput):
 
     def get_url(self):
@@ -282,6 +286,15 @@ class AliasPluginForm(forms.ModelForm):
             },
         ),
     )
+    template = forms.ChoiceField(
+        label=_('Template'),
+        choices=get_templates(),
+        widget=TemplateSelectWidget(
+            attrs={
+                'data-placeholder': _('Select a template'),
+            },
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -293,6 +306,7 @@ class AliasPluginForm(forms.ModelForm):
         fields = (
             'category',
             'alias',
+            'template',
         )
 
 
@@ -304,7 +318,6 @@ class AliasContentForm(forms.ModelForm):
         widget=forms.HiddenInput(),
     )
     language = forms.CharField(widget=forms.HiddenInput())
-    template = forms.ChoiceField(choices=get_templates())
 
     class Meta:
         model = AliasContent

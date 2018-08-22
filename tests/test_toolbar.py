@@ -167,7 +167,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             alias_menu_items[1].url,
             admin_reverse(
                 'djangocms_alias_alias_change',
-                args=[alias.pk],
+                args=[request.toolbar.obj.pk],
             ),
         )
         self.assertEqual(

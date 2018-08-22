@@ -82,7 +82,7 @@ class AliasToolbar(CMSToolbar):
                     _('Change category'),
                     url=admin_reverse(
                         'djangocms_alias_alias_change',
-                        args=[alias_content.alias_id],
+                        args=[self.toolbar.obj.pk],
                     ),
                 )
 

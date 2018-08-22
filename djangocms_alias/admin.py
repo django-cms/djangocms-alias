@@ -5,7 +5,7 @@ from cms.utils.permissions import get_model_permission_codename
 
 from parler.admin import TranslatableAdmin
 
-from .forms import AliasContentForm, AliasForm
+from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
 
@@ -24,7 +24,7 @@ class CategoryAdmin(TranslatableAdmin):
 @admin.register(Alias)
 class AliasAdmin(PlaceholderAdminMixin, admin.ModelAdmin):
     list_display = ['name', 'category']
-    form = AliasForm
+    fields = ('category',)
 
     def get_urls(self):
         return urlpatterns + super().get_urls()

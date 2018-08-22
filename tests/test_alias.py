@@ -1,5 +1,6 @@
 from operator import attrgetter
 
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
 
@@ -8,6 +9,7 @@ from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.compat import get_page_placeholders
+from djangocms_alias.models import TEMPLATE_DEFAULT
 
 from .base import BaseAliasPluginTestCase
 
@@ -259,10 +261,30 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, 'test alias multisite')
         self.assertContains(response, 'Another alias plugin')
 
-    def test_get_alias_content_default_render_template(self):
+    def test_create_alias_with_default_render_template(self):
         alias = self._create_alias(
             self.placeholder.get_plugins(),
         )
-        alias_content = alias.get_content(self.language)
+        add_plugin(
+            self.placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+        )
 
-        self.assertEqual(alias_content.template, 'default')
+        self.assertEqual(alias.cms_plugins.first().template, TEMPLATE_DEFAULT)
+
+    def test_create_alias_with_custom_render_template(self):
+        alias_template = getattr(settings, 'DJANGOCMS_ALIAS_TEMPLATES')[0]
+        alias = self._create_alias(
+            self.placeholder.get_plugins(),
+        )
+        add_plugin(
+            self.placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+            template=alias_template[0],
+        )
+
+        self.assertEqual(alias.cms_plugins.first().template, alias_template[0])

@@ -37,7 +37,6 @@ class Migration(migrations.Migration):
                 ('language', models.CharField(choices=settings.LANGUAGES, default=cms.utils.i18n.get_current_language, max_length=10)),
                 ('alias', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='contents', to='djangocms_alias.Alias')),
                 ('placeholder', cms.models.fields.PlaceholderField(editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='alias_contents', slotname=djangocms_alias.models._get_alias_placeholder_slot, to='cms.Placeholder')),
-                ('template', models.CharField(choices=[('default', 'Default')], default='default', max_length=255, verbose_name='Template')),
             ],
             options={
                 'verbose_name': 'alias content',
@@ -49,6 +48,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('cmsplugin_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, related_name='djangocms_alias_aliasplugin', serialize=False, to='cms.CMSPlugin')),
                 ('alias', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cms_plugins', to='djangocms_alias.Alias', verbose_name='alias')),
+                ('template', models.CharField(choices=[('default', 'Default')], default='default', max_length=255, verbose_name='Template')),
             ],
             options={
                 'verbose_name': 'alias plugin model',

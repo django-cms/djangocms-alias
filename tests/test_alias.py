@@ -280,7 +280,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             alias=alias,
         )
 
-        self.assertEqual(alias.cms_plugins.first().template, TEMPLATE_DEFAULT)
+        self.assertEqual(alias.cms_plugins.last().template, TEMPLATE_DEFAULT)
 
     def test_create_alias_with_custom_render_template(self):
         alias_template = getattr(settings, 'DJANGOCMS_ALIAS_TEMPLATES')[0]
@@ -295,4 +295,4 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             template=alias_template[0],
         )
 
-        self.assertEqual(alias.cms_plugins.first().template, alias_template[0])
+        self.assertEqual(alias.cms_plugins.last().template, alias_template[0])

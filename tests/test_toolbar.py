@@ -3,7 +3,8 @@ from cms.cms_toolbars import (
     ADMINISTRATION_BREAK,
     LANGUAGE_MENU_IDENTIFIER,
 )
-from cms.toolbar.items import Break
+from cms.toolbar.items import Break, ModalItem
+from cms.utils.i18n import force_language
 from cms.utils.urlutils import admin_reverse
 
 from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
@@ -150,30 +151,52 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             'en\/admin\/([\w\/]+)\/copy-plugins\/',
         )
 
-    def test_alias_change_category_button_showing_only_on_alias_edit_view(self):
+    def test_alias_change_category_button_is_visible_on_alias_edit_view(self):
+        button_label = 'Change category...'
+        alias_change_viewname = 'djangocms_alias_alias_change'
         alias = self._create_alias()
-        request = self.get_alias_request(
-            alias=alias,
-            user=self.superuser,
-            edit=True,
-        )
-        alias_menu_items = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER).items
 
+        with force_language('en'):
+            request = self.get_alias_request(
+                alias=alias,
+                user=self.superuser,
+                edit=True,
+            )
+        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
+        self.assertIsNotNone(search_result)
+        button = search_result.item
+        self.assertEqual(button.on_close, 'REFRESH_PAGE')
         self.assertEqual(
-            alias_menu_items[1].name,
-            'Change category...',
-        )
-        self.assertEqual(
-            alias_menu_items[1].url,
+            button.url,
             admin_reverse(
-                'djangocms_alias_alias_change',
-                args=[request.toolbar.obj.pk],
+                alias_change_viewname,
+                args=[alias.pk],
             ),
         )
+
+        with force_language('de'):
+            request = self.get_alias_request(
+                alias=alias,
+                user=self.superuser,
+                edit=True,
+                lang_code='de',
+            )
+        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
+        self.assertIsNotNone(search_result)
+        button = search_result.item
+        self.assertEqual(button.on_close, 'REFRESH_PAGE')
         self.assertEqual(
-            alias_menu_items[1].on_close,
-            'REFRESH_PAGE',
+            button.url,
+            admin_reverse(
+                alias_change_viewname,
+                args=[alias.pk],
+            ),
         )
+
+    def test_alias_change_category_button_not_showing_on_other_pages_than_alias_edit_view(self):
+        alias = self._create_alias()
 
         for endpoint in [
             self.CATEGORY_LIST_ENDPOINT,

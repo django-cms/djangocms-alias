@@ -304,20 +304,29 @@ class AliasSelect2View(ListView):
         return self.request.GET.get('limit', 30)
 
 
-def alias_usage_view(self, request, extra_context=None):
-    # TODO: see djangocms-translations - there is a list like that
-    template_name = 'djangocms_alias/alias_usage_view.html'
+def alias_usage_view(request, pk):
+    if not request.user.is_staff:
+        raise PermissionDenied
 
-    cl = ChangeList(request, 
-                    self.model, 
-                    self.list_display, 
-                    self.list_display_links, 
-                    self.list_filter, 
-                    self.date_hierarchy, 
-                    self.search_fields, 
-                    self.list_select_related, 
-                    self.list_per_page,
-                    self.list_max_show_all, 
-                    self.list_editable, 
-                    self) # 3 extra queries
-    return AliasAdmin.changelist_view(request, extra_context=extra_context)
+    alias = get_object_or_404(AliasModel.objects.all(), pk=pk)
+    opts = Alias.model._meta
+    title = _('Objects using alias: {}'.format(alias))
+    context = {
+        'has_change_permission': True,
+        'opts': opts,
+        'root_path': reverse('admin:index'),
+        'is_popup': True,
+        'app_label': opts.app_label,
+        'object_name': _('Alias'),
+        'object': alias,
+        'title': title,
+        'original': title,
+        'show_back_btn': request.GET.get('back'),
+        'objects_list': sorted(
+            alias.objects_using,
+            # First show Pages on list
+            key=lambda obj: obj.__class__.__name__ == 'Page',
+            reverse=True,
+        ),
+    }
+    return render(request, 'djangocms_alias/alias_usage.html', context)

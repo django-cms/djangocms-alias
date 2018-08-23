@@ -27,7 +27,7 @@ urlpatterns = [
     ),
     url(
         r'^aliases/(?P<pk>\d+)/usage/$',
-        views.AliasUsageView.as_view(),
+        views.alias_usage_view,
         name=constants.USAGE_ALIAS_URL_NAME,
     ),
     url(

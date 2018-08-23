@@ -113,7 +113,7 @@ class Alias(models.Model):
         return self.cms_plugins.exists()
 
     @cached_property
-    def using_objects(self):
+    def objects_using(self):
         objects = set()
         alias_plugins = self.cms_plugins.select_related('placeholder').prefetch_related(
             'placeholder__page_set',

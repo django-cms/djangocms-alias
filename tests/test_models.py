@@ -265,7 +265,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         site2_page.publish('de')  # Should show on the list (draft, public)
 
         with self.assertNumQueries(FuzzyInt(2, 3)):
-            objects = alias.using_objects
+            objects = alias.objects_using
 
         self.assertEqual(
             [page.pk for page in sorted(objects, key=lambda obj: obj.pk)],
@@ -334,28 +334,28 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
 
         with self.assertNumQueries(FuzzyInt(2, 3)):
-            objects = alias1.using_objects
+            objects = alias1.objects_using
         self.assertEqual(
             [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
             [root_alias.pk],
         )
 
         with self.assertNumQueries(FuzzyInt(2, 3)):
-            objects = alias2.using_objects
+            objects = alias2.objects_using
         self.assertEqual(
             [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
             [root_alias.pk, root_alias2.pk],
         )
 
         with self.assertNumQueries(FuzzyInt(2, 3)):
-            objects = alias3.using_objects
+            objects = alias3.objects_using
         self.assertEqual(
             [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
             [alias2.pk],
         )
 
         with self.assertNumQueries(FuzzyInt(2, 3)):
-            objects = alias4.using_objects
+            objects = alias4.objects_using
         self.assertEqual(
             [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
             [alias3.pk],

@@ -1,0 +1,56 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls cms_tags djangocms_alias_tags %}
+
+{% block extrahead %}{{ block.super }}
+<script>
+    function closeSideframe() {
+        try {
+            window.top.CMS.$('.cms-sideframe-close').trigger('click.cms.sideframe');
+        } catch(e) {}
+    }
+</script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst|escape }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'change' object.pk|admin_urlquote %}">{{ object|truncatewords:"18" }}</a>
+    &rsaquo; {% trans 'Usage of alias' %}
+    </div>
+{% endblock %}
+
+
+{% block content %}
+{% if show_back_btn %}<a href="javascript:history.back()" class="button cancel-link cms-btn">{% trans "Back" %}</a>{% endif %}
+<div class="results">
+    <table id="result_list">
+        <thead>
+            <tr>
+                <th>{% trans 'Type' %}</th>
+                <th>{% trans 'Name' %}</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in objects_list %}
+            <tr>
+                {% get_object_type item as object_type %}
+                <td>{{ object_type }}</td>
+                <td>
+                  <a target="_top" onclick="closeSideframe()" href="{% if object_type == 'Alias' %}{% get_alias_url item %}{% else %}{% page_url item %}{% endif %}">{{ item }}</a>
+                </td>
+                <td>
+                    {% if object_type == 'Alias' %}
+                    <a href="{% get_alias_usage_view_url alias=item show_back_btn=True %}">{% trans 'Show usage of alias' %}</a>
+                    {% else %}
+                    {% if item.publisher_is_draft %}Draft{% else %}Public{% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

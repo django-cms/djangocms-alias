@@ -17,7 +17,7 @@ from cms.utils.i18n import get_language_dict
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
-from .constants import CATEGORY_LIST_URL_NAME
+from .constants import CATEGORY_LIST_URL_NAME, USAGE_ALIAS_URL_NAME
 from .models import Alias
 from .utils import alias_plugin_reverse
 
@@ -74,6 +74,13 @@ class AliasToolbar(CMSToolbar):
                 url=admin_reverse(
                     'djangocms_alias_aliascontent_change',
                     args=[self.toolbar.obj.pk],
+                ),
+            )
+            alias_menu.add_modal_item(
+                _('Show usage of alias'),
+                url=alias_plugin_reverse(
+                    USAGE_ALIAS_URL_NAME,
+                    args=[self.toolbar.obj.alias_id],
                 ),
             )
 

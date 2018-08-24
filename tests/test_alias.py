@@ -3,6 +3,7 @@ from operator import attrgetter
 
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
+from django.core.cache import cache
 
 from cms.api import add_plugin, create_page
 from cms.utils.plugins import downcast_plugins
@@ -230,8 +231,10 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
-        site1_page.publish(self.language)
-        site2_page.publish(self.language)
+
+        if CMS_36:
+            site1_page.publish(self.language)
+            site2_page.publish(self.language)
 
         with override_settings(SITE_ID=site1.pk):
             response = self.client.get(site1_page.get_absolute_url())
@@ -247,8 +250,12 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             language=self.language,
             body='Another alias plugin',
         )
-        site1_page.publish(self.language)
-        site2_page.publish(self.language)
+
+        if CMS_36:
+            site1_page.publish(self.language)
+            site2_page.publish(self.language)
+        else:
+            cache.clear()
 
         with override_settings(SITE_ID=site1.pk):
             response = self.client.get(site1_page.get_absolute_url())

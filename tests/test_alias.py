@@ -1,3 +1,4 @@
+from unittest import skipUnless
 from operator import attrgetter
 
 from django.conf import settings
@@ -7,6 +8,7 @@ from django.test.utils import override_settings
 from cms.api import add_plugin, create_page
 from cms.utils.plugins import downcast_plugins
 
+from djangocms_alias.compat import CMS_36
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.compat import get_page_placeholders
 from djangocms_alias.models import TEMPLATE_DEFAULT
@@ -169,6 +171,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             ['test', 'test 1', 'test 2', 'test 3'],
         )
 
+    @skipUnless(CMS_36, "No needed to test on this DjangoCMS version")
     def test_alias_plugin_edit_button_redirecting_to_page_with_structure_mode_turned_on(self):  # noqa: E501
         alias = self._create_alias([])
         alias_plugin = add_plugin(
@@ -207,7 +210,6 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             title='Site1',
             template='page.html',
             language=self.language,
-            published=True,
             in_navigation=True,
             site=site1,
         )
@@ -215,7 +217,6 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             title='Site2',
             template='page.html',
             language=self.language,
-            published=True,
             in_navigation=True,
             site=site2,
         )

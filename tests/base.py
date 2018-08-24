@@ -59,7 +59,6 @@ class BaseAliasPluginTestCase(CMSTestCase):
             title='test',
             template='page.html',
             language=self.language,
-            published=True,
             in_navigation=True,
         )
         self.placeholder = get_page_placeholders(self.page, self.language).get(

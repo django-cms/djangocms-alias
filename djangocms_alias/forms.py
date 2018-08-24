@@ -16,7 +16,13 @@ from cms.utils.permissions import (
 from parler.forms import TranslatableModelForm
 
 from .constants import SELECT2_ALIAS_URL_NAME
-from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category, get_templates
+from .models import (
+    Alias as AliasModel,
+    AliasContent,
+    AliasPlugin,
+    Category,
+    get_templates,
+)
 from .utils import alias_plugin_reverse
 
 

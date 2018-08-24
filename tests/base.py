@@ -54,7 +54,6 @@ class BaseAliasPluginTestCase(CMSTestCase):
             title='test',
             template='page.html',
             language=self.language,
-            published=True,
             in_navigation=True,
         )
         self.category = Category.objects.create(

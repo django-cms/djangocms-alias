@@ -1,5 +1,5 @@
 from operator import attrgetter
-from unittest import skipIf, skipUnless
+from unittest import skipIf
 
 from django.conf import settings
 from django.contrib.sites.models import Site

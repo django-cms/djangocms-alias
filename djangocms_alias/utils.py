@@ -2,6 +2,7 @@ from cms.utils.conf import get_cms_setting
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from djangocms_alias.compat import CMS_36
+
 from .constants import DETAIL_ALIAS_URL_NAME
 
 

@@ -5,6 +5,7 @@ from cms.wizards.wizard_base import Wizard
 from cms.wizards.wizard_pool import wizard_pool
 
 from djangocms_alias.compat import CMS_36
+
 from .cms_plugins import Alias
 from .forms import CreateAliasWizardForm, CreateCategoryWizardForm
 from .models import Alias as AliasModel, Category

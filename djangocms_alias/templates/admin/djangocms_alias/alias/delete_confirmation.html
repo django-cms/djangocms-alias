@@ -34,7 +34,7 @@
 <form method="post">{% csrf_token %}
   <div>
     <input type="hidden" name="post" value="yes" />
-    {% if not perms_needed and not protected %}
+    {% if not perms_needed and not protected and perm %}
       <input type="submit" value="{% trans "Yes, I'm sure" %}" />
     {% endif %}
     <a href="#" class="button cancel-link">{% trans "No, take me back" %}</a>

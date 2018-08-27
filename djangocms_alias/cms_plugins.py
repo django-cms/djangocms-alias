@@ -16,7 +16,7 @@ from cms.utils.plugins import copy_plugins_to_placeholder
 from .compat import CMS_36, reorder_plugins
 from .constants import (
     CREATE_ALIAS_URL_NAME,
-    DELETE_ALIAS_PLUGIN_URL_NAME,
+    DELETE_ALIAS_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
@@ -108,7 +108,7 @@ class Alias(CMSPluginBase):
                 PluginMenuItem(
                     _('Delete Alias'),
                     alias_plugin_reverse(
-                        DELETE_ALIAS_PLUGIN_URL_NAME,
+                        DELETE_ALIAS_URL_NAME,
                         args=(request.toolbar.obj.pk, ),
                     ),
                     action='modal',

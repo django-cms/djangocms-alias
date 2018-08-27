@@ -1,10 +1,16 @@
 from django.contrib.sites.models import Site
 
-from cms.api import add_plugin, create_page
+from cms.api import add_plugin, create_page, create_title
+from cms.models import Placeholder
 from cms.test_utils.util.fuzzy_int import FuzzyInt
 
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
+from djangocms_alias.models import (
+    Alias as AliasModel,
+    AliasContent,
+    Category,
+    _get_alias_placeholder_slot,
+)
 
 from .base import BaseAliasPluginTestCase
 
@@ -261,8 +267,11 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             in_navigation=True,
             site=site2,
         )
+        create_title('en', 'Site2 EN', site2_page)
+        self.add_alias_plugin_to_page(site2_page, alias, 'en')
         self.add_alias_plugin_to_page(site2_page, alias, 'de')
-        site2_page.publish('de')  # Should show on the list (draft, public)
+        site2_page.publish('en')
+        site2_page.publish('de')  # Should show on the list only once (draft, public)
 
         with self.assertNumQueries(FuzzyInt(2, 3)):
             objects = alias.objects_using
@@ -289,6 +298,11 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             alias=root_alias,
             language='de',
         )
+        AliasContent.objects.create(
+            name='root alias it',
+            alias=root_alias,
+            language='it',
+        )
         root_alias2 = self._create_alias(name='root alias 2')
 
         alias1 = self._create_alias(name='alias 1')
@@ -308,6 +322,13 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             language='de',
             alias=alias1,
         )
+        add_plugin(
+            root_alias.get_placeholder('it'),
+            'Alias',
+            language='it',
+            alias=alias1,
+        )
+        # Alias1 should show only once
         add_plugin(
             root_alias.get_placeholder(self.language),
             'Alias',
@@ -359,4 +380,22 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(
             [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
             [alias3.pk],
+        )
+
+    def test_delete(self):
+        alias = self._create_alias([self.plugin])
+        add_plugin(
+            self.placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+        )
+        alias.delete()
+        self.assertFalse(alias.__class__.objects.filter(pk=alias.pk).exists())
+        self.assertEqual(alias.cms_plugins.count(), 0)
+        self.assertEqual(
+            Placeholder.objects.filter(
+                slot=_get_alias_placeholder_slot(alias),
+            ).count(),
+            0,
         )

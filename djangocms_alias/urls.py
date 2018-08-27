@@ -38,7 +38,7 @@ urlpatterns = [
     url(
         r'^delete-alias/(?P<pk>\d+)/$',
         views.delete_alias_view,
-        name=constants.DELETE_ALIAS_PLUGIN_URL_NAME,
+        name=constants.DELETE_ALIAS_URL_NAME,
     ),
     url(
         r'^set-alias-position/$',

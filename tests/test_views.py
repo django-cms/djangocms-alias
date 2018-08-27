@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
@@ -8,10 +10,12 @@ from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.compat import CMS_36
 from djangocms_alias.constants import (
+    DELETE_ALIAS_URL_NAME,
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
     SELECT2_ALIAS_URL_NAME,
     SET_ALIAS_POSITION_URL_NAME,
+    USAGE_ALIAS_URL_NAME,
 )
 from djangocms_alias.models import Alias, AliasContent, Category
 from djangocms_alias.utils import alias_plugin_reverse
@@ -23,16 +27,16 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_view_get_no_data(self):
         with self.login_user_context(self.superuser):
-            response = self.client.get(self.CREATE_ALIAS_ENDPOINT)
+            response = self.client.get(self.get_create_alias_endpoint())
             self.assertEqual(response.status_code, 400)
 
     def test_create_alias_view_non_staff_denied_access(self):
-        response = self.client.get(self.CREATE_ALIAS_ENDPOINT)
+        response = self.client.get(self.get_create_alias_endpoint())
         self.assertEqual(response.status_code, 403)
 
     def test_create_alias_view_get_show_form_plugin(self):
         with self.login_user_context(self.superuser):
-            response = self.client.get(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.get(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
                 'language': self.language,
             })
@@ -44,7 +48,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_view_get_show_form_placeholder(self):
         with self.login_user_context(self.superuser):
-            response = self.client.get(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.get(self.get_create_alias_endpoint(), data={
                 'placeholder': self.placeholder.pk,
                 'language': self.language,
             })
@@ -65,7 +69,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
         )
         with self.login_user_context(user):
-            response = self.client.get(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.get(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
                 'language': self.language,
             })
@@ -76,7 +80,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_view_post_plugin(self):
         with self.login_user_context(self.superuser):
-            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.post(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'language': self.language,
@@ -102,7 +106,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_view_post_plugin_replace(self):
         with self.login_user_context(self.superuser):
-            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.post(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
@@ -124,7 +128,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_view_name(self):
         with self.login_user_context(self.superuser):
-            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.post(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
@@ -141,7 +145,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             category=self.category,
         )
         with self.login_user_context(self.superuser):
-            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.post(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
@@ -164,7 +168,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_view_post_no_plugin_or_placeholder(self):
         with self.login_user_context(self.superuser):
-            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.post(self.get_create_alias_endpoint(), data={
                 'category': self.category.pk,
                 'name': 'test alias',
                 'language': self.language,
@@ -174,7 +178,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_view_post_both_plugin_and_placeholder(self):
         with self.login_user_context(self.superuser):
-            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.post(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
                 'placeholder': self.placeholder.pk,
                 'category': self.category.pk,
@@ -189,7 +193,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         placeholder.save()
 
         with self.login_user_context(self.superuser):
-            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.post(self.get_create_alias_endpoint(), data={
                 'placeholder': placeholder.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
@@ -203,7 +207,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_view_post_placeholder(self):
         with self.login_user_context(self.superuser):
-            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.post(self.get_create_alias_endpoint(), data={
                 'placeholder': self.placeholder.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
@@ -239,7 +243,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
 
         with self.login_user_context(self.superuser):
-            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.post(self.get_create_alias_endpoint(), data={
                 'placeholder': self.placeholder.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
@@ -268,7 +272,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_view_post_no_create_permission(self):
         with self.login_user_context(self.get_staff_user_with_no_permissions()):  # noqa: E501
-            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.post(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
@@ -287,7 +291,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
         )
         with self.login_user_context(user):
-            response = self.client.post(self.CREATE_ALIAS_ENDPOINT, data={
+            response = self.client.post(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
@@ -298,7 +302,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_detach_view_no_permission_to_add_plugins_from_alias(self):
         response = self.client.post(
-            self.DETACH_ALIAS_PLUGIN_ENDPOINT(self.plugin.pk),
+            self.get_detach_alias_plugin_endpoint(self.plugin.pk),
         )
         self.assertEqual(response.status_code, 403)
 
@@ -312,7 +316,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
         with self.login_user_context(self.superuser):
             response = self.client.get(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
             self.assertEqual(response.status_code, 200)
 
@@ -327,14 +331,14 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         user = self.get_staff_user_with_no_permissions()
         with self.login_user_context(user):
             response = self.client.post(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
         self.assertEqual(response.status_code, 403)
 
     def test_detach_view_non_alias_plugin(self):
         with self.login_user_context(self.superuser):
             response = self.client.post(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(self.plugin.pk),
+                self.get_detach_alias_plugin_endpoint(self.plugin.pk),
             )
             self.assertEqual(response.status_code, 404)
 
@@ -355,7 +359,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             response = self.client.post(
-                self.DETACH_ALIAS_PLUGIN_ENDPOINT(plugin.pk),
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
             self.assertEqual(response.status_code, 200)
 
@@ -394,7 +398,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             response = self.client.get(
-                self.LIST_ALIASES_ENDPOINT(category1.pk),
+                self.get_list_aliases_endpoint(category1.pk),
             )
 
         self.assertEqual(response.status_code, 200)
@@ -418,7 +422,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
 
         with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.LIST_ALIASES_ENDPOINT(category.pk))
+            response = self.client.get(self.get_list_aliases_endpoint(category.pk))
         self.assertEqual(response.status_code, 403)
 
     def test_list_view_standard_staff_user(self):
@@ -429,7 +433,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(
             self.get_staff_user_with_std_permissions(),
         ):
-            response = self.client.get(self.LIST_ALIASES_ENDPOINT(category.pk))
+            response = self.client.get(self.get_list_aliases_endpoint(category.pk))
         self.assertEqual(response.status_code, 200)
 
     def test_category_list_view(self):
@@ -444,13 +448,13 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             with force_language('en'):
-                en_response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+                en_response = self.client.get(self.get_category_list_endpoint())
             with force_language('de'):
-                de_response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+                de_response = self.client.get(self.get_category_list_endpoint())
             with force_language('fr'):
-                fr_response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+                fr_response = self.client.get(self.get_category_list_endpoint())
             with force_language('it'):
-                it_response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+                it_response = self.client.get(self.get_category_list_endpoint())
 
         self.assertContains(en_response, 'Category 1')
         self.assertContains(en_response, 'Category 2')
@@ -478,14 +482,14 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_category_list_view_standard_user(self):
         with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+            response = self.client.get(self.get_category_list_endpoint())
         self.assertEqual(response.status_code, 403)
 
     def test_category_list_view_standard_staff_user(self):
         with self.login_user_context(
             self.get_staff_user_with_std_permissions(),
         ):
-            response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+            response = self.client.get(self.get_category_list_endpoint())
         self.assertEqual(response.status_code, 200)
 
     def test_category_list_ordering(self):
@@ -494,13 +498,13 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         category1 = Category.objects.create(name='A category')
 
         with self.login_user_context(self.superuser):
-            response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+            response = self.client.get(self.get_category_list_endpoint())
 
         self.assertEqual([category1, category2], response.context['categories'])
 
     def test_category_list_edit_button(self):
         with self.login_user_context(self.superuser):
-            response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+            response = self.client.get(self.get_category_list_endpoint())
 
         self.assertContains(
             response,
@@ -985,6 +989,187 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.category.set_current_language('de')
         self.assertEqual(self.category.name, 'Alias Kategorie')
 
+    def test_alias_usage_view(self):
+        alias = self._create_alias()
+        root_alias = self._create_alias()
+        self.add_alias_plugin_to_page(self.page, alias)
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    USAGE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+
+        self.assertContains(response, '<td>Page</td>')
+        self.assertContains(response, 'Draft')
+        self.assertNotContains(response, '<td>Alias</td>')
+        self.assertNotContains(response, 'Public')
+
+        add_plugin(
+            root_alias.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        self.page.publish(self.language)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    USAGE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+
+        self.assertContains(response, '<td>Page</td>')
+        self.assertContains(response, '<td>Alias</td>')
+        self.assertContains(response, 'Public')
+        self.assertContains(response, 'Draft')
+        self.assertRegexpMatches(
+            str(response.content),
+            r'href="{}"[\w+]?>{}<\/a>'.format(
+                re.escape(self.page.get_absolute_url(self.language)),
+                str(self.page),
+            ),
+        )
+        self.assertRegexpMatches(
+            str(response.content),
+            r'href="{}"[\w+]?>{}<\/a>'.format(
+                re.escape(alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[root_alias.pk])),
+                str(alias),
+            ),
+        )
+
+    def test_delete_alias_view_get(self):
+        alias = self._create_alias([self.plugin])
+        add_plugin(
+            self.placeholder,
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Are you sure you want to delete the alias "{}"?'.format(alias.name),  # noqa: E501
+        )
+        self.assertContains(response, 'This alias is used on this content:')
+        test = r'<li>[\s\\n]*Page:[\s\\n]*<a href=\"\/en\/test\/\">test<\/a>[\s\\n]*\(Draft\)[\s\\n]*<\/li>'  # noqa: E501
+        self.assertRegexpMatches(str(response.content), test)
+
+    def test_delete_alias_view_get_alias_not_used_on_any_page(self):
+        alias = self._create_alias([self.plugin])
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertContains(response, 'This alias wasn\'t used on any content.')
+
+    def test_delete_alias_view_post(self):
+        from djangocms_alias.views import JAVASCRIPT_SUCCESS_RESPONSE
+        alias = self._create_alias([self.plugin])
+        self.assertIn(alias, Alias.objects.all())
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+        self.assertContains(response, JAVASCRIPT_SUCCESS_RESPONSE)
+        self.assertFalse(Alias.objects.filter(pk=alias.pk).exists())
+
+    def test_delete_alias_view_user_with_no_perms(self):
+        alias = self._create_alias([self.plugin])
+        staff_user = self.get_staff_user_with_no_permissions()
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, '<input type="submit"')
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.post(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_alias_view_alias_not_being_used(self):
+        alias = self._create_alias([self.plugin])
+        staff_user = self.get_staff_user_with_alias_permissions()
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertContains(response, 'Are you sure you want to delete')
+        self.assertContains(response, '<input type="submit"')
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.post(  # noqa
+                alias_plugin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Alias.objects.filter(pk=alias.pk).exists())
+
+    def test_delete_alias_view_alias_being_used_on_pages(self):
+        alias = self._create_alias([self.plugin])
+        add_plugin(
+            self.placeholder,
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        # this user only can delete alias when alias not being used anywhere
+        staff_user = self.get_staff_user_with_no_permissions()
+        # self.add_permission(staff_user, 'add_alias')
+        self.add_permission(staff_user, 'delete_alias')
+
+        with self.login_user_context(staff_user):  # noqa: E501
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, '<input type="submit"')
+
+        with self.login_user_context(staff_user):
+            response = self.client.post(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+                data={'post': 'yes'},
+            )
+        self.assertEqual(response.status_code, 403)
+
     def test_custom_template_alias_view(self):
         alias = self._create_alias()
         add_plugin(
@@ -993,7 +1178,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             language=self.language,
             body='custom alias content',
         )
-
         add_plugin(
             self.placeholder,
             'Alias',

@@ -92,12 +92,19 @@ class AliasDetailView(DetailView):
 def delete_alias_view(request, pk, *args, **kwargs):
     from djangocms_alias.admin import AliasAdmin
 
-    response = AliasAdmin(
+    alias_admin = AliasAdmin(
         model=AliasModel,
         admin_site=admin.site,
-    ).delete_view(request, pk)
-
-    if request.POST and response.status_code == 200:
+    )
+    instance = get_object_or_404(AliasModel, pk=pk)
+    response = alias_admin.delete_view(
+        request,
+        pk,
+        extra_context={
+            'perm': alias_admin._has_delete_permission(request, instance),
+        },
+    )
+    if request.POST and response.status_code in [200, 302]:
         return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
     return response
 

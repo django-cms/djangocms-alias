@@ -5,7 +5,7 @@ class AliasMenuTestCase(BaseAliasPluginTestCase):
 
     def test_alias_pages_have_no_menu_nodes(self):
         with self.login_user_context(self.superuser):
-            response = self.client.get(self.CATEGORY_LIST_ENDPOINT)
+            response = self.client.get(self.get_category_list_endpoint())
         self.assertInHTML('<ul class="nav"></ul>', response.content.decode())
 
     def test_pages_keep_their_menu_nodes(self):

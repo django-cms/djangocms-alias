@@ -1040,6 +1040,19 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 str(alias),
             ),
         )
+        self.assertRegexpMatches(
+            str(response.content),
+            r'href="{}"[\w+]?>{}<\/a>'.format(
+                re.escape(
+                    alias_plugin_reverse(
+                        USAGE_ALIAS_URL_NAME,
+                        args=[root_alias.pk],
+                        parameters={'back': 1},
+                    ),
+                ),
+                'Show usage of alias',
+            ),
+        )
 
     def test_delete_alias_view_get(self):
         alias = self._create_alias([self.plugin])

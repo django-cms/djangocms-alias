@@ -4,6 +4,7 @@ from cms.cms_toolbars import (
     LANGUAGE_MENU_IDENTIFIER,
 )
 from cms.toolbar.items import Break
+import cms.toolbar.utils
 
 from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
 from djangocms_alias.compat import get_object_structure_url

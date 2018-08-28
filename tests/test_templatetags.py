@@ -64,4 +64,4 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             },
             self.get_request('/'),
         )
-        self.assertEqual(output, 'test\n')
+        self.assertEqual(output, 'test')

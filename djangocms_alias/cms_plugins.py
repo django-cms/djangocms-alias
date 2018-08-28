@@ -38,7 +38,9 @@ class Alias(CMSPluginBase):
     form = AliasPluginForm
 
     def get_render_template(self, context, instance, placeholder):
-        return 'djangocms_alias/{}/alias.html'.format(instance.template)
+        if not instance.is_recursive():
+            return 'djangocms_alias/{}/alias.html'.format(instance.template)
+        return 'djangocms_alias/alias_recursive.html'
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):

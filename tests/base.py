@@ -6,9 +6,10 @@ from django.urls import resolve
 from cms.api import add_plugin, create_page
 from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
-from cms.utils.conf import get_cms_setting
+import cms.toolbar.utils
+import cms.utils.conf
 
-from djangocms_alias.compat import get_page_placeholders
+from djangocms_alias.compat import get_page_placeholders, CMS_36
 from djangocms_alias.constants import (
     CATEGORY_LIST_URL_NAME,
     CREATE_ALIAS_URL_NAME,
@@ -50,13 +51,19 @@ class BaseAliasPluginTestCase(CMSTestCase):
 
     def setUp(self):
         self.language = 'en'
-        self.page = create_page(
-            title='test',
-            template='page.html',
-            language=self.language,
-            published=True,
-            in_navigation=True,
-        )
+
+        page = {
+            'title': 'test',
+            'template': 'page.html',
+            'language': self.language,
+            'in_navigation': True,
+        }
+
+        if CMS_36:
+            page.update({'published': True})
+
+        self.page = create_page(**page)
+
         self.category = Category.objects.create(
             name='test category',
         )
@@ -99,10 +106,14 @@ class BaseAliasPluginTestCase(CMSTestCase):
             path = instance.get_absolute_url()
 
         if edit:
-            path += '?%s' % get_cms_setting('CMS_TOOLBAR_URL__EDIT_ON')
+            if CMS_36:
+                path += '?%s' % cms.utils.conf.get_cms_setting('CMS_TOOLBAR_URL__EDIT_ON')
+            else:
+                page_content = self.get_page_title_obj(self.page)
+                path = cms.toolbar.utils.get_object_edit_url(page_content)
 
         if structure:
-            path += '?%s' % get_cms_setting('CMS_TOOLBAR_URL__BUILD')
+            path += '?%s' % cms.utils.conf.get_cms_setting('CMS_TOOLBAR_URL__BUILD')
 
         if preview:
             path += '?preview'
@@ -117,7 +128,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         else:
             request.GET['edit_off'] = None
         if disable:
-            request.GET[get_cms_setting('CMS_TOOLBAR_URL__DISABLE')] = None
+            request.GET[cms.utils.conf.get_cms_setting('CMS_TOOLBAR_URL__DISABLE')] = None
 
         return request
 

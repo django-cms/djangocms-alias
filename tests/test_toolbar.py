@@ -6,6 +6,7 @@ from cms.cms_toolbars import (
 from cms.toolbar.items import Break
 
 from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
+from djangocms_alias.compat import get_object_structure_url
 
 from .base import BaseAliasPluginTestCase
 
@@ -18,11 +19,9 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
 
         self.assertNotContains(response, '<span>Aliases')
 
-        page_structure_url = self.get_obj_structure_url(
-            self.page.get_absolute_url(),
-        )
+        page_url = get_object_structure_url(self.page)
         with self.login_user_context(self.superuser):
-            response = self.client.get(page_structure_url)
+            response = self.client.get(page_url)
 
         self.assertContains(response, '<span>Aliases')
 

@@ -26,7 +26,7 @@ def get_page_placeholders(page, language=None):
 class CompatWizard(Wizard):
 
     def __init__(self, *args, **kwargs):
-        if not CMS_36:
+        if not CMS_36 and kwargs.get('edit_mode_on_success'):
             # cms40 dont support this argument
             kwargs.pop('edit_mode_on_success')
         super().__init__(*args, **kwargs)

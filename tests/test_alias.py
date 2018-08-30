@@ -10,6 +10,7 @@ from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.compat import CMS_36, get_page_placeholders
+from djangocms_alias.models import TEMPLATE_DEFAULT
 
 from .base import BaseAliasPluginTestCase
 

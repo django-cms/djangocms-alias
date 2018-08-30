@@ -3,11 +3,11 @@ from django.http import QueryDict
 from django.test.client import RequestFactory
 from django.urls import resolve
 
+import cms.toolbar.utils
+import cms.utils.conf
 from cms.api import add_plugin, create_page
 from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
-import cms.toolbar.utils
-import cms.utils.conf
 
 from djangocms_alias.compat import (
     get_object_edit_url,

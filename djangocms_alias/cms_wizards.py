@@ -1,23 +1,23 @@
 from django.utils.translation import ugettext_lazy as _
 
 from cms.utils.permissions import get_model_permission_codename
-from cms.wizards.wizard_base import Wizard
 from cms.wizards.wizard_pool import wizard_pool
 
 from djangocms_alias.compat import CMS_36
 
 from .cms_plugins import Alias
+from .compat import CompatWizard
 from .forms import CreateAliasWizardForm, CreateCategoryWizardForm
 from .models import Alias as AliasModel, Category
 
 
-class CreateAliasWizard(Wizard):
+class CreateAliasWizard(CompatWizard):
 
     def user_has_add_permission(self, user, **kwargs):
         return Alias.can_create_alias(user)
 
 
-class CreateAliasCategoryWizard(Wizard):
+class CreateAliasCategoryWizard(CompatWizard):
 
     def user_has_add_permission(self, user, **kwargs):
         return user.has_perm(

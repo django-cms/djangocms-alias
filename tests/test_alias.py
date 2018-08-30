@@ -1,16 +1,14 @@
-from unittest import skipUnless
 from operator import attrgetter
+from unittest import skipIf
 
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
-from django.core.cache import cache
 
 from cms.api import add_plugin, create_page
 from cms.utils.plugins import downcast_plugins
 
-from djangocms_alias.compat import CMS_36
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.compat import get_page_placeholders
+from djangocms_alias.compat import CMS_36, get_page_placeholders
 
 from .base import BaseAliasPluginTestCase
 
@@ -170,7 +168,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             ['test', 'test 1', 'test 2', 'test 3'],
         )
 
-    @skipUnless(CMS_36, "No needed to test on this DjangoCMS version")
+    @skipIf(not CMS_36, 'Only for CMS < 3.7')
     def test_alias_plugin_edit_button_redirecting_to_page_with_structure_mode_turned_on(self):  # noqa: E501
         alias = self._create_alias([])
         alias_plugin = add_plugin(
@@ -210,6 +208,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             template='page.html',
             language=self.language,
             in_navigation=True,
+            published=True,
             site=site1,
         )
         site2_page = create_page(
@@ -217,6 +216,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             template='page.html',
             language=self.language,
             in_navigation=True,
+            published=True,
             site=site2,
         )
         add_plugin(
@@ -255,7 +255,8 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             site1_page.publish(self.language)
             site2_page.publish(self.language)
         else:
-            cache.clear()
+            site1_page.clear_cache(language=self.language, placeholder=True)
+            site2_page.clear_cache(language=self.language, placeholder=True)
 
         with override_settings(SITE_ID=site1.pk):
             response = self.client.get(site1_page.get_absolute_url())

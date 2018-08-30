@@ -6,10 +6,14 @@ from django.urls import resolve
 from cms.api import add_plugin, create_page
 from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
-import cms.toolbar.utils
-import cms.utils.conf
+from cms.utils.conf import get_cms_setting
 
-from djangocms_alias.compat import get_page_placeholders, CMS_36
+from djangocms_alias.compat import (
+    get_object_edit_url,
+    get_object_preview_url,
+    get_object_structure_url,
+    get_page_placeholders,
+)
 from djangocms_alias.constants import (
     CATEGORY_LIST_URL_NAME,
     CREATE_ALIAS_URL_NAME,
@@ -51,23 +55,13 @@ class BaseAliasPluginTestCase(CMSTestCase):
 
     def setUp(self):
         self.language = 'en'
-
-        page = {
-            'title': 'test',
-            'template': 'page.html',
-            'language': self.language,
-            'in_navigation': True,
-        }
-
-        if CMS_36:
-            page.update({'published': True})
-
-        self.page = create_page(**page)
-
-        self.category = Category.objects.create(
-            name='test category',
+        self.page = create_page(
+            title='test',
+            template='page.html',
+            language=self.language,
+            published=True,
+            in_navigation=True,
         )
-
         self.placeholder = get_page_placeholders(self.page, self.language).get(
             slot='content',
         )
@@ -78,6 +72,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
             body='test',
         )
         self.superuser = self.get_superuser()
+        self.category = Category.objects.create(name='test category')
 
     def _create_alias(self, plugins=None, name='test alias', category=None, position=0, language=None):
         if language is None:
@@ -99,24 +94,30 @@ class BaseAliasPluginTestCase(CMSTestCase):
             alias_content.populate(plugins=plugins)
         return alias
 
+    def get_alias_request(self, alias, *args, **kwargs):
+        request = self._get_instance_request(alias, *args, **kwargs)
+        request.current_page = None
+        request = self._process_request_by_toolbar_middleware(request, obj=alias)
+        return request
+
+    def get_page_request(self, page, obj=None, *args, **kwargs):
+        request = self._get_instance_request(page, *args, **kwargs)
+        request.current_page = page
+        request = self._process_request_by_toolbar_middleware(request, obj)
+        return request
+
     def _get_instance_request(self, instance, user, path=None, edit=False,
                               preview=False, structure=False, lang_code='en',
                               disable=False):
         if not path:
-            path = instance.get_absolute_url()
-
-        if edit:
-            if CMS_36:
-                path += '?%s' % cms.utils.conf.get_cms_setting('CMS_TOOLBAR_URL__EDIT_ON')
+            if edit:
+                path = get_object_edit_url(instance)
+            elif preview:
+                path = get_object_preview_url(instance)
+            elif structure:
+                path = get_object_structure_url(instance)
             else:
-                page_content = self.get_page_title_obj(self.page)
-                path = cms.toolbar.utils.get_object_edit_url(page_content)
-
-        if structure:
-            path += '?%s' % cms.utils.conf.get_cms_setting('CMS_TOOLBAR_URL__BUILD')
-
-        if preview:
-            path += '?preview'
+                path = instance.get_absolute_url()
 
         request = RequestFactory().get(path)
         request.session = {}
@@ -128,7 +129,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         else:
             request.GET['edit_off'] = None
         if disable:
-            request.GET[cms.utils.conf.get_cms_setting('CMS_TOOLBAR_URL__DISABLE')] = None
+            request.GET[get_cms_setting('CMS_TOOLBAR_URL__DISABLE')] = None
 
         return request
 
@@ -141,18 +142,6 @@ class BaseAliasPluginTestCase(CMSTestCase):
             request.toolbar.populate()
             request.resolver_match = resolve(request.path)
             request.toolbar.post_template_populate()
-        return request
-
-    def get_alias_request(self, alias, *args, **kwargs):  # noqa: E501
-        request = self._get_instance_request(alias, *args, **kwargs)
-        request.current_page = None
-        request = self._process_request_by_toolbar_middleware(request, obj=alias)
-        return request
-
-    def get_page_request(self, page, obj=None, *args, **kwargs):  # noqa: E501
-        request = self._get_instance_request(page, *args, **kwargs)
-        request.current_page = page
-        request = self._process_request_by_toolbar_middleware(request, obj)
         return request
 
     def _add_default_permissions(self, user):

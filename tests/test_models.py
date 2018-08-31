@@ -49,6 +49,19 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
         self.assertTrue(recursed_alias_plugin.is_recursive())
 
+    def test_alias_is_recursive_with_custom_template(self):
+        alias = self._create_alias(
+            self.placeholder.get_plugins(),
+        )
+        recursive_alias_plugin = add_plugin(
+            alias.get_placeholder(self.language),
+            Alias,
+            language=self.language,
+            alias=alias,
+            template='custom_alias_template'
+        )
+        self.assertTrue(recursive_alias_plugin.is_recursive())
+
     def test_increment_position_for_newly_created_instances(self):
         category1 = Category.objects.create(
             name='Cat 1',

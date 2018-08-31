@@ -1,0 +1,10 @@
+{% extends "admin/change_form.html" %}
+{% load cms_admin cms_static i18n %}
+
+{% block object-tools %}{% endblock %}
+
+{% block submit_buttons_bottom %}
+<div class="submit-row">
+    <input type="submit" value="{% trans "Save" %}" class="default" name="save">
+</div>
+{% endblock %}

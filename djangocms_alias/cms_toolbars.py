@@ -79,6 +79,14 @@ class AliasToolbar(CMSToolbar):
                     ),
                 )
 
+            alias_menu.add_modal_item(
+                _('Change category'),
+                url=admin_reverse(
+                    'djangocms_alias_alias_change',
+                    args=[self.toolbar.obj.pk],
+                ),
+            )
+
     @classmethod
     def get_insert_position(cls, admin_menu, item_name):
         """

@@ -1,19 +1,14 @@
-from unittest import skipUnless
 from operator import attrgetter
 from unittest import skipIf
 
-from django.conf import settings
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
-from django.core.cache import cache
 
 from cms.api import add_plugin, create_page
 from cms.utils.plugins import downcast_plugins
 
-from djangocms_alias.compat import CMS_36
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.compat import CMS_36, get_page_placeholders
-from djangocms_alias.models import TEMPLATE_DEFAULT
 
 from .base import BaseAliasPluginTestCase
 
@@ -274,29 +269,23 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, 'Another alias plugin')
 
     def test_create_alias_with_default_render_template(self):
-        alias = self._create_alias(
-            self.placeholder.get_plugins(),
-        )
+        alias = self._create_alias()
         add_plugin(
             self.placeholder,
             Alias,
             language=self.language,
             alias=alias,
         )
-
-        self.assertEqual(alias.cms_plugins.last().template, TEMPLATE_DEFAULT)
+        self.assertEqual(alias.cms_plugins.first().template, 'default')
 
     def test_create_alias_with_custom_render_template(self):
-        alias_template = getattr(settings, 'DJANGOCMS_ALIAS_TEMPLATES')[0]
-        alias = self._create_alias(
-            self.placeholder.get_plugins(),
-        )
+        alias_template = 'DJANGOCMS_ALIAS_TEMPLATES'
+        alias = self._create_alias()
         add_plugin(
             self.placeholder,
             Alias,
             language=self.language,
             alias=alias,
-            template=alias_template[0],
+            template=alias_template,
         )
-
-        self.assertEqual(alias.cms_plugins.last().template, alias_template[0])
+        self.assertEqual(alias.cms_plugins.first().template, alias_template)

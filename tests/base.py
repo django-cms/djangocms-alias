@@ -3,11 +3,10 @@ from django.http import QueryDict
 from django.test.client import RequestFactory
 from django.urls import resolve
 
-import cms.toolbar.utils
-import cms.utils.conf
 from cms.api import add_plugin, create_page
 from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
+from cms.utils.conf import get_cms_setting
 
 from djangocms_alias.compat import (
     get_object_edit_url,
@@ -60,6 +59,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
             title='test',
             template='page.html',
             language=self.language,
+            published=True,
             in_navigation=True,
         )
         self.placeholder = get_page_placeholders(self.page, self.language).get(
@@ -129,7 +129,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         else:
             request.GET['edit_off'] = None
         if disable:
-            request.GET[cms.utils.conf.get_cms_setting('CMS_TOOLBAR_URL__DISABLE')] = None
+            request.GET[get_cms_setting('CMS_TOOLBAR_URL__DISABLE')] = None
 
         return request
 

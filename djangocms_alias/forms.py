@@ -16,13 +16,7 @@ from cms.utils.permissions import (
 from parler.forms import TranslatableModelForm
 
 from .constants import SELECT2_ALIAS_URL_NAME
-from .models import (
-    Alias as AliasModel,
-    AliasContent,
-    AliasPlugin,
-    Category,
-    get_templates,
-)
+from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
 from .utils import alias_plugin_reverse
 
 
@@ -287,10 +281,6 @@ class AliasPluginForm(forms.ModelForm):
                 'data-placeholder': _('Select an alias'),
             },
         ),
-    )
-    template = forms.ChoiceField(
-        label=_('Template'),
-        choices=get_templates(),
     )
 
     def __init__(self, *args, **kwargs):

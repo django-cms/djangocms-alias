@@ -1,8 +1,8 @@
 from unittest import skipIf
 
+from djangocms_alias.compat import CMS_36
 from djangocms_alias.constants import DETAIL_ALIAS_URL_NAME
 from djangocms_alias.utils import alias_plugin_reverse
-from djangocms_alias.compat import CMS_36
 
 from .base import BaseAliasPluginTestCase
 

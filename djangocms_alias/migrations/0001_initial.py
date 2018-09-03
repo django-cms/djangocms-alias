@@ -7,7 +7,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import djangocms_alias.models
 
-from djangocms_alias.models import get_templates
+from djangocms_alias.models import get_templates, TEMPLATE_DEFAULT
 
 class Migration(migrations.Migration):
 
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('cmsplugin_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, related_name='djangocms_alias_aliasplugin', serialize=False, to='cms.CMSPlugin')),
                 ('alias', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cms_plugins', to='djangocms_alias.Alias', verbose_name='alias')),
-                ('template', models.CharField(choices=get_templates(), default='default', max_length=255, verbose_name='Template')),
+                ('template', models.CharField(choices=get_templates(), default=TEMPLATE_DEFAULT, max_length=255, verbose_name='Template')),
             ],
             options={
                 'verbose_name': 'alias plugin model',

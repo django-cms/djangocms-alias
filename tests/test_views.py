@@ -1,11 +1,12 @@
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
-from cms.api import add_plugin, create_page
-from cms.models import Placeholder, Site
+from cms.api import add_plugin
+from cms.models import Placeholder
 from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
-from djangocms_alias.compat import CMS_36, get_page_placeholders
+
+from djangocms_alias.compat import CMS_36
 from djangocms_alias.constants import (
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,

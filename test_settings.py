@@ -1,3 +1,7 @@
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 HELPER_SETTINGS = {
     'TIME_ZONE': 'Europe/Zurich',
     'TOP_INSTALLED_APPS': [
@@ -49,6 +53,9 @@ HELPER_SETTINGS = {
             },
         ],
     },
+    'TEMPLATE_DIRS': [
+        os.path.join('tests', 'templates'),
+    ],
     'PARLER_LANGUAGES': {
         1: [
             {

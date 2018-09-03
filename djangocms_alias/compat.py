@@ -27,8 +27,8 @@ class CompatWizard(Wizard):
 
     def __init__(self, *args, **kwargs):
         if not CMS_36:
-            # cms40 dont support this argument
-            kwargs.pop('edit_mode_on_success')
+            # cms40 doesn't support this argument
+            kwargs.pop('edit_mode_on_success', None)
         super().__init__(*args, **kwargs)
 
 

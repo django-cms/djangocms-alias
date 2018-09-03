@@ -6,6 +6,7 @@ from cms.models import Placeholder
 from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 
+from djangocms_alias.compat import CMS_36
 from djangocms_alias.constants import (
     DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
@@ -983,3 +984,26 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(self.category.name, 'test category')
         self.category.set_current_language('de')
         self.assertEqual(self.category.name, 'Alias Kategorie')
+
+    def test_custom_template_alias_view(self):
+        alias = self._create_alias()
+        add_plugin(
+            alias.get_placeholder(self.language),
+            'TextPlugin',
+            language=self.language,
+            body='custom alias content',
+        )
+
+        add_plugin(
+            self.placeholder,
+            'Alias',
+            language=self.language,
+            alias=alias,
+            template='custom_alias_template',
+        )
+
+        if CMS_36:
+            self.page.publish(self.language)
+
+        response = self.client.get(self.page.get_absolute_url())
+        self.assertContains(response, '<b>custom alias content</b>')

@@ -1,3 +1,8 @@
+import os
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 HELPER_SETTINGS = {
     'TIME_ZONE': 'Europe/Zurich',
     'TOP_INSTALLED_APPS': [
@@ -49,6 +54,9 @@ HELPER_SETTINGS = {
             },
         ],
     },
+    'TEMPLATE_DIRS': [
+        os.path.join('tests', 'templates'),
+    ],
     'PARLER_LANGUAGES': {
         1: [
             {
@@ -80,6 +88,9 @@ HELPER_SETTINGS = {
     },
     'PARLER_ENABLE_CACHING': False,
     'LANGUAGE_CODE': 'en',
+    'DJANGOCMS_ALIAS_TEMPLATES': [
+        ('custom_alias_template', 'Custom Template Name'),
+    ]
 }
 
 

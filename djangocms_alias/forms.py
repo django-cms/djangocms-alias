@@ -293,6 +293,7 @@ class AliasPluginForm(forms.ModelForm):
         fields = (
             'category',
             'alias',
+            'template',
         )
 
 

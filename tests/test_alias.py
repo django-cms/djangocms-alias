@@ -267,3 +267,25 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             response = self.client.get(site2_page.get_absolute_url())
         self.assertContains(response, 'test alias multisite')
         self.assertContains(response, 'Another alias plugin')
+
+    def test_create_alias_with_default_render_template(self):
+        alias = self._create_alias()
+        add_plugin(
+            self.placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+        )
+        self.assertEqual(alias.cms_plugins.first().template, 'default')
+
+    def test_create_alias_with_custom_render_template(self):
+        alias_template = 'custom_alias_template'
+        alias = self._create_alias()
+        add_plugin(
+            self.placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+            template=alias_template,
+        )
+        self.assertEqual(alias.cms_plugins.first().template, alias_template)

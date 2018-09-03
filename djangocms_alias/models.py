@@ -29,6 +29,22 @@ __all__ = [
 ]
 
 
+# Add additional choices through the ``settings.py``.
+TEMPLATE_DEFAULT = 'default'
+
+
+def get_templates():
+    choices = [
+        (TEMPLATE_DEFAULT, _('Default')),
+    ]
+    choices += getattr(
+        settings,
+        'DJANGOCMS_ALIAS_TEMPLATES',
+        [],
+    )
+    return choices
+
+
 def _get_alias_placeholder_slot(alias):
     return slugify(alias.name)
 
@@ -244,6 +260,12 @@ class AliasPlugin(CMSPlugin):
         verbose_name=_('alias'),
         related_name='cms_plugins',
         on_delete=models.CASCADE,
+    )
+    template = models.CharField(
+        verbose_name=_('template'),
+        choices=get_templates(),
+        default=TEMPLATE_DEFAULT,
+        max_length=255,
     )
 
     class Meta:

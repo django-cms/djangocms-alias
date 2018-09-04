@@ -5,7 +5,12 @@ from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseBadRequest,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import (
@@ -19,6 +24,7 @@ from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 from cms.utils.permissions import has_plugin_permission
 
 from .cms_plugins import Alias
+from .compat import CMS_36
 from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
 from .models import Alias as AliasModel, AliasPlugin, Category
 
@@ -96,6 +102,10 @@ def delete_alias_view(request, pk, *args, **kwargs):
         model=AliasModel,
         admin_site=admin.site,
     )
+    if CMS_36:
+        # use default template
+        alias_admin.delete_confirmation_template = 'admin/delete_confirmation.html'
+
     instance = get_object_or_404(AliasModel, pk=pk)
     response = alias_admin.delete_view(
         request,
@@ -194,7 +204,6 @@ def create_alias_view(request):
 
     if not Alias.can_create_alias(user, plugins):
         raise PermissionDenied
-
     replace = create_form.cleaned_data.get('replace')
 
     if replace and not has_plugin_permission(user, Alias.__name__, 'add'):
@@ -314,6 +323,9 @@ class AliasSelect2View(ListView):
 def alias_usage_view(request, pk):
     if not request.user.is_staff:
         raise PermissionDenied
+
+    if CMS_36:
+        raise Http404()
 
     alias = get_object_or_404(AliasModel.objects.all(), pk=pk)
     opts = Alias.model._meta

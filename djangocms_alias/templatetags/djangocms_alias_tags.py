@@ -20,7 +20,7 @@ def get_alias_usage_view_url(alias, show_back_btn):
 
 @register.simple_tag(takes_context=False)
 def get_object_type(obj):
-    return obj.__class__.__name__
+    return obj._meta.verbose_name
 
 
 @register.simple_tag(takes_context=True)

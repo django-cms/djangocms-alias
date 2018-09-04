@@ -1,4 +1,5 @@
 import itertools
+from unittest import skipIf, skipUnless
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
@@ -10,7 +11,7 @@ from cms.utils.i18n import force_language
 from cms.utils.urlutils import admin_reverse
 
 from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
-from djangocms_alias.compat import get_object_structure_url
+from djangocms_alias.compat import CMS_36, get_object_structure_url
 from djangocms_alias.constants import USAGE_ALIAS_URL_NAME
 
 from .base import BaseAliasPluginTestCase
@@ -232,6 +233,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
                 [alias_item.name for alias_item in alias_menu_items]
             )
 
+    @skipIf(CMS_36, 'Only for CMS >= 4.0')
     def test_alias_usage_button(self):
         alias = self._create_alias()
         request = self.get_alias_request(
@@ -270,6 +272,19 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
                 button_label,
                 [alias_item.name for alias_item in alias_menu_items]
             )
+
+    @skipUnless(CMS_36, 'Only for CMS < 3.7')
+    def test_alias_usage_button_dont_show_on_cms36(self):
+        alias = self._create_alias()
+        request = self.get_alias_request(
+            alias=alias,
+            user=self.superuser,
+            edit=True,
+        )
+        button_label = 'Show usage of alias...'
+        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
+        self.assertIsNone(search_result)
 
     def test_create_wizard_button_enabled(self):
         request = self.get_page_request(

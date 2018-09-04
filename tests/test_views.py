@@ -1,4 +1,5 @@
 import re
+from unittest import skipIf, skipUnless
 
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -989,6 +990,21 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.category.set_current_language('de')
         self.assertEqual(self.category.name, 'Alias Kategorie')
 
+    @skipUnless(CMS_36, 'Only for CMS < 3.7')
+    def test_alias_usage_view_404_on_cms36(self):
+        alias = self._create_alias()
+        self.add_alias_plugin_to_page(self.page, alias)
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    USAGE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+
+        self.assertEqual(response.status_code, 404)
+
+    @skipIf(CMS_36, 'Only for CMS >= 4.0')
     def test_alias_usage_view(self):
         alias = self._create_alias()
         root_alias = self._create_alias()
@@ -1002,9 +1018,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
 
         self.assertContains(response, '<td>Page</td>')
-        self.assertContains(response, 'Draft')
         self.assertNotContains(response, '<td>Alias</td>')
-        self.assertNotContains(response, 'Public')
 
         add_plugin(
             root_alias.get_placeholder(self.language),
@@ -1012,7 +1026,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
-        self.page.publish(self.language)
 
         with self.login_user_context(self.superuser):
             response = self.client.get(
@@ -1024,8 +1037,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         self.assertContains(response, '<td>Page</td>')
         self.assertContains(response, '<td>Alias</td>')
-        self.assertContains(response, 'Public')
-        self.assertContains(response, 'Draft')
         self.assertRegexpMatches(
             str(response.content),
             r'href="{}"[\w+]?>{}<\/a>'.format(
@@ -1069,15 +1080,32 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                     args=[alias.pk],
                 ),
             )
-        self.assertEqual(response.status_code, 200)
         self.assertContains(
             response,
             'Are you sure you want to delete the alias "{}"?'.format(alias.name),  # noqa: E501
         )
-        self.assertContains(response, 'This alias is used on this content:')
-        test = r'<li>[\s\\n]*Page:[\s\\n]*<a href=\"\/en\/test\/\">test<\/a>[\s\\n]*\(Draft\)[\s\\n]*<\/li>'  # noqa: E501
+
+    @skipIf(CMS_36, 'Only for CMS >= 4.0')
+    def test_delete_alias_view_get_using_objects(self):
+        alias = self._create_alias([self.plugin])
+        add_plugin(
+            self.placeholder,
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                alias_plugin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertContains(response, 'This alias is used by following objects:')
+        test = r'<li>[\s\\n]*Page:[\s\\n]*<a href=\"\/en\/test\/\">test<\/a>[\s\\n]*<\/li>'
         self.assertRegexpMatches(str(response.content), test)
 
+    @skipIf(CMS_36, 'Only for CMS >= 4.0')
     def test_delete_alias_view_get_alias_not_used_on_any_page(self):
         alias = self._create_alias([self.plugin])
         with self.login_user_context(self.superuser):
@@ -1087,7 +1115,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                     args=[alias.pk],
                 ),
             )
-        self.assertContains(response, 'This alias wasn\'t used on any content.')
+        self.assertContains(response, 'This alias wasn\'t used by any object.')
 
     def test_delete_alias_view_post(self):
         from djangocms_alias.views import JAVASCRIPT_SUCCESS_RESPONSE
@@ -1115,7 +1143,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 ),
             )
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, '<input type="submit"')
+        self.assertNotContains(response, 'type="submit"')
 
         with self.login_user_context(staff_user):  # noqa: E501
             response = self.client.post(
@@ -1138,7 +1166,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 ),
             )
         self.assertContains(response, 'Are you sure you want to delete')
-        self.assertContains(response, '<input type="submit"')
+        self.assertContains(response, 'type="submit"')
         with self.login_user_context(staff_user):  # noqa: E501
             response = self.client.post(  # noqa
                 alias_plugin_reverse(
@@ -1160,7 +1188,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
         # this user only can delete alias when alias not being used anywhere
         staff_user = self.get_staff_user_with_no_permissions()
-        # self.add_permission(staff_user, 'add_alias')
         self.add_permission(staff_user, 'delete_alias')
 
         with self.login_user_context(staff_user):  # noqa: E501

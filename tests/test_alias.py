@@ -1,5 +1,5 @@
 from operator import attrgetter
-from unittest import skipIf
+from unittest import skipUnless
 
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
@@ -168,7 +168,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             ['test', 'test 1', 'test 2', 'test 3'],
         )
 
-    @skipIf(not CMS_36, 'Only for CMS < 3.7')
+    @skipUnless(CMS_36, 'Only for CMS < 3.7')
     def test_alias_plugin_edit_button_redirecting_to_page_with_structure_mode_turned_on(self):  # noqa: E501
         alias = self._create_alias([])
         alias_plugin = add_plugin(
@@ -191,6 +191,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
 
         self.assertIn('?structure', edit_menu_item.url)
 
+    @override_settings(CMS_PLACEHOLDER_CACHE=False)
     def test_alias_multisite_support(self):
         site1 = Site.objects.create(domain='site1.com', name='1')
         site2 = Site.objects.create(domain='site2.com', name='2')
@@ -243,9 +244,6 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         if CMS_36:
             site1_page.publish(self.language)
             site2_page.publish(self.language)
-        else:
-            site1_page.clear_cache(language=self.language, placeholder=True)
-            site2_page.clear_cache(language=self.language, placeholder=True)
 
         with override_settings(SITE_ID=site1.pk):
             response = self.client.get(site1_page.get_absolute_url())

@@ -1,10 +1,12 @@
+from unittest import skipIf
+
 from django.contrib.sites.models import Site
 
 from cms.api import add_plugin, create_page, create_title
 from cms.models import Placeholder
-from cms.test_utils.util.fuzzy_int import FuzzyInt
 
 from djangocms_alias.cms_plugins import Alias
+from djangocms_alias.compat import CMS_36
 from djangocms_alias.models import (
     Alias as AliasModel,
     AliasContent,
@@ -196,6 +198,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             {0: alias2.pk, 1: alias3.pk, 2: alias4.pk, 3: alias1.pk},
         )
 
+    @skipIf(CMS_36, 'Only for CMS >= 4.0')
     def test_pages_using_alias(self):
         site1 = Site.objects.create(domain='site1.com', name='1')
         site2 = Site.objects.create(domain='site2.com', name='2')
@@ -210,7 +213,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             site=site1,
         )
         self.add_alias_plugin_to_page(site1_page, alias)
-        site1_page.publish(self.language)  # Should show on the list (draft, public)
+        # Should show on the list
 
         nested_page1 = create_page(
             title='Site1 nested page 1',
@@ -223,7 +226,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
         self.add_alias_plugin_to_page(nested_page1, alias)
         self.add_alias_plugin_to_page(nested_page1, alias)
-        nested_page1.publish(self.language)  # Should show on the list only once (draft, public)
+        # Should show on the list only once
 
         nested_page2 = create_page(
             title='Site1 nested page 2',
@@ -235,7 +238,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             parent=site1_page,
         )
         self.add_alias_plugin_to_page(nested_page2, alias)
-        # Not published change but will be shown on the list. (draft)
+        # Should show on the list
 
         nested_page3 = create_page(
             title='Site1 nested page 3',
@@ -257,7 +260,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             parent=nested_page3,
         )
         self.add_alias_plugin_to_page(deep_nested_page4, alias)
-        deep_nested_page4.publish(self.language)  # Should show on the list (draft, public)
+        # Should show on the list
 
         site2_page = create_page(
             title='Site2',
@@ -270,27 +273,23 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         create_title('en', 'Site2 EN', site2_page)
         self.add_alias_plugin_to_page(site2_page, alias, 'en')
         self.add_alias_plugin_to_page(site2_page, alias, 'de')
-        site2_page.publish('en')
-        site2_page.publish('de')  # Should show on the list only once (draft, public)
+        # Should show on the list only once
 
-        with self.assertNumQueries(FuzzyInt(2, 3)):
+        with self.assertNumQueries(3):
             objects = alias.objects_using
 
         self.assertEqual(
             [page.pk for page in sorted(objects, key=lambda obj: obj.pk)],
             [
                 site1_page.pk,
-                site1_page.publisher_public.pk,
                 nested_page1.pk,
-                nested_page1.publisher_public.pk,
                 nested_page2.pk,
                 deep_nested_page4.pk,
-                deep_nested_page4.publisher_public.pk,
                 site2_page.pk,
-                site2_page.publisher_public.pk,
             ]
         )
 
+    @skipIf(CMS_36, 'Only for CMS >= 4.0')
     def test_aliases_using_alias(self):
         root_alias = self._create_alias(name='root alias')
         AliasContent.objects.create(
@@ -354,32 +353,50 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             alias=alias4,
         )
 
-        with self.assertNumQueries(FuzzyInt(2, 3)):
+        with self.assertNumQueries(3):
             objects = alias1.objects_using
         self.assertEqual(
             [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
             [root_alias.pk],
         )
 
-        with self.assertNumQueries(FuzzyInt(2, 3)):
+        with self.assertNumQueries(3):
             objects = alias2.objects_using
         self.assertEqual(
             [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
             [root_alias.pk, root_alias2.pk],
         )
 
-        with self.assertNumQueries(FuzzyInt(2, 3)):
+        with self.assertNumQueries(3):
             objects = alias3.objects_using
         self.assertEqual(
             [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
             [alias2.pk],
         )
 
-        with self.assertNumQueries(FuzzyInt(2, 3)):
+        with self.assertNumQueries(3):
             objects = alias4.objects_using
         self.assertEqual(
             [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
             [alias3.pk],
+        )
+
+    @skipIf(CMS_36, 'Only for CMS >= 4.0')
+    def test_pages_and_aliases_using_objects(self):
+        alias = self._create_alias()
+        root_alias = self._create_alias(name='root alias')
+        add_plugin(
+            root_alias.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        self.add_alias_plugin_to_page(self.page, alias, 'en')
+        with self.assertNumQueries(5):
+            objects = alias.objects_using
+        self.assertEqual(
+            [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
+            [self.page.pk, root_alias.pk],
         )
 
     def test_delete(self):

@@ -32,6 +32,15 @@ class CompatWizard(Wizard):
         super().__init__(*args, **kwargs)
 
 
+def get_wizard_entires():
+    try:
+        from cms.wizards.helpers import get_entries
+        return get_entries()
+    except ImportError:
+        from cms.wizards.wizard_pool import wizard_pool
+        return wizard_pool.get_entries()
+
+
 def _get_object_url_for_cms40(func, instance, language=None):
     from cms.models import Page
     from djangocms_alias.models import Alias

@@ -15,20 +15,18 @@
 <br/>
 
 {% if object.objects_using %}
-  {% blocktrans with escaped_object=object %}This alias is used on this content:{% endblocktrans %}
+  {% blocktrans with escaped_object=object %}This alias is used by following objects:{% endblocktrans %}
   <ul>
       {% for item in object.objects_using %}
       <li>
           {% get_object_type item as object_type %}
-          {{ object_type }}:
-
-          <a href="{% if object_type == 'Alias' %}{% get_alias_url item %}{% else %}{% page_url item %}{% endif %}">{{ item }}</a>
-          {% if object_type == 'Page' %}({% if item.publisher_is_draft %}Draft{% else %}Public{% endif %}){% endif %}
+          {{ object_type|capfirst|escape }}:
+          <a href="{{ item.get_absolute_url }}">{{ item }}</a>
       </li>
       {% endfor %}
   </ul>
 {% else %}
-  {% blocktrans with escaped_object=object %}This alias wasn't used on any content.{% endblocktrans %}
+  {% blocktrans with escaped_object=object %}This alias wasn't used by any object.{% endblocktrans %}
 {% endif %}
 
 <form method="post">{% csrf_token %}

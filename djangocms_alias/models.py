@@ -1,8 +1,9 @@
 import operator
+from collections import defaultdict
 
 from django.conf import settings
 from django.db import models, transaction
-from django.db.models import F, Prefetch, Q
+from django.db.models import F, Q
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
 from django.utils.text import slugify
@@ -115,18 +116,26 @@ class Alias(models.Model):
     @cached_property
     def objects_using(self):
         objects = set()
-        alias_plugins = self.cms_plugins.select_related('placeholder').prefetch_related(
-            'placeholder__page_set',
-            Prefetch(
-                'placeholder__alias_contents',
-                AliasContent.objects.select_related('alias'),
-            ),
-        )
-        for plugin in alias_plugins:
-            pages = plugin.placeholder.page_set.all()
-            objects.update(pages)
-            alias_contents = plugin.placeholder.alias_contents.all()
-            objects.update([obj.alias for obj in alias_contents])
+        object_ids = defaultdict(set)
+        plugins = self.cms_plugins.select_related('placeholder').prefetch_related('placeholder__source')
+        for plugin in plugins:
+            obj = plugin.placeholder.source
+            obj_class_name = obj.__class__.__name__
+            if obj_class_name.endswith('Content'):
+                attr_name = obj_class_name.replace('Content', '').lower()
+                attr_related_model = obj._meta.get_field(attr_name).related_model
+                id_attr = getattr(obj, '{}_id'.format(attr_name))
+                if id_attr:
+                    object_ids[attr_related_model].update([id_attr])
+                else:
+                    objects.update([obj])
+            else:
+                objects.update([obj])
+        objects.update([
+            obj
+            for model_class, ids in object_ids.items()
+            for obj in model_class.objects.filter(pk__in=ids)
+        ])
         return list(objects)
 
     def get_name(self, language=None):
@@ -223,7 +232,13 @@ class AliasContent(models.Model):
         verbose_name_plural = _('alias contents')
 
     def __str__(self):
-        return self.name
+        return '{} ({})'.format(self.name, self.language)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not CMS_36:
+            self.placeholder.source = self
+            self.placeholder.save(update_fields=['object_id', 'content_type'])
 
     def get_absolute_url(self):
         return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[self.alias_id])

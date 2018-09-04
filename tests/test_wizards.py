@@ -1,4 +1,8 @@
+from django.contrib.sites.models import Site
+
 from cms.wizards.forms import WizardStep2BaseForm, step2_form_factory
+
+from djangocms_alias.compat import CMS_36, get_wizard_entires
 
 from .base import BaseAliasPluginTestCase
 
@@ -6,17 +10,32 @@ from .base import BaseAliasPluginTestCase
 class WizardsTestCase(BaseAliasPluginTestCase):
 
     def _get_wizard_instance(self, wizard_name):
-        from cms.wizards.wizard_pool import wizard_pool
         return [
             wizard
-            for wizard in wizard_pool.get_entries()
+            for wizard in get_wizard_entires()
             if wizard.__class__.__name__ == wizard_name
         ][0]
+
+    def _get_form_kwargs(self, data, language=None):
+        language = language or self.language
+        kwargs = {
+            'data': data,
+            'wizard_language': language,
+        }
+        if CMS_36:
+            kwargs.update({
+                'wizard_user': self.superuser,
+            })
+        else:
+            kwargs.update({
+                'wizard_site': Site.objects.get_current(),
+                'wizard_request': self.get_request('/', language=language),
+            })
+        return kwargs
 
     def test_create_alias_wizard_instance(self):
         wizard = self._get_wizard_instance('CreateAliasWizard')
         self.assertEqual(wizard.title, 'New alias')
-        self.assertTrue(wizard.edit_mode_on_success, True)
 
         self.assertTrue(wizard.user_has_add_permission(self.superuser))
         self.assertTrue(
@@ -40,11 +59,7 @@ class WizardsTestCase(BaseAliasPluginTestCase):
             mixin_cls=WizardStep2BaseForm,
             entry_form_class=wizard.form,
         )
-        form = form_class(
-            data=data,
-            wizard_language=self.language,
-            wizard_user=self.superuser,
-        )
+        form = form_class(**self._get_form_kwargs(data))
 
         self.assertTrue(form.is_valid())
         alias = form.save()
@@ -56,7 +71,6 @@ class WizardsTestCase(BaseAliasPluginTestCase):
     def test_create_alias_category_wizard_instance(self):
         wizard = self._get_wizard_instance('CreateAliasCategoryWizard')
         self.assertEqual(wizard.title, 'New alias category')
-        self.assertEqual(wizard.edit_mode_on_success, True)
 
         self.assertTrue(wizard.user_has_add_permission(self.superuser))
         self.assertTrue(
@@ -79,11 +93,7 @@ class WizardsTestCase(BaseAliasPluginTestCase):
             mixin_cls=WizardStep2BaseForm,
             entry_form_class=wizard.form,
         )
-        form = form_class(
-            data=data,
-            wizard_language=self.language,
-            wizard_user=self.superuser,
-        )
+        form = form_class(**self._get_form_kwargs(data))
 
         self.assertTrue(form.is_valid())
         category = form.save()

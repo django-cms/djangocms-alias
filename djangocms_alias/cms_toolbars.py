@@ -83,7 +83,6 @@ class AliasToolbar(CMSToolbar):
                     args=[self.toolbar.obj.alias_id],
                 ),
             )
-
             alias_menu.add_modal_item(
                 _('Change category'),
                 url=admin_reverse(

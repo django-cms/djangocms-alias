@@ -69,21 +69,19 @@ class AliasToolbar(CMSToolbar):
         )
 
         if self.toolbar.obj and self.toolbar.edit_mode_active:
-            alias_content = self.toolbar.obj.get_content(self.toolbar.request_language)
-            if alias_content:
-                alias_menu.add_modal_item(
-                    _('Edit alias details'),
-                    url=admin_reverse(
-                        'djangocms_alias_aliascontent_change',
-                        args=[alias_content.pk],
-                    ),
-                )
+            alias_menu.add_modal_item(
+                _('Edit alias details'),
+                url=admin_reverse(
+                    'djangocms_alias_aliascontent_change',
+                    args=[self.toolbar.obj.pk],
+                ),
+            )
 
             alias_menu.add_modal_item(
                 _('Change category'),
                 url=admin_reverse(
                     'djangocms_alias_alias_change',
-                    args=[self.toolbar.obj.pk],
+                    args=[self.toolbar.obj.alias_id],
                 ),
             )
 

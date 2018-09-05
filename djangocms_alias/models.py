@@ -133,6 +133,7 @@ class Alias(models.Model):
             return self._content_cache[language]
         except KeyError:
             self._content_cache[language] = self.contents.select_related(
+                'alias',
                 'placeholder',
             ).filter(language=language).first()
             return self._content_cache[language]

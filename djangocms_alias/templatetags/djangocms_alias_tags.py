@@ -23,8 +23,8 @@ def render_alias(context, instance, editable=False):
     renderer = toolbar.get_content_renderer()
 
     editable = editable and renderer._placeholders_are_editable
-
     source = instance.get_placeholder()
+
     if source:
         content = renderer.render_placeholder(
             placeholder=source,

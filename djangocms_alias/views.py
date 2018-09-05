@@ -83,7 +83,8 @@ class AliasDetailView(DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        self.request.toolbar.set_object(self.object)
+        alias_content = self.object.get_content()
+        self.request.toolbar.set_object(alias_content)
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
 

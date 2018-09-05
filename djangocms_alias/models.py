@@ -126,7 +126,16 @@ class Alias(models.Model):
     def get_content(self, language=None):
         if not language:
             language = get_current_language()
-        return self.contents.filter(language=language).first()
+
+        if not hasattr(self, '_content_cache'):
+            self._content_cache = {}
+        try:
+            return self._content_cache[language]
+        except KeyError:
+            self._content_cache[language] = self.contents.select_related(
+                'placeholder',
+            ).filter(language=language).first()
+            return self._content_cache[language]
 
     def get_placeholder(self, language=None):
         return getattr(self.get_content(language), 'placeholder', None)
@@ -140,7 +149,9 @@ class Alias(models.Model):
             return self._plugins_cache[language]
 
     def get_languages(self):
-        return self.contents.values_list('language', flat=True)
+        if not hasattr(self, '_content_languages_cache'):
+            self._content_languages_cache = self.contents.values_list('language', flat=True)
+        return self._content_languages_cache
 
     @transaction.atomic
     def delete(self, *args, **kwargs):
@@ -200,6 +211,12 @@ class AliasContent(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[self.alias_id])
+
+    def get_template(self):
+        return 'djangocms_alias/{}/alias.html'.format(TEMPLATE_DEFAULT)
 
     @transaction.atomic
     def delete(self, *args, **kwargs):

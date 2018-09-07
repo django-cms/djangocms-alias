@@ -18,7 +18,7 @@
                                 <span class="cms-alias-title cms-alias-sortable-show-hide-button">
                                     {{ alias.name }}
                                 </span>
-                                <a href="{% get_alias_url alias %}" class="cms-alias-btn"><span
+                                <a href="{{ alias.get_absolute_url }}" class="cms-alias-btn"><span
                                         class="cms-icon cms-icon-pencil"></span></a>
                             </h3>
                             <div class="cms-alias-placeholder">

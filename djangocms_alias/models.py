@@ -133,7 +133,7 @@ class Alias(models.Model):
             return self._content_cache[language]
         except KeyError:
             self._content_cache[language] = self.contents.select_related(
-                'alias',
+                'alias__category',
                 'placeholder',
             ).filter(language=language).first()
             return self._content_cache[language]
@@ -217,7 +217,12 @@ class AliasContent(models.Model):
         return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[self.alias_id])
 
     def get_template(self):
-        return 'djangocms_alias/{}/alias.html'.format(TEMPLATE_DEFAULT)
+        return 'djangocms_alias/alias_detail.html'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.placeholder.source = self
+        self.placeholder.save(update_fields=['object_id', 'content_type'])
 
     @transaction.atomic
     def delete(self, *args, **kwargs):

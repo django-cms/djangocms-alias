@@ -17,9 +17,13 @@ from cms.utils.i18n import get_language_dict
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
-from .constants import CATEGORY_LIST_URL_NAME, USAGE_ALIAS_URL_NAME
-from .models import Alias
-from .utils import alias_plugin_reverse
+from .constants import (
+    CATEGORY_LIST_URL_NAME,
+    DELETE_ALIAS_URL_NAME,
+    LIST_ALIASES_URL_NAME,
+    USAGE_ALIAS_URL_NAME,
+)
+from .models import Alias, AliasContent
 
 
 __all__ = [
@@ -28,7 +32,6 @@ __all__ = [
 
 
 ALIAS_MENU_IDENTIFIER = 'alias'
-ADMIN_ALIAS_MENU_IDENTIFIER = 'admin-alias'
 ALIAS_MENU_CREATE_IDENTIFIER = 'alias-add'
 ALIAS_LANGUAGE_BREAK = 'alias-language'
 
@@ -41,24 +44,20 @@ class AliasToolbar(CMSToolbar):
     def populate(self):
         self.add_aliases_link_to_admin_menu()
 
-        if self.is_current_app:
+        if isinstance(getattr(self.toolbar, 'obj'), AliasContent):
             self.add_alias_menu()
             self.change_language_menu()
 
     def post_template_populate(self):
-        if self.is_current_app:
+        if self.is_current_app or isinstance(getattr(self.toolbar, 'obj'), AliasContent):
             self.enable_create_wizard_button()
 
     def add_aliases_link_to_admin_menu(self):
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
-        alias_menu = admin_menu.get_or_create_menu(
-            ADMIN_ALIAS_MENU_IDENTIFIER,
-            self.plural_name,
+        admin_menu.add_link_item(
+            _('Aliases'),
+            url=admin_reverse(CATEGORY_LIST_URL_NAME),
             position=self.get_insert_position(admin_menu, self.plural_name),
-        )
-        alias_menu.add_link_item(
-            _('List of Aliases'),
-            url=alias_plugin_reverse(CATEGORY_LIST_URL_NAME),
         )
 
     def add_alias_menu(self):
@@ -68,28 +67,46 @@ class AliasToolbar(CMSToolbar):
             position=1,
         )
 
-        if self.toolbar.obj and self.toolbar.edit_mode_active:
-            alias_menu.add_modal_item(
-                _('Edit alias details'),
-                url=admin_reverse(
-                    'djangocms_alias_aliascontent_change',
-                    args=[self.toolbar.obj.pk],
-                ),
-            )
-            alias_menu.add_modal_item(
-                _('Show usage of alias'),
-                url=alias_plugin_reverse(
-                    USAGE_ALIAS_URL_NAME,
-                    args=[self.toolbar.obj.alias_id],
-                ),
-            )
-            alias_menu.add_modal_item(
-                _('Change category'),
-                url=admin_reverse(
-                    'djangocms_alias_alias_change',
-                    args=[self.toolbar.obj.alias_id],
-                ),
-            )
+        alias_menu.add_modal_item(
+            _('Show usage of alias'),
+            url=admin_reverse(
+                USAGE_ALIAS_URL_NAME,
+                args=[self.toolbar.obj.alias_id],
+            ),
+        )
+
+        can_change = self.request.user.has_perm(
+            get_model_permission_codename(Alias, 'change'),
+        )
+        disabled = not can_change or not self.toolbar.edit_mode_active
+        alias_menu.add_modal_item(
+            _('Edit alias details'),
+            url=admin_reverse(
+                'djangocms_alias_aliascontent_change',
+                args=[self.toolbar.obj.pk],
+            ),
+            disabled=disabled,
+        )
+        alias_menu.add_modal_item(
+            _('Change category'),
+            url=admin_reverse(
+                'djangocms_alias_alias_change',
+                args=[self.toolbar.obj.alias_id],
+            ),
+            disabled=disabled,
+        )
+        alias_menu.add_modal_item(
+            _('Delete Alias'),
+            url=admin_reverse(
+                DELETE_ALIAS_URL_NAME,
+                args=(self.toolbar.obj.alias_id, ),
+            ),
+            on_close=admin_reverse(
+                LIST_ALIASES_URL_NAME,
+                args=(self.toolbar.obj.alias.category_id,),
+            ),
+            disabled=disabled,
+        )
 
     @classmethod
     def get_insert_position(cls, admin_menu, item_name):
@@ -145,7 +162,7 @@ class AliasToolbar(CMSToolbar):
         create_wizard_button.disabled = not enable_create_wizard_button
 
     def change_language_menu(self):
-        if self.toolbar.edit_mode_active and isinstance(self.toolbar.obj, Alias):
+        if self.toolbar.edit_mode_active and isinstance(self.toolbar.obj, AliasContent):
             can_change = self.request.user.has_perm(
                 get_model_permission_codename(Alias, 'change'),
             )
@@ -153,17 +170,17 @@ class AliasToolbar(CMSToolbar):
             can_change = False
 
         if can_change:
-            alias = self.toolbar.obj
+            alias_content = self.toolbar.obj
             language_menu = self.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
             if not language_menu:
                 return None
 
             languages = get_language_dict(self.current_site.pk)
-            current_placeholder = alias.get_placeholder(self.current_lang)
+            current_placeholder = alias_content.placeholder
 
             remove = [
                 (code, languages.get(code, code))
-                for code in alias.get_languages()
+                for code in alias_content.alias.get_languages()
                 if code in languages
             ]
             add = [l for l in languages.items() if l not in remove]
@@ -184,7 +201,7 @@ class AliasToolbar(CMSToolbar):
                 add_url = admin_reverse('djangocms_alias_aliascontent_add')
 
                 for code, name in add:
-                    url = add_url_parameters(add_url, language=code, alias=alias.pk)
+                    url = add_url_parameters(add_url, language=code, alias=alias_content.alias_id)
                     add_plugins_menu.add_modal_item(name, url=url)
 
             if remove:
@@ -194,7 +211,7 @@ class AliasToolbar(CMSToolbar):
                 )
                 disabled = len(remove) == 1
                 for code, name in remove:
-                    alias_content = alias.get_content(language=code)
+                    alias_content = alias_content.alias.get_content(language=code)
                     translation_delete_url = admin_reverse(
                         'djangocms_alias_aliascontent_delete',
                         args=(alias_content.pk,),
@@ -220,7 +237,7 @@ class AliasToolbar(CMSToolbar):
                         title % name, action=copy_url,
                         data={
                             'source_language': code,
-                            'source_placeholder_id': alias.get_placeholder(code).pk,
+                            'source_placeholder_id': alias_content.alias.get_placeholder(code).pk,
                             'target_language': self.current_lang,
                             'target_placeholder_id': current_placeholder.pk,
                         },

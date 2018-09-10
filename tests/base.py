@@ -7,54 +7,46 @@ from django.urls import resolve
 from cms.api import add_plugin, create_page
 from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
-from cms.utils.conf import get_cms_setting
-
-from djangocms_alias.compat import (
+from cms.toolbar.utils import (
     get_object_edit_url,
     get_object_preview_url,
     get_object_structure_url,
-    get_page_placeholders,
 )
+from cms.utils.conf import get_cms_setting
+from cms.utils.urlutils import admin_reverse
+
 from djangocms_alias.constants import (
     CATEGORY_LIST_URL_NAME,
     CREATE_ALIAS_URL_NAME,
     DELETE_ALIAS_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
-    DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
 )
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
-from djangocms_alias.utils import alias_plugin_reverse
 
 
 class BaseAliasPluginTestCase(CMSTestCase):
 
     def get_create_alias_endpoint(self):
-        return alias_plugin_reverse(CREATE_ALIAS_URL_NAME)
+        return admin_reverse(CREATE_ALIAS_URL_NAME)
 
     def get_category_list_endpoint(self):
-        return alias_plugin_reverse(CATEGORY_LIST_URL_NAME)
+        return admin_reverse(CATEGORY_LIST_URL_NAME)
 
     def get_detach_alias_plugin_endpoint(self, plugin_pk):
-        return alias_plugin_reverse(
+        return admin_reverse(
             DETACH_ALIAS_PLUGIN_URL_NAME,
             args=[plugin_pk],
         )
 
-    def get_detail_alias_endpoint(self, alias_pk):
-        return alias_plugin_reverse(
-            DETAIL_ALIAS_URL_NAME,
-            args=[alias_pk],
-        )
-
     def get_delete_alias_endpoint(self, alias_pk):
-        return alias_plugin_reverse(
+        return admin_reverse(
             DELETE_ALIAS_URL_NAME,
             args=[alias_pk],
         )
 
     def get_list_aliases_endpoint(self, category_pk):
-        return alias_plugin_reverse(
+        return admin_reverse(
             LIST_ALIASES_URL_NAME,
             args=[category_pk],
         )
@@ -68,7 +60,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
             published=True,
             in_navigation=True,
         )
-        self.placeholder = get_page_placeholders(self.page, self.language).get(
+        self.placeholder = self.page.get_placeholders(self.language).get(
             slot='content',
         )
         self.plugin = add_plugin(
@@ -100,10 +92,10 @@ class BaseAliasPluginTestCase(CMSTestCase):
             alias_content.populate(plugins=plugins)
         return alias
 
-    def get_alias_request(self, alias, *args, **kwargs):
+    def get_alias_request(self, alias, lang_code='en', *args, **kwargs):
         request = self._get_instance_request(alias, *args, **kwargs)
         request.current_page = None
-        request = self._process_request_by_toolbar_middleware(request, obj=alias)
+        request = self._process_request_by_toolbar_middleware(request, obj=alias.get_content(lang_code))
         return request
 
     def get_page_request(self, page, obj=None, *args, **kwargs):
@@ -166,7 +158,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
             language = self.language
 
         add_plugin(
-            get_page_placeholders(page, language).get(slot='content'),
+            page.get_placeholders(language).get(slot='content'),
             'Alias',
             language=language,
             alias=alias,

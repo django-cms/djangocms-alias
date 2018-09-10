@@ -21,11 +21,6 @@ urlpatterns = [
         name=constants.LIST_ALIASES_URL_NAME,
     ),
     url(
-        r'^aliases/(?P<pk>\d+)/$',
-        views.AliasDetailView.as_view(),
-        name=constants.DETAIL_ALIAS_URL_NAME,
-    ),
-    url(
         r'^aliases/(?P<pk>\d+)/usage/$',
         views.alias_usage_view,
         name=constants.USAGE_ALIAS_URL_NAME,

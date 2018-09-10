@@ -5,12 +5,7 @@ from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
-from django.http import (
-    Http404,
-    HttpResponse,
-    HttpResponseBadRequest,
-    JsonResponse,
-)
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import (
@@ -18,13 +13,12 @@ from django.utils.translation import (
     ugettext_lazy as _,
 )
 from django.views.decorators.http import require_POST
-from django.views.generic import DetailView, ListView
+from django.views.generic import ListView
 
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 from cms.utils.permissions import has_plugin_permission
 
 from .cms_plugins import Alias
-from .compat import CMS_36
 from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
 from .models import Alias as AliasModel, AliasPlugin, Category
 
@@ -76,25 +70,6 @@ def detach_alias_plugin_view(request, plugin_pk):
     )
 
 
-class AliasDetailView(DetailView):
-    model = AliasModel
-    context_object_name = 'alias'
-    queryset = AliasModel.objects.all()
-    template_name = 'djangocms_alias/alias_detail.html'
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            raise PermissionDenied
-        return super().dispatch(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        alias_content = self.object.get_content()
-        self.request.toolbar.set_object(alias_content)
-        context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
-
-
 def delete_alias_view(request, pk, *args, **kwargs):
     from djangocms_alias.admin import AliasAdmin
 
@@ -102,18 +77,7 @@ def delete_alias_view(request, pk, *args, **kwargs):
         model=AliasModel,
         admin_site=admin.site,
     )
-    if CMS_36:
-        # use default template
-        alias_admin.delete_confirmation_template = 'admin/delete_confirmation.html'
-
-    instance = get_object_or_404(AliasModel, pk=pk)
-    response = alias_admin.delete_view(
-        request,
-        pk,
-        extra_context={
-            'perm': alias_admin._has_delete_permission(request, instance),
-        },
-    )
+    response = alias_admin.delete_view(request, pk)
     if request.POST and response.status_code in [200, 302]:
         return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
     return response
@@ -323,9 +287,6 @@ class AliasSelect2View(ListView):
 def alias_usage_view(request, pk):
     if not request.user.is_staff:
         raise PermissionDenied
-
-    if CMS_36:
-        raise Http404()
 
     alias = get_object_or_404(AliasModel.objects.all(), pk=pk)
     opts = Alias.model._meta

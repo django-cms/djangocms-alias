@@ -1,9 +1,9 @@
 from django import template
 
 from cms.toolbar.utils import get_toolbar_from_request
+from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from ..constants import USAGE_ALIAS_URL_NAME
-from ..utils import alias_plugin_reverse
 
 
 register = template.Library()
@@ -11,10 +11,13 @@ register = template.Library()
 
 @register.simple_tag(takes_context=False)
 def get_alias_usage_view_url(alias, show_back_btn):
-    return alias_plugin_reverse(
-        USAGE_ALIAS_URL_NAME,
-        args=[alias.pk],
-        parameters={'back': 1} if show_back_btn else {},
+    parameters = {'back': 1} if show_back_btn else {}
+    return add_url_parameters(
+        admin_reverse(
+            USAGE_ALIAS_URL_NAME,
+            args=[alias.pk],
+        ),
+        **parameters,
     )
 
 

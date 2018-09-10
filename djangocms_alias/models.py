@@ -6,20 +6,19 @@ from django.db import models, transaction
 from django.db.models import F, Q
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
-from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from cms.api import add_plugin
-from cms.models import CMSPlugin
-from cms.models.fields import PlaceholderField
+from cms.models import CMSPlugin, Placeholder
+from cms.models.fields import PlaceholderRelationField
+from cms.toolbar.utils import get_object_preview_url
 from cms.utils.i18n import get_current_language
 from cms.utils.plugins import copy_plugins_to_placeholder
+from cms.utils.urlutils import admin_reverse
 
 from parler.models import TranslatableModel, TranslatedFields
 
-from .compat import CMS_36
-from .constants import DETAIL_ALIAS_URL_NAME, LIST_ALIASES_URL_NAME
-from .utils import alias_plugin_reverse
+from .constants import LIST_ALIASES_URL_NAME
 
 
 __all__ = [
@@ -46,10 +45,6 @@ def get_templates():
     return choices
 
 
-def _get_alias_placeholder_slot(alias):
-    return slugify(alias.name)
-
-
 class Category(TranslatableModel):
     translations = TranslatedFields(
         name=models.CharField(
@@ -67,7 +62,7 @@ class Category(TranslatableModel):
         return self.name
 
     def get_absolute_url(self):
-        return alias_plugin_reverse(LIST_ALIASES_URL_NAME, args=[self.pk])
+        return admin_reverse(LIST_ALIASES_URL_NAME, args=[self.pk])
 
 
 class AliasQuerySet(models.QuerySet):
@@ -141,8 +136,8 @@ class Alias(models.Model):
     def get_name(self, language=None):
         return getattr(self.get_content(language), 'name', '')
 
-    def get_absolute_url(self):
-        return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[self.pk])
+    def get_absolute_url(self, language=None):
+        return get_object_preview_url(self.get_content(language=language))
 
     def get_content(self, language=None):
         if not language:
@@ -155,7 +150,8 @@ class Alias(models.Model):
         except KeyError:
             self._content_cache[language] = self.contents.select_related(
                 'alias__category',
-                'placeholder',
+            ).prefetch_related(
+                'placeholders'
             ).filter(language=language).first()
             return self._content_cache[language]
 
@@ -174,6 +170,14 @@ class Alias(models.Model):
         if not hasattr(self, '_content_languages_cache'):
             self._content_languages_cache = self.contents.values_list('language', flat=True)
         return self._content_languages_cache
+
+    def clear_cache(self):
+        if hasattr(self, '_content_cache'):
+            del self._content_cache
+        if hasattr(self, '_content_languages_cache'):
+            del self._content_languages_cache
+        if hasattr(self, '_plugins_cache'):
+            del self._plugins_cache
 
     @transaction.atomic
     def delete(self, *args, **kwargs):
@@ -217,10 +221,7 @@ class AliasContent(models.Model):
         verbose_name=_('name'),
         max_length=120,
     )
-    placeholder = PlaceholderField(
-        slotname=_get_alias_placeholder_slot,
-        related_name='alias_contents',
-    )
+    placeholders = PlaceholderRelationField()
     language = models.CharField(
         max_length=10,
         choices=settings.LANGUAGES,
@@ -234,28 +235,29 @@ class AliasContent(models.Model):
     def __str__(self):
         return '{} ({})'.format(self.name, self.language)
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if not CMS_36:
-            self.placeholder.source = self
-            self.placeholder.save(update_fields=['object_id', 'content_type'])
+    @cached_property
+    def placeholder(self):
+        try:
+            return self.placeholders.get(slot=self.placeholder_slotname)
+        except Placeholder.DoesNotExist:
+            from cms.utils.placeholder import rescan_placeholders_for_obj
+            rescan_placeholders_for_obj(self)
+            return self.placeholders.get(slot=self.placeholder_slotname)
+
+    @property
+    def placeholder_slotname(self):
+        return 'content'
 
     def get_absolute_url(self):
-        return alias_plugin_reverse(DETAIL_ALIAS_URL_NAME, args=[self.alias_id])
+        return get_object_preview_url(self)
 
     def get_template(self):
-        return 'djangocms_alias/alias_detail.html'
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.placeholder.source = self
-        self.placeholder.save(update_fields=['object_id', 'content_type'])
+        return 'djangocms_alias/alias_content.html'
 
     @transaction.atomic
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
         self.alias.cms_plugins.filter(language=self.language).delete()
-        self.placeholder.delete()
 
     @transaction.atomic
     def populate(self, replaced_placeholder=None, replaced_plugin=None, plugins=None):
@@ -271,25 +273,19 @@ class AliasContent(models.Model):
             placeholder = replaced_placeholder
             add_plugin_kwargs = {}
         else:
-            if CMS_36:
-                plugins = replaced_plugin.get_tree(replaced_plugin)
-            else:
-                plugins = CMSPlugin.objects.filter(
-                    id__in=[replaced_plugin.pk] + replaced_plugin._get_descendants_ids(),
-                )
+            plugins = CMSPlugin.objects.filter(
+                id__in=[replaced_plugin.pk] + replaced_plugin._get_descendants_ids(),
+            )
             placeholder = replaced_plugin.placeholder
             add_plugin_kwargs = {'position': 'left', 'target': replaced_plugin}
 
-        if CMS_36:
-            plugins.update(placeholder=self.placeholder, language=self.language)
-        else:
-            copy_plugins_to_placeholder(
-                plugins,
-                placeholder=self.placeholder,
-                language=self.language,
-            )
-            plugins.delete()
-            placeholder._recalculate_plugin_positions(self.language)
+        copy_plugins_to_placeholder(
+            plugins,
+            placeholder=self.placeholder,
+            language=self.language,
+        )
+        plugins.delete()
+        placeholder._recalculate_plugin_positions(self.language)
 
         new_plugin = add_plugin(
             placeholder,
@@ -332,6 +328,6 @@ class AliasPlugin(CMSPlugin):
             placeholder_id=placeholder,
         )
         plugins = plugins.filter(
-            Q(pk=self) | Q(alias__contents__placeholder=placeholder),
+            Q(pk=self) | Q(alias__contents__placeholders=placeholder),
         )
         return plugins.exists()

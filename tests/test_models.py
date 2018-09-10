@@ -1,18 +1,10 @@
-from unittest import skipIf
-
 from django.contrib.sites.models import Site
 
 from cms.api import add_plugin, create_page, create_title
 from cms.models import Placeholder
 
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.compat import CMS_36
-from djangocms_alias.models import (
-    Alias as AliasModel,
-    AliasContent,
-    Category,
-    _get_alias_placeholder_slot,
-)
+from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 
 from .base import BaseAliasPluginTestCase
 
@@ -198,7 +190,6 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             {0: alias2.pk, 1: alias3.pk, 2: alias4.pk, 3: alias1.pk},
         )
 
-    @skipIf(CMS_36, 'Only for CMS >= 4.0')
     def test_pages_using_alias(self):
         site1 = Site.objects.create(domain='site1.com', name='1')
         site2 = Site.objects.create(domain='site2.com', name='2')
@@ -289,7 +280,6 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             ]
         )
 
-    @skipIf(CMS_36, 'Only for CMS >= 4.0')
     def test_aliases_using_alias(self):
         root_alias = self._create_alias(name='root alias')
         AliasContent.objects.create(
@@ -381,7 +371,6 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             [alias3.pk],
         )
 
-    @skipIf(CMS_36, 'Only for CMS >= 4.0')
     def test_pages_and_aliases_using_objects(self):
         alias = self._create_alias()
         root_alias = self._create_alias(name='root alias')
@@ -407,12 +396,8 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
+        self.assertEqual(Placeholder.objects.count(), 2)
         alias.delete()
         self.assertFalse(alias.__class__.objects.filter(pk=alias.pk).exists())
         self.assertEqual(alias.cms_plugins.count(), 0)
-        self.assertEqual(
-            Placeholder.objects.filter(
-                slot=_get_alias_placeholder_slot(alias),
-            ).count(),
-            0,
-        )
+        self.assertEqual(Placeholder.objects.count(), 1)

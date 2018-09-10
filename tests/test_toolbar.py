@@ -1,5 +1,4 @@
 import itertools
-from unittest import skipIf, skipUnless
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
@@ -7,11 +6,11 @@ from cms.cms_toolbars import (
     LANGUAGE_MENU_IDENTIFIER,
 )
 from cms.toolbar.items import Break, ButtonList, ModalItem
+from cms.toolbar.utils import get_object_edit_url
 from cms.utils.i18n import force_language
 from cms.utils.urlutils import admin_reverse
 
 from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
-from djangocms_alias.compat import CMS_36, get_object_structure_url
 from djangocms_alias.constants import USAGE_ALIAS_URL_NAME
 
 from .base import BaseAliasPluginTestCase
@@ -40,13 +39,11 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
     def test_add_aliases_submenu_to_admin_menu(self):
         with self.login_user_context(self.get_standard_user()):
             response = self.client.get(self.page.get_absolute_url())
-
         self.assertNotContains(response, '<span>Aliases')
 
-        page_url = get_object_structure_url(self.page)
+        page_url = get_object_edit_url(self.page.get_title_obj(self.language))
         with self.login_user_context(self.superuser):
             response = self.client.get(page_url)
-
         self.assertContains(response, '<span>Aliases')
 
     def test_aliases_link_placement(self):
@@ -57,23 +54,29 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertEqual(item_positioned_before_admin_break.name, 'Aliases')
 
     def test_add_alias_menu_showing_only_on_alias_plugin_views(self):
-        request = self.get_page_request(self.page, user=self.superuser)
-        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
-        self.assertEqual(alias_menu, None)
-
         alias = self._create_alias([self.plugin])
         for endpoint in [
             self.get_category_list_endpoint(),
             self.get_list_aliases_endpoint(alias.category_id),
-            self.get_detail_alias_endpoint(alias.pk),
+            self.page.get_absolute_url(language=self.language),
         ]:
-            request = self.get_page_request(
-                page=None,
+            request = self.get_page_request(page=None, path=endpoint, user=self.superuser)
+            alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+            self.assertEqual(alias_menu, None)
+
+        def _test_alias_endpoint(**kwargs):
+            request = self.get_alias_request(
+                alias=alias,
                 path=endpoint,
                 user=self.superuser,
+                **kwargs,
             )
             alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
             self.assertEqual(alias_menu.name, 'Alias')
+
+        _test_alias_endpoint()
+        _test_alias_endpoint(edit=True)
+        _test_alias_endpoint(preview=True)
 
     def test_alias_toolbar_language_menu(self):
         request = self.get_page_request(self.page, user=self.superuser)
@@ -87,6 +90,14 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             path=self.get_category_list_endpoint(),
             user=self.superuser,
             edit=True,
+        )
+        language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
+        self.assertEqual(language_menu.get_item_count(), 4)
+
+        request = self.get_alias_request(
+            alias=alias,
+            user=self.superuser,
+            preview=True,
         )
         language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
         self.assertEqual(language_menu.get_item_count(), 4)
@@ -116,6 +127,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
 
         alias_content = alias.contents.create(name='test alias 2', language='fr')
         alias_content.populate(replaced_placeholder=self.placeholder)
+        alias_content.alias.clear_cache()
 
         request = self.get_alias_request(
             alias=alias,
@@ -195,45 +207,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
                 args=[alias.pk],
             ),
         )
-        with force_language('de'):
-            request = self.get_alias_request(
-                alias=alias,
-                user=self.superuser,
-                edit=True,
-                lang_code='de',
-            )
-        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
-        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
-        self.assertIsNotNone(search_result)
-        button = search_result.item
-        self.assertEqual(button.on_close, 'REFRESH_PAGE')
-        self.assertEqual(
-            button.url,
-            admin_reverse(
-                alias_change_viewname,
-                args=[alias.pk],
-            ),
-        )
 
-    def test_alias_change_category_button_not_showing_on_other_pages_than_alias_edit_view(self):
-        alias = self._create_alias()
-        for endpoint in [
-            self.get_category_list_endpoint(),
-            self.get_list_aliases_endpoint(alias.category_id),
-            self.get_detail_alias_endpoint(alias.pk),
-        ]:
-            request = self.get_page_request(
-                page=None,
-                path=endpoint,
-                user=self.superuser,
-            )
-            alias_menu_items = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER).items
-            self.assertNotIn(
-                'Change category...',
-                [alias_item.name for alias_item in alias_menu_items]
-            )
-
-    @skipIf(CMS_36, 'Only for CMS >= 4.0')
     def test_alias_usage_button(self):
         alias = self._create_alias()
         request = self.get_alias_request(
@@ -257,34 +231,6 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             button.on_close,
             'REFRESH_PAGE',
         )
-        for endpoint in [
-            self.get_category_list_endpoint(),
-            self.get_list_aliases_endpoint(alias.category_id),
-            self.get_detail_alias_endpoint(alias.pk),
-        ]:
-            request = self.get_page_request(
-                page=None,
-                path=endpoint,
-                user=self.superuser,
-            )
-            alias_menu_items = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER).items
-            self.assertNotIn(
-                button_label,
-                [alias_item.name for alias_item in alias_menu_items]
-            )
-
-    @skipUnless(CMS_36, 'Only for CMS < 3.7')
-    def test_alias_usage_button_dont_show_on_cms36(self):
-        alias = self._create_alias()
-        request = self.get_alias_request(
-            alias=alias,
-            user=self.superuser,
-            edit=True,
-        )
-        button_label = 'Show usage of alias...'
-        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
-        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
-        self.assertIsNone(search_result)
 
     def test_create_wizard_button_enabled(self):
         request = self.get_page_request(
@@ -294,3 +240,87 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         )
         create_button = self._get_wizard_create_button(request)
         self.assertEqual(create_button.disabled, False)
+
+    def test_delete_button_show_on_edit_alias_view(self):
+        alias = self._create_alias()
+        request = self.get_alias_request(
+            alias=alias,
+            user=self.superuser,
+            edit=True,
+        )
+        button_label = 'Delete Alias...'
+        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
+        self.assertIsNotNone(search_result)
+        button = search_result.item
+        self.assertEqual(button.name, button_label)
+        self.assertEqual(button.url, self.get_delete_alias_endpoint(alias.pk))
+        self.assertEqual(
+            button.on_close,
+            self.get_list_aliases_endpoint(alias.category_id),
+        )
+
+    def test_edit_alias_details_show_on_edit_alias_view(self):
+        alias = self._create_alias()
+        request = self.get_alias_request(
+            alias=alias,
+            user=self.superuser,
+            edit=True,
+        )
+        button_label = 'Edit alias details...'
+        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
+        self.assertIsNotNone(search_result)
+        button = search_result.item
+        self.assertEqual(button.name, button_label)
+        self.assertEqual(button.url, admin_reverse(
+            'djangocms_alias_aliascontent_change',
+            args=[alias.get_content().pk],
+        ))
+        self.assertEqual(button.on_close, 'REFRESH_PAGE')
+
+    def test_disable_buttons_when_in_preview_mode(self):
+        alias = self._create_alias()
+        request = self.get_alias_request(
+            alias=alias,
+            user=self.superuser,
+            preview=True,
+        )
+        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+        search_results = alias_menu.find_items(item_type=ModalItem)
+        self.assertNotEqual(bool(search_results), False)
+        for result in search_results:
+            if result.item.name == 'Show usage of alias...':
+                self.assertEqual(result.item.disabled, False)
+            else:
+                self.assertEqual(result.item.disabled, True)
+
+    def test_disable_buttons_when_not_have_perms(self):
+        alias = self._create_alias()
+        staff_user = self._create_user("user1", is_staff=True, is_superuser=False)
+        request = self.get_alias_request(
+            alias=alias,
+            user=staff_user,
+            edit=True,
+        )
+        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+        search_results = alias_menu.find_items(item_type=ModalItem)
+        self.assertNotEqual(bool(search_results), False)
+        for result in search_results:
+            if result.item.name == 'Show usage of alias...':
+                self.assertEqual(result.item.disabled, False)
+            else:
+                self.assertEqual(result.item.disabled, True)
+
+    def test_enable_buttons_when_on_edit_mode(self):
+        alias = self._create_alias()
+        request = self.get_alias_request(
+            alias=alias,
+            user=self.superuser,
+            edit=True,
+        )
+        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+        search_results = alias_menu.find_items(item_type=ModalItem)
+        self.assertNotEqual(bool(search_results), False)
+        for result in search_results:
+            self.assertEqual(result.item.disabled, False)

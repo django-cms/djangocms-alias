@@ -1,8 +1,7 @@
 from django.contrib.sites.models import Site
 
 from cms.wizards.forms import WizardStep2BaseForm, step2_form_factory
-
-from djangocms_alias.compat import CMS_36, get_wizard_entires
+from cms.wizards.helpers import get_entries as get_wizard_entires
 
 from .base import BaseAliasPluginTestCase
 
@@ -18,20 +17,12 @@ class WizardsTestCase(BaseAliasPluginTestCase):
 
     def _get_form_kwargs(self, data, language=None):
         language = language or self.language
-        kwargs = {
+        return {
             'data': data,
             'wizard_language': language,
+            'wizard_site': Site.objects.get_current(),
+            'wizard_request': self.get_request('/', language=language),
         }
-        if CMS_36:
-            kwargs.update({
-                'wizard_user': self.superuser,
-            })
-        else:
-            kwargs.update({
-                'wizard_site': Site.objects.get_current(),
-                'wizard_request': self.get_request('/', language=language),
-            })
-        return kwargs
 
     def test_create_alias_wizard_instance(self):
         wizard = self._get_wizard_instance('CreateAliasWizard')

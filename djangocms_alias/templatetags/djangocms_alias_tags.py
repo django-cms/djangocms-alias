@@ -1,3 +1,5 @@
+from collections import ChainMap
+
 from django import template
 
 from cms.toolbar.utils import get_toolbar_from_request
@@ -10,15 +12,13 @@ register = template.Library()
 
 
 @register.simple_tag(takes_context=False)
-def get_alias_usage_view_url(alias, show_back_btn):
+def get_alias_usage_view_url(alias, **kwargs):
     url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[alias.pk])
-    if show_back_btn:
-        return add_url_parameters(url, back=1)
-    return url
+    return add_url_parameters(url, **ChainMap(kwargs))
 
 
-@register.simple_tag(takes_context=False)
-def get_object_type(obj):
+@register.filter()
+def verbose_name(obj):
     return obj._meta.verbose_name
 
 

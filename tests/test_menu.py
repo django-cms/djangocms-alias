@@ -5,11 +5,11 @@ class AliasMenuTestCase(BaseAliasPluginTestCase):
 
     def test_alias_pages_have_no_menu_nodes(self):
         alias = self._create_alias()
-        for endpoint in [
-            self.get_category_list_endpoint(),
-            alias.get_absolute_url(),
-        ]:
-            with self.login_user_context(self.superuser):
+        with self.login_user_context(self.superuser):
+            for endpoint in [
+                self.get_category_list_endpoint(),
+                alias.get_absolute_url(),
+            ]:
                 response = self.client.get(endpoint)
             self.assertInHTML('<ul class="nav"></ul>', response.content.decode())
 

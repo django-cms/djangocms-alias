@@ -19,8 +19,7 @@
   <ul>
       {% for item in object.objects_using %}
       <li>
-          {% get_object_type item as object_type %}
-          {{ object_type|capfirst|escape }}:
+          {{ item|verbose_name|capfirst|escape }}:
           <a href="{{ item.get_absolute_url }}">{{ item }}</a>
       </li>
       {% endfor %}

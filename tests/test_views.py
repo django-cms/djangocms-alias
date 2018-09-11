@@ -1036,7 +1036,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                         back=1,
                     )
                 ),
-                'Show usage of alias',
+                'View usage',
             ),
         )
 

@@ -15,6 +15,7 @@ from django.utils.translation import (
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 
+from cms.models import Page
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 from cms.utils.permissions import has_plugin_permission
 
@@ -305,7 +306,7 @@ def alias_usage_view(request, pk):
         'objects_list': sorted(
             alias.objects_using,
             # First show Pages on list
-            key=lambda obj: obj.__class__.__name__ == 'Page',
+            key=lambda obj: isinstance(obj, Page),
             reverse=True,
         ),
     }

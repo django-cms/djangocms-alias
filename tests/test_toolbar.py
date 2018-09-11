@@ -217,7 +217,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             user=self.superuser,
             edit=True,
         )
-        button_label = 'Show usage of alias...'
+        button_label = 'View usage...'
         alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
         search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
         self.assertIsNotNone(search_result)
@@ -292,7 +292,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         search_results = alias_menu.find_items(item_type=ModalItem)
         self.assertNotEqual(bool(search_results), False)
         for result in search_results:
-            if result.item.name == 'Show usage of alias...':
+            if result.item.name == 'View usage...':
                 self.assertEqual(result.item.disabled, False)
             else:
                 self.assertEqual(result.item.disabled, True)
@@ -309,7 +309,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         search_results = alias_menu.find_items(item_type=ModalItem)
         self.assertNotEqual(bool(search_results), False)
         for result in search_results:
-            if result.item.name == 'Show usage of alias...':
+            if result.item.name == 'View usage...':
                 self.assertEqual(result.item.disabled, False)
             else:
                 self.assertEqual(result.item.disabled, True)

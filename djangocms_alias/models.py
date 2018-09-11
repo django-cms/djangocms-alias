@@ -94,6 +94,8 @@ class Alias(models.Model):
 
     def __init__(self, *args, **kwargs):
         self._plugins_cache = {}
+        self._content_cache = {}
+        self._content_languages_cache = []
         super().__init__(*args, **kwargs)
 
     def __str__(self):
@@ -143,8 +145,6 @@ class Alias(models.Model):
         if not language:
             language = get_current_language()
 
-        if not hasattr(self, '_content_cache'):
-            self._content_cache = {}
         try:
             return self._content_cache[language]
         except KeyError:
@@ -167,17 +167,14 @@ class Alias(models.Model):
             return self._plugins_cache[language]
 
     def get_languages(self):
-        if not hasattr(self, '_content_languages_cache'):
+        if not self._content_languages_cache:
             self._content_languages_cache = self.contents.values_list('language', flat=True)
         return self._content_languages_cache
 
     def clear_cache(self):
-        if hasattr(self, '_content_cache'):
-            del self._content_cache
-        if hasattr(self, '_content_languages_cache'):
-            del self._content_languages_cache
-        if hasattr(self, '_plugins_cache'):
-            del self._plugins_cache
+        self._plugins_cache = {}
+        self._content_cache = {}
+        self._content_languages_cache = []
 
     @transaction.atomic
     def delete(self, *args, **kwargs):
@@ -222,6 +219,7 @@ class AliasContent(models.Model):
         max_length=120,
     )
     placeholders = PlaceholderRelationField()
+    placeholder_slotname = 'content'
     language = models.CharField(
         max_length=10,
         choices=settings.LANGUAGES,
@@ -243,10 +241,6 @@ class AliasContent(models.Model):
             from cms.utils.placeholder import rescan_placeholders_for_obj
             rescan_placeholders_for_obj(self)
             return self.placeholders.get(slot=self.placeholder_slotname)
-
-    @property
-    def placeholder_slotname(self):
-        return 'content'
 
     def get_absolute_url(self):
         return get_object_preview_url(self)

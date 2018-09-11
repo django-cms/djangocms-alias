@@ -36,16 +36,17 @@
         <tbody>
             {% for item in objects_list %}
             <tr>
-                {% get_object_type item as object_type %}
+                {% with item|verbose_name as object_type %}
                 <td>{{ object_type|capfirst|escape }}</td>
                 <td>
                   <a target="_top" onclick="closeSideframe()" href="{{ item.get_absolute_url }}">{{ item }}</a>
                 </td>
                 <td>
                     {% if object_type == 'alias' %}
-                    <a href="{% get_alias_usage_view_url alias=item show_back_btn=True %}">{% trans 'Show usage of alias' %}</a>
+                    <a href="{% get_alias_usage_view_url alias=item back=1 %}">{% trans 'View usage' %}</a>
                     {% endif %}
                 </td>
+                {% endwith %}
             </tr>
             {% endfor %}
         </tbody>

@@ -264,7 +264,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             objects = alias.objects_using
 
         self.assertEqual(
-            [page.pk for page in sorted(objects, key=lambda obj: obj.pk)],
+            sorted(obj.pk for obj in objects),
             [
                 site1_page.pk,
                 nested_page1.pk,
@@ -340,28 +340,28 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         with self.assertNumQueries(3):
             objects = alias1.objects_using
         self.assertEqual(
-            [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
+            sorted(obj.pk for obj in objects),
             [root_alias.pk],
         )
 
         with self.assertNumQueries(3):
             objects = alias2.objects_using
         self.assertEqual(
-            [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
+            sorted(obj.pk for obj in objects),
             [root_alias.pk, root_alias2.pk],
         )
 
         with self.assertNumQueries(3):
             objects = alias3.objects_using
         self.assertEqual(
-            [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
+            sorted(obj.pk for obj in objects),
             [alias2.pk],
         )
 
         with self.assertNumQueries(3):
             objects = alias4.objects_using
         self.assertEqual(
-            [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
+            sorted(obj.pk for obj in objects),
             [alias3.pk],
         )
 
@@ -378,7 +378,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         with self.assertNumQueries(5):
             objects = alias.objects_using
         self.assertEqual(
-            [obj.pk for obj in sorted(objects, key=lambda obj: obj.pk)],
+            sorted(obj.pk for obj in objects),
             [self.page.pk, root_alias.pk],
         )
 

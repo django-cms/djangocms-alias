@@ -44,12 +44,12 @@ class AliasToolbar(CMSToolbar):
     def populate(self):
         self.add_aliases_link_to_admin_menu()
 
-        if isinstance(getattr(self.toolbar, 'obj'), AliasContent):
+        if isinstance(self.toolbar.obj, AliasContent):
             self.add_alias_menu()
             self.change_language_menu()
 
     def post_template_populate(self):
-        if self.is_current_app or isinstance(getattr(self.toolbar, 'obj'), AliasContent):
+        if self.is_current_app or isinstance(self.toolbar.obj, AliasContent):
             self.enable_create_wizard_button()
 
     def add_aliases_link_to_admin_menu(self):
@@ -68,7 +68,7 @@ class AliasToolbar(CMSToolbar):
         )
 
         alias_menu.add_modal_item(
-            _('Show usage of alias'),
+            _('View usage'),
             url=admin_reverse(
                 USAGE_ALIAS_URL_NAME,
                 args=[self.toolbar.obj.alias_id],

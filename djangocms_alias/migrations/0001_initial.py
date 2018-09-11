@@ -2,8 +2,11 @@
 
 import cms.utils.i18n
 from django.db import migrations, models
+from django.conf import settings
 import django.db.models.deletion
 import parler.models
+
+from djangocms_alias.models import get_templates, TEMPLATE_DEFAULT
 
 
 class Migration(migrations.Migration):
@@ -32,7 +35,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=120, verbose_name='name')),
-                ('language', models.CharField(choices=[('en', 'English'), ('de', 'German'), ('fr', 'French'), ('it', 'Italiano')], default=cms.utils.i18n.get_current_language, max_length=10)),
+                ('language', models.CharField(choices=settings.LANGUAGES, default=cms.utils.i18n.get_current_language, max_length=10)),
                 ('alias', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='contents', to='djangocms_alias.Alias')),
             ],
             options={
@@ -44,7 +47,7 @@ class Migration(migrations.Migration):
             name='AliasPlugin',
             fields=[
                 ('cmsplugin_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, related_name='djangocms_alias_aliasplugin', serialize=False, to='cms.CMSPlugin')),
-                ('template', models.CharField(choices=[('default', 'Default'), ('custom_alias_template', 'Custom Template Name')], default='default', max_length=255, verbose_name='template')),
+                ('template', models.CharField(choices=get_templates(), default=TEMPLATE_DEFAULT, max_length=255, verbose_name='template')),
                 ('alias', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cms_plugins', to='djangocms_alias.Alias', verbose_name='alias')),
             ],
             options={

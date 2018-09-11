@@ -1,4 +1,5 @@
 import itertools
+from collections import ChainMap
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
@@ -65,12 +66,13 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             self.assertEqual(alias_menu, None)
 
         def _test_alias_endpoint(**kwargs):
-            request = self.get_alias_request(
-                alias=alias,
-                path=endpoint,
-                user=self.superuser,
-                **kwargs,
-            )
+            kwargs.update({
+                'alias': alias,
+                'path': endpoint,
+                'user': self.superuser,
+            })
+            # py34 compat
+            request = self.get_alias_request(**ChainMap(kwargs))
             alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
             self.assertEqual(alias_menu.name, 'Alias')
 

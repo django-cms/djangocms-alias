@@ -184,7 +184,6 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             template='page.html',
             language=self.language,
             in_navigation=True,
-            published=True,
             site=site1,
         )
         site2_page = create_page(
@@ -192,7 +191,6 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             template='page.html',
             language=self.language,
             in_navigation=True,
-            published=True,
             site=site2,
         )
         self.add_alias_plugin_to_page(site1_page, alias)

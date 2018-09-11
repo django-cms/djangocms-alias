@@ -11,14 +11,10 @@ register = template.Library()
 
 @register.simple_tag(takes_context=False)
 def get_alias_usage_view_url(alias, show_back_btn):
-    parameters = {'back': 1} if show_back_btn else {}
-    return add_url_parameters(
-        admin_reverse(
-            USAGE_ALIAS_URL_NAME,
-            args=[alias.pk],
-        ),
-        **parameters,
-    )
+    url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[alias.pk])
+    if show_back_btn:
+        url = add_url_parameters(url, back=1)
+    return url
 
 
 @register.simple_tag(takes_context=False)

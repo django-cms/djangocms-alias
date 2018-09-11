@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from cms.admin.placeholderadmin import PlaceholderAdminMixin
 from cms.utils.permissions import get_model_permission_codename
 
 from parler.admin import TranslatableAdmin
@@ -22,7 +21,7 @@ class CategoryAdmin(TranslatableAdmin):
 
 
 @admin.register(Alias)
-class AliasAdmin(PlaceholderAdminMixin, admin.ModelAdmin):
+class AliasAdmin(admin.ModelAdmin):
     list_display = ['name', 'category']
     fields = ('category',)
 
@@ -35,11 +34,20 @@ class AliasAdmin(PlaceholderAdminMixin, admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         # Alias can be deleted by users who can add aliases,
         # if that alias is not referenced anywhere.
-        if obj and not obj.is_in_use:
-            return request.user.has_perm(
-                get_model_permission_codename(self.model, 'add'),
-            )
-        return super().has_delete_permission(request, obj)
+        if obj:
+            if not obj.is_in_use:
+                return request.user.has_perm(
+                    get_model_permission_codename(self.model, 'add'),
+                )
+            return request.user.is_superuser
+        return False
+
+    def get_deleted_objects(self, objs, request):
+        deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
+        # This is bad and I should feel bad.
+        if 'placeholder' in perms_needed:
+            perms_needed.remove('placeholder')
+        return deleted_objects, model_count, perms_needed, protected
 
 
 @admin.register(AliasContent)

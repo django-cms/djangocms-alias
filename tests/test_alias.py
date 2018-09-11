@@ -1,5 +1,4 @@
 from operator import attrgetter
-from unittest import skipIf
 
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
@@ -8,7 +7,6 @@ from cms.api import add_plugin, create_page
 from cms.utils.plugins import downcast_plugins
 
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.compat import CMS_36, get_page_placeholders
 
 from .base import BaseAliasPluginTestCase
 
@@ -168,29 +166,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             ['test', 'test 1', 'test 2', 'test 3'],
         )
 
-    @skipIf(not CMS_36, 'Only for CMS < 3.7')
-    def test_alias_plugin_edit_button_redirecting_to_page_with_structure_mode_turned_on(self):  # noqa: E501
-        alias = self._create_alias([])
-        alias_plugin = add_plugin(
-            self.placeholder,
-            Alias,
-            language=self.language,
-            alias=alias,
-        )
-        request = self.get_request('/')
-
-        alias_plugin_menu_items = Alias.get_extra_plugin_menu_items(
-            request,
-            alias_plugin,
-        )
-
-        edit_menu_item = next(filter(
-            lambda item: item.name == 'Edit Alias',
-            alias_plugin_menu_items,
-        ))
-
-        self.assertIn('?structure', edit_menu_item.url)
-
+    @override_settings(CMS_PLACEHOLDER_CACHE=False)
     def test_alias_multisite_support(self):
         site1 = Site.objects.create(domain='site1.com', name='1')
         site2 = Site.objects.create(domain='site2.com', name='2')
@@ -208,7 +184,6 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             template='page.html',
             language=self.language,
             in_navigation=True,
-            published=True,
             site=site1,
         )
         site2_page = create_page(
@@ -216,25 +191,10 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             template='page.html',
             language=self.language,
             in_navigation=True,
-            published=True,
             site=site2,
         )
-        add_plugin(
-            get_page_placeholders(site1_page, self.language).get(slot='content'),
-            'Alias',
-            language=self.language,
-            alias=alias,
-        )
-        add_plugin(
-            get_page_placeholders(site2_page, self.language).get(slot='content'),
-            'Alias',
-            language=self.language,
-            alias=alias,
-        )
-
-        if CMS_36:
-            site1_page.publish(self.language)
-            site2_page.publish(self.language)
+        self.add_alias_plugin_to_page(site1_page, alias)
+        self.add_alias_plugin_to_page(site2_page, alias)
 
         with override_settings(SITE_ID=site1.pk):
             response = self.client.get(site1_page.get_absolute_url())
@@ -250,13 +210,6 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             language=self.language,
             body='Another alias plugin',
         )
-
-        if CMS_36:
-            site1_page.publish(self.language)
-            site2_page.publish(self.language)
-        else:
-            site1_page.clear_cache(language=self.language, placeholder=True)
-            site2_page.clear_cache(language=self.language, placeholder=True)
 
         with override_settings(SITE_ID=site1.pk):
             response = self.client.get(site1_page.get_absolute_url())

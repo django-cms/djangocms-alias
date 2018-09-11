@@ -1,9 +1,9 @@
 from cms.api import add_plugin
+from cms.utils.urlutils import admin_reverse
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.constants import SELECT2_ALIAS_URL_NAME
 from djangocms_alias.forms import AliasPluginForm, AliasSelectWidget
-from djangocms_alias.utils import alias_plugin_reverse
 
 from .base import BaseAliasPluginTestCase
 
@@ -33,5 +33,5 @@ class AliasCreatePluginTestCase(BaseAliasPluginTestCase):
         self.assertIn('data-select2-url', attrs)
         self.assertEqual(
             attrs['data-select2-url'],
-            alias_plugin_reverse(SELECT2_ALIAS_URL_NAME),
+            admin_reverse(SELECT2_ALIAS_URL_NAME),
         )

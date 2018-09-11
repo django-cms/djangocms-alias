@@ -1,7 +1,10 @@
-from cms.api import add_plugin
+from django.contrib.sites.models import Site
+
+from cms.api import add_plugin, create_page, create_title
+from cms.models import Placeholder
 
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.models import Alias as AliasModel, Category
+from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 
 from .base import BaseAliasPluginTestCase
 
@@ -186,3 +189,209 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             self._get_aliases_positions(alias1.category),
             {0: alias2.pk, 1: alias3.pk, 2: alias4.pk, 3: alias1.pk},
         )
+
+    def test_pages_using_alias(self):
+        site1 = Site.objects.create(domain='site1.com', name='1')
+        site2 = Site.objects.create(domain='site2.com', name='2')
+        alias = self._create_alias(name='alias')
+
+        site1_page = create_page(
+            title='Site1',
+            template='page.html',
+            language=self.language,
+            in_navigation=True,
+            site=site1,
+        )
+        self.add_alias_plugin_to_page(site1_page, alias)
+        # Should show on the list
+
+        nested_page1 = create_page(
+            title='Site1 nested page 1',
+            template='page.html',
+            language=self.language,
+            in_navigation=True,
+            site=site1,
+            parent=site1_page,
+        )
+        self.add_alias_plugin_to_page(nested_page1, alias)
+        self.add_alias_plugin_to_page(nested_page1, alias)
+        # Should show on the list only once
+
+        nested_page2 = create_page(
+            title='Site1 nested page 2',
+            template='page.html',
+            language=self.language,
+            in_navigation=True,
+            site=site1,
+            parent=site1_page,
+        )
+        self.add_alias_plugin_to_page(nested_page2, alias)
+        # Should show on the list
+
+        nested_page3 = create_page(
+            title='Site1 nested page 3',
+            template='page.html',
+            language=self.language,
+            in_navigation=True,
+            site=site1,
+            parent=site1_page,
+        )  # Not show on the list
+
+        deep_nested_page4 = create_page(
+            title='Site1 deep nested page 4',
+            template='page.html',
+            language=self.language,
+            in_navigation=True,
+            site=site1,
+            parent=nested_page3,
+        )
+        self.add_alias_plugin_to_page(deep_nested_page4, alias)
+        # Should show on the list
+
+        site2_page = create_page(
+            title='Site2',
+            template='page.html',
+            language='de',
+            in_navigation=True,
+            site=site2,
+        )
+        create_title('en', 'Site2 EN', site2_page)
+        self.add_alias_plugin_to_page(site2_page, alias, 'en')
+        self.add_alias_plugin_to_page(site2_page, alias, 'de')
+        # Should show on the list only once
+
+        with self.assertNumQueries(3):
+            objects = alias.objects_using
+
+        self.assertEqual(
+            sorted(obj.pk for obj in objects),
+            [
+                site1_page.pk,
+                nested_page1.pk,
+                nested_page2.pk,
+                deep_nested_page4.pk,
+                site2_page.pk,
+            ]
+        )
+
+    def test_aliases_using_alias(self):
+        root_alias = self._create_alias(name='root alias')
+        AliasContent.objects.create(
+            name='root alias de',
+            alias=root_alias,
+            language='de',
+        )
+        AliasContent.objects.create(
+            name='root alias it',
+            alias=root_alias,
+            language='it',
+        )
+        root_alias2 = self._create_alias(name='root alias 2')
+
+        alias1 = self._create_alias(name='alias 1')
+        alias2 = self._create_alias(name='alias 2')
+        alias3 = self._create_alias(name='alias 3')
+        alias4 = self._create_alias(name='alias 4')
+
+        add_plugin(
+            root_alias.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias1,
+        )
+        add_plugin(
+            root_alias.get_placeholder('de'),
+            'Alias',
+            language='de',
+            alias=alias1,
+        )
+        add_plugin(
+            root_alias.get_placeholder('it'),
+            'Alias',
+            language='it',
+            alias=alias1,
+        )
+        # Alias1 should show only once
+        add_plugin(
+            root_alias.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias2,
+        )
+        add_plugin(
+            root_alias2.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias2,
+        )
+        add_plugin(
+            alias2.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias3,
+        )
+        add_plugin(
+            alias3.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias4,
+        )
+
+        with self.assertNumQueries(3):
+            objects = alias1.objects_using
+        self.assertEqual(
+            sorted(obj.pk for obj in objects),
+            [root_alias.pk],
+        )
+
+        with self.assertNumQueries(3):
+            objects = alias2.objects_using
+        self.assertEqual(
+            sorted(obj.pk for obj in objects),
+            [root_alias.pk, root_alias2.pk],
+        )
+
+        with self.assertNumQueries(3):
+            objects = alias3.objects_using
+        self.assertEqual(
+            sorted(obj.pk for obj in objects),
+            [alias2.pk],
+        )
+
+        with self.assertNumQueries(3):
+            objects = alias4.objects_using
+        self.assertEqual(
+            sorted(obj.pk for obj in objects),
+            [alias3.pk],
+        )
+
+    def test_pages_and_aliases_using_objects(self):
+        alias = self._create_alias()
+        root_alias = self._create_alias(name='root alias')
+        add_plugin(
+            root_alias.get_placeholder(self.language),
+            'Alias',
+            language=self.language,
+            alias=alias,
+        )
+        self.add_alias_plugin_to_page(self.page, alias, 'en')
+        with self.assertNumQueries(5):
+            objects = alias.objects_using
+        self.assertEqual(
+            sorted(obj.pk for obj in objects),
+            [self.page.pk, root_alias.pk],
+        )
+
+    def test_delete(self):
+        alias = self._create_alias([self.plugin])
+        add_plugin(
+            self.placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+        )
+        self.assertEqual(Placeholder.objects.count(), 2)
+        alias.delete()
+        self.assertFalse(alias.__class__.objects.filter(pk=alias.pk).exists())
+        self.assertEqual(alias.cms_plugins.count(), 0)
+        self.assertEqual(Placeholder.objects.count(), 1)

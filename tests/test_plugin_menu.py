@@ -17,7 +17,7 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
         self.assertEqual(extra_item.name, 'Create Alias')
         self.assertEqual(extra_item.action, 'modal')
         parsed_url = urlparse(extra_item.url)
-        self.assertEqual(parsed_url.path, self.CREATE_ALIAS_ENDPOINT)
+        self.assertEqual(parsed_url.path, self.get_create_alias_endpoint())
         self.assertIn('plugin={}'.format(self.plugin.pk), parsed_url.query)
 
     def test_extra_plugin_items_for_alias_plugins(self):
@@ -34,13 +34,13 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
         self.assertEqual(len(extra_items), 2)
         first, second = extra_items
         self.assertEqual(first.name, 'Edit Alias')
-        self.assertEqual(first.url, self.DETAIL_ALIAS_ENDPOINT(alias.pk))
+        self.assertEqual(first.url, alias.get_absolute_url())
 
         self.assertEqual(second.name, 'Detach Alias')
         self.assertEqual(second.action, 'modal')
         self.assertEqual(
             second.url,
-            self.DETACH_ALIAS_PLUGIN_ENDPOINT(alias_plugin.pk),
+            self.get_detach_alias_plugin_endpoint(alias_plugin.pk),
         )
 
     def test_extra_plugin_items_for_placeholder(self):
@@ -53,7 +53,7 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
         self.assertEqual(extra_item.name, 'Create Alias')
         self.assertEqual(extra_item.action, 'modal')
         parsed_url = urlparse(extra_item.url)
-        self.assertEqual(parsed_url.path, self.CREATE_ALIAS_ENDPOINT)
+        self.assertEqual(parsed_url.path, self.get_create_alias_endpoint())
         self.assertIn(
             'placeholder={}'.format(self.placeholder.pk),
             parsed_url.query,

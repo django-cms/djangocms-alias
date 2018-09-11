@@ -12,12 +12,12 @@ from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
 )
+from cms.utils.urlutils import admin_reverse
 
 from parler.forms import TranslatableModelForm
 
 from .constants import SELECT2_ALIAS_URL_NAME
 from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
-from .utils import alias_plugin_reverse
 
 
 __all__ = [
@@ -253,7 +253,7 @@ class CategorySelectWidget(Select2Mixin, forms.Select):
 class AliasSelectWidget(Select2Mixin, forms.TextInput):
 
     def get_url(self):
-        return alias_plugin_reverse(SELECT2_ALIAS_URL_NAME)
+        return admin_reverse(SELECT2_ALIAS_URL_NAME)
 
     def build_attrs(self, *args, **kwargs):
         attrs = super().build_attrs(*args, **kwargs)

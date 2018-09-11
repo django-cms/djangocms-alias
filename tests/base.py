@@ -1,3 +1,4 @@
+from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
 from django.http import QueryDict
 from django.test.client import RequestFactory
@@ -6,49 +7,46 @@ from django.urls import resolve
 from cms.api import add_plugin, create_page
 from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
-from cms.utils.conf import get_cms_setting
-
-from djangocms_alias.compat import (
+from cms.toolbar.utils import (
     get_object_edit_url,
     get_object_preview_url,
     get_object_structure_url,
-    get_page_placeholders,
 )
+from cms.utils.conf import get_cms_setting
+from cms.utils.urlutils import admin_reverse
+
 from djangocms_alias.constants import (
     CATEGORY_LIST_URL_NAME,
     CREATE_ALIAS_URL_NAME,
+    DELETE_ALIAS_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
-    DETAIL_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
 )
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
-from djangocms_alias.utils import alias_plugin_reverse
 
 
 class BaseAliasPluginTestCase(CMSTestCase):
 
-    @property
-    def CREATE_ALIAS_ENDPOINT(self):
-        return alias_plugin_reverse(CREATE_ALIAS_URL_NAME)
+    def get_create_alias_endpoint(self):
+        return admin_reverse(CREATE_ALIAS_URL_NAME)
 
-    @property
-    def CATEGORY_LIST_ENDPOINT(self):
-        return alias_plugin_reverse(CATEGORY_LIST_URL_NAME)
+    def get_category_list_endpoint(self):
+        return admin_reverse(CATEGORY_LIST_URL_NAME)
 
-    def DETACH_ALIAS_PLUGIN_ENDPOINT(self, plugin_pk):
-        return alias_plugin_reverse(
+    def get_detach_alias_plugin_endpoint(self, plugin_pk):
+        return admin_reverse(
             DETACH_ALIAS_PLUGIN_URL_NAME,
             args=[plugin_pk],
         )
 
-    def DETAIL_ALIAS_ENDPOINT(self, alias_pk):
-        return alias_plugin_reverse(
-            DETAIL_ALIAS_URL_NAME,
+    def get_delete_alias_endpoint(self, alias_pk):
+        return admin_reverse(
+            DELETE_ALIAS_URL_NAME,
             args=[alias_pk],
         )
 
-    def LIST_ALIASES_ENDPOINT(self, category_pk):
-        return alias_plugin_reverse(
+    def get_list_aliases_endpoint(self, category_pk):
+        return admin_reverse(
             LIST_ALIASES_URL_NAME,
             args=[category_pk],
         )
@@ -59,10 +57,9 @@ class BaseAliasPluginTestCase(CMSTestCase):
             title='test',
             template='page.html',
             language=self.language,
-            published=True,
             in_navigation=True,
         )
-        self.placeholder = get_page_placeholders(self.page, self.language).get(
+        self.placeholder = self.page.get_placeholders(self.language).get(
             slot='content',
         )
         self.plugin = add_plugin(
@@ -94,10 +91,10 @@ class BaseAliasPluginTestCase(CMSTestCase):
             alias_content.populate(plugins=plugins)
         return alias
 
-    def get_alias_request(self, alias, *args, **kwargs):
+    def get_alias_request(self, alias, lang_code='en', *args, **kwargs):
         request = self._get_instance_request(alias, *args, **kwargs)
         request.current_page = None
-        request = self._process_request_by_toolbar_middleware(request, obj=alias)
+        request = self._process_request_by_toolbar_middleware(request, obj=alias.get_content(lang_code))
         return request
 
     def get_page_request(self, page, obj=None, *args, **kwargs):
@@ -154,3 +151,25 @@ class BaseAliasPluginTestCase(CMSTestCase):
         user.user_permissions.add(Permission.objects.get(codename='add_page'))
         user.user_permissions.add(Permission.objects.get(codename='change_page'))
         user.user_permissions.add(Permission.objects.get(codename='delete_page'))
+
+    def add_alias_plugin_to_page(self, page, alias, language=None):
+        if language is None:
+            language = self.language
+
+        add_plugin(
+            page.get_placeholders(language).get(slot='content'),
+            'Alias',
+            language=language,
+            alias=alias,
+        )
+
+    def get_staff_user_with_alias_permissions(self):
+        staff_user = self._create_user("alias staff", is_staff=True, is_superuser=False)  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename('add', AliasModel._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename('change', AliasModel._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename('delete', AliasModel._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename('add', AliasContent._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename('change', AliasContent._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename('delete', AliasContent._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename('add', Category._meta))  # noqa: E501
+        return staff_user

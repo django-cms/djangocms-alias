@@ -1,5 +1,5 @@
 {% extends "admin/delete_confirmation.html" %}
-{% load i18n admin_urls cms_tags %}
+{% load i18n admin_urls cms_tags djangocms_alias_tags %}
 
 {% block breadcrumbs %}{% endblock %}
 
@@ -14,11 +14,18 @@
 
 <br/>
 
-{% if object.pages_using_this_alias %}
-  {% blocktrans with escaped_object=object %}This alias is used on this pages:{% endblocktrans %}
-  <ul>{{ object.pages_using_this_alias|unordered_list }}</ul>
+{% if object.objects_using %}
+  {% blocktrans with escaped_object=object %}This alias is used by following objects:{% endblocktrans %}
+  <ul>
+      {% for item in object.objects_using %}
+      <li>
+          {{ item|verbose_name|capfirst|escape }}:
+          <a href="{{ item.get_absolute_url }}">{{ item }}</a>
+      </li>
+      {% endfor %}
+  </ul>
 {% else %}
-  {% blocktrans with escaped_object=object %}This alias wasn't used on any page.{% endblocktrans %}
+  {% blocktrans with escaped_object=object %}This alias wasn't used by any object.{% endblocktrans %}
 {% endif %}
 
 <form method="post">{% csrf_token %}

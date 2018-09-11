@@ -3,7 +3,6 @@
 
 {% block content %}
     <h1>{% trans "Add alias" %}</h1>
-    {% get_alias_url alias as alias_link %}
     <form action="." method="post">
         {% csrf_token %}
         {% for hidden in form.hidden_fields %}
@@ -12,7 +11,7 @@
         <div>
             <fieldset class="module aligned">
                 {% with alias_name=alias.name %}
-                <p>{% blocktrans %}Are you sure you want to add alias <a href="{{ alias_link }}">{{ alias_name }}</a>?{% endblocktrans %}</p>
+                <p>{% blocktrans %}Are you sure you want to add alias <a href="{{ alias.get_absolute_url }}">{{ alias_name }}</a>?{% endblocktrans %}</p>
                 {% endwith %}
                 {% for field in form.visible_fields %}
                     <div class="form-row">

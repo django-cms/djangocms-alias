@@ -21,9 +21,9 @@ urlpatterns = [
         name=constants.LIST_ALIASES_URL_NAME,
     ),
     url(
-        r'^aliases/(?P<pk>\d+)/$',
-        views.AliasDetailView.as_view(),
-        name=constants.DETAIL_ALIAS_URL_NAME,
+        r'^aliases/(?P<pk>\d+)/usage/$',
+        views.alias_usage_view,
+        name=constants.USAGE_ALIAS_URL_NAME,
     ),
     url(
         r'^detach-alias/(?P<plugin_pk>\d+)/$',
@@ -33,7 +33,7 @@ urlpatterns = [
     url(
         r'^delete-alias/(?P<pk>\d+)/$',
         views.delete_alias_view,
-        name=constants.DELETE_ALIAS_PLUGIN_URL_NAME,
+        name=constants.DELETE_ALIAS_URL_NAME,
     ),
     url(
         r'^set-alias-position/$',

@@ -13,7 +13,7 @@ register = template.Library()
 def get_alias_usage_view_url(alias, show_back_btn):
     url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[alias.pk])
     if show_back_btn:
-        url = add_url_parameters(url, back=1)
+        return add_url_parameters(url, back=1)
     return url
 
 

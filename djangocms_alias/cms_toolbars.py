@@ -24,6 +24,7 @@ from .constants import (
     USAGE_ALIAS_URL_NAME,
 )
 from .models import Alias, AliasContent
+from .utils import is_versioning_enabled
 
 
 __all__ = [
@@ -46,7 +47,8 @@ class AliasToolbar(CMSToolbar):
 
         if isinstance(self.toolbar.obj, AliasContent):
             self.add_alias_menu()
-            self.change_language_menu()
+            if not is_versioning_enabled():
+                self.change_language_menu()
 
     def post_template_populate(self):
         if self.is_current_app or isinstance(self.toolbar.obj, AliasContent):

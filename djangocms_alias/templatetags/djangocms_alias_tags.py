@@ -38,4 +38,4 @@ def render_alias(context, instance, editable=False):
             context=context,
             editable=editable,
         )
-        return content
+        return content or ''

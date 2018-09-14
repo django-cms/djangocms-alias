@@ -17,11 +17,12 @@ from django.views.generic import ListView
 
 from cms.models import Page
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
+from cms.utils.i18n import get_current_language
 from cms.utils.permissions import has_plugin_permission
 
 from .cms_plugins import Alias
 from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
-from .models import Alias as AliasModel, AliasPlugin, Category
+from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
 
 
 JAVASCRIPT_SUCCESS_RESPONSE = """
@@ -90,7 +91,7 @@ class AliasListView(ListView):
     template_name = 'djangocms_alias/alias_list.html'
 
     def get_queryset(self):
-        return self.category.aliases.current_language()
+        return self.category.aliases.all()
 
     def get_context_data(self, **kwargs):
         kwargs.update({
@@ -265,7 +266,11 @@ class AliasSelect2View(ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = super().get_queryset().current_language()
+        queryset = super().get_queryset().filter(
+            contents__language=get_current_language(),
+            # Needed for versioning integration
+            contents__in=AliasContent.objects.all(),
+        )
         term = self.request.GET.get('term')
         category = self.request.GET.get('category')
         try:

@@ -19,6 +19,7 @@ from cms.utils.urlutils import admin_reverse
 from parler.models import TranslatableModel, TranslatedFields
 
 from .constants import LIST_ALIASES_URL_NAME
+from .utils import is_versioning_enabled
 
 
 __all__ = [
@@ -65,14 +66,6 @@ class Category(TranslatableModel):
         return admin_reverse(LIST_ALIASES_URL_NAME, args=[self.pk])
 
 
-class AliasQuerySet(models.QuerySet):
-
-    def current_language(self):
-        return self.filter(
-            contents__language=get_current_language(),
-        )
-
-
 class Alias(models.Model):
     category = models.ForeignKey(
         Category,
@@ -84,8 +77,6 @@ class Alias(models.Model):
         verbose_name=_('position'),
         default=0,
     )
-
-    objects = AliasQuerySet.as_manager()
 
     class Meta:
         verbose_name = _('alias')
@@ -136,10 +127,16 @@ class Alias(models.Model):
         return list(objects)
 
     def get_name(self, language=None):
-        return getattr(self.get_content(language), 'name', '')
+        return getattr(self.get_content(language), 'name', 'Alias {} (No content)'.format(self.pk))
 
     def get_absolute_url(self, language=None):
-        return get_object_preview_url(self.get_content(language=language))
+        if is_versioning_enabled():
+            return admin_reverse(
+                'djangocms_versioning_aliascontentversion_changelist'
+            ) + '?grouper={}'.format(self.pk)
+        content = self.get_content(language=language)
+        if content:
+            return get_object_preview_url(content)
 
     def get_content(self, language=None):
         if not language:
@@ -152,7 +149,12 @@ class Alias(models.Model):
                 'alias__category',
             ).prefetch_related(
                 'placeholders'
-            ).filter(language=language).first()
+            ).filter(
+                language=language,
+                # Needed for versioning integration
+                # TODO: check why versioning filtering dont work
+                pk__in=AliasContent.objects.values_list('pk', flat=True),
+            ).first()
             return self._content_cache[language]
 
     def get_placeholder(self, language=None):
@@ -297,6 +299,42 @@ class AliasContent(models.Model):
         return new_plugin
 
 
+def copy_alias_content(original_content):
+    """Copy the AliasContent object and deepcopy its
+    placeholders and plugins
+
+    This is needed for versioning integration.
+    """
+    # Copy content object
+    content_fields = {
+        field.name: getattr(original_content, field.name)
+        for field in AliasContent._meta.fields
+        # don't copy primary key because we're creating a new obj
+        if AliasContent._meta.pk.name != field.name
+    }
+    new_content = AliasContent.objects.create(**content_fields)
+
+    # Copy placeholders
+    new_placeholders = []
+    for placeholder in original_content.placeholders.all():
+        placeholder_fields = {
+            field.name: getattr(placeholder, field.name)
+            for field in Placeholder._meta.fields
+            # don't copy primary key because we're creating a new obj
+            # and handle the source field later
+            if field.name not in [Placeholder._meta.pk.name, 'source']
+        }
+        if placeholder.source:
+            placeholder_fields['source'] = new_content
+        new_placeholder = Placeholder.objects.create(**placeholder_fields)
+        # Copy plugins
+        placeholder.copy_plugins(new_placeholder)
+        new_placeholders.append(new_placeholder)
+    new_content.placeholders.add(*new_placeholders)
+
+    return new_content
+
+
 class AliasPlugin(CMSPlugin):
     alias = models.ForeignKey(
         Alias,
@@ -325,6 +363,9 @@ class AliasPlugin(CMSPlugin):
             placeholder_id=placeholder,
         )
         plugins = plugins.filter(
-            Q(pk=self) | Q(alias__contents__placeholders=placeholder),
+            Q(pk=self) | Q(
+                Q(alias__contents__placeholders=placeholder) &
+                Q(alias__contents__in=AliasContent.objects.all())
+            ),
         )
         return plugins.exists()

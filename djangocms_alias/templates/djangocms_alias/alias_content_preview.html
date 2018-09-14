@@ -1,0 +1,16 @@
+{% extends "djangocms_alias/base.html" %}
+{% load i18n cms_tags %}
+
+{% block aliases_content %}
+    <div class="cms-aliases-page container">
+        <h2 class="cms-aliases-page-heading" id="{{ alias_content.name|slugify }}">
+            <span class="cms-aliases-page-heading-inner">
+                {{ alias_content.name }}
+            </span>
+            <a href="{{ alias_content.alias.category.get_absolute_url }}" class="cms-aliases-page-back cms-alias-btn">{% trans "Back" %}</a>
+        </h2>
+        <div class="cms-aliases-detail">
+          {% render_placeholder alias_content.placeholder %}
+        </div>
+    </div>
+{% endblock aliases_content %}

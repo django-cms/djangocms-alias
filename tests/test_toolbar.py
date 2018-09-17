@@ -102,7 +102,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             preview=True,
         )
         language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
-        self.assertEqual(language_menu.get_item_count(), 4)
+        self.assertEqual(language_menu.get_item_count(), 1)
 
         request = self.get_alias_request(
             alias=alias,
@@ -110,7 +110,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             edit=True,
         )
         language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
-        self.assertEqual(language_menu.get_item_count(), 7)
+        self.assertEqual(language_menu.get_item_count(), 4)
 
         language_menu_dict = {
             menu.name: [menu_item.name for menu_item in menu.items]
@@ -137,7 +137,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             edit=True,
         )
         language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
-        self.assertEqual(language_menu.get_item_count(), 8)
+        self.assertEqual(language_menu.get_item_count(), 6)
 
         language_menu_dict = {
             menu.name: [menu_item.name for menu_item in menu.items]
@@ -185,6 +185,34 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertRegexpMatches(
             language_menu_first_items['Copy all plugins'].action,
             'en\/admin\/([\w\/]+)\/copy-plugins\/',
+        )
+
+    def test_language_switcher_when_toolbar_object_is_alias_content(self):
+        alias = self._create_alias([self.plugin])
+        alias_content = alias.contents.create(name='test alias 2', language='fr')
+        alias_content.populate(replaced_placeholder=self.placeholder)
+        alias_content.alias.clear_cache()
+
+        request = self.get_alias_request(
+            alias=alias,
+            user=self.superuser,
+            preview=True,
+        )
+        language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
+        # Showing only existing translation
+        self.assertEqual([item.name for item in language_menu.items], ['English', 'Française'])
+
+    def test_language_switcher_when_toolbar_object_isnt_alias_content(self):
+        request = self.get_page_request(
+            page=self.page,
+            user=self.superuser,
+            preview=True,
+        )
+        language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
+        # Dont change default language switcher that is used for Pages
+        self.assertEqual(
+            [item.name for item in language_menu.items],
+            ['English', 'Deutsche', 'Française', 'Italiano']
         )
 
     def test_alias_change_category_button_is_visible_on_alias_edit_view(self):

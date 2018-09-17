@@ -136,7 +136,7 @@ class Alias(models.Model):
             ) + '?grouper={}'.format(self.pk)
         content = self.get_content(language=language)
         if content:
-            return get_object_preview_url(content)
+            return content.get_absolute_url()
 
     def get_content(self, language=None):
         if not language:
@@ -149,12 +149,7 @@ class Alias(models.Model):
                 'alias__category',
             ).prefetch_related(
                 'placeholders'
-            ).filter(
-                language=language,
-                # Needed for versioning integration
-                # TODO: check why versioning filtering dont work
-                pk__in=AliasContent.objects.values_list('pk', flat=True),
-            ).first()
+            ).filter(language=language).first()
             return self._content_cache[language]
 
     def get_placeholder(self, language=None):

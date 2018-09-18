@@ -317,3 +317,17 @@ class AliasContentForm(forms.ModelForm):
     class Meta:
         model = AliasContent
         fields = ('name',)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if AliasContent.objects.filter(
+            name=cleaned_data.get('name'),
+            language=cleaned_data.get('language'),
+            alias__category=cleaned_data.get('alias').category,
+        ).exists():
+            raise forms.ValidationError(
+                _('Alias with this Name and Category already exists.')
+            )
+
+        return cleaned_data

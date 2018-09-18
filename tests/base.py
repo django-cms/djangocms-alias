@@ -100,6 +100,11 @@ class BaseAliasPluginTestCase(CMSTestCase):
         version = Version.objects.filter_by_grouper(obj).first()
         version.publish(self.superuser)
 
+    def _unpublish_object(self, obj):
+        from djangocms_versioning.models import Version
+        version = Version.objects.filter_by_grouper(obj).first()
+        version.unpublish(self.superuser)
+
     def _create_page(self, title, language=None, site=None, published=True):
         if language is None:
             language = self.language

@@ -1,4 +1,5 @@
 import re
+from unittest import skipIf, skipUnless
 
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -145,13 +146,27 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             self._publish_object(alias)
         self.assertEqual(alias.name, 'test alias')
 
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_create_alias_view_name_draft_alias(self):
+        with self.login_user_context(self.superuser):
+            response = self.client.post(self.get_create_alias_endpoint(), data={
+                'plugin': self.plugin.pk,
+                'category': self.category.pk,
+                'name': 'test alias',
+                'language': self.language,
+            })
+            self.assertEqual(response.status_code, 200)
+
+        alias = Alias.objects.last()
+        # AliasContent not published
+        self.assertEqual(alias.name, 'Alias {} (No content)'.format(alias.pk))
+
+    @skipIf(is_versioning_enabled(), 'Test only relevant without versioning enabled')
     def test_create_alias_name_unique_per_category_and_language(self):
-        alias = self._create_alias(
+        self._create_alias(
             name='test alias',
             category=self.category,
         )
-        if is_versioning_enabled():
-            self._publish_object(alias)
         with self.login_user_context(self.superuser):
             response = self.client.post(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
@@ -173,6 +188,53 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             ).count(),
             1,
         )
+
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_create_alias_name_without_uniqness(self):
+        alias1 = self._create_alias(
+            name='test alias',
+            category=self.category,
+            published=True,
+        )
+        with self.login_user_context(self.superuser):
+            response = self.client.post(self.get_create_alias_endpoint(), data={
+                'plugin': self.plugin.pk,
+                'category': self.category.pk,
+                'name': 'test alias',
+                'language': self.language,
+            })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Alias with this Name and Category already exists.',
+        )
+
+        self._unpublish_object(alias1)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.post(self.get_create_alias_endpoint(), data={
+                'plugin': self.plugin.pk,
+                'category': self.category.pk,
+                'name': 'test alias',
+                'language': self.language,
+            })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(
+            response,
+            'Alias with this Name and Category already exists.',
+        )
+
+        alias = Alias.objects.last()
+        self._publish_object(alias)
+        qs = AliasContent.objects.filter(
+            name='test alias',
+            language=self.language,
+            alias__category=self.category,
+        )
+        self.assertEqual(qs.count(), 1)
+        self.assertEqual(qs.first(), alias.get_content(self.language))
 
     def test_create_alias_view_post_no_plugin_or_placeholder(self):
         with self.login_user_context(self.superuser):
@@ -234,6 +296,49 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             self._publish_object(alias)
 
         source_plugins = self.placeholder.get_plugins()
+        alias_plugins = alias.get_placeholder(self.language).get_plugins()
+
+        self.assertEqual(alias_plugins.count(), source_plugins.count())
+        for source, target in zip(source_plugins, alias_plugins):
+            self.assertEqual(source.plugin_type, target.plugin_type)
+            self.assertEqual(
+                source.get_bound_plugin().body,
+                target.get_bound_plugin().body,
+            )
+
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_create_alias_view_post_placeholder_from_draft_page(self):
+        page1 = self._create_page('test alias page')
+        placeholder = page1.get_placeholders(self.language).get(
+            slot='content',
+        )
+        plugin = add_plugin(
+            placeholder,
+            'TextPlugin',
+            language=self.language,
+            body='test alias',
+        )
+        self._unpublish_object(page1)
+        with self.login_user_context(self.superuser):
+            response = self.client.post(self.get_create_alias_endpoint(), data={
+                'placeholder': placeholder.pk,
+                'category': self.category.pk,
+                'name': 'test alias',
+                'language': self.language,
+            })
+            self.assertEqual(response.status_code, 200)
+
+        # Source plugins are kept in original placeholder
+        plugins = placeholder.get_plugins()
+        self.assertEqual(plugins.count(), 1)
+        plugin_in_placeholder = plugins[0].get_bound_plugin()
+        self.assertEqual(plugin, plugin_in_placeholder)
+
+        alias = Alias.objects.first()
+        if is_versioning_enabled():
+            self._publish_object(alias)
+
+        source_plugins = placeholder.get_plugins()
         alias_plugins = alias.get_placeholder(self.language).get_plugins()
 
         self.assertEqual(alias_plugins.count(), source_plugins.count())

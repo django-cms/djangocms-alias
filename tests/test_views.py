@@ -18,6 +18,7 @@ from djangocms_alias.constants import (
     USAGE_ALIAS_URL_NAME,
 )
 from djangocms_alias.models import Alias, AliasContent, Category
+from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
 
@@ -88,6 +89,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             self.assertEqual(response.status_code, 200)
 
         alias = Alias.objects.last()
+        if is_versioning_enabled():
+            self._publish_object(alias)
         alias_plugins = alias.get_placeholder(self.language).get_plugins()
 
         # Source plugin is kept in original placeholder
@@ -116,6 +119,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(response.status_code, 200)
 
         alias = Alias.objects.last()
+        if is_versioning_enabled():
+            self._publish_object(alias)
         plugins = alias.get_placeholder(self.language).get_plugins()
 
         self.assertEqual(plugins.count(), 1)
@@ -136,13 +141,17 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             self.assertEqual(response.status_code, 200)
 
         alias = Alias.objects.last()
+        if is_versioning_enabled():
+            self._publish_object(alias)
         self.assertEqual(alias.name, 'test alias')
 
     def test_create_alias_name_unique_per_category_and_language(self):
-        self._create_alias(
+        alias = self._create_alias(
             name='test alias',
             category=self.category,
         )
+        if is_versioning_enabled():
+            self._publish_object(alias)
         with self.login_user_context(self.superuser):
             response = self.client.post(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
@@ -220,7 +229,9 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         plugin_in_placeholder = plugins[0].get_bound_plugin()
         self.assertEqual(self.plugin, plugin_in_placeholder)
 
-        alias = Alias.objects.last()
+        alias = Alias.objects.first()
+        if is_versioning_enabled():
+            self._publish_object(alias)
 
         source_plugins = self.placeholder.get_plugins()
         alias_plugins = alias.get_placeholder(self.language).get_plugins()
@@ -252,6 +263,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             self.assertEqual(response.status_code, 200)
 
         alias = Alias.objects.last()
+        if is_versioning_enabled():
+            self._publish_object(alias)
         alias_plugins = alias.get_placeholder(self.language).get_plugins()
 
         self.assertEqual(alias_plugins.count(), 2)

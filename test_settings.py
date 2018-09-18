@@ -2,6 +2,10 @@ import os
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENABLE_VERSIONING = bool(os.environ.get('ENABLE_VERSIONING', False))
+EXTRA_INSTALLED_APPS = []
+if ENABLE_VERSIONING:
+    EXTRA_INSTALLED_APPS.append('djangocms_versioning')
 
 HELPER_SETTINGS = {
     'TIME_ZONE': 'Europe/Zurich',
@@ -11,7 +15,8 @@ HELPER_SETTINGS = {
     'INSTALLED_APPS': [
         'parler',
         'djangocms_alias.test_utils.text',
-    ],
+    ] + EXTRA_INSTALLED_APPS,
+    'VERSIONING_ALIAS_MODELS_ENABLED': ENABLE_VERSIONING,
     'MIGRATION_MODULES': {
         'sites': None,
         'contenttypes': None,
@@ -20,6 +25,7 @@ HELPER_SETTINGS = {
         'menus': None,
         'text': None,
         'djangocms_alias': None,
+        'djangocms_versioning': None,
     },
     'CMS_PERMISSION': True,
     # At present, testing requires bootstrap to be disabled.

@@ -17,7 +17,7 @@ class AliasCMSConfig(CMSAppConfig):
     cms_toolbar_enabled_models = [(AliasContent, render_alias_content)]
 
     djangocms_versioning_enabled = getattr(
-        settings, 'VERSIONING_ALIAS_MODELS_ENABLED', False)
+        settings, 'VERSIONING_ALIAS_MODELS_ENABLED', True)
     if djangocms_versioning_enabled:
         from djangocms_versioning.datastructures import VersionableItem
         versioning = [

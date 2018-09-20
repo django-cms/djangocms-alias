@@ -242,6 +242,9 @@ class AliasContent(models.Model):
             rescan_placeholders_for_obj(self)
             return self.placeholders.get(slot=self.placeholder_slotname)
 
+    def get_placeholders(self):
+        return [self.placeholder]
+
     def get_absolute_url(self):
         return get_object_preview_url(self)
 

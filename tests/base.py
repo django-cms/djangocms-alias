@@ -95,14 +95,23 @@ class BaseAliasPluginTestCase(CMSTestCase):
             alias_content.populate(plugins=plugins)
         return alias
 
-    def _publish_object(self, obj):
+    def _get_version(self, grouper, version_state, language=None):
+        language = language or self.language
+
         from djangocms_versioning.models import Version
-        version = Version.objects.filter_by_grouper(obj).first()
+        versions = Version.objects.filter_by_grouper(grouper).filter(state=version_state)
+        for version in versions:
+            if hasattr(version.content, 'language') and version.content.language == language:
+                return version
+
+    def _publish(self, grouper, language=None):
+        from djangocms_versioning.constants import DRAFT
+        version = self._get_version(grouper, DRAFT, language)
         version.publish(self.superuser)
 
-    def _unpublish_object(self, obj):
-        from djangocms_versioning.models import Version
-        version = Version.objects.filter_by_grouper(obj).first()
+    def _unpublish(self, grouper, language=None):
+        from djangocms_versioning.constants import PUBLISHED
+        version = self._get_version(grouper, PUBLISHED, language)
         version.unpublish(self.superuser)
 
     def _create_page(self, title, language=None, site=None, published=True):

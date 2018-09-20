@@ -55,7 +55,7 @@ def detach_alias_plugin_view(request, plugin_pk):
 
     plugins = instance.alias.get_plugins(language)
 
-    can_detach = Alias.can_detach(request.user, plugins)
+    can_detach = Alias.can_detach(request.user, instance.placeholder, plugins)
 
     if not can_detach:
         raise PermissionDenied
@@ -168,18 +168,21 @@ def create_alias_view(request):
             'Plugins are required to create an alias',
         )
 
-    if not Alias.can_create_alias(user, plugins):
+    if not Alias.can_create_alias(user, plugins,):
         raise PermissionDenied
     replace = create_form.cleaned_data.get('replace')
-
-    if replace and not has_plugin_permission(user, Alias.__name__, 'add'):
-        raise PermissionDenied
-
-    alias_plugin = create_form.save()
 
     if replace:
         plugin = create_form.cleaned_data.get('plugin')
         placeholder = create_form.cleaned_data.get('placeholder')
+        import ipdb; ipdb.set_trace()  # BREAKPOINT
+
+        if not has_plugin_permission(user, Alias.__name__, 'add') or not placeholder.check_source(user):
+            raise PermissionDenied
+
+    alias_plugin = create_form.save()
+
+    if replace:
         return render_replace_response(
             request,
             new_plugins=[alias_plugin],

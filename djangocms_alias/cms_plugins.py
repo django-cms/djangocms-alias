@@ -110,14 +110,14 @@ class Alias(CMSPluginBase):
         )
 
     @classmethod
-    def can_detach(cls, user, plugins):
+    def can_detach(cls, user, target_placeholder, plugins):
         return all(
             has_plugin_permission(
                 user,
                 plugin.plugin_type,
                 'add',
             ) for plugin in plugins
-        )
+        ) and target_placeholder.check_source(user)
 
     @classmethod
     def detach_alias_plugin(cls, plugin, language):

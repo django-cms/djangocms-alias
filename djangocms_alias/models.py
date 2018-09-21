@@ -160,7 +160,8 @@ class Alias(models.Model):
             return self._plugins_cache[language]
         except KeyError:
             placeholder = self.get_placeholder(language)
-            self._plugins_cache[language] = placeholder.get_plugins_list()
+            plugins = placeholder.get_plugins_list() if placeholder else []
+            self._plugins_cache[language] = plugins
             return self._plugins_cache[language]
 
     def get_languages(self):

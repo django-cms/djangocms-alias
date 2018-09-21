@@ -16,7 +16,7 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import CREATE_ALIAS_URL_NAME, DETACH_ALIAS_PLUGIN_URL_NAME
 from .forms import AliasPluginForm
-from .models import Alias as AliasModel, AliasPlugin
+from .models import Alias as AliasModel, AliasContent, AliasPlugin
 
 
 __all__ = [
@@ -31,9 +31,12 @@ class Alias(CMSPluginBase):
     form = AliasPluginForm
 
     def get_render_template(self, context, instance, placeholder):
-        if not instance.is_recursive():
-            return 'djangocms_alias/{}/alias.html'.format(instance.template)
-        return 'djangocms_alias/alias_recursive.html'
+        if (
+            isinstance(instance.placeholder.source, AliasContent)
+            and instance.is_recursive()
+        ):
+            return 'djangocms_alias/alias_recursive.html'
+        return 'djangocms_alias/{}/alias.html'.format(instance.template)
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):

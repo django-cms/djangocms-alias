@@ -1,11 +1,13 @@
 from urllib.parse import urlparse
 
+from cms.api import add_plugin
+
 from djangocms_alias.cms_plugins import Alias
 
 from .base import BaseAliasPluginTestCase
 
 
-class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
+class AliasPluginTestCase(BaseAliasPluginTestCase):
 
     def test_extra_plugin_items_for_regular_plugins(self):
         extra_items = Alias.get_extra_plugin_menu_items(
@@ -58,3 +60,29 @@ class AliasPluginMenuTestCase(BaseAliasPluginTestCase):
             'placeholder={}'.format(self.placeholder.pk),
             parsed_url.query,
         )
+
+    def test_rendering_plugin_on_page(self):
+        alias = self._create_alias(published=True)
+        add_plugin(
+            alias.get_placeholder(self.language),
+            'TextPlugin',
+            language=self.language,
+            body='Content Alias 1234',
+        )
+        add_plugin(
+            alias.get_placeholder(self.language),
+            Alias,
+            language=self.language,
+            alias=alias,
+        )
+        add_plugin(
+            self.placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(self.page.get_absolute_url(self.language))
+
+        self.assertContains(response, 'Content Alias 1234')

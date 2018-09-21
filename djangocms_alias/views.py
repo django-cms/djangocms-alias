@@ -271,7 +271,7 @@ class AliasSelect2View(ListView):
         # Showing published and unpublished aliases
         queryset = super().get_queryset().filter(
             contents__language=get_current_language(),
-        )
+        ).distinct()
         term = self.request.GET.get('term')
         category = self.request.GET.get('category')
         try:

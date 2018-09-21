@@ -903,6 +903,14 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias1 = self._create_alias(name='test 2')
         alias2 = self._create_alias(name='foo', position=1)
         alias3 = self._create_alias(name='foo4', position=1, published=False)
+        if is_versioning_enabled():
+            from djangocms_versioning.constants import DRAFT
+            from djangocms_versioning.models import Version
+            # This shouldnt show becuase it's different version of the same alias
+            draft_content = alias2.contents.create(name='foo', language=self.language)
+            Version.objects.create(
+                content=draft_content, created_by=self.superuser, state=DRAFT)
+
         # This shouldnt show becuase it hasnt content in current language
         self._create_alias(name='foo2', language='fr', position=1)
         with self.login_user_context(self.superuser):

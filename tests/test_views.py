@@ -912,12 +912,18 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 ),
             )
 
-        result = [alias1.pk, alias2.pk]
-        if not is_versioning_enabled():
-            result.append(alias3.pk)
-
+        result = [alias1.pk, alias2.pk, alias3.pk]
+        text_result = ['test 2', 'foo']
+        if is_versioning_enabled():
+            text_result.append('Alias 3 (No content)')
+        else:
+            text_result.append('foo4')
         self.assertEqual(response.status_code, 200)
         self.assertEqual([a['id'] for a in response.json()['results']], result)
+        self.assertEqual(
+            [a['text'] for a in response.json()['results']],
+            text_result,
+        )
 
     def test_select2_view_order_by_category_and_position(self):
         category2 = Category.objects.create(name='foo')

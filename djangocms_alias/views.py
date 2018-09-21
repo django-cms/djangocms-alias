@@ -22,7 +22,7 @@ from cms.utils.permissions import has_plugin_permission
 
 from .cms_plugins import Alias
 from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
-from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
+from .models import Alias as AliasModel, AliasPlugin, Category
 
 
 JAVASCRIPT_SUCCESS_RESPONSE = """
@@ -176,7 +176,7 @@ def create_alias_view(request):
         plugin = create_form.cleaned_data.get('plugin')
         placeholder = create_form.cleaned_data.get('placeholder')
 
-        if not has_plugin_permission(user, Alias.__name__, 'add') or not placeholder.check_source(user):
+        if not has_plugin_permission(user, Alias.__name__, 'add'):
             raise PermissionDenied
 
     alias_plugin = create_form.save()
@@ -268,10 +268,9 @@ class AliasSelect2View(ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
+        # Showing published and unpublished aliases
         queryset = super().get_queryset().filter(
             contents__language=get_current_language(),
-            # Needed for versioning integration
-            contents__in=AliasContent.objects.all(),
         )
         term = self.request.GET.get('term')
         category = self.request.GET.get('category')

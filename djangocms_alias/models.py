@@ -352,15 +352,15 @@ class AliasPlugin(CMSPlugin):
         return force_text(self.alias.name)
 
     def is_recursive(self, language=None):
+        # When versioning enabled it only checks published content.
+        # When rendering alias plugin it always rendering published version if
+        # it's not present it will render nothing
         placeholder = self.alias.get_placeholder(language)
 
         plugins = AliasPlugin.objects.filter(
             placeholder_id=placeholder,
         )
         plugins = plugins.filter(
-            Q(pk=self) | Q(
-                Q(alias__contents__placeholders=placeholder) &
-                Q(alias__contents__in=AliasContent.objects.all())
-            ),
+            Q(pk=self) | Q(alias__contents__placeholders=placeholder)
         )
         return plugins.exists()

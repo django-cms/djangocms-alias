@@ -175,7 +175,6 @@ def create_alias_view(request):
     if replace:
         plugin = create_form.cleaned_data.get('plugin')
         placeholder = create_form.cleaned_data.get('placeholder')
-        import ipdb; ipdb.set_trace()  # BREAKPOINT
 
         if not has_plugin_permission(user, Alias.__name__, 'add') or not placeholder.check_source(user):
             raise PermissionDenied

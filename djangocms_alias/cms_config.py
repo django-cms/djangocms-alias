@@ -17,7 +17,6 @@ class AliasCMSConfig(CMSAppConfig):
     # Internalsearch configuration
     if AliasContentConfig:
         djangocms_internalsearch_enabled = True
-
         internalsearch_config_list = [
             AliasContentConfig
         ]

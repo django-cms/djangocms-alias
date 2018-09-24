@@ -23,7 +23,7 @@ def get_category(obj):
     return obj.result.category
 
 
-get_category.short_description = _('File Path')
+get_category.short_description = _('Category')
 
 
 def get_language(obj):

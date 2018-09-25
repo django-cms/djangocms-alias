@@ -5,10 +5,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from cms.toolbar.utils import get_toolbar_from_request
 
-from haystack import indexes
-
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.helpers import get_request
+from haystack import indexes
 
 from .models import AliasContent
 

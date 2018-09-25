@@ -7,9 +7,10 @@ from cms.toolbar.utils import get_toolbar_from_request
 
 from haystack import indexes
 
-from djangocms_alias.models import AliasContent
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.helpers import get_request
+
+from .models import AliasContent
 
 
 def get_title(obj):

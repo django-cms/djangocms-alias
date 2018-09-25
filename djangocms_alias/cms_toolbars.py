@@ -52,7 +52,7 @@ class AliasToolbar(CMSToolbar):
 
         if isinstance(self.toolbar.obj, AliasContent):
             self.add_alias_menu()
-            self.override_language_menu()
+            self.override_language_switcher()
             if not is_versioning_enabled():
                 self.change_language_menu()
 
@@ -169,7 +169,7 @@ class AliasToolbar(CMSToolbar):
         )
         create_wizard_button.disabled = not enable_create_wizard_button
 
-    def override_language_menu(self):
+    def override_language_switcher(self):
         language_menu = self.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER, _('Language'))
         # Remove all existing language links
         # remove_item uses `items` attribute so we have to copy object
@@ -177,6 +177,8 @@ class AliasToolbar(CMSToolbar):
             language_menu.remove_item(item=_item)
 
         for code, name in get_language_tuple(self.current_site.pk):
+            # Showing only existing translation. For versioning it will be only
+            # published translation
             alias_content = self.toolbar.obj.alias.get_content(language=code)
             if alias_content:
                 with force_language(code):

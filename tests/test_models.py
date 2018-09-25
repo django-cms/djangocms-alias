@@ -1,10 +1,11 @@
 from django.contrib.sites.models import Site
 
-from cms.api import add_plugin, create_page, create_title
+from cms.api import add_plugin, create_title
 from cms.models import Placeholder
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
+from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
 
@@ -195,21 +196,17 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         site2 = Site.objects.create(domain='site2.com', name='2')
         alias = self._create_alias(name='alias')
 
-        site1_page = create_page(
+        site1_page = self._create_page(
             title='Site1',
-            template='page.html',
             language=self.language,
-            in_navigation=True,
             site=site1,
         )
         self.add_alias_plugin_to_page(site1_page, alias)
         # Should show on the list
 
-        nested_page1 = create_page(
+        nested_page1 = self._create_page(
             title='Site1 nested page 1',
-            template='page.html',
             language=self.language,
-            in_navigation=True,
             site=site1,
             parent=site1_page,
         )
@@ -217,47 +214,47 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.add_alias_plugin_to_page(nested_page1, alias)
         # Should show on the list only once
 
-        nested_page2 = create_page(
+        nested_page2 = self._create_page(
             title='Site1 nested page 2',
-            template='page.html',
             language=self.language,
-            in_navigation=True,
             site=site1,
             parent=site1_page,
         )
         self.add_alias_plugin_to_page(nested_page2, alias)
         # Should show on the list
 
-        nested_page3 = create_page(
+        nested_page3 = self._create_page(
             title='Site1 nested page 3',
-            template='page.html',
             language=self.language,
-            in_navigation=True,
             site=site1,
             parent=site1_page,
         )  # Not show on the list
 
-        deep_nested_page4 = create_page(
+        deep_nested_page4 = self._create_page(
             title='Site1 deep nested page 4',
-            template='page.html',
             language=self.language,
-            in_navigation=True,
             site=site1,
             parent=nested_page3,
         )
         self.add_alias_plugin_to_page(deep_nested_page4, alias)
         # Should show on the list
 
-        site2_page = create_page(
+        site2_page = self._create_page(
             title='Site2',
-            template='page.html',
             language='de',
-            in_navigation=True,
             site=site2,
         )
-        create_title('en', 'Site2 EN', site2_page)
-        self.add_alias_plugin_to_page(site2_page, alias, 'en')
         self.add_alias_plugin_to_page(site2_page, alias, 'de')
+
+        if is_versioning_enabled():
+            from djangocms_versioning.models import Version
+            page_content = create_title('en', 'Site2 EN', site2_page, created_by=self.superuser)
+            version = Version.objects.create(content=page_content, created_by=self.superuser)
+            version.publish(self.superuser)
+        else:
+            page_content = create_title('en', 'Site2 EN', site2_page)
+
+        self.add_alias_plugin_to_page(site2_page, alias, 'en')
         # Should show on the list only once
 
         with self.assertNumQueries(3):
@@ -276,16 +273,18 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
 
     def test_aliases_using_alias(self):
         root_alias = self._create_alias(name='root alias')
-        AliasContent.objects.create(
-            name='root alias de',
-            alias=root_alias,
-            language='de',
-        )
-        AliasContent.objects.create(
-            name='root alias it',
-            alias=root_alias,
-            language='it',
-        )
+        if not is_versioning_enabled():
+            # TODO: fix it after versioning will have multilanguage support
+            AliasContent.objects.create(
+                name='root alias de',
+                alias=root_alias,
+                language='de',
+            )
+            AliasContent.objects.create(
+                name='root alias it',
+                alias=root_alias,
+                language='it',
+            )
         root_alias2 = self._create_alias(name='root alias 2')
 
         alias1 = self._create_alias(name='alias 1')
@@ -299,18 +298,20 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias1,
         )
-        add_plugin(
-            root_alias.get_placeholder('de'),
-            'Alias',
-            language='de',
-            alias=alias1,
-        )
-        add_plugin(
-            root_alias.get_placeholder('it'),
-            'Alias',
-            language='it',
-            alias=alias1,
-        )
+        if not is_versioning_enabled():
+            # TODO: fix it after versioning will have multilanguage support
+            add_plugin(
+                root_alias.get_placeholder('de'),
+                'Alias',
+                language='de',
+                alias=alias1,
+            )
+            add_plugin(
+                root_alias.get_placeholder('it'),
+                'Alias',
+                language='it',
+                alias=alias1,
+            )
         # Alias1 should show only once
         add_plugin(
             root_alias.get_placeholder(self.language),
@@ -383,6 +384,8 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_delete(self):
+        self.page.delete()
+
         alias = self._create_alias([self.plugin])
         add_plugin(
             self.placeholder,
@@ -390,8 +393,8 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
-        self.assertEqual(Placeholder.objects.count(), 2)
+        self.assertEqual(Placeholder.objects.count(), 1)
         alias.delete()
         self.assertFalse(alias.__class__.objects.filter(pk=alias.pk).exists())
         self.assertEqual(alias.cms_plugins.count(), 0)
-        self.assertEqual(Placeholder.objects.count(), 1)
+        self.assertEqual(Placeholder.objects.count(), 0)

@@ -3,6 +3,8 @@ from unittest import skipIf, skipUnless
 
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
+from django.test.utils import override_settings
 
 from cms.api import add_plugin
 from cms.models import Placeholder
@@ -159,6 +161,22 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias = Alias.objects.last()
         # AliasContent not published
         self.assertEqual(alias.name, 'Alias {} (No content)'.format(alias.pk))
+
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_create_alias_view_creating_version(self):
+        with self.login_user_context(self.superuser):
+            response = self.client.post(self.get_create_alias_endpoint(), data={
+                'plugin': self.plugin.pk,
+                'category': self.category.pk,
+                'name': 'test alias',
+                'language': self.language,
+            })
+            self.assertEqual(response.status_code, 200)
+
+        alias = Alias.objects.last()
+        if is_versioning_enabled():
+            from djangocms_versioning.models import Version
+            self.assertEqual(Version.objects.filter_by_grouper(alias).count(), 1)
 
     @skipIf(is_versioning_enabled(), 'Test only relevant without versioning enabled')
     def test_create_alias_name_unique_per_category_and_language(self):
@@ -334,8 +352,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(plugin, plugin_in_placeholder)
 
         alias = Alias.objects.first()
-        if is_versioning_enabled():
-            self._publish(alias)
+        self._publish(alias)
 
         source_plugins = placeholder.get_plugins()
         alias_plugins = alias.get_placeholder(self.language).get_plugins()
@@ -347,6 +364,11 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 source.get_bound_plugin().body,
                 target.get_bound_plugin().body,
             )
+
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_create_alias_with_replace_plugin_with_versioning_checks(self):
+        # TODO: 403 when placeholder from non-draft page
+        pass
 
     def test_create_alias_view_post_placeholder_replace(self):
         add_plugin(
@@ -485,6 +507,11 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             plugins[0].get_bound_plugin().body,
             plugins[1].get_bound_plugin().body,
         )
+
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_detach_view_with_versioning_checks(self):
+        # TODO: 403 when placeholder from non-draft page
+        pass
 
     def test_list_view(self):
         category1 = Category.objects.create(
@@ -1385,3 +1412,54 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         response = self.client.get(self.page.get_absolute_url())
         self.assertContains(response, '<b>custom alias content</b>')
+
+    @override_settings(CMS_PLACEHOLDER_CACHE=False)
+    def test_alias_multisite_support(self):
+        site1 = Site.objects.create(domain='site1.com', name='1')
+        site2 = Site.objects.create(domain='site2.com', name='2')
+        alias = self._create_alias()
+        alias_placeholder = alias.get_placeholder(self.language)
+        add_plugin(
+            alias_placeholder,
+            'TextPlugin',
+            language=self.language,
+            body='test alias multisite',
+        )
+
+        site1_page = self._create_page(
+            title='Site1',
+            language=self.language,
+            site=site1,
+        )
+        site2_page = self._create_page(
+            title='Site2',
+            language=self.language,
+            site=site2,
+        )
+        self.add_alias_plugin_to_page(site1_page, alias)
+        self.add_alias_plugin_to_page(site2_page, alias)
+
+        with override_settings(SITE_ID=site1.pk):
+            response = self.client.get(site1_page.get_absolute_url())
+        self.assertContains(response, 'test alias multisite')
+
+        with override_settings(SITE_ID=site2.pk):
+            response = self.client.get(site2_page.get_absolute_url())
+        self.assertContains(response, 'test alias multisite')
+
+        add_plugin(
+            alias_placeholder,
+            'TextPlugin',
+            language=self.language,
+            body='Another alias plugin',
+        )
+
+        with override_settings(SITE_ID=site1.pk):
+            response = self.client.get(site1_page.get_absolute_url())
+        self.assertContains(response, 'test alias multisite')
+        self.assertContains(response, 'Another alias plugin')
+
+        with override_settings(SITE_ID=site2.pk):
+            response = self.client.get(site2_page.get_absolute_url())
+        self.assertContains(response, 'test alias multisite')
+        self.assertContains(response, 'Another alias plugin')

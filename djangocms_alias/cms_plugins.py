@@ -47,20 +47,29 @@ class Alias(CMSPluginBase):
                 args=[plugin.pk],
             )
 
-            return [
+            plugin_menu_items = [
                 PluginMenuItem(
                     _('Edit Alias'),
                     edit_endpoint,
                     action='',
                     attributes={'icon': 'alias'},
                 ),
-                PluginMenuItem(
-                    _('Detach Alias'),
-                    detach_endpoint,
-                    action='modal',
-                    attributes={'icon': 'alias'},
-                ),
             ]
+
+            if cls.can_detach(
+                request.user,
+                plugin.placeholder,
+                plugin.alias.get_plugins(),
+            ):
+                plugin_menu_items.append(
+                    PluginMenuItem(
+                        _('Detach Alias'),
+                        detach_endpoint,
+                        action='modal',
+                        attributes={'icon': 'alias'},
+                    )
+                )
+            return plugin_menu_items
 
         data = {
             'plugin': plugin.pk,
@@ -95,14 +104,21 @@ class Alias(CMSPluginBase):
         return menu_items
 
     @classmethod
-    def can_create_alias(cls, user, plugins=None):
+    def can_create_alias(cls, user, plugins=None, replace=False):
         if not user.has_perm(
             get_model_permission_codename(AliasModel, 'add'),
         ):
             return False
 
-        if plugins is None:
+        if not plugins:
             return True
+        elif replace:
+            target_placeholder = plugins[0].placeholder
+            if (
+                not target_placeholder.check_source(user)
+                or not has_plugin_permission(user, Alias.__name__, 'add')
+            ):
+                return False
 
         return all(
             has_plugin_permission(

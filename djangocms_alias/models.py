@@ -155,7 +155,9 @@ class Alias(models.Model):
     def get_placeholder(self, language=None):
         return getattr(self.get_content(language), 'placeholder', None)
 
-    def get_plugins(self, language):
+    def get_plugins(self, language=None):
+        if not language:
+            language = get_current_language()
         try:
             return self._plugins_cache[language]
         except KeyError:

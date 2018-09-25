@@ -114,9 +114,12 @@ class BaseAliasPluginTestCase(CMSTestCase):
         version = self._get_version(grouper, PUBLISHED, language)
         version.unpublish(self.superuser)
 
-    def _create_page(self, title, language=None, site=None, published=True):
+    def _create_page(self, title, language=None, site=None, published=True, **kwargs):
         if language is None:
             language = self.language
+
+        if is_versioning_enabled() and not kwargs.get('created_by'):
+            kwargs['created_by'] = self.superuser
 
         page = create_page(
             title=title,
@@ -126,6 +129,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
             in_navigation=True,
             limit_visibility_in_menu=None,
             site=site,
+            **kwargs
         )
         if is_versioning_enabled():
             from djangocms_versioning.models import Version

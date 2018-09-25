@@ -18,7 +18,6 @@ from django.views.generic import ListView
 from cms.models import Page
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 from cms.utils.i18n import get_current_language
-from cms.utils.permissions import has_plugin_permission
 
 from .cms_plugins import Alias
 from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
@@ -168,20 +167,15 @@ def create_alias_view(request):
             'Plugins are required to create an alias',
         )
 
-    if not Alias.can_create_alias(user, plugins,):
-        raise PermissionDenied
     replace = create_form.cleaned_data.get('replace')
-
-    if replace:
-        plugin = create_form.cleaned_data.get('plugin')
-        placeholder = create_form.cleaned_data.get('placeholder')
-
-        if not has_plugin_permission(user, Alias.__name__, 'add'):
-            raise PermissionDenied
+    if not Alias.can_create_alias(user, plugins, replace):
+        raise PermissionDenied
 
     alias_plugin = create_form.save()
 
     if replace:
+        plugin = create_form.cleaned_data.get('plugin')
+        placeholder = create_form.cleaned_data.get('placeholder')
         return render_replace_response(
             request,
             new_plugins=[alias_plugin],

@@ -6,7 +6,6 @@ from django.urls import resolve
 
 from cms.api import add_plugin, create_page
 from cms.middleware.toolbar import ToolbarMiddleware
-from cms.models import PageContent
 from cms.test_utils.testcases import CMSTestCase
 from cms.toolbar.utils import (
     get_object_edit_url,
@@ -131,26 +130,8 @@ class BaseAliasPluginTestCase(CMSTestCase):
             site=site,
             **kwargs
         )
-        if is_versioning_enabled():
-            from djangocms_versioning.models import Version
-            page_content = PageContent.objects.create(
-                page=page,
-                title=title,
-                language=language,
-                template='page.html',
-                menu_title='',
-                in_navigation=True,
-                limit_visibility_in_menu=None,
-            )
-            page_content.rescan_placeholders()
-            page_languages = page.get_languages()
-
-            if language not in page_languages:
-                page.update_languages(page_languages + [language])
-
-            version = Version.objects.create(content=page_content, created_by=self.superuser)
-            if published:
-                version.publish(self.superuser)
+        if is_versioning_enabled() and published:
+            self._publish(page, language)
         return page
 
     def get_alias_request(self, alias, lang_code='en', *args, **kwargs):

@@ -247,12 +247,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.add_alias_plugin_to_page(site2_page, alias, 'de')
 
         if is_versioning_enabled():
-            from djangocms_versioning.models import Version
-            page_content = create_title('en', 'Site2 EN', site2_page, created_by=self.superuser)
-            version = Version.objects.create(content=page_content, created_by=self.superuser)
-            version.publish(self.superuser)
+            create_title('en', 'Site2 EN', site2_page, created_by=self.superuser)
+            self._publish(site2_page, 'en')
         else:
-            page_content = create_title('en', 'Site2 EN', site2_page)
+            create_title('en', 'Site2 EN', site2_page)
 
         self.add_alias_plugin_to_page(site2_page, alias, 'en')
         # Should show on the list only once

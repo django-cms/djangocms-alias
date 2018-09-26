@@ -1,9 +1,9 @@
-from django.conf import settings
+from django.apps import apps
 
 
 def is_versioning_enabled():
-    from .cms_config import AliasCMSConfig
-    return (
-        AliasCMSConfig.djangocms_versioning_enabled
-        and 'djangocms_versioning' in getattr(settings, 'INSTALLED_APPS', [])
-    )
+    from .models import AliasContent
+    try:
+        return apps.get_app_config('djangocms_versioning').cms_extension.is_content_model_versioned(AliasContent)
+    except LookupError:
+        return False

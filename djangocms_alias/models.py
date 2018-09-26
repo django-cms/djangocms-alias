@@ -355,9 +355,8 @@ class AliasPlugin(CMSPlugin):
         return force_text(self.alias.name)
 
     def is_recursive(self, language=None):
-        # When versioning enabled it only checks published content.
-        # When rendering alias plugin it always rendering published version if
-        # it's not present it will render nothing
+        # When versioning is enabled it will only get published content
+        # placeholder. If does not exist, then None.
         placeholder = self.alias.get_placeholder(language)
 
         plugins = AliasPlugin.objects.filter(

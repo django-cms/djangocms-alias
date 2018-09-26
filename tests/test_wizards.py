@@ -3,6 +3,8 @@ from django.contrib.sites.models import Site
 from cms.wizards.forms import WizardStep2BaseForm, step2_form_factory
 from cms.wizards.helpers import get_entries as get_wizard_entires
 
+from djangocms_alias.utils import is_versioning_enabled
+
 from .base import BaseAliasPluginTestCase
 
 
@@ -17,11 +19,13 @@ class WizardsTestCase(BaseAliasPluginTestCase):
 
     def _get_form_kwargs(self, data, language=None):
         language = language or self.language
+        request = self.get_request('/', language=language)
+        request.user = self.superuser
         return {
             'data': data,
             'wizard_language': language,
             'wizard_site': Site.objects.get_current(),
-            'wizard_request': self.get_request('/', language=language),
+            'wizard_request': request,
         }
 
     def test_create_alias_wizard_instance(self):
@@ -58,6 +62,10 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             response = self.client.get(alias.get_absolute_url())
         self.assertContains(response, data['name'])
+
+        if is_versioning_enabled():
+            from djangocms_versioning.models import Version
+            self.assertEqual(Version.objects.filter_by_grouper(alias).count(), 1)
 
     def test_create_alias_category_wizard_instance(self):
         wizard = self._get_wizard_instance('CreateAliasCategoryWizard')

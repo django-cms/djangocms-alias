@@ -23,6 +23,7 @@ from djangocms_alias.constants import (
     LIST_ALIASES_URL_NAME,
 )
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
+from djangocms_alias.utils import is_versioning_enabled
 
 
 class BaseAliasPluginTestCase(CMSTestCase):
@@ -52,13 +53,9 @@ class BaseAliasPluginTestCase(CMSTestCase):
         )
 
     def setUp(self):
+        self.superuser = self.get_superuser()
         self.language = 'en'
-        self.page = create_page(
-            title='test',
-            template='page.html',
-            language=self.language,
-            in_navigation=True,
-        )
+        self.page = self._create_page('test')
         self.placeholder = self.page.get_placeholders(self.language).get(
             slot='content',
         )
@@ -68,10 +65,9 @@ class BaseAliasPluginTestCase(CMSTestCase):
             language=self.language,
             body='test',
         )
-        self.superuser = self.get_superuser()
         self.category = Category.objects.create(name='test category')
 
-    def _create_alias(self, plugins=None, name='test alias', category=None, position=0, language=None):
+    def _create_alias(self, plugins=None, name='test alias', category=None, position=0, language=None, published=True):
         if language is None:
             language = self.language
         if category is None:
@@ -87,9 +83,56 @@ class BaseAliasPluginTestCase(CMSTestCase):
             name=name,
             language=language,
         )
+
+        if is_versioning_enabled():
+            from djangocms_versioning.models import Version
+            version = Version.objects.create(content=alias_content, created_by=self.superuser)
+            if published:
+                version.publish(self.superuser)
+
         if plugins:
             alias_content.populate(plugins=plugins)
         return alias
+
+    def _get_version(self, grouper, version_state, language=None):
+        language = language or self.language
+
+        from djangocms_versioning.models import Version
+        versions = Version.objects.filter_by_grouper(grouper).filter(state=version_state)
+        for version in versions:
+            if hasattr(version.content, 'language') and version.content.language == language:
+                return version
+
+    def _publish(self, grouper, language=None):
+        from djangocms_versioning.constants import DRAFT
+        version = self._get_version(grouper, DRAFT, language)
+        version.publish(self.superuser)
+
+    def _unpublish(self, grouper, language=None):
+        from djangocms_versioning.constants import PUBLISHED
+        version = self._get_version(grouper, PUBLISHED, language)
+        version.unpublish(self.superuser)
+
+    def _create_page(self, title, language=None, site=None, published=True, **kwargs):
+        if language is None:
+            language = self.language
+
+        if is_versioning_enabled() and not kwargs.get('created_by'):
+            kwargs['created_by'] = self.superuser
+
+        page = create_page(
+            title=title,
+            language=language,
+            template='page.html',
+            menu_title='',
+            in_navigation=True,
+            limit_visibility_in_menu=None,
+            site=site,
+            **kwargs
+        )
+        if is_versioning_enabled() and published:
+            self._publish(page, language)
+        return page
 
     def get_alias_request(self, alias, lang_code='en', *args, **kwargs):
         request = self._get_instance_request(alias, *args, **kwargs)

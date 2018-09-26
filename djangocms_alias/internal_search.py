@@ -88,5 +88,5 @@ class AliasContentConfig(BaseSearchConfig):
         return obj.alias.category.name
 
     def prepare_version_status(self, obj):
-        # Todo: Replace with version state when alias versioning is ready
+        # TODO: Replace with version state when alias versioning is ready
         return random.choice(['Draft', 'Published', 'Unpublished', 'Locked'])

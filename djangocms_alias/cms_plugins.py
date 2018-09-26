@@ -16,7 +16,7 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import CREATE_ALIAS_URL_NAME, DETACH_ALIAS_PLUGIN_URL_NAME
 from .forms import AliasPluginForm
-from .models import Alias as AliasModel, AliasPlugin
+from .models import Alias as AliasModel, AliasContent, AliasPlugin
 
 
 __all__ = [
@@ -31,9 +31,12 @@ class Alias(CMSPluginBase):
     form = AliasPluginForm
 
     def get_render_template(self, context, instance, placeholder):
-        if not instance.is_recursive():
-            return 'djangocms_alias/{}/alias.html'.format(instance.template)
-        return 'djangocms_alias/alias_recursive.html'
+        if (
+            isinstance(instance.placeholder.source, AliasContent)
+            and instance.is_recursive()
+        ):
+            return 'djangocms_alias/alias_recursive.html'
+        return 'djangocms_alias/{}/alias.html'.format(instance.template)
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):
@@ -44,20 +47,29 @@ class Alias(CMSPluginBase):
                 args=[plugin.pk],
             )
 
-            return [
+            plugin_menu_items = [
                 PluginMenuItem(
                     _('Edit Alias'),
                     edit_endpoint,
                     action='',
                     attributes={'icon': 'alias'},
                 ),
-                PluginMenuItem(
-                    _('Detach Alias'),
-                    detach_endpoint,
-                    action='modal',
-                    attributes={'icon': 'alias'},
-                ),
             ]
+
+            if cls.can_detach(
+                request.user,
+                plugin.placeholder,
+                plugin.alias.get_plugins(),
+            ):
+                plugin_menu_items.append(
+                    PluginMenuItem(
+                        _('Detach Alias'),
+                        detach_endpoint,
+                        action='modal',
+                        attributes={'icon': 'alias'},
+                    )
+                )
+            return plugin_menu_items
 
         data = {
             'plugin': plugin.pk,
@@ -92,14 +104,21 @@ class Alias(CMSPluginBase):
         return menu_items
 
     @classmethod
-    def can_create_alias(cls, user, plugins=None):
+    def can_create_alias(cls, user, plugins=None, replace=False):
         if not user.has_perm(
             get_model_permission_codename(AliasModel, 'add'),
         ):
             return False
 
-        if plugins is None:
+        if not plugins:
             return True
+        elif replace:
+            target_placeholder = plugins[0].placeholder
+            if (
+                not target_placeholder.check_source(user)
+                or not has_plugin_permission(user, Alias.__name__, 'add')
+            ):
+                return False
 
         return all(
             has_plugin_permission(
@@ -110,14 +129,14 @@ class Alias(CMSPluginBase):
         )
 
     @classmethod
-    def can_detach(cls, user, plugins):
+    def can_detach(cls, user, target_placeholder, plugins):
         return all(
             has_plugin_permission(
                 user,
                 plugin.plugin_type,
                 'add',
             ) for plugin in plugins
-        )
+        ) and target_placeholder.check_source(user)
 
     @classmethod
     def detach_alias_plugin(cls, plugin, language):

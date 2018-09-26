@@ -1,4 +1,5 @@
 import itertools
+from copy import copy
 
 from django.urls import NoReverseMatch
 from django.utils.encoding import force_text
@@ -13,7 +14,11 @@ from cms.cms_toolbars import (
 from cms.toolbar.items import Break, ButtonList
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
-from cms.utils.i18n import get_language_dict
+from cms.utils.i18n import (
+    force_language,
+    get_language_dict,
+    get_language_tuple,
+)
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
@@ -24,6 +29,7 @@ from .constants import (
     USAGE_ALIAS_URL_NAME,
 )
 from .models import Alias, AliasContent
+from .utils import is_versioning_enabled
 
 
 __all__ = [
@@ -46,7 +52,9 @@ class AliasToolbar(CMSToolbar):
 
         if isinstance(self.toolbar.obj, AliasContent):
             self.add_alias_menu()
-            self.change_language_menu()
+            self.override_language_switcher()
+            if not is_versioning_enabled():
+                self.change_language_menu()
 
     def post_template_populate(self):
         if self.is_current_app or isinstance(self.toolbar.obj, AliasContent):
@@ -160,6 +168,22 @@ class AliasToolbar(CMSToolbar):
             list(entry_choices(self.request.user, page=None))
         )
         create_wizard_button.disabled = not enable_create_wizard_button
+
+    def override_language_switcher(self):
+        language_menu = self.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER, _('Language'))
+        # Remove all existing language links
+        # remove_item uses `items` attribute so we have to copy object
+        for _item in copy(language_menu.items):
+            language_menu.remove_item(item=_item)
+
+        for code, name in get_language_tuple(self.current_site.pk):
+            # Showing only existing translation. For versioning it will be only
+            # published translation
+            alias_content = self.toolbar.obj.alias.get_content(language=code)
+            if alias_content:
+                with force_language(code):
+                    url = alias_content.get_absolute_url()
+                language_menu.add_link_item(name, url=url, active=self.current_lang == code)
 
     def change_language_menu(self):
         if self.toolbar.edit_mode_active and isinstance(self.toolbar.obj, AliasContent):

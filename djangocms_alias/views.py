@@ -17,7 +17,7 @@ from django.views.generic import ListView
 
 from cms.models import Page
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
-from cms.utils.permissions import has_plugin_permission
+from cms.utils.i18n import get_current_language
 
 from .cms_plugins import Alias
 from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
@@ -54,7 +54,7 @@ def detach_alias_plugin_view(request, plugin_pk):
 
     plugins = instance.alias.get_plugins(language)
 
-    can_detach = Alias.can_detach(request.user, plugins)
+    can_detach = Alias.can_detach(request.user, instance.placeholder, plugins)
 
     if not can_detach:
         raise PermissionDenied
@@ -90,7 +90,7 @@ class AliasListView(ListView):
     template_name = 'djangocms_alias/alias_list.html'
 
     def get_queryset(self):
-        return self.category.aliases.current_language()
+        return self.category.aliases.all()
 
     def get_context_data(self, **kwargs):
         kwargs.update({
@@ -167,11 +167,8 @@ def create_alias_view(request):
             'Plugins are required to create an alias',
         )
 
-    if not Alias.can_create_alias(user, plugins):
-        raise PermissionDenied
     replace = create_form.cleaned_data.get('replace')
-
-    if replace and not has_plugin_permission(user, Alias.__name__, 'add'):
+    if not Alias.can_create_alias(user, plugins, replace):
         raise PermissionDenied
 
     alias_plugin = create_form.save()
@@ -265,7 +262,10 @@ class AliasSelect2View(ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = super().get_queryset().current_language()
+        # Showing published and unpublished aliases
+        queryset = super().get_queryset().filter(
+            contents__language=get_current_language(),
+        ).distinct()
         term = self.request.GET.get('term')
         category = self.request.GET.get('category')
         try:

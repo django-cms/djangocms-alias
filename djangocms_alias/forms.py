@@ -16,9 +16,13 @@ from cms.utils.urlutils import admin_reverse
 
 from parler.forms import TranslatableModelForm
 
-from .constants import SELECT2_ALIAS_URL_NAME
+from . import constants
 from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
-from .utils import is_versioning_enabled
+from .utils import (
+    is_versioning_enabled,
+    send_post_alias_operation,
+    send_pre_alias_operation,
+)
 
 
 __all__ = [
@@ -160,7 +164,7 @@ class CreateAliasForm(BaseCreateAliasForm):
             replaced_plugin=plugin,
             plugins=source_plugins,
         )
-        return new_plugin
+        return alias, alias_content, new_plugin
 
 
 class CreateAliasWizardForm(forms.Form):
@@ -182,6 +186,10 @@ class CreateAliasWizardForm(forms.Form):
 
     @transaction.atomic
     def save(self):
+        operation_token = send_pre_alias_operation(
+            request=self._request,
+            operation=constants.CREATE_ALIAS_OPERATION,
+        )
         alias = AliasModel.objects.create(
             category=self.cleaned_data.get('category'),
         )
@@ -194,6 +202,13 @@ class CreateAliasWizardForm(forms.Form):
         if is_versioning_enabled():
             from djangocms_versioning.models import Version
             Version.objects.create(content=alias_content, created_by=self._request.user)
+
+        send_post_alias_operation(
+            request=self._request,
+            operation=constants.CREATE_ALIAS_OPERATION,
+            token=operation_token,
+            obj=alias,
+        )
         return alias
 
 
@@ -261,7 +276,7 @@ class CategorySelectWidget(Select2Mixin, forms.Select):
 class AliasSelectWidget(Select2Mixin, forms.TextInput):
 
     def get_url(self):
-        return admin_reverse(SELECT2_ALIAS_URL_NAME)
+        return admin_reverse(constants.SELECT2_ALIAS_URL_NAME)
 
     def build_attrs(self, *args, **kwargs):
         attrs = super().build_attrs(*args, **kwargs)

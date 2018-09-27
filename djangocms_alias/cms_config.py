@@ -26,8 +26,6 @@ class AliasCMSConfig(CMSAppConfig):
                 grouper_field_name='alias',
                 copy_function=copy_alias_content,
                 grouper_selector_option_label=lambda obj, lang: obj.get_name(lang),
-                on_publish=lambda version: None,
-                on_unpublish=lambda version: None,
             ),
         ]
 

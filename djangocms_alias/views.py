@@ -19,9 +19,11 @@ from cms.models import Page
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 from cms.utils.i18n import get_current_language
 
+from . import constants
 from .cms_plugins import Alias
 from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
 from .models import Alias as AliasModel, AliasPlugin, Category
+from .utils import send_post_alias_operation, send_pre_alias_operation
 
 
 JAVASCRIPT_SUCCESS_RESPONSE = """
@@ -171,7 +173,19 @@ def create_alias_view(request):
     if not Alias.can_create_alias(user, plugins, replace):
         raise PermissionDenied
 
-    alias_plugin = create_form.save()
+    operation_token = send_pre_alias_operation(
+        request=request,
+        operation=constants.CREATE_ALIAS_OPERATION,
+    )
+
+    alias, alias_content, alias_plugin = create_form.save()
+
+    send_post_alias_operation(
+        request=request,
+        operation=constants.CREATE_ALIAS_OPERATION,
+        token=operation_token,
+        obj=alias,
+    )
 
     if replace:
         plugin = create_form.cleaned_data.get('plugin')
@@ -235,7 +249,19 @@ def set_alias_position_view(request):
     if not form.is_valid():
         return JsonResponse({'errors': form.errors}, status=400)
 
+    operation_token = send_pre_alias_operation(
+        request=request,
+        operation=constants.CHANGE_ALIAS_OPERATION,
+    )
+
     alias = form.save()
+
+    send_post_alias_operation(
+        request=request,
+        operation=constants.CHANGE_ALIAS_OPERATION,
+        token=operation_token,
+        obj=alias,
+    )
     return JsonResponse({'alias': alias.pk, 'position': alias.position})
 
 

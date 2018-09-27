@@ -18,11 +18,7 @@ from parler.forms import TranslatableModelForm
 
 from . import constants
 from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
-from .utils import (
-    is_versioning_enabled,
-    send_post_alias_operation,
-    send_pre_alias_operation,
-)
+from .utils import is_versioning_enabled
 
 
 __all__ = [
@@ -186,10 +182,6 @@ class CreateAliasWizardForm(forms.Form):
 
     @transaction.atomic
     def save(self):
-        operation_token = send_pre_alias_operation(
-            request=self._request,
-            operation=constants.CREATE_ALIAS_OPERATION,
-        )
         alias = AliasModel.objects.create(
             category=self.cleaned_data.get('category'),
         )
@@ -203,12 +195,11 @@ class CreateAliasWizardForm(forms.Form):
             from djangocms_versioning.models import Version
             Version.objects.create(content=alias_content, created_by=self._request.user)
 
-        send_post_alias_operation(
-            request=self._request,
-            operation=constants.CREATE_ALIAS_OPERATION,
-            token=operation_token,
-            obj=alias,
-        )
+        try:
+            from djangocms_internalsearch.helpers import emit_content_change
+            emit_content_change(alias_content)
+        except ImportError:
+            pass
         return alias
 
 

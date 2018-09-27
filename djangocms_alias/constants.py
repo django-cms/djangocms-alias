@@ -8,11 +8,3 @@ CATEGORY_LIST_URL_NAME = '{}_category_list'.format(PLUGIN_URL_NAME_PREFIX)
 SET_ALIAS_POSITION_URL_NAME = '{}_set_alias_position'.format(PLUGIN_URL_NAME_PREFIX)  # noqa: E501
 SELECT2_ALIAS_URL_NAME = '{}_select2'.format(PLUGIN_URL_NAME_PREFIX)
 USAGE_ALIAS_URL_NAME = '{}_alias_usage'.format(PLUGIN_URL_NAME_PREFIX)
-
-# Operations
-CREATE_ALIAS_OPERATION = 'create_alias'
-CHANGE_ALIAS_OPERATION = 'change_alias'
-DELETE_ALIAS_OPERATION = 'delete_alias'
-ADD_ALIAS_CONTENT_OPERATION = 'add_alias_content'
-CHANGE_ALIAS_CONTENT_OPERATION = 'change_alias_content'
-DELETE_ALIAS_CONTENT_OPERATION = 'delete_alias_content'

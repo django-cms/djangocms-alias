@@ -563,9 +563,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias1_content = alias1.get_content(language=self.language)
         alias1_url = alias1_content.get_absolute_url()
         if is_versioning_enabled():
-            alias1_url = admin_reverse(
-                'djangocms_versioning_aliascontentversion_changelist'
-            ) + '?grouper={}'.format(alias1.pk)
+            from djangocms_versioning.helpers import version_list_url_for_grouper
+            alias1_url = version_list_url_for_grouper(alias1)
 
         self.assertContains(response, alias1_url)
         self.assertNotContains(response, alias2.get_absolute_url())

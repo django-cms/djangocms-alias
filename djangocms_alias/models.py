@@ -131,9 +131,8 @@ class Alias(models.Model):
 
     def get_absolute_url(self, language=None):
         if is_versioning_enabled():
-            return admin_reverse(
-                'djangocms_versioning_aliascontentversion_changelist'
-            ) + '?grouper={}'.format(self.pk)
+            from djangocms_versioning.helpers import version_list_url_for_grouper
+            return version_list_url_for_grouper(self)
         content = self.get_content(language=language)
         if content:
             return content.get_absolute_url()

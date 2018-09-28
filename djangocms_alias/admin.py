@@ -7,6 +7,7 @@ from parler.admin import TranslatableAdmin
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
+from .utils import emit_content_change, emit_content_delete
 
 
 __all__ = [
@@ -24,12 +25,12 @@ class CategoryAdmin(TranslatableAdmin):
         change = not obj._state.adding
         super().save_model(request, obj, form, change)
         if change:
-            try:
-                from djangocms_internalsearch.helpers import emit_content_change
-                for content in AliasContent._base_manager.filter(alias__in=obj.aliases.all()):
-                    emit_content_change(obj=content, sender=self.model)
-            except ImportError:
-                pass
+            # Dont emit delete content because there is on_delete=PROTECT for
+            # category FK on alias
+            emit_content_change(
+                AliasContent._base_manager.filter(alias__in=obj.aliases.all()),
+                sender=self.model,
+            )
 
 
 @admin.register(Alias)
@@ -63,21 +64,17 @@ class AliasAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        try:
-            from djangocms_internalsearch.helpers import emit_content_change
-            for content in AliasContent._base_manager.filter(alias=obj):
-                emit_content_change(obj=content, sender=self.model)
-        except ImportError:
-            pass
+        emit_content_change(
+            AliasContent._base_manager.filter(alias=obj),
+            sender=self.model,
+        )
 
     def delete_model(self, request, obj):
         super().delete_model(request, obj)
-        try:
-            from djangocms_internalsearch.helpers import emit_content_change
-            for content in AliasContent._base_manager.filter(alias=obj):
-                emit_content_change(obj=content, sender=self.model)
-        except ImportError:
-            pass
+        emit_content_delete(
+            AliasContent._base_manager.filter(alias=obj),
+            sender=self.model,
+        )
 
 
 @admin.register(AliasContent)
@@ -86,16 +83,8 @@ class AliasContentAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        try:
-            from djangocms_internalsearch.helpers import emit_content_change
-            emit_content_change(obj=obj, sender=self.model)
-        except ImportError:
-            pass
+        emit_content_change([obj], sender=self.model)
 
     def delete_model(self, request, obj):
         super().delete_model(request, obj)
-        try:
-            from djangocms_internalsearch.helpers import emit_content_change
-            emit_content_change(obj=obj, sender=self.model)
-        except ImportError:
-            pass
+        emit_content_delete([obj], sender=self.model)

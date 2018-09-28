@@ -18,7 +18,7 @@ from parler.forms import TranslatableModelForm
 
 from .constants import SELECT2_ALIAS_URL_NAME
 from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
-from .utils import is_versioning_enabled
+from .utils import emit_content_change, is_versioning_enabled
 
 
 __all__ = [
@@ -195,11 +195,7 @@ class CreateAliasWizardForm(forms.Form):
             from djangocms_versioning.models import Version
             Version.objects.create(content=alias_content, created_by=self._request.user)
 
-        try:
-            from djangocms_internalsearch.helpers import emit_content_change
-            emit_content_change(alias_content)
-        except ImportError:
-            pass
+        emit_content_change([alias_content])
         return alias
 
 

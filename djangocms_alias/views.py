@@ -22,6 +22,7 @@ from cms.utils.i18n import get_current_language
 from .cms_plugins import Alias
 from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
 from .models import Alias as AliasModel, AliasPlugin, Category
+from .utils import emit_content_change
 
 
 JAVASCRIPT_SUCCESS_RESPONSE = """
@@ -172,12 +173,7 @@ def create_alias_view(request):
         raise PermissionDenied
 
     alias, alias_content, alias_plugin = create_form.save()
-
-    try:
-        from djangocms_internalsearch.helpers import emit_content_change
-        emit_content_change(alias_content)
-    except ImportError:
-        pass
+    emit_content_change([alias_content])
 
     if replace:
         plugin = create_form.cleaned_data.get('plugin')

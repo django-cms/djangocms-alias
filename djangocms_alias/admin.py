@@ -7,17 +7,30 @@ from parler.admin import TranslatableAdmin
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
+from .utils import emit_content_change, emit_content_delete
 
 
 __all__ = [
     'AliasAdmin',
     'CategoryAdmin',
+    'AliasContentAdmin',
 ]
 
 
 @admin.register(Category)
 class CategoryAdmin(TranslatableAdmin):
     list_display = ['name']
+
+    def save_model(self, request, obj, form, change):
+        change = not obj._state.adding
+        super().save_model(request, obj, form, change)
+        if change:
+            # Dont emit delete content because there is on_delete=PROTECT for
+            # category FK on alias
+            emit_content_change(
+                AliasContent._base_manager.filter(alias__in=obj.aliases.all()),
+                sender=self.model,
+            )
 
 
 @admin.register(Alias)
@@ -49,7 +62,29 @@ class AliasAdmin(admin.ModelAdmin):
             perms_needed.remove('placeholder')
         return deleted_objects, model_count, perms_needed, protected
 
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        emit_content_change(
+            AliasContent._base_manager.filter(alias=obj),
+            sender=self.model,
+        )
+
+    def delete_model(self, request, obj):
+        super().delete_model(request, obj)
+        emit_content_delete(
+            AliasContent._base_manager.filter(alias=obj),
+            sender=self.model,
+        )
+
 
 @admin.register(AliasContent)
 class AliasContentAdmin(admin.ModelAdmin):
     form = AliasContentForm
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        emit_content_change([obj], sender=self.model)
+
+    def delete_model(self, request, obj):
+        super().delete_model(request, obj)
+        emit_content_delete([obj], sender=self.model)

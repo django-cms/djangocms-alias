@@ -18,7 +18,7 @@ from parler.forms import TranslatableModelForm
 
 from .constants import SELECT2_ALIAS_URL_NAME
 from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
-from .utils import is_versioning_enabled
+from .utils import emit_content_change, is_versioning_enabled
 
 
 __all__ = [
@@ -160,7 +160,7 @@ class CreateAliasForm(BaseCreateAliasForm):
             replaced_plugin=plugin,
             plugins=source_plugins,
         )
-        return new_plugin
+        return alias, alias_content, new_plugin
 
 
 class CreateAliasWizardForm(forms.Form):
@@ -194,6 +194,8 @@ class CreateAliasWizardForm(forms.Form):
         if is_versioning_enabled():
             from djangocms_versioning.models import Version
             Version.objects.create(content=alias_content, created_by=self._request.user)
+
+        emit_content_change([alias_content])
         return alias
 
 

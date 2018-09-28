@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.conf import settings
 
 from cms.app_base import CMSAppConfig
@@ -7,8 +8,9 @@ from .rendering import render_alias_content
 
 
 try:
+    apps.get_app_config('djangocms_internalsearch')
     from .internal_search import AliasContentConfig
-except ImportError:
+except (ImportError, LookupError):
     AliasContentConfig = None
 
 
@@ -26,8 +28,6 @@ class AliasCMSConfig(CMSAppConfig):
                 grouper_field_name='alias',
                 copy_function=copy_alias_content,
                 grouper_selector_option_label=lambda obj, lang: obj.get_name(lang),
-                on_publish=lambda version: None,
-                on_unpublish=lambda version: None,
             ),
         ]
 

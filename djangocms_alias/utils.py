@@ -12,9 +12,8 @@ def is_versioning_enabled():
 
 def emit_content_change(objs, sender=None):
     try:
-        apps.get_app_config('djangocms_internalsearch')
         from djangocms_internalsearch.helpers import emit_content_change
-    except (ImportError, LookupError):
+    except ImportError:
         return
 
     for obj in objs:
@@ -23,9 +22,8 @@ def emit_content_change(objs, sender=None):
 
 def emit_content_delete(objs, sender=None):
     try:
-        apps.get_app_config('djangocms_internalsearch')
         from djangocms_internalsearch.helpers import emit_content_delete
-    except (ImportError, LookupError):
+    except ImportError:
         return
 
     for obj in objs:

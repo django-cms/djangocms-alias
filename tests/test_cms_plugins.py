@@ -2,7 +2,7 @@ from operator import attrgetter
 from unittest import skipUnless
 from urllib.parse import urlparse
 
-from cms.api import add_plugin
+from cms.api import add_plugin, create_title
 from cms.utils.plugins import downcast_plugins
 from cms.utils.urlutils import admin_reverse
 
@@ -31,12 +31,19 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
 
     def test_extra_plugin_items_for_alias_plugins(self):
         alias = self._create_alias()
-        alias_plugin = alias.get_content(self.language).populate(
-            replaced_placeholder=self.placeholder
-        )
 
+        placeholder = self.placeholder
+        page_content = None
+        if is_versioning_enabled():
+            # Can only edit page/content that is in DRAFT
+            page_content = create_title(self.language, 'Draft Page', self.page, created_by=self.superuser)
+            placeholder = page_content.get_placeholders().get(slot='content')
+
+        alias_plugin = alias.get_content(self.language).populate(
+            replaced_placeholder=placeholder,
+        )
         extra_items = Alias.get_extra_plugin_menu_items(
-            self.get_page_request(page=self.page, user=self.superuser),
+            self.get_page_request(page=self.page, obj=page_content, user=self.superuser),
             alias_plugin,
         )
 
@@ -70,8 +77,20 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_extra_plugin_items_with_versioning_checks(self):
-        # TODO: remove Detach Alias button when placeholder from published page
-        pass
+        alias = self._create_alias()
+        alias_plugin = alias.get_content(self.language).populate(
+            replaced_placeholder=self.placeholder,
+        )
+        extra_items = Alias.get_extra_plugin_menu_items(
+            self.get_page_request(page=self.page, obj=self.page.get_title_obj(), user=self.superuser),
+            alias_plugin,
+        )
+
+        self.assertEqual(len(extra_items), 1)
+        first = extra_items[0]
+        # We cannot detach alias on undraft page
+        self.assertEqual(first.name, 'Edit Alias')
+        self.assertEqual(first.url, alias.get_absolute_url())
 
     def test_rendering_plugin_on_page(self):
         alias = self._create_alias(published=True)

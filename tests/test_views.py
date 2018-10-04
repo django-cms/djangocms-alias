@@ -109,9 +109,21 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_create_alias_view_post_plugin_replace(self):
+        placeholder = self.placeholder
+        if is_versioning_enabled():
+            # Can only edit page/content that is in DRAFT
+            placeholder = self._get_draft_page_placeholder()
+
+        plugin = add_plugin(
+            placeholder,
+            'TextPlugin',
+            language='en',
+            body='test 222',
+        )
+
         with self.login_user_context(self.superuser):
             response = self.client.post(self.get_create_alias_endpoint(), data={
-                'plugin': self.plugin.pk,
+                'plugin': plugin.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
                 'language': self.language,
@@ -129,7 +141,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(plugins[0].plugin_type, self.plugin.plugin_type)
         self.assertEqual(
             plugins[0].get_bound_plugin().body,
-            self.plugin.body,
+            plugin.body,
         )
 
     def test_create_alias_view_name(self):
@@ -367,12 +379,26 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_create_alias_with_replace_plugin_with_versioning_checks(self):
-        # TODO: 403 when placeholder from non-draft page
-        pass
+        # 403 if you try to edit placeholder of published page
+        with self.login_user_context(self.superuser):
+            response = self.client.post(self.get_create_alias_endpoint(), data={
+                'placeholder': self.placeholder.pk,
+                'category': self.category.pk,
+                'name': 'test alias 5',
+                'language': self.language,
+                'replace': True,
+            })
+            self.assertEqual(response.status_code, 403)
 
     def test_create_alias_view_post_placeholder_replace(self):
-        add_plugin(
-            self.placeholder,
+        placeholder = self.placeholder
+        if is_versioning_enabled():
+            # Can only edit page/content that is in DRAFT
+            placeholder = self._get_draft_page_placeholder()
+
+        placeholder.get_plugins().delete()
+        text_plugin = add_plugin(
+            placeholder,
             'TextPlugin',
             language='en',
             body='test 2',
@@ -380,7 +406,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             response = self.client.post(self.get_create_alias_endpoint(), data={
-                'placeholder': self.placeholder.pk,
+                'placeholder': placeholder.pk,
                 'category': self.category.pk,
                 'name': 'test alias',
                 'language': self.language,
@@ -393,14 +419,14 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             self._publish(alias)
         alias_plugins = alias.get_placeholder(self.language).get_plugins()
 
-        self.assertEqual(alias_plugins.count(), 2)
+        self.assertEqual(alias_plugins.count(), 1)
         self.assertEqual(alias_plugins[0].plugin_type, self.plugin.plugin_type)
         self.assertEqual(
             alias_plugins[0].get_bound_plugin().body,
-            self.plugin.body,
+            text_plugin.body,
         )
 
-        placeholder_plugins = self.placeholder.get_plugins()
+        placeholder_plugins = placeholder.get_plugins()
         self.assertEqual(placeholder_plugins.count(), 1)
 
         self.assertEqual(
@@ -481,9 +507,21 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             self.assertEqual(response.status_code, 404)
 
     def test_detach_view(self):
-        alias = self._create_alias([self.plugin])
+        placeholder = self.placeholder
+        if is_versioning_enabled():
+            # Can only edit page/content that is in DRAFT
+            placeholder = self._get_draft_page_placeholder()
+
+        placeholder.get_plugins().delete()
+        alias = self._create_alias()
+        add_plugin(
+            placeholder,
+            'TextPlugin',
+            language=self.language,
+            body='test',
+        )
         plugin = add_plugin(
-            self.placeholder,
+            placeholder,
             'Alias',
             language='en',
             alias=alias,
@@ -494,6 +532,14 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             language=self.language,
             body='test 2',
         )
+        add_plugin(
+            alias.get_placeholder(self.language),
+            'TextPlugin',
+            language=self.language,
+            body='test 88',
+        )
+        plugins = placeholder.get_plugins()
+        self.assertEqual(plugins.count(), 2)
 
         with self.login_user_context(self.superuser):
             response = self.client.post(
@@ -501,17 +547,27 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
             self.assertEqual(response.status_code, 200)
 
-        plugins = self.placeholder.get_plugins()
+        plugins = placeholder.get_plugins()
         self.assertEqual(plugins.count(), 3)
-        self.assertEqual(
-            plugins[0].get_bound_plugin().body,
-            plugins[1].get_bound_plugin().body,
-        )
+        self.assertEqual(plugins[0].get_bound_plugin().body, 'test')
+        self.assertEqual(plugins[1].get_bound_plugin().body, 'test 2')
+        self.assertEqual(plugins[2].get_bound_plugin().body, 'test 88')
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_detach_view_with_versioning_checks(self):
-        # TODO: 403 when placeholder from non-draft page
-        pass
+        # 403 when placeholder from non-draft page
+        alias = self._create_alias()
+        plugin = add_plugin(
+            self.placeholder,
+            'Alias',
+            language='en',
+            alias=alias,
+        )
+        with self.login_user_context(self.superuser):
+            response = self.client.post(
+                self.get_detach_alias_plugin_endpoint(plugin.pk),
+            )
+            self.assertEqual(response.status_code, 403)
 
     def test_list_view(self):
         category1 = Category.objects.create(

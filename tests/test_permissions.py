@@ -5,6 +5,7 @@ from cms.api import add_plugin
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.models import Alias as AliasModel
+from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
 
@@ -98,10 +99,13 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
     def test_can_detach_has_permission(self):
         user = self.get_staff_user_with_std_permissions()
         alias = self._create_alias(self.placeholder.get_plugins())
+        placeholder = self.placeholder
+        if is_versioning_enabled():
+            placeholder = self._get_draft_page_placeholder()
         self.assertTrue(
             Alias.can_detach(
                 user,
-                self.placeholder,
+                placeholder,
                 alias.get_placeholder(self.language).get_plugins(),
             ),
         )

@@ -4,7 +4,7 @@ from django.http import QueryDict
 from django.test.client import RequestFactory
 from django.urls import resolve
 
-from cms.api import add_plugin, create_page
+from cms.api import add_plugin, create_page, create_title
 from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
 from cms.toolbar.utils import (
@@ -66,6 +66,10 @@ class BaseAliasPluginTestCase(CMSTestCase):
             body='test',
         )
         self.category = Category.objects.create(name='test category')
+
+    def _get_draft_page_placeholder(self):
+        page_content = create_title(self.language, 'Draft Page', self.page, created_by=self.superuser)
+        return page_content.get_placeholders().get(slot='content')
 
     def _create_alias(self, plugins=None, name='test alias', category=None, position=0, language=None, published=True):
         if language is None:

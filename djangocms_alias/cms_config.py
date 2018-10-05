@@ -17,7 +17,10 @@ except (ImportError, LookupError):
 class AliasCMSConfig(CMSAppConfig):
     cms_enabled = True
     cms_toolbar_enabled_models = [(AliasContent, render_alias_content)]
+    moderated_models = [AliasContent]
 
+    djangocms_moderation_enabled = getattr(
+        settings, 'MODERATING_ALIAS_MODELS_ENABLED', True)
     djangocms_versioning_enabled = getattr(
         settings, 'VERSIONING_ALIAS_MODELS_ENABLED', True)
     if djangocms_versioning_enabled:

@@ -1,12 +1,10 @@
-import random
-
 from django.template import RequestContext
 from django.utils.translation import ugettext_lazy as _
 
 from cms.toolbar.utils import get_toolbar_from_request
 
 from djangocms_internalsearch.base import BaseSearchConfig
-from djangocms_internalsearch.helpers import get_request
+from djangocms_internalsearch.helpers import get_request, get_version_object
 from haystack import indexes
 
 from .models import AliasContent
@@ -88,5 +86,7 @@ class AliasContentConfig(BaseSearchConfig):
         return obj.alias.category.name
 
     def prepare_version_status(self, obj):
-        # TODO: Replace with version state when alias versioning is ready
-        return random.choice(['Draft', 'Published', 'Unpublished', 'Locked'])
+        version_obj = get_version_object(obj)
+        if not version_obj:
+            return
+        return version_obj.state

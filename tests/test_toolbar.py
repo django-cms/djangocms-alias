@@ -187,7 +187,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         )
         self.assertRegexpMatches(
             language_menu_first_items['Copy all plugins'].action,
-            'en\/admin\/([\w\/]+)\/copy-plugins\/',
+            r'en\/admin\/([\w\/]+)\/copy-plugins\/',
         )
 
     def test_language_switcher_when_toolbar_object_is_alias_content(self):

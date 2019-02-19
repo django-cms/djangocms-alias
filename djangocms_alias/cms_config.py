@@ -36,9 +36,9 @@ class AliasCMSConfig(CMSAppConfig):
 
     djangocms_references_enabled = getattr(
         settings, 'REFERENCES_ALIAS_MODELS_ENABLED', True)
-    reference_fields = {
-        AliasPlugin.alias,
-    }
+    reference_fields = [
+        (AliasPlugin, 'alias'),
+    ]
 
     # Internalsearch configuration
     if AliasContentConfig:

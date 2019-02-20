@@ -3,7 +3,7 @@ from django.conf import settings
 
 from cms.app_base import CMSAppConfig
 
-from .models import AliasContent, copy_alias_content
+from .models import AliasContent, AliasPlugin, copy_alias_content
 from .rendering import render_alias_content
 
 
@@ -33,6 +33,12 @@ class AliasCMSConfig(CMSAppConfig):
                 grouper_selector_option_label=lambda obj, lang: obj.get_name(lang),
             ),
         ]
+
+    djangocms_references_enabled = getattr(
+        settings, 'REFERENCES_ALIAS_MODELS_ENABLED', True)
+    reference_fields = [
+        (AliasPlugin, 'alias'),
+    ]
 
     # Internalsearch configuration
     if AliasContentConfig:

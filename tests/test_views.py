@@ -650,9 +650,11 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             name='Category 1',
         )
 
-        with self.login_user_context(
-            self.get_staff_user_with_std_permissions(),
-        ):
+        user = self.get_staff_user_with_std_permissions()
+        user.user_permissions.add(Permission.objects.get(
+            content_type__app_label='djangocms_alias',
+            codename='change_alias'))
+        with self.login_user_context(user):
             response = self.client.get(self.get_list_aliases_endpoint(category.pk))
         self.assertEqual(response.status_code, 200)
 
@@ -706,9 +708,11 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_category_list_view_standard_staff_user(self):
-        with self.login_user_context(
-            self.get_staff_user_with_std_permissions(),
-        ):
+        user = self.get_staff_user_with_std_permissions()
+        user.user_permissions.add(Permission.objects.get(
+            content_type__app_label='djangocms_alias',
+            codename='change_category'))
+        with self.login_user_context(user):
             response = self.client.get(self.get_category_list_endpoint())
         self.assertEqual(response.status_code, 200)
 
@@ -861,7 +865,11 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
         self.assertEqual(response.status_code, 403)
 
-        with self.login_user_context(self.get_staff_user_with_std_permissions()):  # noqa: E501
+        user = self.get_staff_user_with_std_permissions()
+        user.user_permissions.add(Permission.objects.get(
+            content_type__app_label='djangocms_alias',
+            codename='change_alias'))
+        with self.login_user_context(user):
             response = self.client.post(
                 admin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,

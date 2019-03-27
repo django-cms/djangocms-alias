@@ -645,7 +645,18 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             response = self.client.get(self.get_list_aliases_endpoint(category.pk))
         self.assertEqual(response.status_code, 403)
 
-    def test_list_view_standard_staff_user(self):
+    def test_list_view_staff_user_without_permission(self):
+        category = Category.objects.create(
+            name='Category 1',
+        )
+
+        url = self.get_list_aliases_endpoint(category.pk)
+        with self.login_user_context(self.get_staff_user_with_std_permissions()):
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/accounts/login/?next={}".format(url))
+
+    def test_list_view_staff_user_with_permission(self):
         category = Category.objects.create(
             name='Category 1',
         )
@@ -707,7 +718,14 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             response = self.client.get(self.get_category_list_endpoint())
         self.assertEqual(response.status_code, 403)
 
-    def test_category_list_view_standard_staff_user(self):
+    def test_category_list_view_staff_user_without_permission(self):
+        url = self.get_category_list_endpoint()
+        with self.login_user_context(self.get_staff_user_with_std_permissions()):
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/accounts/login/?next={}".format(url))
+
+    def test_category_list_view_staff_user_with_permission(self):
         user = self.get_staff_user_with_std_permissions()
         user.user_permissions.add(Permission.objects.get(
             content_type__app_label='djangocms_alias',
@@ -852,11 +870,13 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(ordered_aliases, [alias2.pk, alias1.pk])
 
-    def test_set_alias_position_view_only_staff_users(self):
+    def test_set_alias_position_view_only_staff_users_with_permission(self):
         alias = Alias.objects.create(category=self.category)
         Alias.objects.create(category=self.category)
 
-        with self.login_user_context(self.get_standard_user()):
+        user = self.get_staff_user_with_std_permissions()
+
+        with self.login_user_context(user):
             response = self.client.post(
                 admin_reverse(
                     SET_ALIAS_POSITION_URL_NAME,
@@ -865,7 +885,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
         self.assertEqual(response.status_code, 403)
 
-        user = self.get_staff_user_with_std_permissions()
         user.user_permissions.add(Permission.objects.get(
             content_type__app_label='djangocms_alias',
             codename='change_alias'))

@@ -3,3 +3,4 @@ djangocms_helper
 flake8
 isort
 https://github.com/divio/djangocms-versioning/archive/master.zip
+pyflakes>=2.1.1

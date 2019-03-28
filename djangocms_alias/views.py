@@ -2,6 +2,7 @@ import json
 import operator
 
 from django.contrib import admin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
@@ -85,8 +86,9 @@ def delete_alias_view(request, pk, *args, **kwargs):
     return response
 
 
-class AliasListView(ListView):
+class AliasListView(PermissionRequiredMixin, ListView):
     model = AliasModel
+    permission_required = 'djangocms_alias.change_alias'
     context_object_name = 'aliases'
     template_name = 'djangocms_alias/alias_list.html'
 
@@ -109,8 +111,9 @@ class AliasListView(ListView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class CategoryListView(ListView):
+class CategoryListView(PermissionRequiredMixin, ListView):
     model = Category
+    permission_required = 'djangocms_alias.change_category'
     context_object_name = 'categories'
     template_name = 'djangocms_alias/category_list.html'
 
@@ -229,7 +232,10 @@ def render_replace_response(request, new_plugins, source_placeholder=None,
 @require_POST
 @transaction.atomic
 def set_alias_position_view(request):
-    if not request.user.is_staff:
+    if (
+        not request.user.is_staff or
+        not request.user.has_perm('djangocms_alias.change_alias')
+    ):
         raise PermissionDenied
 
     form = SetAliasPositionForm(request.POST or None)

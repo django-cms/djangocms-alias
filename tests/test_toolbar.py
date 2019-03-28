@@ -2,6 +2,8 @@ import itertools
 from collections import ChainMap
 from unittest import skipIf
 
+from django.contrib.auth.models import Permission
+
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
     ADMINISTRATION_BREAK,
@@ -39,13 +41,18 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             button for button in buttons if button.name == 'Create'
         ][0]
 
-    def test_add_aliases_submenu_to_admin_menu(self):
-        with self.login_user_context(self.get_standard_user()):
+    def test_add_aliases_submenu_to_admin_menu_no_permission(self):
+        with self.login_user_context(self.get_staff_user_with_std_permissions()):
             response = self.client.get(self.page.get_absolute_url())
         self.assertNotContains(response, '<span>Aliases')
 
+    def test_add_aliases_submenu_to_admin_menu(self):
+        user = self.get_staff_user_with_std_permissions()
+        user.user_permissions.add(Permission.objects.get(
+            content_type__app_label='djangocms_alias',
+            codename='change_category'))
         page_url = get_object_edit_url(self.page.get_title_obj(self.language))
-        with self.login_user_context(self.superuser):
+        with self.login_user_context(user):
             response = self.client.get(page_url)
         self.assertContains(response, '<span>Aliases')
 

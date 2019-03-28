@@ -61,6 +61,8 @@ class AliasToolbar(CMSToolbar):
             self.enable_create_wizard_button()
 
     def add_aliases_link_to_admin_menu(self):
+        if not self.request.user.has_perm('djangocms_alias.change_category'):
+            return
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
         admin_menu.add_link_item(
             _('Aliases'),

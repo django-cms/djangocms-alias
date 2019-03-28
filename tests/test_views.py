@@ -12,6 +12,7 @@ from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
+from djangocms_alias.compat import DJANGO_GTE_21
 from djangocms_alias.constants import (
     DELETE_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
@@ -645,6 +646,18 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             response = self.client.get(self.get_list_aliases_endpoint(category.pk))
         self.assertEqual(response.status_code, 403)
 
+    @skipIf(DJANGO_GTE_21, "Django>=2.1")
+    def test_list_view_staff_user_without_permission_dj21(self):
+        category = Category.objects.create(
+            name='Category 1',
+        )
+
+        url = self.get_list_aliases_endpoint(category.pk)
+        with self.login_user_context(self.get_staff_user_with_std_permissions()):
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+
+    @skipIf(not DJANGO_GTE_21, "Django<2.1")
     def test_list_view_staff_user_without_permission(self):
         category = Category.objects.create(
             name='Category 1',
@@ -718,6 +731,14 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             response = self.client.get(self.get_category_list_endpoint())
         self.assertEqual(response.status_code, 403)
 
+    @skipIf(DJANGO_GTE_21, "Django>=2.1")
+    def test_category_list_view_staff_user_without_permission_dj21(self):
+        url = self.get_category_list_endpoint()
+        with self.login_user_context(self.get_staff_user_with_std_permissions()):
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+
+    @skipIf(not DJANGO_GTE_21, "Django<2.1")
     def test_category_list_view_staff_user_without_permission(self):
         url = self.get_category_list_endpoint()
         with self.login_user_context(self.get_staff_user_with_std_permissions()):

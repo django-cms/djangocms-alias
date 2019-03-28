@@ -648,7 +648,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     @skipUnless(DJANGO_GTE_21, "Django>=2.1")
     def test_list_view_staff_user_without_permission_dj21(self):
-        import pdb;pdb.set_trace()
         category = Category.objects.create(
             name='Category 1',
         )

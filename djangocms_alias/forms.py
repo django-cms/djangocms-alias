@@ -309,16 +309,22 @@ class AliasPluginForm(forms.ModelForm):
 
 class AliasContentForm(forms.ModelForm):
 
-    alias = forms.ModelChoiceField(
-        queryset=AliasModel.objects.all(),
-        required=True,
-        widget=forms.HiddenInput(),
-    )
-    language = forms.CharField(widget=forms.HiddenInput())
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        initial = kwargs.get('initial', {})
+        if initial.get('alias'):
+            self.fields['alias'] = forms.ModelChoiceField(
+                queryset=AliasModel.objects.all(),
+                required=True,
+                widget=forms.HiddenInput(),
+            )
+
+        if initial.get('language'):
+            self.fields['language'] = forms.CharField(widget=forms.HiddenInput())
 
     class Meta:
         model = AliasContent
-        fields = ('name',)
+        fields = ('name', 'alias', 'language')
 
     def clean(self):
         cleaned_data = super().clean()

@@ -1222,9 +1222,21 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                     alias=alias.pk,
                 )
             )
+            form = response.context_data['adminform'].form
 
+        self.assertEquals(len(form.hidden_fields()), 2)
         self.assertContains(response, 'type="hidden" name="language" value="fr"')
         self.assertContains(response, 'type="hidden" name="alias" value="{}"'.format(alias.pk))
+
+    def test_aliascontent_add_view_get_without_parameters(self):
+        '''Fields should not be hidden if parameters are not supplied'''
+        Alias.objects.create(category=self.category)
+        self.client.force_login(self.superuser)
+        url = admin_reverse('djangocms_alias_aliascontent_add')
+        response = self.client.get(url)
+        form = response.context_data['adminform'].form
+
+        self.assertEquals(form.hidden_fields(), [])
 
     def test_aliascontent_add_view_invalid_data(self):
         alias = Alias.objects.create(category=self.category)

@@ -1569,3 +1569,34 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
                 self.get_detach_alias_plugin_endpoint(plugin.pk),
             )
             self.assertEqual(response.status_code, 403)
+
+    @skipUnless(is_versioning_enabled(), 'Only valid in versioning scenario')
+    def test_alias_not_shown_when_draft_when_visiting_page(self):
+        """
+        When visiting a published page with a draft alias the alias
+        is not visible
+        """
+        from djangocms_versioning.helpers import remove_published_where
+
+        unpublished_alias = self._create_alias(published=False)
+        content = remove_published_where(
+            unpublished_alias.contents.filter(language=self.language)
+        ).first()
+        alias_placeholder = content.placeholder
+
+        body = 'unpublished alias'
+        add_plugin(
+            alias_placeholder,
+            'TextPlugin',
+            language=self.language,
+            body=body
+        )
+
+        page = self._create_page(
+            title='New page',
+            language=self.language,
+        )
+
+        self.add_alias_plugin_to_page(page, unpublished_alias)
+        response = self.client.get(page.get_absolute_url())
+        self.assertNotContains(response, body)

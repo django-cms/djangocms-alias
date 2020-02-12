@@ -1,23 +1,11 @@
 version: 2.0
 
-py34default: &py34default
-  docker:
-    - image: circleci/python:3.4
-  steps:
-   - setup_remote_docker:
-       docker_layer_caching: true
-   - checkout
-   - attach_workspace:
-       at: /tmp/images
-   - run: docker load -i /tmp/images/py34.tar || true
-   - run: docker run py34 tox -e $CIRCLE_STAGE
-
 py35default: &py35default
   docker:
     - image: circleci/python:3.5
   steps:
    - setup_remote_docker:
-       docker_layer_caching: true
+       docker_layer_caching: false
    - checkout
    - attach_workspace:
        at: /tmp/images
@@ -29,16 +17,12 @@ py36default: &py36default
     - image: circleci/python:3.6
   steps:
    - setup_remote_docker:
-       docker_layer_caching: true
+       docker_layer_caching: false
    - checkout
    - attach_workspace:
        at: /tmp/images
    - run: docker load -i /tmp/images/py36.tar || true
    - run: docker run py36 tox -e $CIRCLE_STAGE
-
-py34_requires: &py34_requires
-  requires:
-    - py34_base
 
 py35_requires: &py35_requires
   requires:
@@ -49,26 +33,13 @@ py36_requires: &py36_requires
     - py36_base
 
 jobs:
-  py34_base:
-    docker:
-      - image: circleci/python:3.4
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run: docker build -f .circleci/Dockerfile --build-arg PYTHON_VERSION=3.4 -t py34 .
-      - run: mkdir images
-      - run: docker save -o images/py34.tar py34
-      - persist_to_workspace:
-         root: images
-         paths: py34.tar
   py35_base:
     docker:
       - image: circleci/python:3.5
     steps:
       - checkout
       - setup_remote_docker:
-          docker_layer_caching: true
+          docker_layer_caching: false
       - run: docker build -f .circleci/Dockerfile --build-arg PYTHON_VERSION=3.5 -t py35 .
       - run: mkdir images
       - run: docker save -o images/py35.tar py35
@@ -81,7 +52,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          docker_layer_caching: true
+          docker_layer_caching: false
       - run: docker build -f .circleci/Dockerfile --build-arg PYTHON_VERSION=3.6 -t py36 .
       - run: mkdir images
       - run: docker save -o images/py36.tar py36
@@ -95,16 +66,12 @@ jobs:
     <<: *py35default
   py36-dj111-sqlite-cms40-default:
     <<: *py36default
-  py34-dj20-sqlite-cms40-default:
-    <<: *py34default
   py35-dj20-sqlite-cms40-default:
     <<: *py35default
   py36-dj20-sqlite-cms40-default:
     <<: *py36default
   py36-dj21-sqlite-cms40-default:
     <<: *py36default
-  py34-dj111-sqlite-cms40-versioning:
-    <<: *py34default
   py35-dj20-sqlite-cms40-versioning:
     <<: *py35default
   py36-dj21-sqlite-cms40-versioning:
@@ -116,7 +83,6 @@ workflows:
   version: 2
   build:
     jobs:
-      - py34_base
       - py35_base
       - py36_base
       - flake8:
@@ -128,9 +94,6 @@ workflows:
       - py36-dj111-sqlite-cms40-default:
           requires:
             - py36_base
-      - py34-dj20-sqlite-cms40-default:
-          requires:
-            - py34_base
       - py35-dj20-sqlite-cms40-default:
           requires:
             - py35_base
@@ -140,9 +103,6 @@ workflows:
       - py36-dj21-sqlite-cms40-default:
           requires:
             - py36_base
-      - py34-dj111-sqlite-cms40-versioning:
-          requires:
-            - py34_base
       - py35-dj20-sqlite-cms40-versioning:
           requires:
             - py35_base

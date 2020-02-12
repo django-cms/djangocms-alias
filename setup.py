@@ -25,7 +25,7 @@ CLASSIFIERS = [
 INSTALL_REQUIREMENTS = [
     'Django>=1.11,<2.2',
     'django-parler>=1.4',
-    # 'django-cms>=3.6',  # not released
+    'django-cms'
 ]
 
 setup(
@@ -44,4 +44,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     test_suite='test_settings.run',
+    dependency_links=[
+        'http://github.com/divio/django-cms/tarball/release/4.0.x#egg=django-cms-4.0.0',
+    ]
 )

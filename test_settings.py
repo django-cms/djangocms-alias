@@ -2,7 +2,7 @@ import os
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ENABLE_VERSIONING = bool(os.environ.get('ENABLE_VERSIONING', False))
+ENABLE_VERSIONING = bool(os.environ.get('ENABLE_VERSIONING', True))
 EXTRA_INSTALLED_APPS = []
 if ENABLE_VERSIONING:
     EXTRA_INSTALLED_APPS.append('djangocms_versioning')

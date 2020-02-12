@@ -127,7 +127,16 @@ class Alias(models.Model):
         return list(objects)
 
     def get_name(self, language=None):
-        return getattr(self.get_content(language), 'name', 'Alias {} (No content)'.format(self.pk))
+        content = self.get_content(language, show_draft_content=True)
+        name = getattr(content, 'name', 'Alias {} (No content)'.format(self.pk))
+        if is_versioning_enabled() and content:
+            from djangocms_versioning.constants import DRAFT
+            version = content.versions.first()
+
+            if version.state == DRAFT:
+                return '{} (Not published)'.format(name)
+
+        return name
 
     def get_absolute_url(self, language=None):
         if is_versioning_enabled():
@@ -137,18 +146,24 @@ class Alias(models.Model):
         if content:
             return content.get_absolute_url()
 
-    def get_content(self, language=None):
+    def get_content(self, language=None, show_draft_content=False):
         if not language:
             language = get_current_language()
 
         try:
             return self._content_cache[language]
         except KeyError:
-            self._content_cache[language] = self.contents.select_related(
+            qs = self.contents.select_related(
                 'alias__category',
             ).prefetch_related(
                 'placeholders'
-            ).filter(language=language).first()
+            ).filter(language=language)
+
+            if show_draft_content and is_versioning_enabled():
+                from djangocms_versioning.helpers import remove_published_where
+                qs = remove_published_where(qs)
+
+            self._content_cache[language] = qs.first()
             return self._content_cache[language]
 
     def get_placeholder(self, language=None):

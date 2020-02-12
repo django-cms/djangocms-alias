@@ -436,7 +436,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, 'Alias 1')
         self.assertNotContains(response, 'Alias 2')
         if is_versioning_enabled():
-            self.assertContains(response, 'Alias {} (No content)'.format(alias3.pk))
+            self.assertContains(response, '{} (Not published)'.format('Alias test 3'))
         else:
             self.assertContains(response, 'Alias test 3')
 
@@ -904,7 +904,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         result = [alias1.pk, alias2.pk, alias3.pk]
         text_result = ['test 2', 'foo']
         if is_versioning_enabled():
-            text_result.append('Alias 3 (No content)')
+            text_result.append('foo4 (Not published)')
         else:
             text_result.append('foo4')
         self.assertEqual(response.status_code, 200)
@@ -1424,17 +1424,18 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_create_alias_view_name_draft_alias(self):
         with self.login_user_context(self.superuser):
+            name = 'test alias'
             response = self.client.post(self.get_create_alias_endpoint(), data={
                 'plugin': self.plugin.pk,
                 'category': self.category.pk,
-                'name': 'test alias',
+                'name': name,
                 'language': self.language,
             })
             self.assertEqual(response.status_code, 200)
 
         alias = Alias.objects.last()
         # AliasContent not published
-        self.assertEqual(alias.name, 'Alias {} (No content)'.format(alias.pk))
+        self.assertEqual(alias.name, '{} (Not published)'.format(name))
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_create_alias_view_creating_version(self):

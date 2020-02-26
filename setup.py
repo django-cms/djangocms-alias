@@ -20,12 +20,17 @@ CLASSIFIERS = [
     'Framework :: Django :: 1.11',
     'Framework :: Django :: 2.0',
     'Framework :: Django :: 2.1',
+    'Framework :: Django :: 2.2',
 ]
 
 INSTALL_REQUIREMENTS = [
-    'Django>=1.11,<2.2',
+    'Django>=1.11,<3.0',
     'django-parler>=1.4',
     'django-cms'
+]
+
+TEST_REQUIRE = [
+    'djangocms-versioning'
 ]
 
 setup(
@@ -43,8 +48,10 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
+    tests_require=TEST_REQUIRE,
     test_suite='test_settings.run',
     dependency_links=[
         'http://github.com/divio/django-cms/tarball/release/4.0.x#egg=django-cms-4.0.0',
+        'http://github.com/divio/djangocms-versioning/tarball/master#egg=djangocms-versioning-0.0.23',
     ]
 )

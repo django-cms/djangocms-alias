@@ -26,11 +26,12 @@ CLASSIFIERS = [
 INSTALL_REQUIREMENTS = [
     'Django>=1.11,<3.0',
     'django-parler>=1.4',
-    'django-cms'
+    'django-cms',
 ]
 
 TEST_REQUIRE = [
-    'djangocms-versioning'
+    "djangocms_helper",
+    'djangocms-versioning',
 ]
 
 setup(

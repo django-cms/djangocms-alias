@@ -396,3 +396,32 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.assertFalse(alias.__class__.objects.filter(pk=alias.pk).exists())
         self.assertEqual(alias.cms_plugins.count(), 0)
         self.assertEqual(Placeholder.objects.count(), 0)
+
+
+class AliasCategoryModelTestCase(BaseAliasPluginTestCase):
+
+    def test_create_alias_category_with_no_fallback_fails_gracefully(self):
+        """When creating an Alias via the Wizard an error can occur if the category
+        doesn't have a valid translation
+
+        Various ways to handle fallbacks:
+        https://django-parler.readthedocs.io/en/stable/advanced/fallback.html
+
+        Cat wizard has get all query:
+        https://github.com/divio/djangocms-alias/blob/9a9f3020aa0a01339164094c2bc1caf190d66428/djangocms_alias/forms.py#L90
+
+        Cat definitiona doesn't handle not having a fallback:
+        https://github.com/divio/djangocms-alias/blob/master/djangocms_alias/models.py#L63
+        """
+
+        # activate("ja")
+        japanese_category = Category.objects.language('ja').create(name='Japanese category')
+
+        categories = Category.objects.all()
+        
+        # A default category is created in the base as well as our Japanese category
+        self.assertEqual(2, categories.count())
+
+        for catagory in categories:
+            # Each category name property can be accessed without an error
+            self.assertTrue(bool(catagory.name))

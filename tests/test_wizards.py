@@ -3,6 +3,7 @@ from django.contrib.sites.models import Site
 from cms.wizards.forms import WizardStep2BaseForm, step2_form_factory
 from cms.wizards.helpers import get_entries as get_wizard_entires
 
+from djangocms_alias.models import Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
@@ -66,6 +67,33 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         if is_versioning_enabled():
             from djangocms_versioning.models import Version
             self.assertEqual(Version.objects.filter_by_grouper(alias).count(), 1)
+
+    def test_create_alias_wizard_form_with_no_category_fallback_language(self):
+        """When creating an Alias via the Wizard an error can occur if the category
+        doesn't have a valid translation
+        """
+        # A japanese translation that does not have any fallback settings!
+        Category.objects.language('ja').create(name='Japanese category')
+
+        wizard = self._get_wizard_instance('CreateAliasWizard')
+        data = {
+            'name': 'Content #1',
+            'category': None,
+        }
+
+        form_class = step2_form_factory(
+            mixin_cls=WizardStep2BaseForm,
+            entry_form_class=wizard.form,
+        )
+        form = form_class(**self._get_form_kwargs(data))
+
+        categories = form.declared_fields['category'].queryset.all()
+
+        for category in categories:
+            # Each category string representation can be accessed without an error
+            category_name = str(category)
+
+            self.assertTrue(category_name)
 
     def test_create_alias_category_wizard_instance(self):
         wizard = self._get_wizard_instance('CreateAliasCategoryWizard')

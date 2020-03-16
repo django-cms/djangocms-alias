@@ -60,7 +60,8 @@ class Category(TranslatableModel):
         verbose_name_plural = _('categories')
 
     def __str__(self):
-        return self.name
+        # Be sure to be able to see the category name even if it's not in the current language
+        return self.safe_translation_getter("name", any_language=True)
 
     def get_absolute_url(self):
         return admin_reverse(LIST_ALIASES_URL_NAME, args=[self.pk])

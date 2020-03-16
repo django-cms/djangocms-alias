@@ -1,4 +1,5 @@
 from django.contrib.sites.models import Site
+from django.utils import translation
 
 from cms.wizards.forms import WizardStep2BaseForm, step2_form_factory
 from cms.wizards.helpers import get_entries as get_wizard_entires
@@ -72,6 +73,7 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         """When creating an Alias via the Wizard an error can occur if the category
         doesn't have a valid translation
         """
+        translation.activate('en')
         # A japanese translation that does not have any fallback settings!
         Category.objects.language('ja').create(name='Japanese category')
 
@@ -80,16 +82,20 @@ class WizardsTestCase(BaseAliasPluginTestCase):
             'name': 'Content #1',
             'category': None,
         }
-
         form_class = step2_form_factory(
             mixin_cls=WizardStep2BaseForm,
             entry_form_class=wizard.form,
         )
         form = form_class(**self._get_form_kwargs(data))
+        category_form_queryset = form.declared_fields['category'].queryset
 
-        categories = form.declared_fields['category'].queryset.all()
+        # Be sure that we have untranslated categories that enforces a fair test
+        self.assertNotEqual(
+            category_form_queryset.all().count(),
+            category_form_queryset.active_translations().count()
+        )
 
-        for category in categories:
+        for category in category_form_queryset.all():
             # Each category string representation can be accessed without an error
             category_name = str(category)
 

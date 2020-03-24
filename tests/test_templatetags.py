@@ -3,6 +3,7 @@ from unittest import skipUnless
 from cms.api import add_plugin
 
 from djangocms_alias.cms_plugins import Alias
+from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
@@ -72,3 +73,49 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
             self.get_request('/'),
         )
         self.assertEqual(output, 'test')
+
+
+class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
+    alias_template = """{% load djangocms_alias_tags %}{% alias_placeholder "some_uniquer_id" %}"""  # noqa: E501
+
+    def test_no_alias_rendered_when_no_alias_exists(self):
+        alias = self._create_alias(identifier="")
+        alias_plugin = alias.get_content(self.language).populate(
+            replaced_placeholder=self.placeholder,
+        )
+        add_plugin(
+            alias.get_placeholder(self.language),
+            'TextPlugin',
+            language=self.language,
+            body='Content Alias 1234',
+        )
+
+        output = self.render_template_obj(
+            self.alias_template,
+            {
+                'plugin': alias_plugin,
+            },
+            self.get_request('/'),
+        )
+        self.assertEqual(output, "")
+
+    def test_alias_rendered_when_alias_with_identifier_exists(self):
+        alias = self._create_alias(identifier="some_uniquer_id")
+        alias_plugin = alias.get_content(self.language).populate(
+            replaced_placeholder=self.placeholder,
+        )
+        add_plugin(
+            alias.get_placeholder(self.language),
+            'TextPlugin',
+            language=self.language,
+            body='Content Alias 1234',
+        )
+
+        output = self.render_template_obj(
+            self.alias_template,
+            {
+                'plugin': alias_plugin,
+            },
+            self.get_request('/'),
+        )
+        self.assertEqual(output, "testContent Alias 1234")

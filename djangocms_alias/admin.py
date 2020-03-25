@@ -4,6 +4,7 @@ from cms.utils.permissions import get_model_permission_codename
 
 from parler.admin import TranslatableAdmin
 
+from .filters import LanguageFilter
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
@@ -80,6 +81,7 @@ class AliasAdmin(admin.ModelAdmin):
 @admin.register(AliasContent)
 class AliasContentAdmin(admin.ModelAdmin):
     form = AliasContentForm
+    list_filter = (LanguageFilter,)
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

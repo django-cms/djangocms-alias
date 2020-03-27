@@ -164,7 +164,16 @@ class CreateAliasForm(BaseCreateAliasForm):
 
 
 class CreateAliasWizardForm(forms.Form):
-    name = forms.CharField(required=True, widget=AdminTextInputWidget())
+    name = forms.CharField(
+        label=_('Name'),
+        required=True,
+        widget=AdminTextInputWidget()
+    )
+    identifier = forms.CharField(
+        label=_('Template Identifier'),
+        required=False,
+        widget=AdminTextInputWidget()
+    )
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
         required=True,
@@ -184,6 +193,7 @@ class CreateAliasWizardForm(forms.Form):
     def save(self):
         alias = AliasModel.objects.create(
             category=self.cleaned_data.get('category'),
+            identifier=self.cleaned_data.get('identifier'),
         )
         alias_content = AliasContent.objects.create(
             alias=alias,

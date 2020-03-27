@@ -68,13 +68,13 @@ class AliasPlaceholder(Tag):
     options = PlaceholderOptions(
         Argument('identifier', resolve=False),
         MultiValueArgument('extra_bits', required=False, resolve=False),
+        blocks=[
+            ('endalias_placeholder', 'nodelist'),
+        ],
     )
 
-    def render_tag(self, context, identifier, extra_bits):
+    def render_tag(self, context, identifier, extra_bits, nodelist=None):
         request = context.get('request')
-
-        if not request:
-            return ''
 
         validate_placeholder_name(identifier)
 
@@ -86,7 +86,10 @@ class AliasPlaceholder(Tag):
         # Try and find an Alias to render or fall back to nothing.
         alias_instance = Alias.objects.filter(identifier=identifier)
         if not alias_instance.count():
-            return ""
+            if nodelist:
+                return nodelist.render(context)
+            return ''
+
 
         alias_instance = alias_instance.first()
         source = alias_instance.get_placeholder()
@@ -95,6 +98,7 @@ class AliasPlaceholder(Tag):
             content = renderer.render_placeholder(
                 placeholder=source,
                 context=context,
+                nodelist=nodelist,
             )
             return content
 

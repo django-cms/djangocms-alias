@@ -36,7 +36,7 @@ class CategoryAdmin(TranslatableAdmin):
 @admin.register(Alias)
 class AliasAdmin(admin.ModelAdmin):
     list_display = ['name', 'category']
-    fields = ('category',)
+    fields = ('category', 'identifier',)
 
     def get_urls(self):
         return urlpatterns + super().get_urls()

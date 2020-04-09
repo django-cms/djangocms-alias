@@ -89,7 +89,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         _test_alias_endpoint(edit=True)
         _test_alias_endpoint(preview=True)
 
-    @skipIf(is_versioning_enabled(), 'Managing content is done by version admin')
+    #@skipIf(is_versioning_enabled(), 'Managing content is done by version admin')
     def test_alias_toolbar_language_menu(self):
         request = self.get_page_request(self.page, user=self.superuser)
         alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
@@ -140,6 +140,13 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         alias_content = alias.contents.create(name='test alias 2', language='fr')
         alias_content.populate(replaced_placeholder=self.placeholder)
         alias_content.alias.clear_cache()
+
+        if is_versioning_enabled():
+            from djangocms_versioning.constants import PUBLISHED
+            from djangocms_versioning.models import Version
+
+            Version.objects.create(
+                content=alias_content, created_by=self.superuser, state=PUBLISHED)
 
         request = self.get_alias_request(
             alias=alias,
@@ -201,21 +208,22 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias([self.plugin])
         alias_content = alias.contents.create(name='test alias 2', language='fr')
         expected_result = ['English', 'Française']
+
         if is_versioning_enabled():
             from djangocms_versioning.constants import DRAFT
             from djangocms_versioning.models import Version
             Version.objects.create(
                 content=alias_content, created_by=self.superuser, state=DRAFT)
-            expected_result = ['English']
+
         alias_content.populate(replaced_placeholder=self.placeholder)
         alias_content.alias.clear_cache()
-
         request = self.get_alias_request(
             alias=alias,
             user=self.superuser,
             preview=True,
         )
         language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
+
         self.assertEqual([item.name for item in language_menu.items], expected_result)
 
     def test_language_switcher_when_toolbar_object_isnt_alias_content(self):

@@ -33,7 +33,7 @@ class FiltersTestCase(CMSTestCase):
 
         base_url = self.get_admin_url(AliasContent, "changelist")
 
-        with self.login_user_context(self.get_superuser()):
+        with self.login_user_context(self.superuser):
             # en is the default language configured for the site
             response_default = self.client.get(base_url)
             qs_default = response_default.context["cl"].queryset
@@ -43,11 +43,11 @@ class FiltersTestCase(CMSTestCase):
             # de should have a result
             response_de = self.client.get(base_url + "?language=de")
             qs_de = response_de.context["cl"].queryset
-            # fr should have no result and be empty
+            # fr should have no result and be empty because nothing was created
             response_fr = self.client.get(base_url + "?language=fr")
             qs_fr = response_fr.context["cl"].queryset
 
-        self.assertEqual(set(qs_default), set(expected_en_content))
-        self.assertEqual(set(qs_en), set(expected_en_content))
-        self.assertEqual(set(qs_de), set(expected_de_content))
-        self.assertEqual(set(qs_fr), set())
+        self.assertEqual(set(qs_default), set([expected_en_content]))
+        self.assertEqual(set(qs_en), set([expected_en_content]))
+        self.assertEqual(set(qs_de), set([expected_de_content]))
+        self.assertEqual(set(qs_fr), set([]))

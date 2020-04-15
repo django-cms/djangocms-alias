@@ -8,7 +8,11 @@ from .filters import LanguageFilter
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
-from .utils import emit_content_change, emit_content_delete
+from .utils import (
+    emit_content_change,
+    emit_content_delete,
+    is_versioning_enabled,
+)
 
 
 __all__ = [
@@ -85,8 +89,16 @@ class AliasContentAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        emit_content_change([obj], sender=self.model)
+
+        # Only emit content changes if versioning is not installed
+        # Versioning emits content changes
+        if not is_versioning_enabled():
+            emit_content_change([obj], sender=self.model)
 
     def delete_model(self, request, obj):
         super().delete_model(request, obj)
-        emit_content_delete([obj], sender=self.model)
+
+        # Only emit content changes if versioning is not installed
+        # Versioning emits content changes
+        if not is_versioning_enabled():
+            emit_content_delete([obj], sender=self.model)

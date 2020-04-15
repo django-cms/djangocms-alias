@@ -1,6 +1,5 @@
 import itertools
 from collections import ChainMap
-from unittest import skipIf
 
 from django.contrib.auth.models import Permission
 
@@ -89,7 +88,6 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         _test_alias_endpoint(edit=True)
         _test_alias_endpoint(preview=True)
 
-    #@skipIf(is_versioning_enabled(), 'Managing content is done by version admin')
     def test_alias_toolbar_language_menu(self):
         request = self.get_page_request(self.page, user=self.superuser)
         alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)

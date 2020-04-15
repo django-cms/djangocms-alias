@@ -29,7 +29,6 @@ from .constants import (
     USAGE_ALIAS_URL_NAME,
 )
 from .models import Alias, AliasContent
-from .utils import is_versioning_enabled
 
 
 __all__ = [

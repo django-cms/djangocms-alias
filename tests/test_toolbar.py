@@ -231,10 +231,15 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             preview=True,
         )
         language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
+        expected_result = ['English', 'Deutsche', 'Française', 'Italiano']
+        # Versioning changes the toolbar language selector and only shows
+        # languages that have translations
+        if is_versioning_enabled():
+            expected_result = ['English']
+
         # Dont change default language switcher that is used for Pages
         self.assertEqual(
-            [item.name for item in language_menu.items],
-            ['English', 'Deutsche', 'Française', 'Italiano']
+            [item.name for item in language_menu.items], expected_result
         )
 
     def test_alias_change_category_button_is_visible_on_alias_edit_view(self):

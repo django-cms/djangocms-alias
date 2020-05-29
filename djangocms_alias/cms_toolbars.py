@@ -210,7 +210,7 @@ class AliasToolbar(CMSToolbar):
                 for code in alias_content.alias.get_languages()
                 if code in languages
             ]
-            add = [l for l in languages.items() if l not in remove]
+            add = [code for code in languages.items() if code not in remove]
             copy = [
                 (code, name)
                 for code, name in languages.items()

@@ -90,7 +90,7 @@ class AliasContentAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
 
-        # Only emit content changes if versioning is not installed
+        # Only emit content changes if Versioning is not installed because
         # Versioning emits it's own signals for changes
         if not is_versioning_enabled():
             emit_content_change([obj], sender=self.model)
@@ -98,7 +98,7 @@ class AliasContentAdmin(admin.ModelAdmin):
     def delete_model(self, request, obj):
         super().delete_model(request, obj)
 
-        # Only emit content changes if versioning is not installed
+        # Only emit content changes if Versioning is not installed because
         # Versioning emits it's own signals for changes
         if not is_versioning_enabled():
             emit_content_delete([obj], sender=self.model)

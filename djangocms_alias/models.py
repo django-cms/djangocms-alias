@@ -167,8 +167,9 @@ class Alias(models.Model):
             self._content_cache[language] = qs.first()
             return self._content_cache[language]
 
-    def get_placeholder(self, language=None):
-        return getattr(self.get_content(language), 'placeholder', None)
+    def get_placeholder(self, language=None, show_draft_content=False):
+        content = self.get_content(language=language, show_draft_content=show_draft_content)
+        return getattr(content, 'placeholder', None)
 
     def get_plugins(self, language=None):
         if not language:
@@ -183,7 +184,13 @@ class Alias(models.Model):
 
     def get_languages(self):
         if not self._content_languages_cache:
-            self._content_languages_cache = self.contents.values_list('language', flat=True)
+            queryset = self.contents.all()
+
+            if is_versioning_enabled():
+                from djangocms_versioning.helpers import remove_published_where
+                queryset = remove_published_where(queryset)
+
+            self._content_languages_cache = queryset.values_list('language', flat=True)
         return self._content_languages_cache
 
     def clear_cache(self):

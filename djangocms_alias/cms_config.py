@@ -25,10 +25,14 @@ class AliasCMSConfig(CMSAppConfig):
         settings, 'VERSIONING_ALIAS_MODELS_ENABLED', True)
     if djangocms_versioning_enabled:
         from djangocms_versioning.datastructures import VersionableItem
+        from cms.utils.i18n import get_language_tuple
+
         versioning = [
             VersionableItem(
                 content_model=AliasContent,
                 grouper_field_name='alias',
+                extra_grouping_fields=["language"],
+                version_list_filter_lookups={"language": get_language_tuple},
                 copy_function=copy_alias_content,
                 grouper_selector_option_label=lambda obj, lang: obj.get_name(lang),
             ),

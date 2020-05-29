@@ -29,7 +29,6 @@ from .constants import (
     USAGE_ALIAS_URL_NAME,
 )
 from .models import Alias, AliasContent
-from .utils import is_versioning_enabled
 
 
 __all__ = [
@@ -53,8 +52,7 @@ class AliasToolbar(CMSToolbar):
         if isinstance(self.toolbar.obj, AliasContent):
             self.add_alias_menu()
             self.override_language_switcher()
-            if not is_versioning_enabled():
-                self.change_language_menu()
+            self.change_language_menu()
 
     def post_template_populate(self):
         if self.is_current_app or isinstance(self.toolbar.obj, AliasContent):
@@ -179,9 +177,12 @@ class AliasToolbar(CMSToolbar):
             language_menu.remove_item(item=_item)
 
         for code, name in get_language_tuple(self.current_site.pk):
-            # Showing only existing translation. For versioning it will be only
-            # published translation
-            alias_content = self.toolbar.obj.alias.get_content(language=code)
+            # Showing only existing translation. For versioning it will be the
+            # latest translation i.e. draft or published
+            alias_content = self.toolbar.obj.alias.get_content(
+                language=code,
+                show_draft_content=True,
+            )
             if alias_content:
                 with force_language(code):
                     url = alias_content.get_absolute_url()
@@ -209,7 +210,7 @@ class AliasToolbar(CMSToolbar):
                 for code in alias_content.alias.get_languages()
                 if code in languages
             ]
-            add = [l for l in languages.items() if l not in remove]
+            add = [code for code in languages.items() if code not in remove]
             copy = [
                 (code, name)
                 for code, name in languages.items()
@@ -237,7 +238,10 @@ class AliasToolbar(CMSToolbar):
                 )
                 disabled = len(remove) == 1
                 for code, name in remove:
-                    alias_content = alias_content.alias.get_content(language=code)
+                    alias_content = alias_content.alias.get_content(
+                        language=code,
+                        show_draft_content=True,
+                    )
                     translation_delete_url = admin_reverse(
                         'djangocms_alias_aliascontent_delete',
                         args=(alias_content.pk,),
@@ -259,13 +263,19 @@ class AliasToolbar(CMSToolbar):
                     copy_url = admin_reverse('djangocms_alias_alias_copy_plugins')
 
                 for code, name in copy:
+                    source_placeholder = alias_content.alias.get_placeholder(
+                        language=code,
+                        show_draft_content=True,
+                    )
                     copy_plugins_menu.add_ajax_item(
-                        title % name, action=copy_url,
+                        title % name,
+                        action=copy_url,
                         data={
                             'source_language': code,
-                            'source_placeholder_id': alias_content.alias.get_placeholder(code).pk,
+                            'source_placeholder_id': source_placeholder.pk,
                             'target_language': self.current_lang,
                             'target_placeholder_id': current_placeholder.pk,
                         },
-                        question=question % name, on_success=self.toolbar.REFRESH_PAGE
+                        question=question % name,
+                        on_success=self.toolbar.REFRESH_PAGE
                     )

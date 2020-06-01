@@ -4,10 +4,15 @@ from cms.utils.permissions import get_model_permission_codename
 
 from parler.admin import TranslatableAdmin
 
+from .filters import LanguageFilter
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
-from .utils import emit_content_change, emit_content_delete
+from .utils import (
+    emit_content_change,
+    emit_content_delete,
+    is_versioning_enabled,
+)
 
 
 __all__ = [
@@ -80,11 +85,20 @@ class AliasAdmin(admin.ModelAdmin):
 @admin.register(AliasContent)
 class AliasContentAdmin(admin.ModelAdmin):
     form = AliasContentForm
+    list_filter = (LanguageFilter,)
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        emit_content_change([obj], sender=self.model)
+
+        # Only emit content changes if Versioning is not installed because
+        # Versioning emits it's own signals for changes
+        if not is_versioning_enabled():
+            emit_content_change([obj], sender=self.model)
 
     def delete_model(self, request, obj):
         super().delete_model(request, obj)
-        emit_content_delete([obj], sender=self.model)
+
+        # Only emit content changes if Versioning is not installed because
+        # Versioning emits it's own signals for changes
+        if not is_versioning_enabled():
+            emit_content_delete([obj], sender=self.model)

@@ -10,9 +10,8 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 from classytags.arguments import (
     Argument,
     MultiValueArgument,
-    MultiKeywordArgument,
 )
-from classytags.core import Options, Tag
+from classytags.core import Tag
 
 from ..constants import USAGE_ALIAS_URL_NAME
 from ..models import Alias
@@ -89,7 +88,6 @@ class AliasPlaceholder(Tag):
             if nodelist:
                 return nodelist.render(context)
             return ''
-
 
         alias_instance = alias_instance.first()
         source = alias_instance.get_placeholder()

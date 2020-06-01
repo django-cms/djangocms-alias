@@ -3,7 +3,6 @@ from unittest import skipUnless
 from cms.api import add_plugin
 
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase

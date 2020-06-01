@@ -7,10 +7,7 @@ from cms.toolbar.utils import get_toolbar_from_request
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
-from classytags.arguments import (
-    Argument,
-    MultiValueArgument,
-)
+from classytags.arguments import Argument, MultiValueArgument
 from classytags.core import Tag
 
 from ..constants import USAGE_ALIAS_URL_NAME

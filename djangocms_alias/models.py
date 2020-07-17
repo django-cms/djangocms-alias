@@ -78,10 +78,11 @@ class Alias(models.Model):
         verbose_name=_('position'),
         default=0,
     )
-    identifier = models.CharField(
-        verbose_name=_('identifier'),
+    static_code = models.CharField(
+        verbose_name=_('static code'),
         max_length=255,
         blank=True,
+        null=True,
         help_text=_('To render the alias in templates.')
     )
 

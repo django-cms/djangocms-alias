@@ -70,6 +70,34 @@ class StaticAlias(Tag):
         ],
     )
 
+    def _get_alias(self, static_code, extra_bits):
+        alias_kwargs = {
+            'static_code': static_code,
+            # 'defaults': {'creation_method': StaticPlaceholder.CREATION_BY_TEMPLATE}
+        }
+        # Site
+        if 'site' in extra_bits:
+            alias_kwargs['site'] = get_current_site()
+        else:
+            alias_kwargs['site_id__isnull'] = True
+
+        # Try and find an Alias to render or fall back to nothing.
+        alias_instance = Alias.objects.filter(**alias_kwargs).first()
+        if not alias_instance:
+
+            # FIXME: Get default language
+            # Parlers get_or_create doesn't work well with the translations
+            default_category = Category.objects.filter(translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME).first()
+            if not default_category:
+                default_category = Category.objects.create(name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
+
+            if "site_id__isnull" in alias_kwargs:
+                del(alias_kwargs["site_id__isnull"])
+
+            alias_instance = Alias.objects.create(category=default_category, **alias_kwargs)
+
+        return alias_instance
+
     def render_tag(self, context, static_code, extra_bits, nodelist=None):
         request = context.get('request')
 
@@ -83,30 +111,7 @@ class StaticAlias(Tag):
 
         toolbar = get_toolbar_from_request(request)
         renderer = toolbar.get_content_renderer()
-
-        # Try and find an Alias to render or fall back to nothing.
-        # FIXME: Could have the same code for site bound and project wide?
-        alias_instance = Alias.objects.filter(static_code=static_code).first()
-        if not alias_instance:
-
-            # FIXME: Get default language
-            # Parlers get_or_create doesn't work well with the translations
-            default_category = Category.objects.filter(translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME).first()
-            if not default_category:
-                default_category = Category.objects.create(name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
-
-            alias_instance = Alias.objects.create(category=default_category, static_code=static_code)
-
-        kwargs = {
-            'static_code': static_code,
-            # 'defaults': {'creation_method': StaticPlaceholder.CREATION_BY_TEMPLATE}
-        }
-        # Site
-        if 'site' in extra_bits:
-            kwargs['site'] = get_current_site()
-        else:
-            kwargs['site_id__isnull'] = True
-
+        alias_instance = self._get_alias(static_code, extra_bits)
         source = alias_instance.get_placeholder()
 
         if source:
@@ -116,5 +121,4 @@ class StaticAlias(Tag):
                 nodelist=nodelist,
             )
             return content
-
         return ''

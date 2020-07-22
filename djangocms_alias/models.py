@@ -2,6 +2,7 @@ import operator
 from collections import defaultdict
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.db import models, transaction
 from django.db.models import F, Q
 from django.utils.encoding import force_text
@@ -85,11 +86,13 @@ class Alias(models.Model):
         null=True,
         help_text=_('To render the alias in templates.')
     )
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = _('alias')
         verbose_name_plural = _('aliases')
         ordering = ['position']
+        unique_together = (('static_code', 'site'),)  # Only restrict instances that have a site specified
 
     def __init__(self, *args, **kwargs):
         self._plugins_cache = {}

@@ -1,10 +1,12 @@
 from collections import ChainMap
 
 from django import template
+from django.contrib.auth import get_user_model
 
 from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_toolbar_from_request
 from cms.utils import get_current_site
+from cms.utils.i18n import get_default_language_for_site
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
@@ -12,7 +14,8 @@ from classytags.arguments import Argument, MultiValueArgument
 from classytags.core import Tag
 
 from ..constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME, USAGE_ALIAS_URL_NAME
-from ..models import Alias, Category
+from ..models import Alias, AliasContent, Category
+from ..utils import is_versioning_enabled
 
 
 register = template.Library()
@@ -70,20 +73,22 @@ class StaticAlias(Tag):
         ],
     )
 
-    def _get_alias(self, static_code, extra_bits):
+    def _get_alias(self, request, static_code, extra_bits):
         alias_kwargs = {
             'static_code': static_code,
             # 'defaults': {'creation_method': StaticPlaceholder.CREATION_BY_TEMPLATE}
         }
         # Site
+        current_site = get_current_site()
         if 'site' in extra_bits:
-            alias_kwargs['site'] = get_current_site()
+            alias_kwargs['site'] = current_site
         else:
             alias_kwargs['site_id__isnull'] = True
 
         # Try and find an Alias to render or fall back to nothing.
-        alias_instance = Alias.objects.filter(**alias_kwargs).first()
-        if not alias_instance:
+        alias = Alias.objects.filter(**alias_kwargs).first()
+        if not alias:
+            language = get_default_language_for_site(current_site)
 
             # FIXME: Get default language
             # Parlers get_or_create doesn't work well with the translations
@@ -94,9 +99,22 @@ class StaticAlias(Tag):
             if "site_id__isnull" in alias_kwargs:
                 del(alias_kwargs["site_id__isnull"])
 
-            alias_instance = Alias.objects.create(category=default_category, **alias_kwargs)
+            alias = Alias.objects.create(category=default_category, **alias_kwargs)
+            alias_content = AliasContent.objects.create(
+                alias=alias,
+                name=static_code,
+                language=language,
+            )
 
-        return alias_instance
+            # FIXME: User should be a generic system user!
+            if is_versioning_enabled():
+                from djangocms_versioning.models import Version
+
+                # Get a default user as the visitor is probably an anonymous visitor
+                user, created = get_user_model().objects.get_or_create(username="static-alias-auto-generated-user")
+                Version.objects.create(content=alias_content, created_by=user)
+
+        return alias
 
     def render_tag(self, context, static_code, extra_bits, nodelist=None):
         request = context.get('request')
@@ -111,7 +129,7 @@ class StaticAlias(Tag):
 
         toolbar = get_toolbar_from_request(request)
         renderer = toolbar.get_content_renderer()
-        alias_instance = self._get_alias(static_code, extra_bits)
+        alias_instance = self._get_alias(request, static_code, extra_bits)
         source = alias_instance.get_placeholder()
 
         if source:

@@ -213,15 +213,15 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
         self.assertEqual(site1_unlimited_preview, "unlimited text")
         # FIXME: The limited preview should fall back if no entries exist for the site?
-        #self.assertEqual(site1_limited_preview, "unlimited text")
+        self.assertEqual(site1_limited_preview, "")
 
         # Should show the contents of the site limited template
         with override_settings(SITE_ID=site2.pk):
             site2_unlimited_preview = self.render_template_obj(unlimited_template, {}, self.get_request('/'))
             site2_limited_preview = self.render_template_obj(site_limited_template, {}, self.get_request('/'))
 
-        self.assertEqual(site1_unlimited_preview, "unlimited text")
-        self.assertEqual(site1_limited_preview, "site limited text")
+        self.assertEqual(site2_unlimited_preview, "unlimited text")
+        self.assertEqual(site2_limited_preview, "site limited text")
 
 # TODO:
 # - Test with Versions!

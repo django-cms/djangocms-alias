@@ -169,11 +169,6 @@ class CreateAliasWizardForm(forms.Form):
         required=True,
         widget=AdminTextInputWidget()
     )
-    identifier = forms.CharField(
-        label=_('Template Identifier'),
-        required=False,
-        widget=AdminTextInputWidget()
-    )
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
         required=True,

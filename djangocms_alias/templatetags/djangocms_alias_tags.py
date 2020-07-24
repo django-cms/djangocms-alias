@@ -12,7 +12,10 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 from classytags.arguments import Argument, MultiValueArgument
 from classytags.core import Tag
 
-from ..constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME, USAGE_ALIAS_URL_NAME
+from ..constants import (
+    DEFAULT_STATIC_ALIAS_CATEGORY_NAME,
+    USAGE_ALIAS_URL_NAME,
+)
 from ..models import Alias, AliasContent, Category
 from ..utils import is_versioning_enabled
 

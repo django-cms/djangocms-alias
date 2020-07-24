@@ -1,17 +1,14 @@
 from unittest import skipUnless
 
-from cms.api import add_plugin, create_page
-from cms.toolbar.utils import (
-    get_object_edit_url,
-    get_object_preview_url,
-)
-
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
 
-from djangocms_alias.constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME
+from cms.api import add_plugin, create_page
+from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
+
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.models import Category, Alias as AliasModel
+from djangocms_alias.constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME
+from djangocms_alias.models import Alias as AliasModel, Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
@@ -135,6 +132,7 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
             - A category is created if it doesn't exist
             - An alias is created if one doesn't exist that matches the static_code
             - The creation_method is recorded as created by a template
+            - If versioning is enabled the tag is only created for a user that is logged in
         """
         alias_template = """{% load djangocms_alias_tags %}{% static_alias "category_unique_code" %}"""  # noqa: E501
 
@@ -144,6 +142,13 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
         self.assertEqual(category.count(), 0)
         self.assertEqual(alias.count(), 0)
+
+        # If versioning is enabled the tag is only created for a user that is logged in
+        if is_versioning_enabled():
+            self.render_template_obj(alias_template, {}, self.get_request('/'))
+
+            self.assertEqual(category.count(), 0)
+            self.assertEqual(alias.count(), 0)
 
         with self.login_user_context(self.superuser):
             # A default category, and a new alias is created for the template tag

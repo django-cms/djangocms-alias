@@ -228,7 +228,6 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
             site1_limited_preview = self.render_template_obj(site_limited_template, {}, self.get_request('/'))
 
         self.assertEqual(site1_unlimited_preview, "unlimited text")
-        # FIXME: The limited preview should fall back if no entries exist for the site?
         self.assertEqual(site1_limited_preview, "")
 
         # Should show the contents of the site limited template

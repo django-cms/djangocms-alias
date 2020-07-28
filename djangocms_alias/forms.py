@@ -188,7 +188,6 @@ class CreateAliasWizardForm(forms.Form):
     def save(self):
         alias = AliasModel.objects.create(
             category=self.cleaned_data.get('category'),
-            static_code=self.cleaned_data.get('static_code'),
         )
         alias_content = AliasContent.objects.create(
             alias=alias,

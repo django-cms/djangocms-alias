@@ -71,7 +71,8 @@ class BaseAliasPluginTestCase(CMSTestCase):
         page_content = create_title(self.language, 'Draft Page', self.page, created_by=self.superuser)
         return page_content.get_placeholders().get(slot='content')
 
-    def _create_alias(self, plugins=None, name='test alias', category=None, position=0, language=None, published=True):
+    def _create_alias(self, plugins=None, name='test alias', category=None, position=0,
+                      language=None, published=True, static_code="", site=None):
         if language is None:
             language = self.language
         if category is None:
@@ -81,6 +82,8 @@ class BaseAliasPluginTestCase(CMSTestCase):
         alias = AliasModel.objects.create(
             category=category,
             position=position,
+            static_code=static_code,
+            site=site,
         )
         alias_content = AliasContent.objects.create(
             alias=alias,

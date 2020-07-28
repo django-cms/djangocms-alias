@@ -884,15 +884,16 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias1 = self._create_alias(name='test 2')
         alias2 = self._create_alias(name='foo', position=1)
         alias3 = self._create_alias(name='foo4', position=1, published=False)
+
         if is_versioning_enabled():
             from djangocms_versioning.constants import DRAFT
             from djangocms_versioning.models import Version
-            # This shouldnt show becuase it's different version of the same alias
+            # This will show because it's a new draft version of the same alias
             draft_content = alias2.contents.create(name='foo', language=self.language)
             Version.objects.create(
                 content=draft_content, created_by=self.superuser, state=DRAFT)
 
-        # This shouldnt show becuase it hasnt content in current language
+        # This shouldn't show because it hasn't content in current language
         self._create_alias(name='foo2', language='fr', position=1)
         with self.login_user_context(self.superuser):
             response = self.client.get(
@@ -902,11 +903,16 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
 
         result = [alias1.pk, alias2.pk, alias3.pk]
-        text_result = ['test 2', 'foo']
+        text_result = ['test 2']
+
         if is_versioning_enabled():
+            # The following versions have draft content
+            text_result.append('foo (Not published)')
             text_result.append('foo4 (Not published)')
         else:
+            text_result.append('foo')
             text_result.append('foo4')
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual([a['id'] for a in response.json()['results']], result)
         self.assertEqual(

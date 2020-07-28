@@ -164,7 +164,11 @@ class CreateAliasForm(BaseCreateAliasForm):
 
 
 class CreateAliasWizardForm(forms.Form):
-    name = forms.CharField(required=True, widget=AdminTextInputWidget())
+    name = forms.CharField(
+        label=_('Name'),
+        required=True,
+        widget=AdminTextInputWidget()
+    )
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
         required=True,

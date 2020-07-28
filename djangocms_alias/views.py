@@ -233,8 +233,8 @@ def render_replace_response(request, new_plugins, source_placeholder=None,
 @transaction.atomic
 def set_alias_position_view(request):
     if (
-        not request.user.is_staff or
-        not request.user.has_perm('djangocms_alias.change_alias')
+        not request.user.is_staff
+        or not request.user.has_perm('djangocms_alias.change_alias')
     ):
         raise PermissionDenied
 

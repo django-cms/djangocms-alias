@@ -10,8 +10,8 @@ class AliasDisableMenu(Modifier):
 
     def modify(self, request, nodes, namespace, root_id, post_cut, breadcrumb):
         if (
-            request.toolbar.app_name == PLUGIN_URL_NAME_PREFIX or
-            isinstance(request.toolbar.obj, AliasContent)
+            request.toolbar.app_name == PLUGIN_URL_NAME_PREFIX
+            or isinstance(request.toolbar.obj, AliasContent)
         ):
             return []
         return nodes

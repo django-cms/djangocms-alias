@@ -2,6 +2,7 @@ import operator
 from collections import defaultdict
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.db import models, transaction
 from django.db.models import F, Q
 from django.utils.encoding import force_text
@@ -68,6 +69,16 @@ class Category(TranslatableModel):
 
 
 class Alias(models.Model):
+    CREATION_BY_TEMPLATE = 'template'
+    CREATION_BY_CODE = 'code'
+    CREATION_METHODS = (
+        (CREATION_BY_TEMPLATE, _('by template')),
+        (CREATION_BY_CODE, _('by code')),
+    )
+    creation_method = models.CharField(
+        verbose_name=_('creation_method'), choices=CREATION_METHODS,
+        default=CREATION_BY_CODE, max_length=20, blank=True,
+    )
     category = models.ForeignKey(
         Category,
         verbose_name=_('category'),
@@ -78,11 +89,20 @@ class Alias(models.Model):
         verbose_name=_('position'),
         default=0,
     )
+    static_code = models.CharField(
+        verbose_name=_('static code'),
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text=_('To render the alias in templates.')
+    )
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = _('alias')
         verbose_name_plural = _('aliases')
         ordering = ['position']
+        unique_together = (('static_code', 'site'),)  # Only restrict instances that have a site specified
 
     def __init__(self, *args, **kwargs):
         self._plugins_cache = {}
@@ -161,8 +181,13 @@ class Alias(models.Model):
             ).filter(language=language)
 
             if show_draft_content and is_versioning_enabled():
+                from djangocms_versioning.constants import DRAFT, PUBLISHED
                 from djangocms_versioning.helpers import remove_published_where
+
+                # Ensure that we are getting the latest valid content, the top most version can become
+                # archived with a previous version re-published
                 qs = remove_published_where(qs)
+                qs = qs.filter(Q(versions__state=DRAFT) | Q(versions__state=PUBLISHED)).order_by('-versions__created')
 
             self._content_cache[language] = qs.first()
             return self._content_cache[language]

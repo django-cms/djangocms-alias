@@ -63,6 +63,11 @@ HELPER_SETTINGS = {
     'TEMPLATE_DIRS': [
         os.path.join('tests', 'templates'),
     ],
+    'CMS_TEMPLATES': (
+        ("fullwidth.html", "Fullwidth"),
+        ("page.html", "Normal page"),
+        ('static_alias.html', 'Static Alias Template'),
+    ),
     'PARLER_LANGUAGES': {
         1: [
             {

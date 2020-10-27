@@ -41,6 +41,7 @@ class CategoryAdmin(TranslatableAdmin):
 @admin.register(Alias)
 class AliasAdmin(admin.ModelAdmin):
     list_display = ['name', 'category']
+    list_filter =['site', 'category']
     fields = ('category',)
     readonly_fields = ('static_code', 'site')
 

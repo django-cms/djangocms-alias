@@ -5,5 +5,4 @@ isort
 pyflakes>=2.1.1
 django-classy-tags<2.0.0
 django-sekizai<2.0.0
-https://github.com/divio/djangocms-text-ckeditor/tarball/support/4.0.x#egg=djangocms-text-ckeditor
-git+git://github.com/divio/djangocms-versioning.git#egg=djangocms-versioning
+django-parler>=1.4

@@ -255,6 +255,7 @@ class Select2Mixin:
             'all': ('cms/js/select2/select2.css', ),
         }
         js = (
+            'admin/js/jquery.init.js',
             'cms/js/select2/select2.js',
             'djangocms_alias/js/dist/bundle.alias.create.min.js',
         )

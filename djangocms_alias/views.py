@@ -3,6 +3,7 @@ import operator
 
 from django.contrib import admin
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
@@ -93,13 +94,18 @@ class AliasListView(PermissionRequiredMixin, ListView):
     template_name = 'djangocms_alias/alias_list.html'
 
     def get_queryset(self):
+        site = self.request.GET.get('site', None)
+        if site:
+            return self.category.aliases.filter(site_id=site)
         return self.category.aliases.all()
 
     def get_context_data(self, **kwargs):
         kwargs.update({
             'category': self.category,
         })
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+        context['sites'] = Site.objects.all()
+        return context
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:

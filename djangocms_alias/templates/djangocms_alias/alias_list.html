@@ -9,6 +9,15 @@
             </span>
             <a href="../.." class="cms-aliases-page-back cms-alias-btn">{% trans "Back" %}</a>
         </h2>
+        <div class="text-right">
+            <label class="inline">{% trans "Filter by Site" %}</label>
+            <select id="sitefilter" class="small-2">
+                <option value=0>{% trans "All" %}</option>
+                {% for site in sites %}
+                    <option value={{ site.id }}>{{ site.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <div class="cms-aliases-category">
             <div class="cms-aliases-sortable" data-ajax-url="{% url 'admin:djangocms_alias_set_alias_position' %}">
                 {% for alias in aliases %}

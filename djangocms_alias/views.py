@@ -106,7 +106,7 @@ class AliasListView(PermissionRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['sites'] = Site.objects.all()
         site = self.request.GET.get('site', None)
-        context['site_selected'] = site if site else 'all'
+        context['site_selected'] = site if site else None
         return context
 
     def dispatch(self, request, *args, **kwargs):

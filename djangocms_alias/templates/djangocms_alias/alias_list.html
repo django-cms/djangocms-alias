@@ -12,7 +12,7 @@
         <div class="cms-alias-site-filter">
             <label class="inline">{% trans "Filter by Site" %}</label>
             <select id="sitefilter" class="small-2">
-                <option value='all' >{% trans "ALL" %}</option>
+                <option value='' >------</option>
                 {% for site in sites %}
                     <option value="{{ site.id }}">{{ site.name }}</option>
                 {% endfor %}

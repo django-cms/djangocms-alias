@@ -24,7 +24,7 @@
     "gulp-watch": "^5.0.0",
     "imports-loader": "^0.7.1",
     "karma-sourcemap-loader": "^0.3.7",
-    "minimist": "1.2.0",
+    "minimist": "1.2.3",
     "postcss-flexbugs-fixes": "^3.3.1",
     "postcss-initial": "^2.0.0",
     "webpack": "^4.8.1"

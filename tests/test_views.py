@@ -667,6 +667,63 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertNotContains(detail_response, en_plugin.body)
         self.assertNotContains(list_response, en_plugin.body)
 
+    def test_view_aliases_using_site_filter(self):
+        site1 = Site.objects.create(domain='site1.com', name='1')
+        site2 = Site.objects.create(domain='site2.com', name='2')
+        site1_plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='en',
+            body='This is text in English',
+        )
+        site2_plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='en',
+            body='Das ist Text auf Deutsch',
+        )
+        site1_alias = self._create_alias([site1_plugin], site=site1, name='site1_alias', category=self.category)
+        site2_alias = self._create_alias([site1_plugin], site=site2, name='site2_alias', category=self.category)
+        alias_content_site1 = AliasContent.objects.create(
+            alias=site1_alias,
+            name='test alias site1',
+            language='en',
+        )
+        alias_content_site1.populate(plugins=[site1_plugin])
+        alias_content_site2 = AliasContent.objects.create(
+            alias=site2_alias,
+            name='test alias site2',
+            language='en',
+        )
+        alias_content_site2.populate(plugins=[site2_plugin])
+
+        with self.login_user_context(self.superuser):
+            with force_language('en'):
+                list_response = self.client.get(
+                    admin_reverse(LIST_ALIASES_URL_NAME, args=[site1_alias.category.pk]),
+                )
+
+        self.assertContains(list_response, site1_alias.name)
+        self.assertContains(list_response, site2_alias.name)
+
+        with self.login_user_context(self.superuser):
+            with force_language('en'):
+                aliases_list_url = admin_reverse(LIST_ALIASES_URL_NAME, args=[site1_alias.category.pk])
+                site1_aliases_filter_url = "{}?site={}".format(aliases_list_url, site1_alias.site.id)
+                list_response = self.client.get(site1_aliases_filter_url)
+
+        self.assertContains(list_response, site1_alias.name)
+        self.assertNotContains(list_response, site2_alias.name)
+
+        with self.login_user_context(self.superuser):
+            with force_language('en'):
+                aliases_list_url = admin_reverse(LIST_ALIASES_URL_NAME, args=[site2_alias.category.pk])
+                site2_aliases_filter_url = "{}?site={}".format(aliases_list_url, site2_alias.site.id)
+                list_response = self.client.get(site2_aliases_filter_url)
+
+        self.assertNotContains(list_response, site1_alias.name)
+        self.assertContains(list_response, site2_alias.name)
+
     @skipIf(is_versioning_enabled(), 'Test only relevant without versioning enabled')
     def test_create_alias_name_unique_per_category_and_language(self):
         self._create_alias(

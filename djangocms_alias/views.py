@@ -3,12 +3,14 @@ import operator
 
 from django.contrib import admin
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.html import conditional_escape
 from django.utils.translation import (
     get_language_from_request,
     ugettext_lazy as _,
@@ -93,13 +95,23 @@ class AliasListView(PermissionRequiredMixin, ListView):
     template_name = 'djangocms_alias/alias_list.html'
 
     def get_queryset(self):
+        site_id = self.request.GET.get('site', None)
+        if site_id:
+            site_id = conditional_escape(site_id)
+            return self.category.aliases.filter(site_id=site_id)
         return self.category.aliases.all()
 
     def get_context_data(self, **kwargs):
         kwargs.update({
             'category': self.category,
         })
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+        context['sites'] = Site.objects.all()
+        site_id = self.request.GET.get('site', None)
+        if site_id:
+            site_id = conditional_escape(site_id)
+        context['site_selected'] = site_id
+        return context
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:

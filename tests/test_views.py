@@ -709,7 +709,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             with force_language('en'):
                 aliases_list_url = admin_reverse(LIST_ALIASES_URL_NAME, args=[site1_alias.category.pk])
-                site1_aliases_filter_url = f"{aliases_list_url}?site={site1_alias.site.id}"
+                site1_aliases_filter_url = "{}?site={}".format(aliases_list_url, site1_alias.site.id)
                 list_response = self.client.get(site1_aliases_filter_url)
 
         self.assertContains(list_response, site1_alias.name)
@@ -718,7 +718,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             with force_language('en'):
                 aliases_list_url = admin_reverse(LIST_ALIASES_URL_NAME, args=[site2_alias.category.pk])
-                site2_aliases_filter_url = f"{aliases_list_url}?site={site2_alias.site.id}"
+                site2_aliases_filter_url = "{}?site={}".format(aliases_list_url, site2_alias.site.id)
                 list_response = self.client.get(site2_aliases_filter_url)
 
         self.assertNotContains(list_response, site1_alias.name)

@@ -720,7 +720,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 aliases_list_url = admin_reverse(LIST_ALIASES_URL_NAME, args=[site2_alias.category.pk])
                 site2_aliases_filter_url = f"{aliases_list_url}?site={site2_alias.site.id}"
                 list_response = self.client.get(site2_aliases_filter_url)
-        import pdb;pdb.set_trace()
+
         self.assertNotContains(list_response, site1_alias.name)
         self.assertContains(list_response, site2_alias.name)
 

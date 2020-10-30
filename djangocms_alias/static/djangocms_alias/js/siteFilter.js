@@ -4,16 +4,24 @@ export function initSiteFilter() {
     const $siteSelector = $('#sitefilter');
     const url_string = window.location.href
     let url = new URL(url_string);
-    const id = url.searchParams.get("site") != null ? url.searchParams.get("site") : '';
+    const loadedSiteId = url.searchParams.get("site") != null ? url.searchParams.get("site") : '';
 
     // On load we may need to preset a site
-    $siteSelector.val(id)
+    $siteSelector.val(loadedSiteId)
 
-    $siteSelector.on('change', function(){
+    $siteSelector.on('change', function() {
         const endpoint = window.location.pathname;
-        const id = $(this).val();
+        const changedSiteId = $(this).val();
 
-        url.searchParams.set("site", id)
+        // Remove the get param if nothing is set
+        if (changedSiteId == "") {
+            url.searchParams.delete("site")
+        }
+        // Change the get param if the value is set
+        else {
+            url.searchParams.set("site", changedSiteId)
+        }
+        // Force a window reload with the new value set to trigger a rerender
         window.location.href = url;
     });
 }

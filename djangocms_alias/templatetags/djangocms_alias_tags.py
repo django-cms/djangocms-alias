@@ -155,7 +155,7 @@ class StaticAlias(Tag):
                 placeholder=placeholder,
                 context=context,
                 nodelist=nodelist,
-                use_cahe=not get_draft_content,
+                use_cache=not get_draft_content,
             )
             return content
         return ''

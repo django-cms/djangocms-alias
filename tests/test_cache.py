@@ -1,7 +1,9 @@
-from .base import BaseAliasPluginTestCase
 from cms.api import add_plugin
 from cms.test_utils.util.fuzzy_int import FuzzyInt
+
 from djangocms_alias.cms_plugins import Alias
+
+from .base import BaseAliasPluginTestCase
 
 
 class AliasCacheTestCase(BaseAliasPluginTestCase):
@@ -90,12 +92,6 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
             slot='content',
         )
 
-        # add_plugin(
-        #     page_placeholder,
-        #     'TextPlugin',
-        #     language=self.language,
-        #     body='Content Alias 1234',
-        # )
         add_plugin(
             page_placeholder,
             Alias,

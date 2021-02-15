@@ -1,8 +1,8 @@
 from .base import BaseAliasPluginTestCase
 from cms.api import add_plugin
-from djangocms_alias.cms_plugins import Alias
-from cms.models import Page
 from cms.test_utils.util.fuzzy_int import FuzzyInt
+from djangocms_alias.cms_plugins import Alias
+
 
 class AliasCacheTestCase(BaseAliasPluginTestCase):
     alias_template = """{% load djangocms_alias_tags %}{% render_alias plugin.alias %}"""

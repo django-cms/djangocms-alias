@@ -41,6 +41,11 @@ def render_alias(context, instance, editable=False):
     toolbar = get_toolbar_from_request(request)
     renderer = toolbar.get_content_renderer()
 
+    # Get draft contents in edit or preview mode?
+    get_draft_content = False
+    if toolbar.edit_mode_active or toolbar.preview_mode_active:
+        get_draft_content = True
+
     editable = editable and renderer._placeholders_are_editable
     source = instance.get_placeholder()
 
@@ -49,6 +54,7 @@ def render_alias(context, instance, editable=False):
             placeholder=source,
             context=context,
             editable=editable,
+            use_cache=not get_draft_content,
         )
         return content or ''
     return ''

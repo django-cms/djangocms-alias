@@ -2,7 +2,7 @@ from django.template import Context
 
 from cms.api import add_plugin
 from cms.test_utils.util.fuzzy_int import FuzzyInt
-from cms.cache.placeholder import get_placeholder_cache, set_placeholder_cache
+from cms.cache.placeholder import get_placeholder_cache
 
 from djangocms_alias.cms_plugins import Alias
 
@@ -138,7 +138,6 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
         )
         self.assertEqual(alias.cms_plugins.first().template, "custom_alias_template")
 
-
     # def test_placeholder_cache(self):
     #
     #     alias = self._create_alias(published=True)
@@ -173,7 +172,6 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
     #     self.assertEqual(cached_en_content, en_content)
 
     def test_count_queries_first(self):
-
         alias = self._create_alias(published=True)
         alias_placeholder = alias.get_placeholder(self.language)
         add_plugin(

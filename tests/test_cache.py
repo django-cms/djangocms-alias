@@ -201,12 +201,12 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
             self.client.get(page.get_absolute_url(self.language))
 
         request = self.get_request('/en/')
-        # context = Context({
-        #     'request': request,
-        # })
+        context = Context({
+            'request': request,
+        })
 
-        # renderer = self.get_content_renderer(request)
-        # content = renderer.render_placeholder(page_placeholder, context, 'en', width=350)
+        renderer = self.get_content_renderer(request)
+        content = renderer.render_placeholder(page_placeholder, context, 'en', width=350)
 
         # placeholder, lang, site_id, request
         # # set_placeholder_cache(page_placeholder, 'en', 1, content, request)
@@ -214,4 +214,4 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
         # self.assertEqual(cached_content, content)
         cached_placeholder = get_placeholder_cache(page_placeholder, 'en', 1, request)
         # self.assertEqual(cached_placeholder, page_placeholder['content'])
-        self.assertEqual(cached_placeholder.get('content'), page_placeholder.get('content'))
+        self.assertEqual(cached_placeholder.get('content'), content)

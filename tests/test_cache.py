@@ -1,8 +1,8 @@
 from django.template import Context
 
 from cms.api import add_plugin
-from cms.test_utils.util.fuzzy_int import FuzzyInt
 from cms.cache.placeholder import get_placeholder_cache
+from cms.test_utils.util.fuzzy_int import FuzzyInt
 
 from djangocms_alias.cms_plugins import Alias
 

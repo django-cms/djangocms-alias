@@ -22,13 +22,16 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
         self.page_placeholder = self.page.get_placeholders(self.language).get(slot='content')
 
     def test_create_published_alias(self):
+        """
+        A published page populated with placeholders and plugins
+        should contain the content it is populated with when rendered
+        """
         add_plugin(
             self.alias_placeholder,
             'TextPlugin',
             language=self.language,
             body='Content Alias 1234',
         )
-
         # Create alias plugin inside the page placeholder
         add_plugin(
             self.page_placeholder,
@@ -56,14 +59,12 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
             language=self.language,
             body='test 2',
         )
-
         add_plugin(
             self.page_placeholder,
             'TextPlugin',
             language=self.language,
             body='Content Alias 1234',
         )
-
         add_plugin(
             self.page_placeholder,
             Alias,
@@ -72,25 +73,17 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
         )
 
         with self.login_user_context(self.superuser):
-            # returns a template response
+            # render the page
             self.client.get(self.page.get_absolute_url(self.language))
-
+        # Get the plugins from the page and count them
         plugins = self.page_placeholder.get_plugins()
         plugins_count = plugins.count()
+
+        # Ensure only the two created plugins are present
         self.assertEqual(plugins_count, 2)
 
-    def test_count_queries_second(self):
-        add_plugin(
-            self.page_placeholder,
-            Alias,
-            language=self.language,
-            alias=self.alias,
-        )
-
-        with self.assertNumQueries(FuzzyInt(1, 26)):
-            self.client.get(self.page.get_absolute_url(self.language))
-
     def test_create_alias_with_default_render_template(self):
+        # Create an alias plugin without explicitly defining the template to use
         add_plugin(
             self.alias_placeholder,
             Alias,
@@ -98,18 +91,14 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
             alias=self.alias,
         )
 
-        add_plugin(
-            self.alias_placeholder,
-            Alias,
-            language=self.language,
-            alias=self.alias,
-        )
-
-        # Test if the template rendered is the default template
+        # The default template should be used if one is not provided
         self.assertEqual(self.alias.cms_plugins.first().template, 'default')
 
     def test_create_alias_with_custom_render_template(self):
+        # Define a custom template
         alias_template = 'custom_alias_template'
+
+        # Create an alias plugin providing our custom template
         add_plugin(
             self.alias_placeholder,
             Alias,
@@ -117,9 +106,12 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
             alias=self.alias,
             template=alias_template,
         )
+
+        # The custom template should be assigned to the plugin we created
         self.assertEqual(self.alias.cms_plugins.first().template, "custom_alias_template")
 
-    def test_count_queries_first(self):
+    def test_query_count(self):
+        # Create a text plugin and an alias plugin
         add_plugin(
             self.alias_placeholder,
             'TextPlugin',
@@ -133,23 +125,23 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
             alias=self.alias,
         )
 
+        # The first time we render the page it should be querying the database
         with self.assertNumQueries(FuzzyInt(1, 26)):
             self.client.get(self.page.get_absolute_url(self.language))
+        # The second time we render the page, the cache should be populated, there should be no queries
         with self.assertNumQueries(FuzzyInt(0, 0)):
             self.client.get(self.page.get_absolute_url(self.language))
 
+        # Get a request targeting the page
         request = self.get_request('/en/')
         context = Context({
             'request': request,
         })
 
+        # Render the page given the request we generated earlier
         renderer = self.get_content_renderer(request)
         content = renderer.render_placeholder(self.page_placeholder, context, 'en', width=350)
-
-        # placeholder, lang, site_id, request
-        # # set_placeholder_cache(page_placeholder, 'en', 1, content, request)
-        # cached_content = get_placeholder_cache(page_placeholder, 'en', 1, request)
-        # self.assertEqual(cached_content, content)
         cached_placeholder = get_placeholder_cache(self.page_placeholder, 'en', 1, request)
-        # self.assertEqual(cached_placeholder, page_placeholder['content'])
+
+        # The content should be the same whether accessed via the rendered page, or via the plugin directly
         self.assertEqual(cached_placeholder.get('content'), content)

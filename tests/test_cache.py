@@ -5,6 +5,8 @@ from cms.cache.placeholder import get_placeholder_cache
 from cms.test_utils.util.fuzzy_int import FuzzyInt
 
 from djangocms_alias.cms_plugins import Alias
+from djangocms_alias.constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME
+from djangocms_alias.models import Alias as AliasModel, Category
 
 from .base import BaseAliasPluginTestCase
 
@@ -47,6 +49,17 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
 
         # Check the response contains the content we added to our page
         self.assertContains(response, 'Content Alias 1234')
+
+    # def test_static_alias_placeholder_cache(self):
+    #     category = Category.objects.create(name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
+    #     unlimited_alias = self._create_alias(
+    #         plugins=None, name='test alias', category=category, static_code="site_limit_alias_code", site=None)
+    #     add_plugin(
+    #         unlimited_alias.get_placeholder(self.language),
+    #         'TextPlugin',
+    #         language=self.language,
+    #         body='unlimited text',
+    #     )
 
     def test_query_plugin_count(self):
         """

@@ -84,7 +84,13 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             # render the page
-            self.client.get(page.get_absolute_url(self.language))
+            # Check the query count on rendering the page the first time
+            with self.assertNumQueries(FuzzyInt(1, 38)):
+                self.client.get(page.get_absolute_url(self.language))
+            # The query count should decrease on the second rendering
+            with self.assertNumQueries(FuzzyInt(1, 29)):
+                self.client.get(page.get_absolute_url(self.language))
+
         # Get the plugins from the page and count them
         plugins = page_placeholder.get_plugins()
         plugins_count = plugins.count()

@@ -51,6 +51,9 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, 'Content Alias 1234')
 
     def test_static_alias_placeholder_cache(self):
+        """
+
+        """
         category = Category.objects.create(name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
         alias = self._create_alias(
             plugins=None, name='test alias', category=category, static_code="site_limit_alias_code", site=None)
@@ -182,6 +185,10 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
         self.assertEqual(cached_placeholder.get('content'), content)
 
     def test_cache_invalidation(self):
+        """
+        Cache should be invalidated when published
+        """
+
         alias = self._create_alias(published=True)
         alias_placeholder = alias.get_placeholder(self.language)
         # Create a text plugin and an alias plugin
@@ -206,7 +213,6 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
 
         with self.assertNumQueries(FuzzyInt(1, 26)):
             self.client.get(page.get_absolute_url(self.language))
-            # The second time we render the page, the cache should be populated, there should be no queries
 
         create_title(self.language, 'Site Test', page, created_by=self.superuser)
 

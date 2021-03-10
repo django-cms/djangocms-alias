@@ -50,16 +50,38 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
         # Check the response contains the content we added to our page
         self.assertContains(response, 'Content Alias 1234')
 
-    # def test_static_alias_placeholder_cache(self):
-    #     category = Category.objects.create(name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
-    #     unlimited_alias = self._create_alias(
-    #         plugins=None, name='test alias', category=category, static_code="site_limit_alias_code", site=None)
-    #     add_plugin(
-    #         unlimited_alias.get_placeholder(self.language),
-    #         'TextPlugin',
-    #         language=self.language,
-    #         body='unlimited text',
-    #     )
+    def test_static_alias_placeholder_cache(self):
+        category = Category.objects.create(name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
+        alias = self._create_alias(
+            plugins=None, name='test alias', category=category, static_code="site_limit_alias_code", site=None)
+
+        add_plugin(
+            alias.get_placeholder(self.language),
+            'TextPlugin',
+            language=self.language,
+            body='Static Alias Text',
+        )
+
+        # Create page and add alias
+        page = self._create_page('test')
+        page_placeholder = page.get_placeholders(self.language).get(
+            slot='content',
+        )
+
+        # Create alias plugin inside the page placeholder
+        add_plugin(
+            page_placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+        )
+
+        # Get page via http request
+        with self.login_user_context(self.superuser):
+            response = self.client.get(page.get_absolute_url(self.language))
+
+        # Check the response contains the content we added to our page
+        self.assertContains(response, 'Static Alias Text')
 
     def test_query_plugin_count(self):
         """

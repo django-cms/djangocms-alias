@@ -6,7 +6,7 @@ from cms.test_utils.util.fuzzy_int import FuzzyInt
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME
-from djangocms_alias.models import Alias as AliasModel, Category
+from djangocms_alias.models import Category
 
 from .base import BaseAliasPluginTestCase
 

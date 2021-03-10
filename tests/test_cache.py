@@ -214,5 +214,3 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
 
         with self.assertNumQueries(FuzzyInt(0, 16)):
             self.client.get(page.get_absolute_url(self.language))
-
-

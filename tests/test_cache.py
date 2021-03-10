@@ -1,6 +1,6 @@
 from django.template import Context
 
-from cms.api import add_plugin
+from cms.api import add_plugin, create_title
 from cms.cache.placeholder import get_placeholder_cache
 from cms.test_utils.util.fuzzy_int import FuzzyInt
 
@@ -180,3 +180,39 @@ class AliasCacheTestCase(BaseAliasPluginTestCase):
 
         # The content should be the same whether accessed via the rendered page, or via the plugin directly
         self.assertEqual(cached_placeholder.get('content'), content)
+
+    def test_cache_invalidation(self):
+        alias = self._create_alias(published=True)
+        alias_placeholder = alias.get_placeholder(self.language)
+        # Create a text plugin and an alias plugin
+        add_plugin(
+            alias_placeholder,
+            'TextPlugin',
+            language=self.language,
+            body='test 2',
+        )
+
+        page = self._create_page('test')
+        page_placeholder = page.get_placeholders(self.language).get(
+            slot='content',
+        )
+
+        add_plugin(
+            page_placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+        )
+
+        with self.assertNumQueries(FuzzyInt(1, 26)):
+            self.client.get(page.get_absolute_url(self.language))
+            # The second time we render the page, the cache should be populated, there should be no queries
+
+        create_title(self.language, 'Site Test', page, created_by=self.superuser)
+
+        self._publish(page, self.language)
+
+        with self.assertNumQueries(FuzzyInt(0, 16)):
+            self.client.get(page.get_absolute_url(self.language))
+
+

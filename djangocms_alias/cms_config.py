@@ -3,6 +3,7 @@ from django.conf import settings
 
 from cms.app_base import CMSAppConfig
 
+from .helpers import content_expiry_site_alias_excluded_set
 from .models import AliasContent, AliasPlugin, copy_alias_content
 from .rendering import render_alias_content
 
@@ -50,3 +51,8 @@ class AliasCMSConfig(CMSAppConfig):
         internalsearch_config_list = [
             AliasContentConfig,
         ]
+
+    # Content Expiry changelist filer results by site
+    djangocms_content_expiry_changelist_queryset_filters = [
+        content_expiry_site_alias_excluded_set
+    ]

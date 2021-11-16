@@ -1,8 +1,5 @@
-coverage
-djangocms_helper
-flake8
-isort
-pyflakes>=2.1.1
+-r requirements_base.txt
+
 django-classy-tags<2.0.0
 django-sekizai<2.0.0
 django-parler<=2.1

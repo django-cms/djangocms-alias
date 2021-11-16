@@ -1,0 +1,5 @@
+coverage
+djangocms_helper
+flake8
+isort
+pyflakes>=2.1.1

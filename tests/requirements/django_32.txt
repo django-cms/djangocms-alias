@@ -1,0 +1,5 @@
+-r requirements_base.txt
+
+django-classy-tags
+django-sekizai
+django-parler<=2.1

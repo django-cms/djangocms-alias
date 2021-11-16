@@ -3,3 +3,8 @@ djangocms_helper
 flake8
 isort
 pyflakes>=2.1.1
+
+# FIXME: DO NOT MERGE WITHOUT THE PACKAGES BEING RELEASED BELOW
+
+# Unreleased dependancies
+http://github.com/Aiky30/djangocms-versioning/archive/feature/django-32-compat.zip

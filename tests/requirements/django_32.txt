@@ -1,5 +1,6 @@
 -r requirements_base.txt
 
+Django>=3.2,<3.3
 django-classy-tags
 django-sekizai
 django-parler<=2.1

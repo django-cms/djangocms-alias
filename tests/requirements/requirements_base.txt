@@ -1,5 +1,5 @@
 coverage
-djangocms_helper
+django-app-helper
 flake8
 isort
 pyflakes>=2.1.1
@@ -7,4 +7,7 @@ pyflakes>=2.1.1
 # FIXME: DO NOT MERGE WITHOUT THE PACKAGES BEING RELEASED BELOW
 
 # Unreleased dependancies
+# FIXME: Unreleased 3.2 changes cms40: https://github.com/divio/django-cms/archive/develop-4.zip
+https://github.com/Aiky30/django-cms/archive/feature/cms-4-django-32-support.zip
+# FIXME: Unreleased 3.2 changes versioning: http://github.com/divio/djangocms-versioning/archive/master.zip
 http://github.com/Aiky30/djangocms-versioning/archive/feature/django-32-compat.zip

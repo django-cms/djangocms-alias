@@ -2,5 +2,6 @@
 
 Django>=3.2,<3.3
 django-classy-tags
+django-fsm>=2.6
 django-sekizai
 django-parler<=2.1

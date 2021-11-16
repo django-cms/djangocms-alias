@@ -8,6 +8,7 @@ if ENABLE_VERSIONING:
     EXTRA_INSTALLED_APPS.append('djangocms_versioning')
 
 HELPER_SETTINGS = {
+    'SECRET_KEY': 'test1234',
     'TIME_ZONE': 'Europe/Zurich',
     'TOP_INSTALLED_APPS': [
         'djangocms_alias',
@@ -106,7 +107,7 @@ HELPER_SETTINGS = {
 
 
 def run():
-    from djangocms_helper import runner
+    from app_helper import runner
     runner.cms('djangocms_alias', extra_args=[])
 
 

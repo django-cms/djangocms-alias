@@ -443,7 +443,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias1_content = alias1.get_content(language=self.language)
         alias1_url = alias1_content.get_absolute_url()
         if is_versioning_enabled():
-            from djangocms_versioning.helpers import version_list_url_for_grouper
+            from djangocms_versioning.helpers import (
+                version_list_url_for_grouper,
+            )
+
             alias1_url = version_list_url_for_grouper(alias1)
 
         self.assertContains(response, alias1_url)
@@ -945,6 +948,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         if is_versioning_enabled():
             from djangocms_versioning.constants import DRAFT
             from djangocms_versioning.models import Version
+
             # This will show because it's a new draft version of the same alias
             draft_content = alias2.contents.create(name='foo', language=self.language)
             Version.objects.create(

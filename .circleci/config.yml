@@ -97,31 +97,31 @@ jobs:
     <<: *py38default
 
   # django 2.2
-  py37-dj22-sqlite-cms40-default:
+  py37-dj22-sqlite-default:
     <<: *py37default
-  py37-dj22-sqlite-cms40-versioning:
+  py37-dj22-sqlite-versioning:
     <<: *py37default
-  py38-dj22-sqlite-cms40-default:
+  py38-dj22-sqlite-default:
     <<: *py38default
-  py38-dj22-sqlite-cms40-versioning:
+  py38-dj22-sqlite-versioning:
     <<: *py38default
-  py39-dj22-sqlite-cms40-default:
+  py39-dj22-sqlite-default:
     <<: *py39default
-  py39-dj22-sqlite-cms40-versioning:
+  py39-dj22-sqlite-versioning:
     <<: *py39default
 
   # django 3.2
-  py37-dj32-sqlite-cms40-default:
+  py37-dj32-sqlite-default:
     <<: *py37default
-  py37-dj32-sqlite-cms40-versioning:
+  py37-dj32-sqlite-versioning:
     <<: *py37default
-  py38-dj32-sqlite-cms40-default:
+  py38-dj32-sqlite-default:
     <<: *py38default
-  py38-dj32-sqlite-cms40-versioning:
+  py38-dj32-sqlite-versioning:
     <<: *py38default
-  py39-dj32-sqlite-cms40-default:
+  py39-dj32-sqlite-default:
     <<: *py39default
-  py39-dj32-sqlite-cms40-versioning:
+  py39-dj32-sqlite-versioning:
     <<: *py39default
 
 
@@ -141,40 +141,40 @@ workflows:
           requires:
             - py38_base
       # django 2.2
-      - py37-dj22-sqlite-cms40-default:
+      - py37-dj22-sqlite-default:
           requires:
             - py37_base
-      - py37-dj22-sqlite-cms40-versioning:
+      - py37-dj22-sqlite-versioning:
           requires:
             - py37_base
-      - py38-dj22-sqlite-cms40-default:
+      - py38-dj22-sqlite-default:
           requires:
             - py38_base
-      - py38-dj22-sqlite-cms40-versioning:
+      - py38-dj22-sqlite-versioning:
           requires:
             - py38_base
-      - py39-dj22-sqlite-cms40-default:
+      - py39-dj22-sqlite-default:
           requires:
             - py39_base
-      - py39-dj22-sqlite-cms40-versioning:
+      - py39-dj22-sqlite-versioning:
           requires:
             - py39_base
       # django 3.2
-      - py37-dj32-sqlite-cms40-default:
+      - py37-dj32-sqlite-default:
           requires:
             - py37_base
-      - py37-dj32-sqlite-cms40-versioning:
+      - py37-dj32-sqlite-versioning:
           requires:
             - py37_base
-      - py38-dj32-sqlite-cms40-default:
+      - py38-dj32-sqlite-default:
           requires:
             - py38_base
-      - py38-dj32-sqlite-cms40-versioning:
+      - py38-dj32-sqlite-versioning:
           requires:
             - py38_base
-      - py39-dj32-sqlite-cms40-default:
+      - py39-dj32-sqlite-default:
           requires:
             - py39_base
-      - py39-dj32-sqlite-cms40-versioning:
+      - py39-dj32-sqlite-versioning:
           requires:
             - py39_base

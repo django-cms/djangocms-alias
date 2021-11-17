@@ -161,6 +161,7 @@ class AliasToolbar(CMSToolbar):
         ][0]
 
         from cms.wizards.wizard_pool import entry_choices
+
         # we enable this button when user has permissions to perform actions on
         # wizard
         enable_create_wizard_button = bool(

@@ -161,7 +161,10 @@ class Alias(models.Model):
 
     def get_absolute_url(self, language=None):
         if is_versioning_enabled():
-            from djangocms_versioning.helpers import version_list_url_for_grouper
+            from djangocms_versioning.helpers import (
+                version_list_url_for_grouper,
+            )
+
             return version_list_url_for_grouper(self)
         content = self.get_content(language=language)
         if content:

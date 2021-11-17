@@ -1244,21 +1244,21 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         self.assertContains(response, '<td>Page</td>')
         self.assertContains(response, '<td>Alias</td>')
-        self.assertRegexpMatches(
+        self.assertRegex(
             str(response.content),
             r'href="{}"[\w+]?>{}<\/a>'.format(
                 re.escape(self.page.get_absolute_url(self.language)),
                 str(self.page),
             ),
         )
-        self.assertRegexpMatches(
+        self.assertRegex(
             str(response.content),
             r'href="{}"[\w+]?>{}<\/a>'.format(
                 re.escape(root_alias.get_absolute_url()),
                 str(alias),
             ),
         )
-        self.assertRegexpMatches(
+        self.assertRegex(
             str(response.content),
             r'href="{}"[\w+]?>{}<\/a>'.format(
                 re.escape(
@@ -1311,7 +1311,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
         self.assertContains(response, 'This alias is used by following objects:')
         test = r'<li>[\s\\n]*Page:[\s\\n]*<a href=\"\/en\/test\/\">test<\/a>[\s\\n]*<\/li>'
-        self.assertRegexpMatches(str(response.content), test)
+        self.assertRegex(str(response.content), test)
 
     def test_delete_alias_view_get_alias_not_used_on_any_page(self):
         alias = self._create_alias([self.plugin])

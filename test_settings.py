@@ -102,7 +102,8 @@ HELPER_SETTINGS = {
     'LANGUAGE_CODE': 'en',
     'DJANGOCMS_ALIAS_TEMPLATES': [
         ('custom_alias_template', 'Custom Template Name'),
-    ]
+    ],
+    "DEFAULT_AUTO_FIELD": "django.db.models.AutoField",
 }
 
 

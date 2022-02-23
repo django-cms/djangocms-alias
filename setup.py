@@ -34,6 +34,8 @@ setup(
     name='djangocms-alias',
     author='Divio AG',
     author_email='info@divio.ch',
+    maintainer='Django CMS Association and contributors',
+    maintainer_email='info@django-cms.org',
     url='http://github.com/divio/djangocms-alias',
     license='BSD',
     version=djangocms_alias.__version__,

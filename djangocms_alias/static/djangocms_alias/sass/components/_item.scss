@@ -6,11 +6,11 @@
     justify-content: space-between;
     align-items: center;
     height: $item-height;
-    background-color: white;
+    background-color: var(--dca-white, var(--body-bg, white));
     border-radius: 3px;
     box-shadow: 0 1px 4px rgba(black, 0.5);
     margin-bottom: 10px;
-    border: 1px solid white;
+    border: 1px solid var(--dca-white, var(--body-bg, white));
     overflow: hidden;
 
     &:hover {
@@ -49,14 +49,14 @@
     text-overflow: ellipsis;
     font-size: 14px;
     font-weight: bold;
-    color: black;
+    color: var(--dca-black, var(--body-fg, black));
     flex-grow: 1;
 
     &,
     &:hover,
     &:focus,
     &:visited {
-        color: black;
+        color: var(--dca-black, var(--body-fg, black));
         text-decoration: none;
     }
 }
@@ -81,7 +81,7 @@
         transition: transform 0.1s;
         top: 50%;
         left: 7px;
-        color: #555;
+        color: var(--dca-gray-darker, #555);
         font-size: 12px;
         margin-top: -6px;
         margin-left: 18px;

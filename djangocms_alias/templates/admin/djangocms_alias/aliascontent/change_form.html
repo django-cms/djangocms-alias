@@ -1,7 +1,13 @@
 {% extends "admin/change_form.html" %}
 {% load cms_admin cms_static i18n %}
 
-{% block object-tools %}{% endblock %}
+{% block object-tools %}
+    <li>
+         <a href={{ url }}>
+             {% trans "References" %}
+         </a>
+     </li>
+{% endblock %}
 
 {% block submit_buttons_bottom %}
 <div class="submit-row">

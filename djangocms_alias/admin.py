@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
+from django.template.loader import render_to_string
+from django.urls import reverse
 
 from cms.utils.permissions import get_model_permission_codename
 
@@ -88,6 +91,20 @@ class AliasAdmin(admin.ModelAdmin):
 class AliasContentAdmin(admin.ModelAdmin):
     form = AliasContentForm
     list_filter = (LanguageFilter,)
+
+    def _get_references_link(self, obj, request):
+        content_type_id = ContentType.objects.get("djangocms_alias", "aliascontent").id
+
+        url = reverse(
+            "djangocms_references:references-index",
+            kwargs={"content_type_id": content_type_id, "object_id": obj.id},
+        )
+
+        return render_to_string("djangocms_references/admin/references.html", {"url": url})
+
+    def get_list_actions(self):
+        return super().get_list_actions() + [self._get_references_link, ]
+
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

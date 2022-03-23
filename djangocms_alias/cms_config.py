@@ -13,7 +13,6 @@ try:
 except (ImportError, LookupError):
     AliasContentConfig = None
 
-
 class AliasCMSConfig(CMSAppConfig):
     cms_enabled = True
     cms_toolbar_enabled_models = [(AliasContent, render_alias_content)]

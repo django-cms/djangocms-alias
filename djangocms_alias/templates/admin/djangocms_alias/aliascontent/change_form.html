@@ -1,10 +1,16 @@
-{% extends "admin/change_form.html" %}
+{% extends is_versioning_enabled|yesno:"djangocms_versioning/admin/mixin/change_form.html,admin/change_form.html" %}
 {% load cms_admin cms_static i18n %}
 
 {% block object-tools %}{% endblock %}
 
-{% block submit_buttons_bottom %}
-<div class="submit-row">
-    <input type="submit" value="{% trans "Save" %}" class="default" name="save">
-</div>
+{% block extrahead %}
+    <script src="{% static_with_version "cms/js/dist/bundle.admin.base.min.js" %}" type="text/javascript"></script>
+    <script type="text/javascript">
+        if (!window.jQuery) {
+            window.jQuery = CMS.$;
+            window.$ = window.jQuery;
+        }
+    </script>
+    {{ block.super }}
 {% endblock %}
+

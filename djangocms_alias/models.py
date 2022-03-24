@@ -5,9 +5,9 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models, transaction
 from django.db.models import F, Q
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from cms.api import add_plugin
 from cms.models import CMSPlugin, Placeholder
@@ -161,7 +161,10 @@ class Alias(models.Model):
 
     def get_absolute_url(self, language=None):
         if is_versioning_enabled():
-            from djangocms_versioning.helpers import version_list_url_for_grouper
+            from djangocms_versioning.helpers import (
+                version_list_url_for_grouper,
+            )
+
             return version_list_url_for_grouper(self)
         content = self.get_content(language=language)
         if content:
@@ -399,7 +402,7 @@ class AliasPlugin(CMSPlugin):
         verbose_name_plural = _('alias plugin models')
 
     def __str__(self):
-        return force_text(self.alias.name)
+        return force_str(self.alias.name)
 
     def is_recursive(self, language=None):
         # When versioning is enabled it will only get published content

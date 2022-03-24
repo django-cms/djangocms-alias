@@ -23,8 +23,9 @@ class AliasCMSConfig(CMSAppConfig):
     djangocms_versioning_enabled = getattr(
         settings, 'VERSIONING_ALIAS_MODELS_ENABLED', True)
     if djangocms_versioning_enabled:
-        from djangocms_versioning.datastructures import VersionableItem
         from cms.utils.i18n import get_language_tuple
+
+        from djangocms_versioning.datastructures import VersionableItem
 
         versioning = [
             VersionableItem(

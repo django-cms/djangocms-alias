@@ -8,6 +8,7 @@ if ENABLE_VERSIONING:
     EXTRA_INSTALLED_APPS.append('djangocms_versioning')
 
 HELPER_SETTINGS = {
+    'SECRET_KEY': 'test1234',
     'TIME_ZONE': 'Europe/Zurich',
     'TOP_INSTALLED_APPS': [
         'djangocms_alias',
@@ -101,12 +102,13 @@ HELPER_SETTINGS = {
     'LANGUAGE_CODE': 'en',
     'DJANGOCMS_ALIAS_TEMPLATES': [
         ('custom_alias_template', 'Custom Template Name'),
-    ]
+    ],
+    "DEFAULT_AUTO_FIELD": "django.db.models.AutoField",
 }
 
 
 def run():
-    from djangocms_helper import runner
+    from app_helper import runner
     runner.cms('djangocms_alias', extra_args=[])
 
 

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.template.loader import render_to_string
 
 from cms.utils.permissions import get_model_permission_codename
 
@@ -30,6 +31,7 @@ if djangocms_versioning_enabled:
     from djangocms_versioning.admin import ExtendedVersionAdminMixin
     alias_content_admin_classes.insert(0, ExtendedVersionAdminMixin)
     alias_content_admin_list_display = ('name', 'get_category',)
+
 
 @admin.register(Category)
 class CategoryAdmin(TranslatableAdmin):
@@ -105,6 +107,23 @@ class AliasContentAdmin(*alias_content_admin_classes):
 
     get_category.short_description = 'category'
     get_category.admin_order_field = "alias__category"
+
+    def _get_preview_link(self, obj, request, disabled=False):
+        """
+        Return a user friendly button for previewing the content model
+        :param obj: Instance of versioned content model
+        :param request: The request to admin menu
+        :param disabled: Should the link be marked disabled?
+        :return: Preview icon template
+        """
+        preview_url = obj.get_absolute_url()
+        if not preview_url:
+            disabled = True
+
+        return render_to_string(
+            "djangocms_versioning/admin/icons/preview.html",
+            {"url": preview_url, "disabled": disabled},
+        )
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

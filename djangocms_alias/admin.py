@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.template.loader import render_to_string
 
 from cms.utils.permissions import get_model_permission_codename
 

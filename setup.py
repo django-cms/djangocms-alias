@@ -55,5 +55,6 @@ setup(
     test_suite='test_settings.run',
     dependency_links=[
         'http://github.com/divio/django-cms/tarball/release/4.0.x#egg=django-cms-4.0.0',
+        'http://github.com/divio/djangocms-versioning/tarball/master#egg=djangocms-versioning-0.0.23',
     ]
 )

@@ -101,6 +101,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
     list_display = alias_content_admin_list_display
     change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"
 
+    # Add Alias category in the admin manager list and order field
     def get_category(self, obj):
         return obj.alias.category
 

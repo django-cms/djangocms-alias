@@ -2,8 +2,8 @@ import itertools
 from copy import copy
 
 from django.urls import NoReverseMatch
-from django.utils.encoding import force_text
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.encoding import force_str
+from django.utils.translation import gettext, gettext_lazy as _
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
@@ -134,7 +134,7 @@ class AliasToolbar(CMSToolbar):
         items = admin_menu.get_items()[start.index + 1: end.index]
         for idx, item in enumerate(items):
             try:
-                if force_text(item_name.lower()) < force_text(item.name.lower()):  # noqa: E501
+                if force_str(item_name.lower()) < force_str(item.name.lower()):  # noqa: E501
                     return idx + start.index + 1
             except AttributeError:
                 # Some item types do not have a 'name' attribute.
@@ -157,10 +157,11 @@ class AliasToolbar(CMSToolbar):
         # There will always be this button, because we are in the context of
         # alias app views
         create_wizard_button = [
-            button for button in buttons if button.name == ugettext('Create')
+            button for button in buttons if button.name == gettext('Create')
         ][0]
 
         from cms.wizards.wizard_pool import entry_choices
+
         # we enable this button when user has permissions to perform actions on
         # wizard
         enable_create_wizard_button = bool(

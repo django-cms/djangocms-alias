@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils.html import conditional_escape
 from django.utils.translation import (
     get_language_from_request,
-    ugettext_lazy as _,
+    gettext_lazy as _,
 )
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView

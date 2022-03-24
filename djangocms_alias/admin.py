@@ -96,12 +96,9 @@ class AliasAdmin(admin.ModelAdmin):
 @admin.register(AliasContent)
 class AliasContentAdmin(*alias_content_admin_classes):
     form = AliasContentForm
-    list_filter = (LanguageFilter, 'alias__site', 'alias__category',)
+    list_filter = (LanguageFilter, )
     list_display = alias_content_admin_list_display
     change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"
-
-    if djangocms_versioning_enabled:
-        list_filter = list_filter + (UnpublishedFilter, )
 
     def get_category(self, obj):
         return obj.alias.category

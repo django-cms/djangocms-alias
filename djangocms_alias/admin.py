@@ -5,7 +5,7 @@ from cms.utils.permissions import get_model_permission_codename
 from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
-from .filters import LanguageFilter, UnpublishedFilter
+from .filters import LanguageFilter
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns

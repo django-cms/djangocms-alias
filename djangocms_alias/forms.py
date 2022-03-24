@@ -5,7 +5,7 @@ from django.contrib.admin.widgets import (
     RelatedFieldWidgetWrapper,
 )
 from django.db import transaction
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
 from cms.utils.permissions import (

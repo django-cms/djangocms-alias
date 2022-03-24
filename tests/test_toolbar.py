@@ -197,7 +197,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             ),
             language_menu_first_items['Delete Translation'].url,
         )
-        self.assertRegexpMatches(
+        self.assertRegex(
             language_menu_first_items['Copy all plugins'].action,
             r'en\/admin\/([\w\/]+)\/copy-plugins\/',
         )

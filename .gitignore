@@ -12,3 +12,4 @@ local.sqlite
 .coverage
 htmlcov
 .python-version
+venv*

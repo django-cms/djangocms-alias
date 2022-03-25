@@ -51,3 +51,55 @@ class FiltersTestCase(CMSTestCase):
         self.assertEqual(set(qs_en), set([expected_en_content]))
         self.assertEqual(set(qs_de), set([expected_de_content]))
         self.assertEqual(set(qs_fr), set([]))
+
+
+class AliasContentManagerTestCase(CMSTestCase):
+    def setUp(self):
+        self.superuser = self.get_superuser()
+
+    def test_alias_content_manager_rendering_with_versioning_actions(self):
+        category = Category.objects.create(name='Language Filter Category')
+        alias = AliasModel.objects.create(
+            category=category,
+            position=0,
+        )
+        expected_en_content = AliasContent.objects.create(
+            alias=alias,
+            name="EN Alias Content",
+            language="en",
+        )
+        # If versioning is enabled be sure to create a version
+        if is_versioning_enabled():
+            from djangocms_versioning.models import Version
+
+            Version.objects.create(content=expected_en_content, created_by=self.superuser)
+
+        base_url = self.get_admin_url(AliasContent, "changelist")
+
+        with self.login_user_context(self.superuser):
+            # en is the default language configured for the site
+            response = self.client.get(base_url)
+
+        response_content_decoded = response.content.decode()
+
+        self.assertInHTML('Actions', # noqa: E501
+            response_content_decoded,
+        )
+        self.assertInHTML(
+            'Category',  # noqa: E501
+            response_content_decoded,
+        )
+
+        self.assertIn(
+            category.name,
+            response_content_decoded
+        )
+        self.assertIn(
+            expected_en_content.name,
+            response_content_decoded,
+        )
+        aliascontent_author = expected_en_content.versions.all()[0].created_by.username
+        self.assertInHTML(
+            f'<td class="field-get_author">{aliascontent_author}</td>', # noqa: E501
+            response_content_decoded,
+        )

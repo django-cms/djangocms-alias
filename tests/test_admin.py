@@ -82,6 +82,7 @@ class AliasContentManagerTestCase(CMSTestCase):
 
         response_content_decoded = response.content.decode()
 
+        # Check Column Headings
         self.assertInHTML(
             'Category',
             response_content_decoded,

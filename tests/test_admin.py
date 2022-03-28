@@ -82,14 +82,28 @@ class AliasContentManagerTestCase(CMSTestCase):
 
         response_content_decoded = response.content.decode()
 
-        self.assertInHTML('Actions', # noqa: E501
+        self.assertInHTML(
+            'Category',
             response_content_decoded,
         )
         self.assertInHTML(
-            'Category',  # noqa: E501
+            'Author',
+            response_content_decoded,
+        )
+        self.assertInHTML(
+            'Modified',
+            response_content_decoded,
+        )
+        self.assertInHTML(
+            'State',
+            response_content_decoded,
+        )
+        self.assertInHTML(
+            'Actions',
             response_content_decoded,
         )
 
+        # Check Alias content row values
         self.assertIn(
             category.name,
             response_content_decoded
@@ -98,8 +112,16 @@ class AliasContentManagerTestCase(CMSTestCase):
             expected_en_content.name,
             response_content_decoded,
         )
-        aliascontent_author = expected_en_content.versions.all()[0].created_by.username
+
+        latest_alias_content_version = expected_en_content.versions.all()[0]
+
         self.assertInHTML(
-            f'<td class="field-get_author">{aliascontent_author}</td>', # noqa: E501
+            f'<td class="field-get_author">{latest_alias_content_version.created_by.username}</td>', # noqa: E501
             response_content_decoded,
         )
+        self.assertInHTML(
+            str(latest_alias_content_version.get_state_display()),  # noqa: E501
+            response_content_decoded,
+        )
+
+

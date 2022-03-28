@@ -116,12 +116,10 @@ class AliasContentManagerTestCase(CMSTestCase):
         latest_alias_content_version = expected_en_content.versions.all()[0]
 
         self.assertInHTML(
-            f'<td class="field-get_author">{latest_alias_content_version.created_by.username}</td>', # noqa: E501
+            f'<td class="field-get_author">{latest_alias_content_version.created_by.username}</td>',  # noqa: E501
             response_content_decoded,
         )
         self.assertInHTML(
             str(latest_alias_content_version.get_state_display()),  # noqa: E501
             response_content_decoded,
         )
-
-

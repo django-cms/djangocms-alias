@@ -1,3 +1,7 @@
+from datetime import datetime
+
+from django.utils.timezone import localtime
+
 from cms.test_utils.testcases import CMSTestCase
 
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
@@ -120,7 +124,13 @@ class AliasContentManagerTestCase(CMSTestCase):
             f'<td class="field-get_author">{latest_alias_content_version.created_by.username}</td>',  # noqa: E501
             response_content_decoded,
         )
-        self.assertInHTML(
-            str(latest_alias_content_version.get_state_display()),  # noqa: E501
+        self.assertIn(
+            latest_alias_content_version.get_state_display(),
+            response_content_decoded,
+        )
+        self.assertIn(
+            localtime(
+                latest_alias_content_version.modified
+            ).strftime("%B %-d, %Y, %-I:%M %p").replace('AM', 'a.m.').replace('PM', 'p.m.'),
             response_content_decoded,
         )

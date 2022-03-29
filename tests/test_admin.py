@@ -1,8 +1,11 @@
 from unittest import skipUnless
 
+from django.utils.formats import localize
 from django.utils.timezone import localtime
 
 from cms.test_utils.testcases import CMSTestCase
+
+from freezegun import freeze_time
 
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
@@ -110,15 +113,15 @@ class AliasContentManagerTestCase(CMSTestCase):
             name="EN Alias Content",
             language="en",
         )
-        # If versioning is enabled be sure to create a version
-        if is_versioning_enabled():
-            from djangocms_versioning.models import Version
+        #create a version
 
-            Version.objects.create(content=expected_en_content, created_by=self.superuser)
+        from djangocms_versioning.models import Version
 
-        base_url = self.get_admin_url(AliasContent, "changelist")
+        Version.objects.create(content=expected_en_content, created_by=self.superuser)
 
         with self.login_user_context(self.superuser):
+
+            base_url = self.get_admin_url(AliasContent, "changelist")
             # en is the default language configured for the site
             response = self.client.get(base_url)
 
@@ -166,9 +169,8 @@ class AliasContentManagerTestCase(CMSTestCase):
             latest_alias_content_version.get_state_display(),
             response_content_decoded,
         )
+
         self.assertIn(
-            localtime(
-                latest_alias_content_version.modified
-            ).strftime("%B %-d, %Y, %-I:%M %p").replace('AM', 'a.m.').replace('PM', 'p.m.'),
+            localize(localtime(latest_alias_content_version.modified)),
             response_content_decoded,
         )

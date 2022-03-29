@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 
 from cms.utils.permissions import get_model_permission_codename
 
@@ -105,7 +106,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
     def get_category(self, obj):
         return obj.alias.category
 
-    get_category.short_description = 'category'
+    get_category.short_description = _('category')
     get_category.admin_order_field = "alias__category"
 
     def save_model(self, request, obj, form, change):

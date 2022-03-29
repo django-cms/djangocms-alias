@@ -59,6 +59,44 @@ class AliasContentManagerTestCase(CMSTestCase):
     def setUp(self):
         self.superuser = self.get_superuser()
 
+    @skipUnless(not is_versioning_enabled(), 'Test only relevant when no versioning')
+    def test_alias_content_manager_rendering_without_versioning_actions(self):
+        category = Category.objects.create(name='Language Filter Category')
+        alias = AliasModel.objects.create(
+            category=category,
+            position=0,
+        )
+        expected_en_content = AliasContent.objects.create(
+            alias=alias,
+            name="EN Alias Content",
+            language="en",
+        )
+
+        base_url = self.get_admin_url(AliasContent, "changelist")
+
+        with self.login_user_context(self.superuser):
+            # en is the default language configured for the site
+            response = self.client.get(base_url)
+
+        response_content_decoded = response.content.decode()
+
+        # Check Column Headings
+        self.assertInHTML(
+            'Category',
+            response_content_decoded,
+        )
+
+        # Check Alias content row values
+        self.assertIn(
+            category.name,
+            response_content_decoded
+        )
+        self.assertIn(
+            expected_en_content.name,
+            response_content_decoded,
+        )
+
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_alias_content_manager_rendering_with_versioning_actions(self):
         category = Category.objects.create(name='Language Filter Category')
         alias = AliasModel.objects.create(

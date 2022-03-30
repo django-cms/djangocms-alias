@@ -1,11 +1,12 @@
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 
 from cms.utils.permissions import get_model_permission_codename
 
 from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
-from .filters import LanguageFilter, UnpublishedFilter
+from .filters import LanguageFilter
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
@@ -30,6 +31,7 @@ if djangocms_versioning_enabled:
     from djangocms_versioning.admin import ExtendedVersionAdminMixin
     alias_content_admin_classes.insert(0, ExtendedVersionAdminMixin)
     alias_content_admin_list_display = ('name', 'get_category',)
+
 
 @admin.register(Category)
 class CategoryAdmin(TranslatableAdmin):
@@ -96,18 +98,17 @@ class AliasAdmin(admin.ModelAdmin):
 @admin.register(AliasContent)
 class AliasContentAdmin(*alias_content_admin_classes):
     form = AliasContentForm
-    list_filter = (LanguageFilter, 'alias__site', 'alias__category',)
+    list_filter = (LanguageFilter,)
     list_display = alias_content_admin_list_display
     change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"
 
-    if djangocms_versioning_enabled:
-        list_filter = list_filter + (UnpublishedFilter, )
-
+    # Add Alias category in the admin manager list and order field
     def get_category(self, obj):
         return obj.alias.category
 
-    get_category.short_description = 'category'
+    get_category.short_description = _('category')
     get_category.admin_order_field = "alias__category"
+
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

@@ -98,6 +98,10 @@ class AliasContentManagerTestCase(CMSTestCase):
             expected_en_content.name,
             response_content_decoded,
         )
+        self.assertNotIn(
+            expected_en_content.get_absolute_url(),
+            response_content_decoded,
+        )
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_alias_content_manager_rendering_with_versioning_actions(self):
@@ -169,5 +173,9 @@ class AliasContentManagerTestCase(CMSTestCase):
 
         self.assertIn(
             localize(localtime(latest_alias_content_version.modified)),
+            response_content_decoded,
+        )
+        self.assertIn(
+            expected_en_content.get_absolute_url(),
             response_content_decoded,
         )

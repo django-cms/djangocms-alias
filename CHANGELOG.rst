@@ -4,6 +4,9 @@ Changelog
 
 Unreleased
 ==========
+
+0.0.13
+==========
 * feat: Add versioning actions to Alias AliasContent Manager
 * feat: Github Actions integration
 * Python 3.8, 3.9 support added

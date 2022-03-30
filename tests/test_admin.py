@@ -175,4 +175,3 @@ class AliasContentManagerTestCase(CMSTestCase):
             expected_en_content.get_absolute_url(),
             response_content_decoded,
         )
-

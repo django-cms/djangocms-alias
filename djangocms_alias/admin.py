@@ -110,7 +110,6 @@ class AliasContentAdmin(*alias_content_admin_classes):
     get_category.short_description = _('category')
     get_category.admin_order_field = "alias__category"
 
-
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
 
@@ -160,4 +159,3 @@ class AliasContentAdmin(*alias_content_admin_classes):
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
-

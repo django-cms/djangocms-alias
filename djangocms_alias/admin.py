@@ -127,6 +127,15 @@ class AliasContentAdmin(*alias_content_admin_classes):
         if not is_versioning_enabled():
             emit_content_delete([obj], sender=self.model)
 
+    def get_list_actions(self):
+        """
+        Collect rendered actions from implemented methods and return as list
+        """
+        return [
+            self._get_preview_link,
+            self._get_manage_versions_link,
+        ]
+
     def _get_preview_link(self, obj, request, disabled=False):
         """
         Return a user friendly button for previewing the content model
@@ -142,5 +151,13 @@ class AliasContentAdmin(*alias_content_admin_classes):
         return render_to_string(
             "djangocms_versioning/admin/icons/preview.html",
             {"url": preview_url, "disabled": disabled},
+        )
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        # Provide additional context to the changeform
+        extra_context['is_versioning_enabled'] = is_versioning_enabled()
+        return super().change_view(
+            request, object_id, form_url, extra_context=extra_context,
         )
 

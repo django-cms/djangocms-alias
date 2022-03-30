@@ -5,7 +5,7 @@ Changelog
 Unreleased
 ==========
 
-1.0.0:
+1.0.0 (2022-03-30)
 ==========
 * feat: Add preview link to Alias AliasContent Manager versioning actions
 * feat: Add versioning actions to Alias AliasContent Manager

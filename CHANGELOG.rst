@@ -4,6 +4,9 @@ Changelog
 
 Unreleased
 ==========
+
+1.0.0:
+==========
 * feat: Add preview link to Alias AliasContent Manager versioning actions
 * feat: Add versioning actions to Alias AliasContent Manager
 * feat: Github Actions integration

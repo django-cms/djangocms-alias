@@ -1,4 +1,4 @@
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from cms.utils.permissions import get_model_permission_codename
 from cms.wizards.wizard_base import Wizard

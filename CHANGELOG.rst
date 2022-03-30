@@ -4,7 +4,8 @@ Changelog
 
 Unreleased
 ==========
-* Add versioning actions to Alias AliasContent Manager
+* feat: Add preview link to Alias AliasContent Manager versioning actions
+* feat: Add versioning actions to Alias AliasContent Manager
 * feat: Github Actions integration
 * Python 3.8, 3.9 support added
 * Django 3.0, 3.1 and 3.2 support added

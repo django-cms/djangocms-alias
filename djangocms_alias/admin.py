@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
-
 from cms.utils.permissions import get_model_permission_codename
 
 from parler.admin import TranslatableAdmin
@@ -110,6 +109,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
 
     get_category.short_description = _('category')
     get_category.admin_order_field = "alias__category"
+
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

@@ -5,8 +5,6 @@ from django.utils.timezone import localtime
 
 from cms.test_utils.testcases import CMSTestCase
 
-from freezegun import freeze_time
-
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
@@ -113,7 +111,6 @@ class AliasContentManagerTestCase(CMSTestCase):
             name="EN Alias Content",
             language="en",
         )
-        #create a version
 
         from djangocms_versioning.models import Version
 

@@ -98,7 +98,7 @@ class AliasAdmin(admin.ModelAdmin):
 @admin.register(AliasContent)
 class AliasContentAdmin(*alias_content_admin_classes):
     form = AliasContentForm
-    list_filter = (LanguageFilter,)
+    list_filter = (LanguageFilter, )
     list_display = alias_content_admin_list_display
     change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"
 

@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* feat: Close the sideframe when following links to the alias placeholder endpoints
 
 1.0.0 (2022-03-30)
 ==================

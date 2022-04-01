@@ -211,7 +211,10 @@ class AliasReferencesIntegrationTestCase(CMSTestCase):
             in_navigation=True,
             **kwargs
         )
-        page_content = create_title("en", "Draft Page", page, created_by=user)
+        if is_versioning_enabled():
+            page_content = create_title("en", "Draft Page", page, created_by=user)
+        else:
+            page_content = page.pagecontent_set.last()
         placeholder = page_content.get_placeholders().get(
             slot="content"
         )

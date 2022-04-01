@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* feat: Add more Alias actions to Alias AliasContent Manager versioning actions
 
 1.0.1 (2022-04-01)
 ==================

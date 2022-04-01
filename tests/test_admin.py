@@ -4,7 +4,9 @@ from django.utils.formats import localize
 from django.utils.timezone import localtime
 
 from cms.test_utils.testcases import CMSTestCase
+from cms.utils.urlutils import admin_reverse
 
+from djangocms_alias.constants import USAGE_ALIAS_URL_NAME
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
@@ -103,6 +105,34 @@ class AliasContentManagerTestCase(CMSTestCase):
             response_content_decoded,
         )
 
+        usage_url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[expected_en_content.alias.pk])
+        change_category_and_site_url = admin_reverse(
+            '{}_{}_change'.format(
+                expected_en_content._meta.app_label,
+                expected_en_content.alias._meta.model_name
+            ), args=(expected_en_content.alias.pk,)
+        )
+        rename_alias_url = admin_reverse(
+            '{}_{}_change'.format(
+                expected_en_content._meta.app_label,
+                expected_en_content._meta.model_name
+            ), args=(expected_en_content.pk,)
+        )
+
+        self.assertNotIn(
+            usage_url,
+            response_content_decoded,
+        )
+        self.assertNotIn(
+            rename_alias_url,
+            response_content_decoded,
+        )
+        self.assertNotIn(
+            change_category_and_site_url,
+            response_content_decoded,
+        )
+
+
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_alias_content_manager_rendering_with_versioning_actions(self):
         category = Category.objects.create(name='Language Filter Category')
@@ -177,5 +207,32 @@ class AliasContentManagerTestCase(CMSTestCase):
         )
         self.assertIn(
             expected_en_content.get_absolute_url(),
+            response_content_decoded,
+        )
+
+        usage_url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[expected_en_content.alias.pk])
+        change_category_and_site_url = admin_reverse(
+            '{}_{}_change'.format(
+                expected_en_content._meta.app_label,
+                expected_en_content.alias._meta.model_name
+            ), args=(expected_en_content.alias.pk,)
+        )
+        rename_alias_url = admin_reverse(
+            '{}_{}_change'.format(
+                expected_en_content._meta.app_label,
+                expected_en_content._meta.model_name
+            ), args=(expected_en_content.pk,)
+        )
+
+        self.assertIn(
+            usage_url,
+            response_content_decoded,
+        )
+        self.assertIn(
+            rename_alias_url,
+            response_content_decoded,
+        )
+        self.assertIn(
+            change_category_and_site_url,
             response_content_decoded,
         )

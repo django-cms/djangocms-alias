@@ -3,9 +3,11 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
 from cms.utils.permissions import get_model_permission_codename
+from cms.utils.urlutils import admin_reverse
 
 from parler.admin import TranslatableAdmin
 
+from .constants import USAGE_ALIAS_URL_NAME
 from .cms_config import AliasCMSConfig
 from .filters import LanguageFilter
 from .forms import AliasContentForm
@@ -16,7 +18,6 @@ from .utils import (
     emit_content_delete,
     is_versioning_enabled,
 )
-
 
 __all__ = [
     'AliasAdmin',
@@ -133,7 +134,35 @@ class AliasContentAdmin(*alias_content_admin_classes):
         return [
             self._get_preview_link,
             self._get_manage_versions_link,
+            self._get_alias_rename_link,
+            self._get_alias_usage_link,
+            self._get_alias_site_category_change_link,
         ]
+
+    def _get_alias_rename_link(self, obj, request):
+        url = admin_reverse('{}_{}_change'.format(
+            obj._meta.app_label, obj._meta.model_name), args=(obj.pk,)
+        )
+        return render_to_string(
+            "admin/djangocms_alias/icons/rename_alias.html",
+            {"url": url, "disabled": False, "keepsideframe": False},
+        )
+
+    def _get_alias_usage_link(self, obj, request):
+        url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.alias.pk])
+        return render_to_string(
+            "admin/djangocms_alias/icons/view_usage.html",
+            {"url": url, "disabled": False, "keepsideframe": False},
+        )
+
+    def _get_alias_site_category_change_link(self, obj, request):
+        url = admin_reverse('{}_{}_change'.format(
+            obj._meta.app_label, obj.alias._meta.model_name), args=(obj.alias.pk,)
+        )
+        return render_to_string(
+            "admin/djangocms_alias/icons/edit_alias.html",
+            {"url": url, "disabled": False, "keepsideframe": False},
+        )
 
     def _get_preview_link(self, obj, request, disabled=False):
         """

@@ -7,8 +7,8 @@ from cms.utils.urlutils import admin_reverse
 
 from parler.admin import TranslatableAdmin
 
-from .constants import USAGE_ALIAS_URL_NAME
 from .cms_config import AliasCMSConfig
+from .constants import USAGE_ALIAS_URL_NAME
 from .filters import LanguageFilter
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
@@ -18,6 +18,7 @@ from .utils import (
     emit_content_delete,
     is_versioning_enabled,
 )
+
 
 __all__ = [
     'AliasAdmin',

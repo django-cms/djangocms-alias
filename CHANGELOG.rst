@@ -5,6 +5,10 @@ Changelog
 Unreleased
 ==========
 
+1.0.1 (2022-04-01)
+==================
+* feat: Close the sideframe when following links to the alias placeholder endpoints
+
 1.0.0 (2022-03-30)
 ==================
 * feat: Add preview link to Alias AliasContent Manager versioning actions

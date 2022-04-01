@@ -178,7 +178,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
 
         return render_to_string(
             "djangocms_versioning/admin/icons/preview.html",
-            {"url": preview_url, "disabled": disabled},
+            {"url": preview_url, "disabled": disabled, "keepsideframe": False},
         )
 
     def change_view(self, request, object_id, form_url='', extra_context=None):

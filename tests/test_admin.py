@@ -112,26 +112,15 @@ class AliasContentManagerTestCase(CMSTestCase):
                 expected_en_content.alias._meta.model_name
             ), args=(expected_en_content.alias.pk,)
         )
-        rename_alias_url = admin_reverse(
-            '{}_{}_change'.format(
-                expected_en_content._meta.app_label,
-                expected_en_content._meta.model_name
-            ), args=(expected_en_content.pk,)
-        )
 
         self.assertNotIn(
             usage_url,
             response_content_decoded,
         )
         self.assertNotIn(
-            rename_alias_url,
-            response_content_decoded,
-        )
-        self.assertNotIn(
             change_category_and_site_url,
             response_content_decoded,
         )
-
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_alias_content_manager_rendering_with_versioning_actions(self):

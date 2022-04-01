@@ -1,3 +1,3 @@
-__version__ = '0.0.12'
+__version__ = '1.0.1'
 
 default_app_config = 'djangocms_alias.apps.AliasConfig'

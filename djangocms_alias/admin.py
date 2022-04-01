@@ -1,14 +1,15 @@
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import format_html_join
+from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
 from cms.utils.permissions import get_model_permission_codename
 
 from parler.admin import TranslatableAdmin
 
+from .cms_config import AliasCMSConfig
 from .filters import LanguageFilter
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
@@ -25,6 +26,15 @@ __all__ = [
     'CategoryAdmin',
     'AliasContentAdmin',
 ]
+
+alias_content_admin_classes = [admin.ModelAdmin]
+alias_content_admin_list_display = ('name', 'get_category',)
+djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
+
+if djangocms_versioning_enabled:
+    from djangocms_versioning.admin import ExtendedVersionAdminMixin
+    alias_content_admin_classes.insert(0, ExtendedVersionAdminMixin)
+    alias_content_admin_list_display = ('name', 'get_category',)
 
 
 @admin.register(Category)
@@ -90,10 +100,15 @@ class AliasAdmin(admin.ModelAdmin):
 
 
 @admin.register(AliasContent)
-class AliasContentAdmin(admin.ModelAdmin):
+class AliasContentAdmin(*alias_content_admin_classes):
     form = AliasContentForm
-    list_filter = (LanguageFilter,)
-    list_display = ["name", ]
+    list_filter = (LanguageFilter, )
+    list_display = alias_content_admin_list_display
+    change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"
+
+    # Add Alias category in the admin manager list and order field
+    def get_category(self, obj):
+        return obj.alias.category
 
     class Media:
         css = {
@@ -137,8 +152,8 @@ class AliasContentAdmin(admin.ModelAdmin):
         list_actions.short_description = _("actions")
         return list_actions
 
-    def get_list_actions(self):
-        return [self._get_references_link, ]
+    get_category.short_description = _('category')
+    get_category.admin_order_field = "alias__category"
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
@@ -155,3 +170,38 @@ class AliasContentAdmin(admin.ModelAdmin):
         # Versioning emits it's own signals for changes
         if not is_versioning_enabled():
             emit_content_delete([obj], sender=self.model)
+
+    def get_list_actions(self):
+        """
+        Collect rendered actions from implemented methods and return as list
+        """
+        return [
+            self._get_preview_link,
+            self._get_manage_versions_link,
+            self._get_references_link,
+        ]
+
+    def _get_preview_link(self, obj, request, disabled=False):
+        """
+        Return a user friendly button for previewing the content model
+        :param obj: Instance of versioned content model
+        :param request: The request to admin menu
+        :param disabled: Should the link be marked disabled?
+        :return: Preview icon template
+        """
+        preview_url = obj.get_absolute_url()
+        if not preview_url:
+            disabled = True
+
+        return render_to_string(
+            "djangocms_versioning/admin/icons/preview.html",
+            {"url": preview_url, "disabled": disabled, "keepsideframe": False},
+        )
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        # Provide additional context to the changeform
+        extra_context['is_versioning_enabled'] = is_versioning_enabled()
+        return super().change_view(
+            request, object_id, form_url, extra_context=extra_context,
+        )

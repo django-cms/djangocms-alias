@@ -158,7 +158,6 @@ class AliasContentAdmin(*alias_content_admin_classes):
         )
 
     def _get_alias_usage_link(self, obj, request):
-        Get Alias usage link
         """
         url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.alias.pk])
         return render_to_string(

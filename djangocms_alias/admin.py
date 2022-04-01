@@ -158,7 +158,6 @@ class AliasContentAdmin(*alias_content_admin_classes):
         )
 
     def _get_alias_usage_link(self, obj, request):
-        """
         url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.alias.pk])
         return render_to_string(
             "admin/djangocms_alias/icons/view_usage.html",

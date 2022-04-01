@@ -135,9 +135,9 @@ class AliasContentAdmin(*alias_content_admin_classes):
         return [
             self._get_preview_link,
             self._get_manage_versions_link,
+            self._get_alias_site_category_change_link,
             self._get_rename_alias_link,
             self._get_alias_usage_link,
-            self._get_alias_site_category_change_link,
         ]
 
     def get_list_display_links(self, request, list_display):
@@ -148,7 +148,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
             self.list_display_links = None
         return super().get_list_display_links(request, list_display)
 
-    def _get_alias_rename_link(self, obj, request):
+    def _get_rename_alias_link(self, obj, request):
         url = admin_reverse('{}_{}_change'.format(
             obj._meta.app_label, obj._meta.model_name), args=(obj.pk,)
         )

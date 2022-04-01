@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
-from django.utils.html import format_html_join
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
@@ -123,7 +122,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
             kwargs={"content_type_id": content_type_id, "object_id": obj.id},
         )
 
-        return render_to_string("admin/djangocms_alias/aliascontent/references.html", {"url": url})
+        return render_to_string("admin/djangocms_references/references_icon.html", {"url": url})
 
     def get_list_display(self, request):
         # get configured list_display
@@ -133,24 +132,6 @@ class AliasContentAdmin(*alias_content_admin_classes):
             self._list_actions(request)
         ]
         return list_display
-
-    def _list_actions(self, request):
-        """
-        A closure that makes it possible to pass request object to
-        list action button functions.
-        """
-
-        def list_actions(obj):
-            """Display links to state change endpoints
-            """
-            return format_html_join(
-                "",
-                "{}",
-                ((action(obj, request),) for action in self.get_list_actions()),
-            )
-
-        list_actions.short_description = _("actions")
-        return list_actions
 
     get_category.short_description = _('category')
     get_category.admin_order_field = "alias__category"

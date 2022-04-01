@@ -142,7 +142,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
 
     def get_list_display_links(self, request, list_display):
         """
-        set list_display_links to none if versioning is enabled
+        Remove the linked text when versioning is enabled, because versioning adds actions
         """
         if is_versioning_enabled():
             self.list_display_links = None

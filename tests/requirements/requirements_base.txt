@@ -7,3 +7,4 @@ pyflakes>=2.1.1
 # Unreleased django-cms 4.0 compatible packages
 https://github.com/django-cms/django-cms/tarball/develop-4#egg=django-cms
 https://github.com/django-cms/djangocms-versioning/tarball/master#egg=djangocms-versioning
+https://github.com/FidelityInternational/djangocms-references/tarball/master#egg=djangocms-references

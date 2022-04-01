@@ -29,6 +29,7 @@ __all__ = [
 alias_content_admin_classes = [admin.ModelAdmin]
 alias_content_admin_list_display = ('name', 'get_category',)
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
+djangocms_references_enabled = AliasCMSConfig.djangocms_references_enabled
 
 if djangocms_versioning_enabled:
     from djangocms_versioning.admin import ExtendedVersionAdminMixin
@@ -97,6 +98,22 @@ class AliasAdmin(admin.ModelAdmin):
             sender=self.model,
         )
 
+    def _get_references_link(self, obj, request):
+        """
+        Return a user friendly button for viewing references to an alias.
+        :param obj: Instance of versioned content model
+        :param request: The request to admin menu
+        :return: References icon template
+        """
+        content_type_id = ContentType.objects.get(app_label="djangocms_alias", model="alias").id
+
+        url = reverse(
+            "djangocms_references:references-index",
+            kwargs={"content_type_id": content_type_id, "object_id": obj.id},
+        )
+
+        return render_to_string("admin/djangocms_references/references_icon.html", {"url": url})
+
 
 @admin.register(AliasContent)
 class AliasContentAdmin(*alias_content_admin_classes):
@@ -113,25 +130,6 @@ class AliasContentAdmin(*alias_content_admin_classes):
         css = {
             "all": ("djangocms_versioning/css/actions.css",)
         }
-
-    def _get_references_link(self, obj, request):
-        content_type_id = ContentType.objects.get(app_label="djangocms_alias", model="aliascontent").id
-
-        url = reverse(
-            "djangocms_references:references-index",
-            kwargs={"content_type_id": content_type_id, "object_id": obj.id},
-        )
-
-        return render_to_string("admin/djangocms_references/references_icon.html", {"url": url})
-
-    def get_list_display(self, request):
-        # get configured list_display
-        list_display = self.list_display
-        # Add versioning information and action fields
-        list_display += [
-            self._list_actions(request)
-        ]
-        return list_display
 
     get_category.short_description = _('category')
     get_category.admin_order_field = "alias__category"
@@ -159,7 +157,6 @@ class AliasContentAdmin(*alias_content_admin_classes):
         return [
             self._get_preview_link,
             self._get_manage_versions_link,
-            self._get_references_link,
         ]
 
     def _get_preview_link(self, obj, request, disabled=False):

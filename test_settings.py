@@ -17,6 +17,7 @@ HELPER_SETTINGS = {
     'INSTALLED_APPS': [
         'parler',
         'djangocms_alias.test_utils.text',
+        'djangocms_references',
     ] + EXTRA_INSTALLED_APPS,
     'VERSIONING_ALIAS_MODELS_ENABLED': ENABLE_VERSIONING,
     'MIGRATION_MODULES': {
@@ -105,6 +106,7 @@ HELPER_SETTINGS = {
         ('custom_alias_template', 'Custom Template Name'),
     ],
     "DEFAULT_AUTO_FIELD": "django.db.models.AutoField",
+    "ROOT_URLCONF": "tests.urls",
 }
 
 

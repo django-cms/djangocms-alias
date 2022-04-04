@@ -143,6 +143,96 @@ class AliasContentManagerTestCase(CMSTestCase):
         Version.objects.create(content=self.expected_en_content, created_by=self.superuser)
 
         with self.login_user_context(self.superuser):
+
+            base_url = self.get_admin_url(AliasContent, "changelist")
+            # en is the default language configured for the site
+            response = self.client.get(base_url)
+
+        response_content_decoded = response.content.decode()
+
+        # Check Column Headings
+        self.assertInHTML(
+            'Category',
+            response_content_decoded,
+        )
+        self.assertInHTML(
+            'Author',
+            response_content_decoded,
+        )
+        self.assertInHTML(
+            'Modified',
+            response_content_decoded,
+        )
+        self.assertInHTML(
+            'State',
+            response_content_decoded,
+        )
+        self.assertInHTML(
+            'Actions',
+            response_content_decoded,
+        )
+
+        # Check Alias content row values
+        self.assertIn(
+            self.category.name,
+            response_content_decoded
+        )
+        self.assertIn(
+            self.expected_en_content.name,
+            response_content_decoded,
+        )
+
+        latest_alias_content_version = self.expected_en_content.versions.all()[0]
+
+        self.assertInHTML(
+            f'<td class="field-get_author">{latest_alias_content_version.created_by.username}</td>',  # noqa: E501
+            response_content_decoded,
+        )
+        self.assertIn(
+            latest_alias_content_version.get_state_display(),
+            response_content_decoded,
+        )
+
+        self.assertIn(
+            localize(localtime(latest_alias_content_version.modified)),
+            response_content_decoded,
+        )
+
+        usage_url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[self.expected_en_content.alias.pk])
+        change_category_and_site_url = admin_reverse(
+            '{}_{}_change'.format(
+                self.expected_en_content._meta.app_label,
+                self.expected_en_content.alias._meta.model_name
+            ), args=(self.expected_en_content.alias.pk,)
+        )
+        rename_alias_url = admin_reverse(
+            '{}_{}_change'.format(
+                self.expected_en_content._meta.app_label,
+                self.expected_en_content._meta.model_name
+            ), args=(self.expected_en_content.pk,)
+        )
+
+        self.assertIn(
+            usage_url,
+            response_content_decoded,
+        )
+        self.assertIn(
+            rename_alias_url,
+            response_content_decoded,
+        )
+        self.assertIn(
+            change_category_and_site_url,
+            response_content_decoded,
+        )
+
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_alias_content_manager_rendering_preview_add_url(self):
+
+        from djangocms_versioning.models import Version
+
+        Version.objects.create(content=self.expected_en_content, created_by=self.superuser)
+
+        with self.login_user_context(self.superuser):
             base_url = self.get_admin_url(AliasContent, "changelist")
             # en is the default language configured for the site
             response = self.client.get(base_url)

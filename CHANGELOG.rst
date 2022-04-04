@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* feat:Remove Addlink cta  and hide delete dropdown actions from AliasContent admin Manager
 
 1.0.2 (2022-04-01)
 ==================

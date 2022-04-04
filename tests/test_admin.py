@@ -92,11 +92,11 @@ class AliasContentManagerTestCase(CMSTestCase):
 
         # Check Alias content row values
         self.assertIn(
-            category.name,
+            self.category.name,
             response_content_decoded
         )
         self.assertIn(
-            expected_en_content.name,
+            self.expected_en_content.name,
             response_content_decoded,
         )
         self.assertNotIn(

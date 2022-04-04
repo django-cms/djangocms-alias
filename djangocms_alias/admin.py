@@ -103,6 +103,8 @@ class AliasContentAdmin(*alias_content_admin_classes):
     form = AliasContentForm
     list_filter = (LanguageFilter, )
     list_display = alias_content_admin_list_display
+    # Disable dropdown actions
+    actions = None
     change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"
 
     # Add Alias category in the admin manager list and order field
@@ -112,6 +114,10 @@ class AliasContentAdmin(*alias_content_admin_classes):
     get_category.short_description = _('category')
     get_category.admin_order_field = "alias__category"
 
+    def has_add_permission(self, request, obj=None):
+        # FIXME: It is not currently possible to add an alias from the django admin changelist issue #97
+        return False
+
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
 
@@ -120,13 +126,6 @@ class AliasContentAdmin(*alias_content_admin_classes):
         if not is_versioning_enabled():
             emit_content_change([obj], sender=self.model)
 
-    def delete_model(self, request, obj):
-        super().delete_model(request, obj)
-
-        # Only emit content changes if Versioning is not installed because
-        # Versioning emits it's own signals for changes
-        if not is_versioning_enabled():
-            emit_content_delete([obj], sender=self.model)
 
     def get_list_actions(self):
         """

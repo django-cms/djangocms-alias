@@ -56,8 +56,8 @@ class CategoryAdmin(TranslatableAdmin):
 class AliasAdmin(admin.ModelAdmin):
     list_display = ['name', 'category']
     list_filter = ['site', 'category']
-    fields = ('category',)
-    readonly_fields = ('static_code', 'site')
+    fields = ('category', 'site')
+    readonly_fields = ('static_code',)
 
     def get_urls(self):
         return urlpatterns + super().get_urls()

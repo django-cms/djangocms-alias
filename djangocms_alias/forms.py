@@ -4,10 +4,12 @@ from django.contrib.admin.widgets import (
     AdminTextInputWidget,
     RelatedFieldWidgetWrapper,
 )
+from django.contrib.sites.models import Site
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
+from cms.utils import get_current_site
 from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
@@ -169,6 +171,10 @@ class CreateAliasWizardForm(forms.Form):
         required=True,
         widget=AdminTextInputWidget()
     )
+    site = forms.ModelChoiceField(
+        queryset=Site.objects.all(),
+        required=True,
+    )
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
         required=True,
@@ -179,6 +185,7 @@ class CreateAliasWizardForm(forms.Form):
         if not getattr(self, 'user', None):
             self.user = self._request.user
         self.set_category_widget(self.user)
+        self.fields["site"].initial = get_current_site()
 
     def set_category_widget(self, user):
         formfield = self.fields['category']
@@ -188,6 +195,7 @@ class CreateAliasWizardForm(forms.Form):
     def save(self):
         alias = AliasModel.objects.create(
             category=self.cleaned_data.get('category'),
+            site=self.cleaned.data.get('site'),
         )
         alias_content = AliasContent.objects.create(
             alias=alias,

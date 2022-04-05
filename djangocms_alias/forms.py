@@ -323,7 +323,6 @@ class AliasPluginForm(forms.ModelForm):
             self.fields['category'].initial = self.instance.alias.category_id
         self.fields['site'].initial = get_current_site()
 
-
     class Meta:
         model = AliasPlugin
         fields = (

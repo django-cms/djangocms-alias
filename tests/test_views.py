@@ -1112,15 +1112,14 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
     def test_aliascontent_add_view(self):
         alias = Alias.objects.create(category=self.category)
         with self.login_user_context(self.superuser):
-            if not is_versioning_enabled():
-                response = self.client.post(
-                    admin_reverse('djangocms_alias_aliascontent_add'),
-                    data={
-                        'language': 'de',
-                        'name': 'alias test de 1',
-                        'alias': alias.pk,
-                    },
-                )
+            response = self.client.post(
+                admin_reverse('djangocms_alias_aliascontent_add'),
+                data={
+                    'language': 'de',
+                    'name': 'alias test de 1',
+                    'alias': alias.pk,
+                },
+            )
 
         self.assertEqual(response.status_code, 302)
         if is_versioning_enabled():

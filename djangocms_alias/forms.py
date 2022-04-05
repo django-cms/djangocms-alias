@@ -4,10 +4,12 @@ from django.contrib.admin.widgets import (
     AdminTextInputWidget,
     RelatedFieldWidgetWrapper,
 )
+from django.contrib.sites.models import Site
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
+from cms.utils import get_current_site
 from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
@@ -276,7 +278,24 @@ class AliasSelectWidget(Select2Mixin, forms.TextInput):
         return attrs
 
 
+class HtmlLinkMixin:
+    class Media:
+        css = {"all": ("cms/js/select2/select2.css",)}
+        js = ("cms/js/select2/select2.js",)
+
+
+class HtmlLinkSiteSelectWidget(HtmlLinkMixin, forms.Select):
+    pass
+
+
 class AliasPluginForm(forms.ModelForm):
+    site = forms.ModelChoiceField(
+        label=_("Site"),
+        queryset=Site.objects.all(),
+        widget=HtmlLinkSiteSelectWidget(attrs={"data-placeholder": _("Select site")}),
+        required=False,
+    )
+
     category = forms.ModelChoiceField(
         label=_('Category'),
         queryset=Category.objects.all(),
@@ -302,10 +321,13 @@ class AliasPluginForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
             self.fields['category'].initial = self.instance.alias.category_id
+        self.fields['site'].initial = get_current_site()
+
 
     class Meta:
         model = AliasPlugin
         fields = (
+            'site',
             'category',
             'alias',
             'template',

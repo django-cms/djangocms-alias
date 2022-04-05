@@ -3,6 +3,7 @@ from unittest import skipUnless
 from urllib.parse import urlparse
 
 from cms.api import add_plugin, create_title
+from cms.utils import get_current_site
 from cms.utils.plugins import downcast_plugins
 from cms.utils.urlutils import admin_reverse
 
@@ -318,3 +319,17 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             alias_content.placeholder.get_plugins()[1].get_bound_plugin().body,
             'test 2',
         )
+
+    def test_create_alias_plugin_form_initial_site(self):
+        current_site = get_current_site()
+        alias = self._create_alias(
+            self.placeholder.get_plugins(),
+        )
+        alias_plugin = add_plugin(
+            self.placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+        )
+        form = AliasPluginForm(instance=alias_plugin)
+        self.assertEqual(form.fields['site'].initial, current_site)

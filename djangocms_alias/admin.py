@@ -127,6 +127,14 @@ class AliasContentAdmin(*alias_content_admin_classes):
         if not is_versioning_enabled():
             emit_content_change([obj], sender=self.model)
 
+    def delete_model(self, request, obj):
+        super().delete_model(request, obj)
+
+        # Only emit content changes if Versioning is not installed because
+        # Versioning emits it's own signals for changes
+        if not is_versioning_enabled():
+            emit_content_delete([obj], sender=self.model)
+
     def get_list_actions(self):
         """
         Collect rendered actions from implemented methods and return as list

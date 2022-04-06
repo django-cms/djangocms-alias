@@ -5,6 +5,7 @@ Changelog
 Unreleased
 ==========
 * feat: Remove Add cta and hide delete dropdown actions from AliasContent admin ChangeList
+
 1.0.2 (2022-04-01)
 ==================
 * feat: Add more Alias actions to Alias AliasContent Manager versioning actions

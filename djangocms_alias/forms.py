@@ -269,6 +269,10 @@ class Select2Mixin:
         )
 
 
+class SiteSelectWidget(Select2Mixin, forms.Select):
+    pass
+
+
 class CategorySelectWidget(Select2Mixin, forms.Select):
     pass
 
@@ -285,6 +289,13 @@ class AliasSelectWidget(Select2Mixin, forms.TextInput):
 
 
 class AliasPluginForm(forms.ModelForm):
+    site = forms.ModelChoiceField(
+        label=_("Site"),
+        queryset=Site.objects.all(),
+        widget=SiteSelectWidget(attrs={"data-placeholder": _("Select site")}),
+        required=False,
+    )
+
     category = forms.ModelChoiceField(
         label=_('Category'),
         queryset=Category.objects.all(),
@@ -310,10 +321,12 @@ class AliasPluginForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
             self.fields['category'].initial = self.instance.alias.category_id
+        self.fields['site'].initial = get_current_site()
 
     class Meta:
         model = AliasPlugin
         fields = (
+            'site',
             'category',
             'alias',
             'template',

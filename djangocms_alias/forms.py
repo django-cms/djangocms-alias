@@ -263,6 +263,10 @@ class Select2Mixin:
         )
 
 
+class SiteSelectWidget(Select2Mixin, forms.Select):
+    pass
+
+
 class CategorySelectWidget(Select2Mixin, forms.Select):
     pass
 
@@ -278,21 +282,11 @@ class AliasSelectWidget(Select2Mixin, forms.TextInput):
         return attrs
 
 
-class HtmlLinkMixin:
-    class Media:
-        css = {"all": ("cms/js/select2/select2.css",)}
-        js = ("cms/js/select2/select2.js",)
-
-
-class HtmlLinkSiteSelectWidget(HtmlLinkMixin, forms.Select):
-    pass
-
-
 class AliasPluginForm(forms.ModelForm):
     site = forms.ModelChoiceField(
         label=_("Site"),
         queryset=Site.objects.all(),
-        widget=HtmlLinkSiteSelectWidget(attrs={"data-placeholder": _("Select site")}),
+        widget=SiteSelectWidget(attrs={"data-placeholder": _("Select site")}),
         required=False,
     )
 

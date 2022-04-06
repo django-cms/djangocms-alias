@@ -332,4 +332,5 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             alias=alias,
         )
         form = AliasPluginForm(instance=alias_plugin)
+
         self.assertEqual(form.fields['site'].initial, current_site)

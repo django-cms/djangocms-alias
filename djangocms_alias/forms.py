@@ -1,19 +1,13 @@
 from django import forms
 from django.contrib import admin
-from django.contrib.admin.widgets import (
-    AdminTextInputWidget,
-    RelatedFieldWidgetWrapper,
-)
+from django.contrib.admin.widgets import AdminTextInputWidget, RelatedFieldWidgetWrapper
 from django.contrib.sites.models import Site
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
 from cms.utils import get_current_site
-from cms.utils.permissions import (
-    get_model_permission_codename,
-    has_plugin_permission,
-)
+from cms.utils.permissions import get_model_permission_codename, has_plugin_permission
 from cms.utils.urlutils import admin_reverse
 
 from parler.forms import TranslatableModelForm
@@ -238,7 +232,7 @@ class SetAliasPositionForm(forms.Form):
                     'position': _(
                         'Invalid position in category list, '
                         'available positions are: {}'
-                    ).format([i for i in range(0, alias_count)])
+                    ).format(list(range(0, alias_count)))
                 })
 
         return cleaned_data

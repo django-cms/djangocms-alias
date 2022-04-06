@@ -5,29 +5,15 @@ from django.urls import NoReverseMatch
 from django.utils.encoding import force_str
 from django.utils.translation import gettext, gettext_lazy as _
 
-from cms.cms_toolbars import (
-    ADMIN_MENU_IDENTIFIER,
-    ADMINISTRATION_BREAK,
-    LANGUAGE_MENU_IDENTIFIER,
-    SHORTCUTS_BREAK,
-)
+from cms.cms_toolbars import ADMIN_MENU_IDENTIFIER, ADMINISTRATION_BREAK, LANGUAGE_MENU_IDENTIFIER, SHORTCUTS_BREAK
 from cms.toolbar.items import Break, ButtonList
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
-from cms.utils.i18n import (
-    force_language,
-    get_language_dict,
-    get_language_tuple,
-)
+from cms.utils.i18n import force_language, get_language_dict, get_language_tuple
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
-from .constants import (
-    CATEGORY_LIST_URL_NAME,
-    DELETE_ALIAS_URL_NAME,
-    LIST_ALIASES_URL_NAME,
-    USAGE_ALIAS_URL_NAME,
-)
+from .constants import CATEGORY_LIST_URL_NAME, DELETE_ALIAS_URL_NAME, LIST_ALIASES_URL_NAME, USAGE_ALIAS_URL_NAME
 from .models import Alias, AliasContent
 
 
@@ -223,7 +209,7 @@ class AliasToolbar(CMSToolbar):
 
             if add:
                 add_plugins_menu = language_menu.get_or_create_menu(
-                    '{0}-add'.format(LANGUAGE_MENU_IDENTIFIER),
+                    f'{LANGUAGE_MENU_IDENTIFIER}-add',
                     _('Add Translation'),
                 )
                 add_url = admin_reverse('djangocms_alias_aliascontent_add')
@@ -234,7 +220,7 @@ class AliasToolbar(CMSToolbar):
 
             if remove:
                 remove_plugins_menu = language_menu.get_or_create_menu(
-                    '{0}-del'.format(LANGUAGE_MENU_IDENTIFIER),
+                    f'{LANGUAGE_MENU_IDENTIFIER}-del',
                     _('Delete Translation'),
                 )
                 disabled = len(remove) == 1
@@ -252,7 +238,7 @@ class AliasToolbar(CMSToolbar):
 
             if copy:
                 copy_plugins_menu = language_menu.get_or_create_menu(
-                    '{0}-copy'.format(LANGUAGE_MENU_IDENTIFIER),
+                    f'{LANGUAGE_MENU_IDENTIFIER}-copy',
                     _('Copy all plugins')
                 )
                 title = _('from %s')

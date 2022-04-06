@@ -1,16 +1,10 @@
 from copy import copy
 
-from django.utils.translation import (
-    get_language_from_request,
-    gettext_lazy as _,
-)
+from django.utils.translation import get_language_from_request, gettext_lazy as _
 
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
-from cms.utils.permissions import (
-    get_model_permission_codename,
-    has_plugin_permission,
-)
+from cms.utils.permissions import get_model_permission_codename, has_plugin_permission
 from cms.utils.plugins import copy_plugins_to_placeholder
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
@@ -36,7 +30,7 @@ class Alias(CMSPluginBase):
             and instance.is_recursive()
         ):
             return 'djangocms_alias/alias_recursive.html'
-        return 'djangocms_alias/{}/alias.html'.format(instance.template)
+        return f'djangocms_alias/{instance.template}/alias.html'
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):

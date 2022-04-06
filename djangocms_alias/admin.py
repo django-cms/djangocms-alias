@@ -13,11 +13,7 @@ from .filters import LanguageFilter
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
-from .utils import (
-    emit_content_change,
-    emit_content_delete,
-    is_versioning_enabled,
-)
+from .utils import emit_content_change, emit_content_delete, is_versioning_enabled
 
 
 __all__ = [
@@ -27,13 +23,13 @@ __all__ = [
 ]
 
 alias_content_admin_classes = [admin.ModelAdmin]
-alias_content_admin_list_display = ('name', 'get_category',)
+alias_content_admin_list_display = ('name', 'get_category')
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
     from djangocms_versioning.admin import ExtendedVersionAdminMixin
     alias_content_admin_classes.insert(0, ExtendedVersionAdminMixin)
-    alias_content_admin_list_display = ('name', 'get_category',)
+    alias_content_admin_list_display = ('name', 'get_category')
 
 
 @admin.register(Category)

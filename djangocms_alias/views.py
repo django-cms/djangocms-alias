@@ -11,10 +11,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import conditional_escape
-from django.utils.translation import (
-    get_language_from_request,
-    gettext_lazy as _,
-)
+from django.utils.translation import get_language_from_request, gettext_lazy as _
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 
@@ -311,7 +308,7 @@ def alias_usage_view(request, pk):
 
     alias = get_object_or_404(AliasModel.objects.all(), pk=pk)
     opts = Alias.model._meta
-    title = _('Objects using alias: {}'.format(alias))
+    title = _(f'Objects using alias: {alias}')
     context = {
         'has_change_permission': True,
         'opts': opts,

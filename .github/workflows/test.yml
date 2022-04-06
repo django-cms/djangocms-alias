@@ -22,7 +22,7 @@ jobs:
             django_32.txt,
         ]
         os: [
-            ubuntu-latest,
+            ubuntu-20.04,
         ]
         versioning-enabled: [ 0, 1 ]
 

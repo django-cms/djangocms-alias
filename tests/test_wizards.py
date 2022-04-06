@@ -63,7 +63,7 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         self.assertTrue(form.is_valid())
         alias = form.save()
 
-        self.assertEqual(form.fields['site'].initial,get_current_site())
+        self.assertEqual(form.fields['site'].initial, get_current_site())
 
         with self.login_user_context(self.superuser):
             response = self.client.get(alias.get_absolute_url())

@@ -9,7 +9,7 @@ Installation
 Requirements
 ============
 
-django CMS Alias requires that you have a django CMS 3.5 (or higher) project already running and set up.
+django CMS Alias requires that you have a django CMS 3.6 (or higher) project already running and set up.
 
 
 To install
@@ -19,7 +19,7 @@ Run::
 
     pip install djangocms-alias
 
-Add ``djangocms_alias`` to your project's ``INSTALLED_APPS``.
+Add ``djangocms_alias`` and ``parler`` to your project's ``INSTALLED_APPS``.
 
 Run::
 

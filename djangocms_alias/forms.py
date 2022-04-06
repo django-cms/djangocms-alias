@@ -173,7 +173,7 @@ class CreateAliasWizardForm(forms.Form):
     )
     site = forms.ModelChoiceField(
         queryset=Site.objects.all(),
-        required=True,
+        required=False,
     )
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
@@ -195,7 +195,6 @@ class CreateAliasWizardForm(forms.Form):
     def save(self):
         alias = AliasModel.objects.create(
             category=self.cleaned_data.get('category'),
-            site=self.cleaned.data.get('site'),
         )
         alias_content = AliasContent.objects.create(
             alias=alias,

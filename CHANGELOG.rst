@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* feat: Site dropdown added to createalias wizard and change alias admin
 * feat: Remove Add cta and hide delete dropdown actions from AliasContent admin ChangeList
 * feat: Site field added to plugin
 

@@ -1,6 +1,7 @@
 from django.contrib.sites.models import Site
 from django.utils import translation
 
+from cms.utils import get_current_site
 from cms.wizards.forms import WizardStep2BaseForm, step2_form_factory
 from cms.wizards.helpers import get_entries as get_wizard_entires
 
@@ -50,6 +51,7 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         data = {
             'name': 'Content #1',
             'category': self.category.pk,
+            'site': get_current_site()
         }
 
         form_class = step2_form_factory(
@@ -60,6 +62,8 @@ class WizardsTestCase(BaseAliasPluginTestCase):
 
         self.assertTrue(form.is_valid())
         alias = form.save()
+
+        self.assertEqual(form.fields['site'].initial,get_current_site())
 
         with self.login_user_context(self.superuser):
             response = self.client.get(alias.get_absolute_url())
@@ -88,6 +92,8 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         )
         form = form_class(**self._get_form_kwargs(data))
         category_form_queryset = form.declared_fields['category'].queryset
+
+        self.assertEqual(form.fields['site'].initial, get_current_site())
 
         # Be sure that we have untranslated categories that enforces a fair test
         self.assertNotEqual(

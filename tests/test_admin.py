@@ -16,6 +16,9 @@ class FiltersTestCase(CMSTestCase):
         self.superuser = self.get_superuser()
 
     def test_language_filter(self):
+        """
+        When rendering aliascontent manager language filter
+        """
         category = Category.objects.create(name='Language Filter Category')
         alias = AliasModel.objects.create(
             category=category,
@@ -66,6 +69,9 @@ class AliasContentManagerTestCase(CMSTestCase):
 
     @skipUnless(not is_versioning_enabled(), 'Test only relevant when no versioning')
     def test_alias_content_manager_rendering_without_versioning_actions(self):
+        """
+        When rendering aliascontent manager without versioning
+        """
         category = Category.objects.create(name='Language Filter Category')
         alias = AliasModel.objects.create(
             category=category,
@@ -76,7 +82,6 @@ class AliasContentManagerTestCase(CMSTestCase):
             name="EN Alias Content",
             language="en",
         )
-
         base_url = self.get_admin_url(AliasContent, "changelist")
 
         with self.login_user_context(self.superuser):
@@ -121,9 +126,29 @@ class AliasContentManagerTestCase(CMSTestCase):
             change_category_and_site_url,
             response_content_decoded,
         )
+        # check for add content admin link
+        add_alias_link = admin_reverse(
+            '{}_{}_add'.format(
+                expected_en_content._meta.app_label,
+                expected_en_content._meta.model_name
+            )
+        )
+        self.assertNotIn(
+            # It is not currently possible to add an alias from the django admin changelist issue #97
+            # https://github.com/django-cms/djangocms-alias/issues/97
+            add_alias_link,
+            response_content_decoded,
+        )
+        self.assertNotIn(
+            '<option value="delete_selected">Delete selected alias contents</option>',  # noqa: E501
+            response_content_decoded
+        )
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_alias_content_manager_rendering_with_versioning_actions(self):
+        """
+        When rendering aliascontent manager with versioning actions
+        """
         category = Category.objects.create(name='Language Filter Category')
         alias = AliasModel.objects.create(
             category=category,
@@ -194,10 +219,6 @@ class AliasContentManagerTestCase(CMSTestCase):
             localize(localtime(latest_alias_content_version.modified)),
             response_content_decoded,
         )
-        self.assertIn(
-            expected_en_content.get_absolute_url(),
-            response_content_decoded,
-        )
 
         usage_url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[expected_en_content.alias.pk])
         change_category_and_site_url = admin_reverse(
@@ -223,5 +244,52 @@ class AliasContentManagerTestCase(CMSTestCase):
         )
         self.assertIn(
             change_category_and_site_url,
+            response_content_decoded,
+        )
+
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_alias_content_manager_rendering_preview_add_url(self):
+        """
+        When rendering aliascontent manager with versioning actions and preview
+        """
+        category = Category.objects.create(name='Language Filter Category')
+        alias = AliasModel.objects.create(
+            category=category,
+            position=0,
+        )
+        expected_en_content = AliasContent.objects.create(
+            alias=alias,
+            name="EN Alias Content",
+            language="en",
+        )
+
+        from djangocms_versioning.models import Version
+
+        Version.objects.create(content=expected_en_content, created_by=self.superuser)
+
+        with self.login_user_context(self.superuser):
+            base_url = self.get_admin_url(AliasContent, "changelist")
+            # en is the default language configured for the site
+            response = self.client.get(base_url)
+
+        response_content_decoded = response.content.decode()
+
+        self.assertIn(
+            expected_en_content.get_absolute_url(),
+            response_content_decoded,
+        )
+        self.assertNotIn(
+            '<option value="delete_selected">Delete selected alias contents</option>',  # noqa: E501
+            response_content_decoded
+        )
+        # check for add content admin link
+        add_aliascontent_url = admin_reverse(
+            '{}_{}_add'.format(
+                expected_en_content._meta.app_label,
+                expected_en_content._meta.model_name
+            )
+        )
+        self.assertNotIn(
+            add_aliascontent_url,
             response_content_decoded,
         )

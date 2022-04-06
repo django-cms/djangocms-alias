@@ -4,6 +4,9 @@ Changelog
 
 Unreleased
 ==========
+
+1.0.3 (2022-04-06)
+==================
 * feat: Site field added to plugin
 
 1.0.2 (2022-04-01)

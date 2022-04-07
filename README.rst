@@ -28,6 +28,13 @@ Run::
 to perform the application's database migrations.
 
 
-=====
-Usage
-=====
+To contribute
+=============
+
+The project makes use of pre-commit hooks in git to help maintain coding standards.
+To utilise this during development, need to make sure this is installed.
+
+Run::
+
+    pip install pre-commit
+    pre-commit install

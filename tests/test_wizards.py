@@ -51,7 +51,7 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         data = {
             'name': 'Content #1',
             'category': self.category.pk,
-            'site': get_current_site()
+            'site': None
         }
 
         form_class = step2_form_factory(

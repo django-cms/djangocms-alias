@@ -6,6 +6,7 @@ Unreleased
 ==========
 * feat: Remove Add cta and hide delete dropdown actions from AliasContent admin ChangeList
 * feat: Site field added to plugin
+* fix: Added parler to the installation instructions as an installed app
 
 1.0.2 (2022-04-01)
 ==================

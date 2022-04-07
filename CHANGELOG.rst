@@ -5,6 +5,9 @@ Changelog
 Unreleased
 ==========
 * feat: Add site dropdown to create alias wizard and change alias admin
+
+1.1.0 (2022-04-06)
+==================
 * feat: Remove Add cta and hide delete dropdown actions from AliasContent admin ChangeList
 * feat: Site field added to plugin
 

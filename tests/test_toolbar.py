@@ -59,8 +59,8 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         request = self.get_page_request(self.page, user=self.superuser)
         admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
         break_item = admin_menu.find_first(Break, identifier=ADMINISTRATION_BREAK)  # noqa: E501
-        item_positioned_before_admin_break = admin_menu.items[break_item.index - 1]  # noqa: E501
-        self.assertEqual(item_positioned_before_admin_break.name, 'Aliases')
+        item_positioned_before_admin_break = admin_menu.items[break_item.index + 2]  # noqa: E501
+        self.assertEqual(item_positioned_before_admin_break.name, 'Aliases...')
 
     def test_add_alias_menu_showing_only_on_alias_plugin_views(self):
         alias = self._create_alias([self.plugin])

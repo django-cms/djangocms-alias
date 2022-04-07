@@ -4,6 +4,10 @@ Changelog
 
 Unreleased
 ==========
+* feat: Changed Site dropdown url for Aliases to point to the admin changelist
+
+1.1.0 (2022-04-06)
+==================
 * feat: Remove Add cta and hide delete dropdown actions from AliasContent admin ChangeList
 * feat: Site field added to plugin
 

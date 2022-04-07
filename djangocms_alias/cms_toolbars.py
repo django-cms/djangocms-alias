@@ -1,7 +1,7 @@
 import itertools
 from copy import copy
 
-from django.urls import NoReverseMatch
+from django.urls import NoReverseMatch, reverse
 from django.utils.encoding import force_str
 from django.utils.translation import gettext, gettext_lazy as _
 
@@ -45,6 +45,7 @@ ALIAS_LANGUAGE_BREAK = 'alias-language'
 class AliasToolbar(CMSToolbar):
     name = _('Alias')
     plural_name = _('Aliases')
+    alias_content_model = AliasContent
 
     def populate(self):
         self.add_aliases_link_to_admin_menu()
@@ -62,11 +63,10 @@ class AliasToolbar(CMSToolbar):
         if not self.request.user.has_perm('djangocms_alias.change_category'):
             return
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
-        admin_menu.add_link_item(
-            _('Aliases'),
-            url=admin_reverse(CATEGORY_LIST_URL_NAME),
-            position=self.get_insert_position(admin_menu, self.plural_name),
+        url = reverse("admin:{}_alias_changelist".format(
+            self.alias_content_model._meta.app_label)
         )
+        admin_menu.add_sideframe_item(_("Aliases"), url=url, position=5)
 
     def add_alias_menu(self):
         alias_menu = self.toolbar.get_or_create_menu(

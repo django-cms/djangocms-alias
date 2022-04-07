@@ -51,9 +51,8 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         data = {
             'name': 'Content #1',
             'category': self.category.pk,
-            'site': None
+            'site': get_current_site().pk
         }
-
         form_class = step2_form_factory(
             mixin_cls=WizardStep2BaseForm,
             entry_form_class=wizard.form,

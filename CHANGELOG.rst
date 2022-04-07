@@ -6,6 +6,9 @@ Unreleased
 ==========
 * feat: Remove Add cta and hide delete dropdown actions from AliasContent admin ChangeList
 * feat: Site field added to plugin
+* build: Added ``long_description_content_type`` for setuptools.
+* ci: Changed test workflow so that the coverage reporting happens after all unittests run
+* ci: Updated deprecated isort v4 CLI flags for the v5 double-dashed arguments
 
 1.0.2 (2022-04-01)
 ==================

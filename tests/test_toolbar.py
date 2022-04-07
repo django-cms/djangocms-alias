@@ -15,6 +15,7 @@ from cms.utils.urlutils import admin_reverse
 
 from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
 from djangocms_alias.constants import USAGE_ALIAS_URL_NAME
+from djangocms_alias.models import Alias
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
@@ -381,3 +382,22 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertNotEqual(bool(search_results), False)
         for result in search_results:
             self.assertEqual(result.item.disabled, False)
+
+    def test_site_dropdown_url_renders_admin_changelist(self):
+        request = self.get_page_request(self.page, user=self.superuser)
+        admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
+        site_url = admin_menu.items[5].url
+        admin_changelist = self.get_admin_url(Alias, "changelist")
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                site_url,
+            )
+
+        content = response.content.decode('utf-8')
+
+        self.assertEqual(response.status_code, 200)
+        # Url from site menu matches admin changelog url
+        self.assertEqual(site_url, admin_changelist)
+        # Rendered content should contain admin changelist header
+        self.assertIn("Select alias to change | Django site admin", content)

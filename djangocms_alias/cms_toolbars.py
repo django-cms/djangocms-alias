@@ -24,12 +24,9 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import (
     CATEGORY_LIST_URL_NAME,
-    DELETE_ALIAS_URL_NAME,
-    LIST_ALIASES_URL_NAME,
     USAGE_ALIAS_URL_NAME,
 )
 from .models import Alias, AliasContent
-from .utils import is_versioning_enabled
 
 
 __all__ = [

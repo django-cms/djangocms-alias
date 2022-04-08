@@ -1,6 +1,5 @@
 import itertools
 from copy import copy
-from unittest import skipUnless
 
 from django.urls import NoReverseMatch
 from django.utils.encoding import force_str

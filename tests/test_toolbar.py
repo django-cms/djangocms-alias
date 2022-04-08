@@ -1,5 +1,6 @@
 import itertools
 from collections import ChainMap
+from unittest import skipUnless
 
 from django.contrib.auth.models import Permission
 

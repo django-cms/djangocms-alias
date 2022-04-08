@@ -62,7 +62,7 @@ class AliasToolbar(CMSToolbar):
         if not self.request.user.has_perm('djangocms_alias.change_category'):
             return
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
-        url = reverse("admin:{}_alias_changelist".format(
+        url = reverse("admin:{}_aliascontent_changelist".format(
             self.alias_content_model._meta.app_label)
         )
         admin_menu.add_sideframe_item(_("Aliases"), url=url, position=5)

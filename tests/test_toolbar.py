@@ -299,25 +299,6 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         create_button = self._get_wizard_create_button(request)
         self.assertEqual(create_button.disabled, False)
 
-    @skipUnless(not is_versioning_enabled(), 'Test only relevant when no versioning')
-    def test_delete_button_show_on_edit_alias_view(self):
-        alias = self._create_alias()
-        request = self.get_alias_request(
-            alias=alias,
-            user=self.superuser,
-            edit=True,
-        )
-        button_label = 'Delete Alias...'
-        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
-        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
-        button = search_result.item
-        self.assertEqual(button.name, button_label)
-        self.assertEqual(button.url, self.get_delete_alias_endpoint(alias.pk))
-        self.assertEqual(
-            button.on_close,
-            self.get_list_aliases_endpoint(alias.category_id),
-        )
-
     def test_rename_alias_show_on_edit_alias_view(self):
         alias = self._create_alias()
         request = self.get_alias_request(

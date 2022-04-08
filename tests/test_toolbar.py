@@ -243,7 +243,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             [item.name for item in language_menu.items], expected_result
         )
 
-    def test_alias_change_category_button_is_visible_on_alias_edit_view(self):
+    def test_change_alias_settings_button_is_visible_on_alias_edit_view(self):
         button_label = 'Change alias settings...'
         alias_change_viewname = 'djangocms_alias_alias_change'
         alias = self._create_alias()
@@ -310,7 +310,6 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         button_label = 'Delete Alias...'
         alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
         search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
-        self.assertIsNotNone(search_result)
         button = search_result.item
         self.assertEqual(button.name, button_label)
         self.assertEqual(button.url, self.get_delete_alias_endpoint(alias.pk))
@@ -319,7 +318,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             self.get_list_aliases_endpoint(alias.category_id),
         )
 
-    def test_edit_alias_details_show_on_edit_alias_view(self):
+    def test_rename_alias_show_on_edit_alias_view(self):
         alias = self._create_alias()
         request = self.get_alias_request(
             alias=alias,

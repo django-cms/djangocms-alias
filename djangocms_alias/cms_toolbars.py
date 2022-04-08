@@ -31,6 +31,7 @@ from .constants import (
 from .models import Alias, AliasContent
 from .utils import is_versioning_enabled
 
+
 __all__ = [
     'AliasToolbar',
 ]

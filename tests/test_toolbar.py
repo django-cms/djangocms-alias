@@ -2,6 +2,7 @@ import itertools
 from collections import ChainMap
 
 from django.contrib.auth.models import Permission
+from django.urls import reverse
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
@@ -387,7 +388,9 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         request = self.get_page_request(self.page, user=self.superuser)
         admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
         site_aliases_url = admin_menu.items[5].url
-        admin_changelist_aliases_url = self.get_admin_url(AliasContent, "changelist")
+        admin_changelist_aliases_url = reverse("admin:{}_aliascontent_changelist".format(
+            AliasContent._meta.app_label)
+        )
 
         with self.login_user_context(self.superuser):
             response = self.client.get(

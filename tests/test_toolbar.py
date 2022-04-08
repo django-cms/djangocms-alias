@@ -243,7 +243,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         )
 
     def test_alias_change_category_button_is_visible_on_alias_edit_view(self):
-        button_label = 'Change category...'
+        button_label = 'Change alias settings...'
         alias_change_viewname = 'djangocms_alias_alias_change'
         alias = self._create_alias()
         with force_language('en'):
@@ -298,6 +298,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         create_button = self._get_wizard_create_button(request)
         self.assertEqual(create_button.disabled, False)
 
+    @skipUnless(not is_versioning_enabled(), 'Test only relevant when no versioning')
     def test_delete_button_show_on_edit_alias_view(self):
         alias = self._create_alias()
         request = self.get_alias_request(
@@ -324,7 +325,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             user=self.superuser,
             edit=True,
         )
-        button_label = 'Edit alias details...'
+        button_label = 'Rename alias...'
         alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
         search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
         self.assertIsNotNone(search_result)

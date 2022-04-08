@@ -61,7 +61,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         request = self.get_page_request(self.page, user=self.superuser)
         admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
         break_item = admin_menu.find_first(Break, identifier=ADMINISTRATION_BREAK)  # noqa: E501
-        item_positioned_before_admin_break = admin_menu.items[break_item.index + 2]  # noqa: E501
+        item_positioned_before_admin_break = admin_menu.items[break_item.index - 1]  # noqa: E501
         self.assertEqual(item_positioned_before_admin_break.name, 'Aliases...')
 
     def test_add_alias_menu_showing_only_on_alias_plugin_views(self):
@@ -387,7 +387,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
     def test_site_dropdown_url_renders_admin_changelist(self):
         request = self.get_page_request(self.page, user=self.superuser)
         admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
-        site_aliases_url = admin_menu.items[5].url
+        site_aliases_url = admin_menu.items[3].url
 
         with self.login_user_context(self.superuser):
             response = self.client.get(
@@ -403,7 +403,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
     def test_site_dropdown_url_renders_admin_changelist_url(self):
         request = self.get_page_request(self.page, user=self.superuser)
         admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
-        site_aliases_url = admin_menu.items[5].url
+        site_aliases_url = admin_menu.items[3].url
         admin_changelist_aliases_url = reverse("admin:{}_aliascontent_changelist".format(
             AliasContent._meta.app_label)
         )

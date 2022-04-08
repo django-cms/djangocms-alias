@@ -64,7 +64,11 @@ class AliasToolbar(CMSToolbar):
         url = reverse("admin:{}_aliascontent_changelist".format(
             AliasContent._meta.app_label)
         )
-        admin_menu.add_sideframe_item(_("Aliases"), url=url, position=5)
+        admin_menu.add_sideframe_item(
+            _("Aliases"),
+            url=url,
+            position=self.get_insert_position(admin_menu, self.plural_name),
+        )
 
     def add_alias_menu(self):
         alias_menu = self.toolbar.get_or_create_menu(

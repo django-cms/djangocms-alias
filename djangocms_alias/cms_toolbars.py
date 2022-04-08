@@ -44,7 +44,6 @@ ALIAS_LANGUAGE_BREAK = 'alias-language'
 class AliasToolbar(CMSToolbar):
     name = _('Alias')
     plural_name = _('Aliases')
-    alias_content_model = AliasContent
 
     def populate(self):
         self.add_aliases_link_to_admin_menu()

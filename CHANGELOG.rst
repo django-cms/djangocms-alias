@@ -4,6 +4,9 @@ Changelog
 
 Unreleased
 ==========
+
+1.1.0 (2022-04-06)
+==================
 * feat: Remove Add cta and hide delete dropdown actions from AliasContent admin ChangeList
 * feat: Site field added to plugin
 * feat: Added pre-commit config so that hooks can be installed to ensure coding standards are maintained before issues are picked up during CI and review.

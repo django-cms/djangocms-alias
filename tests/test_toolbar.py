@@ -388,9 +388,6 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         request = self.get_page_request(self.page, user=self.superuser)
         admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
         site_aliases_url = admin_menu.items[5].url
-        admin_changelist_aliases_url = reverse("admin:{}_aliascontent_changelist".format(
-            AliasContent._meta.app_label)
-        )
 
         with self.login_user_context(self.superuser):
             response = self.client.get(
@@ -400,7 +397,22 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         content = response.content.decode('utf-8')
 
         self.assertEqual(response.status_code, 200)
-        # Url from site menu matches admin changelist url
-        self.assertEqual(site_aliases_url, admin_changelist_aliases_url)
         # Rendered content should contain admin changelist header
         self.assertIn("Select alias content to change | Django site admin", content)
+
+    def test_site_dropdown_url_renders_admin_changelist_url(self):
+        request = self.get_page_request(self.page, user=self.superuser)
+        admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
+        site_aliases_url = admin_menu.items[5].url
+        admin_changelist_aliases_url = reverse("admin:{}_aliascontent_changelist".format(
+            AliasContent._meta.app_label)
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                site_aliases_url,
+            )
+
+        self.assertEqual(response.status_code, 200)
+        # Url from site menu renders Alias content
+        self.assertEqual(site_aliases_url, admin_changelist_aliases_url)

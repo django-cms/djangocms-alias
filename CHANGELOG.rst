@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* feat: Refactor alias topdown and versioning action menus
 
 1.1.0 (2022-04-06)
 ==================

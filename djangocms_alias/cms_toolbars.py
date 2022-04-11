@@ -23,8 +23,8 @@ from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import (
-    CATEGORY_LIST_URL_NAME,
     DELETE_ALIAS_URL_NAME,
+    LIST_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
     USAGE_ALIAS_URL_NAME,
 )
@@ -63,9 +63,12 @@ class AliasToolbar(CMSToolbar):
         if not self.request.user.has_perm('djangocms_alias.change_category'):
             return
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
-        admin_menu.add_link_item(
-            _('Aliases'),
-            url=admin_reverse(CATEGORY_LIST_URL_NAME),
+
+        url = admin_reverse(LIST_ALIAS_URL_NAME)
+
+        admin_menu.add_sideframe_item(
+            _("Aliases"),
+            url=url,
             position=self.get_insert_position(admin_menu, self.plural_name),
         )
 

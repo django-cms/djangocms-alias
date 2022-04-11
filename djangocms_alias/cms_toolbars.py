@@ -23,7 +23,7 @@ from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import (
-    CHANGE_ALIAS_URL_NAME,
+    LIST_ALIAS_URL_NAME,
     DELETE_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
     USAGE_ALIAS_URL_NAME,
@@ -64,7 +64,7 @@ class AliasToolbar(CMSToolbar):
             return
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
 
-        url = admin_reverse(CHANGE_ALIAS_URL_NAME)
+        url = admin_reverse(LIST_ALIAS_URL_NAME)
 
         admin_menu.add_sideframe_item(
             _("Aliases"),

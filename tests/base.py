@@ -19,6 +19,7 @@ from djangocms_alias.constants import (
     CREATE_ALIAS_URL_NAME,
     DELETE_ALIAS_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
+    LIST_ALIAS_URL_NAME,
 )
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled, url_for_category_list
@@ -30,7 +31,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         return admin_reverse(CREATE_ALIAS_URL_NAME)
 
     def get_category_list_endpoint(self):
-        return admin_reverse('djangocms_alias_aliascontent_changelist')
+        return admin_reverse(LIST_ALIAS_URL_NAME)
 
     def get_detach_alias_plugin_endpoint(self, plugin_pk):
         return admin_reverse(

@@ -2,7 +2,7 @@ from django.apps import apps
 
 from cms.utils.urlutils import admin_reverse
 
-from .constants import CATEGORY_FILTER_URL_PARAM
+from .constants import CATEGORY_FILTER_URL_PARAM, LIST_ALIAS_URL_NAME
 
 
 def is_versioning_enabled():
@@ -19,7 +19,7 @@ def url_for_category_list(category_id):
     category_id: An id of a category
     returns: a url for the list of aliases for a given category.
     """
-    return admin_reverse('djangocms_alias_aliascontent_changelist') + f"?{CATEGORY_FILTER_URL_PARAM}={category_id}"
+    return admin_reverse(LIST_ALIAS_URL_NAME) + f"?{CATEGORY_FILTER_URL_PARAM}={category_id}"
 
 
 def emit_content_change(objs, sender=None):

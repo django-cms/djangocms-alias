@@ -23,12 +23,11 @@ from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import (
-    CATEGORY_FILTER_URL_PARAM,
     DELETE_ALIAS_URL_NAME,
     USAGE_ALIAS_URL_NAME,
 )
 from .models import Alias, AliasContent
-from .utils import is_versioning_enabled
+from .utils import is_versioning_enabled, url_for_category_list
 
 
 __all__ = [
@@ -111,9 +110,7 @@ class AliasToolbar(CMSToolbar):
                     DELETE_ALIAS_URL_NAME,
                     args=(self.toolbar.obj.alias_id, ),
                 ),
-                on_close=admin_reverse(
-                    "djangocms_alias_aliascontent_changelist"
-                ) + f"?{CATEGORY_FILTER_URL_PARAM}={self.toolbar.obj.alias.category_id}",
+                on_close=url_for_category_list(self.toolbar.obj.alias.category_id),
                 disabled=disabled,
             )
 

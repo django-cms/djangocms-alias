@@ -19,7 +19,7 @@ from cms.utils.urlutils import admin_reverse
 
 from parler.models import TranslatableModel, TranslatedFields
 
-from .utils import is_versioning_enabled
+from .utils import is_versioning_enabled, url_for_category_list
 
 
 __all__ = [
@@ -64,7 +64,7 @@ class Category(TranslatableModel):
         return self.safe_translation_getter("name", any_language=True)
 
     def get_absolute_url(self):
-        return admin_reverse('djangocms_alias_aliascontent_changelist') + f"?category={self.pk}"
+        return url_for_category_list(self.pk)
 
 
 class Alias(models.Model):

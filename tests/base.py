@@ -16,11 +16,10 @@ from cms.utils.conf import get_cms_setting
 from cms.utils.urlutils import admin_reverse
 
 from djangocms_alias.constants import (
-    CATEGORY_LIST_URL_NAME,
+    CATEGORY_FILTER_URL_PARAM,
     CREATE_ALIAS_URL_NAME,
     DELETE_ALIAS_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
-    LIST_ALIASES_URL_NAME,
 )
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
@@ -32,7 +31,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         return admin_reverse(CREATE_ALIAS_URL_NAME)
 
     def get_category_list_endpoint(self):
-        return admin_reverse(CATEGORY_LIST_URL_NAME)
+        return admin_reverse('djangocms_alias_aliascontent_changelist')
 
     def get_detach_alias_plugin_endpoint(self, plugin_pk):
         return admin_reverse(
@@ -47,10 +46,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         )
 
     def get_list_aliases_endpoint(self, category_pk):
-        return admin_reverse(
-            LIST_ALIASES_URL_NAME,
-            args=[category_pk],
-        )
+        return admin_reverse('djangocms_alias_aliascontent_changelist') + f"?{CATEGORY_FILTER_URL_PARAM}={category_pk}"
 
     def setUp(self):
         self.superuser = self.get_superuser()

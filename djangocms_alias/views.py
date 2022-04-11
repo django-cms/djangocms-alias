@@ -1,16 +1,12 @@
 import json
-import operator
 
 from django.contrib import admin
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils.html import conditional_escape
 from django.utils.translation import (
     get_language_from_request,
     gettext_lazy as _,

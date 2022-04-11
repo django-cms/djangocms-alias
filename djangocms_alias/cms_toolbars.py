@@ -29,6 +29,7 @@ from .constants import (
     USAGE_ALIAS_URL_NAME,
 )
 from .models import Alias, AliasContent
+from .utils import is_versioning_enabled
 
 
 __all__ = [
@@ -102,18 +103,21 @@ class AliasToolbar(CMSToolbar):
                 args=[self.toolbar.obj.alias_id],
             ),
         )
-        alias_menu.add_modal_item(
-            _('Delete Alias'),
-            url=admin_reverse(
-                DELETE_ALIAS_URL_NAME,
-                args=(self.toolbar.obj.alias_id, ),
-            ),
-            on_close=admin_reverse(
-                LIST_ALIASES_URL_NAME,
-                args=(self.toolbar.obj.alias.category_id,),
-            ),
-            disabled=disabled,
-        )
+
+        # Only show deletion if versioning is not enabled
+        if not is_versioning_enabled():
+            alias_menu.add_modal_item(
+                _('Delete Alias'),
+                url=admin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=(self.toolbar.obj.alias_id, ),
+                ),
+                on_close=admin_reverse(
+                    LIST_ALIASES_URL_NAME,
+                    args=(self.toolbar.obj.alias.category_id,),
+                ),
+                disabled=disabled,
+            )
 
     @classmethod
     def get_insert_position(cls, admin_menu, item_name):

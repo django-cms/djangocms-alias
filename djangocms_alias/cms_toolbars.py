@@ -23,8 +23,8 @@ from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import (
-    LIST_ALIAS_URL_NAME,
     DELETE_ALIAS_URL_NAME,
+    LIST_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
     USAGE_ALIAS_URL_NAME,
 )

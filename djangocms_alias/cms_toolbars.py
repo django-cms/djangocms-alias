@@ -28,6 +28,7 @@ from .constants import (
     USAGE_ALIAS_URL_NAME,
 )
 from .models import Alias, AliasContent
+from .utils import is_versioning_enabled
 
 
 __all__ = [
@@ -79,6 +80,26 @@ class AliasToolbar(CMSToolbar):
             position=1,
         )
 
+        can_change = self.request.user.has_perm(
+            get_model_permission_codename(Alias, 'change'),
+        )
+        disabled = not can_change or not self.toolbar.edit_mode_active
+        alias_menu.add_modal_item(
+            _('Change alias settings'),
+            url=admin_reverse(
+                'djangocms_alias_alias_change',
+                args=[self.toolbar.obj.alias_id],
+            ),
+            disabled=disabled,
+        )
+        alias_menu.add_modal_item(
+            _('Rename alias'),
+            url=admin_reverse(
+                'djangocms_alias_aliascontent_change',
+                args=[self.toolbar.obj.pk],
+            ),
+            disabled=disabled,
+        )
         alias_menu.add_modal_item(
             _('View usage'),
             url=admin_reverse(
@@ -87,38 +108,20 @@ class AliasToolbar(CMSToolbar):
             ),
         )
 
-        can_change = self.request.user.has_perm(
-            get_model_permission_codename(Alias, 'change'),
-        )
-        disabled = not can_change or not self.toolbar.edit_mode_active
-        alias_menu.add_modal_item(
-            _('Edit alias details'),
-            url=admin_reverse(
-                'djangocms_alias_aliascontent_change',
-                args=[self.toolbar.obj.pk],
-            ),
-            disabled=disabled,
-        )
-        alias_menu.add_modal_item(
-            _('Change category'),
-            url=admin_reverse(
-                'djangocms_alias_alias_change',
-                args=[self.toolbar.obj.alias_id],
-            ),
-            disabled=disabled,
-        )
-        alias_menu.add_modal_item(
-            _('Delete Alias'),
-            url=admin_reverse(
-                DELETE_ALIAS_URL_NAME,
-                args=(self.toolbar.obj.alias_id, ),
-            ),
-            on_close=admin_reverse(
-                LIST_ALIASES_URL_NAME,
-                args=(self.toolbar.obj.alias.category_id,),
-            ),
-            disabled=disabled,
-        )
+        # Only show deletion if versioning is not enabled
+        if not is_versioning_enabled():
+            alias_menu.add_modal_item(
+                _('Delete alias'),
+                url=admin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=(self.toolbar.obj.alias_id, ),
+                ),
+                on_close=admin_reverse(
+                    LIST_ALIASES_URL_NAME,
+                    args=(self.toolbar.obj.alias.category_id,),
+                ),
+                disabled=disabled,
+            )
 
     @classmethod
     def get_insert_position(cls, admin_menu, item_name):

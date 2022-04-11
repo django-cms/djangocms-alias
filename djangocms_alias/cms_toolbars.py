@@ -107,7 +107,7 @@ class AliasToolbar(CMSToolbar):
         # Only show deletion if versioning is not enabled
         if not is_versioning_enabled():
             alias_menu.add_modal_item(
-                _('Delete Alias'),
+                _('Delete alias'),
                 url=admin_reverse(
                     DELETE_ALIAS_URL_NAME,
                     args=(self.toolbar.obj.alias_id, ),

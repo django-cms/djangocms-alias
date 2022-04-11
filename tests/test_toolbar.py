@@ -1,5 +1,6 @@
 import itertools
 from collections import ChainMap
+from unittest import skipUnless
 
 from django.contrib.auth.models import Permission
 
@@ -242,8 +243,8 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             [item.name for item in language_menu.items], expected_result
         )
 
-    def test_alias_change_category_button_is_visible_on_alias_edit_view(self):
-        button_label = 'Change category...'
+    def test_change_alias_settings_button_is_visible_on_alias_edit_view(self):
+        button_label = 'Change alias settings...'
         alias_change_viewname = 'djangocms_alias_alias_change'
         alias = self._create_alias()
         with force_language('en'):
@@ -298,18 +299,27 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         create_button = self._get_wizard_create_button(request)
         self.assertEqual(create_button.disabled, False)
 
-    def test_delete_button_show_on_edit_alias_view(self):
+    @skipUnless(not is_versioning_enabled(), 'Test only relevant when no versioning')
+    def test_delete_button_show_on_edit_alias_view_no_versioning(self):
+        """
+        When versioning is not installed deletion should be possible. The delete button
+        should be available in the toolbar.
+        """
         alias = self._create_alias()
         request = self.get_alias_request(
             alias=alias,
             user=self.superuser,
             edit=True,
         )
-        button_label = 'Delete Alias...'
+        button_label = 'Delete alias...'
         alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+
         search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
+
         self.assertIsNotNone(search_result)
+
         button = search_result.item
+
         self.assertEqual(button.name, button_label)
         self.assertEqual(button.url, self.get_delete_alias_endpoint(alias.pk))
         self.assertEqual(
@@ -317,14 +327,33 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             self.get_list_aliases_endpoint(alias.category_id),
         )
 
-    def test_edit_alias_details_show_on_edit_alias_view(self):
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_delete_button_not_shown_on_edit_alias_view_with_versioning(self):
+        """
+        When versioning is installed no deletion should be possible. The delete button
+        should not be available in the toolbar.
+        """
         alias = self._create_alias()
         request = self.get_alias_request(
             alias=alias,
             user=self.superuser,
             edit=True,
         )
-        button_label = 'Edit alias details...'
+        button_label = 'Delete alias...'
+        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
+
+        # No button should be found for delete
+        self.assertIsNone(search_result)
+
+    def test_rename_alias_show_on_edit_alias_view(self):
+        alias = self._create_alias()
+        request = self.get_alias_request(
+            alias=alias,
+            user=self.superuser,
+            edit=True,
+        )
+        button_label = 'Rename alias...'
         alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
         search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
         self.assertIsNotNone(search_result)

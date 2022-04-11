@@ -9,7 +9,7 @@ from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
 from .constants import USAGE_ALIAS_URL_NAME
-from .filters import LanguageFilter
+from .filters import LanguageFilter, SiteFilter
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
@@ -101,7 +101,7 @@ class AliasAdmin(admin.ModelAdmin):
 @admin.register(AliasContent)
 class AliasContentAdmin(*alias_content_admin_classes):
     form = AliasContentForm
-    list_filter = (LanguageFilter,)
+    list_filter = (LanguageFilter, SiteFilter,)
     list_display = alias_content_admin_list_display
     # Disable dropdown actions
     actions = None

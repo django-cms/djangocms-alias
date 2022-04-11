@@ -311,7 +311,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             user=self.superuser,
             edit=True,
         )
-        button_label = 'Delete Alias...'
+        button_label = 'Delete alias...'
         alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
 
         search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)

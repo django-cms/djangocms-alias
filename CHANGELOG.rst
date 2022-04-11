@@ -4,6 +4,9 @@ Changelog
 
 Unreleased
 ==========
+
+1.2.0 (2022-04-11)
+==================
 * feat: Changed Site dropdown url for Aliases to point to the admin changelist
 * feat: Refactor alias topdown and versioning action menus
 

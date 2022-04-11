@@ -155,29 +155,29 @@ class AliasContentAdmin(*alias_content_admin_classes):
             self.list_display_links = None
         return super().get_list_display_links(request, list_display)
 
-    def _get_rename_alias_link(self, obj, request):
+    def _get_rename_alias_link(self, obj, request, disabled=False):
         url = admin_reverse('{}_{}_change'.format(
             obj._meta.app_label, obj._meta.model_name), args=(obj.pk,)
         )
         return render_to_string(
             "admin/djangocms_alias/icons/rename_alias.html",
-            {"url": url, "disabled": False},
+            {"url": url, "disabled": disabled},
         )
 
-    def _get_alias_usage_link(self, obj, request):
+    def _get_alias_usage_link(self, obj, request, disabled=False):
         url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.alias.pk])
         return render_to_string(
             "admin/djangocms_alias/icons/view_usage.html",
-            {"url": url, "disabled": False},
+            {"url": url, "disabled": disabled},
         )
 
-    def _get_change_alias_settings_link(self, obj, request):
+    def _get_change_alias_settings_link(self, obj, request, disabled=False):
         url = admin_reverse('{}_{}_change'.format(
             obj._meta.app_label, obj.alias._meta.model_name), args=(obj.alias.pk,)
         )
         return render_to_string(
             "admin/djangocms_alias/icons/change_alias_settings.html",
-            {"url": url, "disabled": False},
+            {"url": url, "disabled": disabled},
         )
 
     def _get_preview_link(self, obj, request, disabled=False):

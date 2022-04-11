@@ -1,7 +1,7 @@
 import itertools
 from copy import copy
 
-from django.urls import NoReverseMatch, reverse
+from django.urls import NoReverseMatch
 from django.utils.encoding import force_str
 from django.utils.translation import gettext, gettext_lazy as _
 

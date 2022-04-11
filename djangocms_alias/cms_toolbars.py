@@ -22,7 +22,12 @@ from cms.utils.i18n import (
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
-from .constants import CATEGORY_LIST_URL_NAME, USAGE_ALIAS_URL_NAME
+from .constants import (
+    CATEGORY_LIST_URL_NAME,
+    DELETE_ALIAS_URL_NAME,
+    LIST_ALIASES_URL_NAME,
+    USAGE_ALIAS_URL_NAME,
+)
 from .models import Alias, AliasContent
 
 
@@ -96,6 +101,18 @@ class AliasToolbar(CMSToolbar):
                 USAGE_ALIAS_URL_NAME,
                 args=[self.toolbar.obj.alias_id],
             ),
+        )
+        alias_menu.add_modal_item(
+            _('Delete Alias'),
+            url=admin_reverse(
+                DELETE_ALIAS_URL_NAME,
+                args=(self.toolbar.obj.alias_id, ),
+            ),
+            on_close=admin_reverse(
+                LIST_ALIASES_URL_NAME,
+                args=(self.toolbar.obj.alias.category_id,),
+            ),
+            disabled=disabled,
         )
 
     @classmethod

@@ -42,8 +42,7 @@ class SiteFilter(admin.SimpleListFilter):
     no_site_set_value = "none"
 
     def lookups(self, request, model_admin):
-        site_list = get_sites()
-        return [(site['id'], site['name']) for site in site_list]
+        return [(site.pk, site.name) for site in get_sites()]
 
     def queryset(self, request, queryset):
         chosen_site = self.value()

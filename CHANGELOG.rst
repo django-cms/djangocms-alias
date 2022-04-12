@@ -6,6 +6,10 @@ Unreleased
 ==========
 * feat: Add AliasContent admin changelist Site filter
 
+1.3.0 (2022-04-12)
+==================
+* feat: Add site dropdown to create alias wizard and change alias admin
+
 1.2.0 (2022-04-11)
 ==================
 * feat: Changed Site dropdown url for Aliases to point to the admin changelist

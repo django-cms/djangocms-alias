@@ -81,7 +81,11 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
         current_site = get_current_site()
         another_site = Site.objects.create(
             name="Other site",
-            domain="othersite.com"
+            domain="othersite.here"
+        )
+        empty_site = Site.objects.create(
+            name="Empty site",
+            domain="emptysite.here"
         )
         category = Category.objects.create(name='Site Filter Category')
         current_site_alias = AliasModel.objects.create(
@@ -128,6 +132,8 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
             response_current_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={str(current_site.pk)}")
             # filter by aliases with a different site set
             response_other_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={str(another_site.pk)}")
+            # filter by aliases with an empty site set
+            response_empty_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={str(empty_site.pk)}")
             # filter by aliases with no site set
             response_no_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={SITE_FILTER_NO_SITE_VALUE}")
 
@@ -154,4 +160,9 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
         self.assertEqual(
             set(response_no_site.context["cl"].queryset),
             set([no_site_alias_content])
+        )
+        # No are shown when filtered by an empty site
+        self.assertEqual(
+            set(response_empty_site.context["cl"].queryset),
+            set([])
         )

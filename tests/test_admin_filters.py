@@ -129,11 +129,11 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
             # en is the default language configured for the site
             response_default = self.client.get(base_url)
             # filter by aliases with the current site
-            response_current_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={str(current_site.pk)}")
+            response_current_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={current_site.pk}")
             # filter by aliases with a different site set
-            response_other_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={str(another_site.pk)}")
+            response_other_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={another_site.pk}")
             # filter by aliases with an empty site set
-            response_empty_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={str(empty_site.pk)}")
+            response_empty_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={empty_site.pk}")
             # filter by aliases with no site set
             response_no_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={SITE_FILTER_NO_SITE_VALUE}")
 

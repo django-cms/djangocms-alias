@@ -15,5 +15,6 @@ LIST_ALIAS_URL_NAME = f'{PLUGIN_URL_NAME_PREFIX}_aliascontent_changelist'
 DEFAULT_STATIC_ALIAS_CATEGORY_NAME = "Static Alias"
 
 # Admin Filters
+LANGUAGE_FILTER_URL_PARAM = "language"
 SITE_FILTER_URL_PARAM = "alias_site"
 SITE_FILTER_NO_SITE_VALUE = "no_site"

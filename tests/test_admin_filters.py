@@ -1,16 +1,15 @@
 from django.contrib.sites.models import Site
 
-from cms.test_utils.testcases import CMSTestCase
 from cms.utils import get_current_site
 
 from djangocms_alias.constants import SITE_FILTER_NO_SITE_VALUE, SITE_FILTER_URL_PARAM
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
+from .base import BaseAliasPluginTestCase
 
-class LanguageFiltersTestCase(CMSTestCase):
-    def setUp(self):
-        self.superuser = self.get_superuser()
+
+class LanguageFiltersTestCase(BaseAliasPluginTestCase):
 
     def test_language_filter(self):
         """
@@ -69,9 +68,7 @@ class LanguageFiltersTestCase(CMSTestCase):
         )
 
 
-class SiteFiltersTestCase(CMSTestCase):
-    def setUp(self):
-        self.superuser = self.get_superuser()
+class SiteFiltersTestCase(BaseAliasPluginTestCase):
 
     def test_site_filter(self):
         """
@@ -127,9 +124,9 @@ class SiteFiltersTestCase(CMSTestCase):
             # filter by aliases with the current site
             response_current_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={str(current_site.pk)}")
             # filter by aliases with a different site set
-            response_other_site = self.client.get(f"{base_url}/?{SITE_FILTER_URL_PARAM}={str(another_site.pk)}")
+            response_other_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={str(another_site.pk)}")
             # filter by aliases with no site set
-            response_no_site = self.client.get(f"{base_url}/?{SITE_FILTER_URL_PARAM}={SITE_FILTER_NO_SITE_VALUE}")
+            response_no_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={SITE_FILTER_NO_SITE_VALUE}")
 
         # By default all alias are shown
         self.assertEqual(

@@ -4,12 +4,16 @@ from django.utils.translation import gettext_lazy as _
 from cms.forms.utils import get_sites
 from cms.utils.i18n import get_language_tuple, get_site_language_from_request
 
-from .constants import SITE_FILTER_NO_SITE_VALUE, SITE_FILTER_URL_PARAM
+from .constants import (
+    LANGUAGE_FILTER_URL_PARAM,
+    SITE_FILTER_NO_SITE_VALUE,
+    SITE_FILTER_URL_PARAM,
+)
 
 
 class LanguageFilter(admin.SimpleListFilter):
-    title = _("language")
-    parameter_name = "language"
+    title = _("Language")
+    parameter_name = LANGUAGE_FILTER_URL_PARAM
 
     def lookups(self, request, model_admin):
         return get_language_tuple()
@@ -62,7 +66,7 @@ class SiteFilter(admin.SimpleListFilter):
             "query_string": changelist.get_query_string(
                 {self.parameter_name: SITE_FILTER_NO_SITE_VALUE}
             ),
-            "display": _("No Site"),
+            "display": _("No site"),
         }
         for lookup, title in self.lookup_choices:
             yield {

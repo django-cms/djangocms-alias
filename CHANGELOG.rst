@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* feat: Add AliasContent admin changelist Site filter
 
 1.3.0 (2022-04-12)
 ==================

@@ -1,7 +1,10 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
+from cms.forms.utils import get_sites
 from cms.utils.i18n import get_language_tuple, get_site_language_from_request
+
+from .constants import SITE_FILTER_NO_SITE_VALUE, SITE_FILTER_URL_PARAM
 
 
 class LanguageFilter(admin.SimpleListFilter):
@@ -32,21 +35,17 @@ class LanguageFilter(admin.SimpleListFilter):
                 "display": title,
             }
 
-from django.contrib.sites.models import Site
-from cms.forms.utils import get_sites
-
 
 class SiteFilter(admin.SimpleListFilter):
     title = _("Site")
-    parameter_name = "site"
-    no_site_set_value = "no_site"
+    parameter_name = SITE_FILTER_URL_PARAM
 
     def lookups(self, request, model_admin):
         return [(site.pk, site.name) for site in get_sites()]
 
     def queryset(self, request, queryset):
         chosen_site = self.value()
-        if chosen_site and chosen_site == self.no_site_set_value:
+        if chosen_site and chosen_site == SITE_FILTER_NO_SITE_VALUE:
             return queryset.filter(alias__site__isnull=True)
         elif chosen_site:
             return queryset.filter(alias__site__pk=int(chosen_site))
@@ -59,9 +58,9 @@ class SiteFilter(admin.SimpleListFilter):
             "display": _("All"),
         }
         yield {
-            "selected": self.value() == self.no_site_set_value,
+            "selected": self.value() == SITE_FILTER_NO_SITE_VALUE,
             "query_string": changelist.get_query_string(
-                {self.parameter_name: self.no_site_set_value}
+                {self.parameter_name: SITE_FILTER_NO_SITE_VALUE}
             ),
             "display": _("No Site"),
         }

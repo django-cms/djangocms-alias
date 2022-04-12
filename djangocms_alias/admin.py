@@ -101,7 +101,7 @@ class AliasAdmin(admin.ModelAdmin):
 @admin.register(AliasContent)
 class AliasContentAdmin(*alias_content_admin_classes):
     form = AliasContentForm
-    list_filter = (LanguageFilter, SiteFilter,)
+    list_filter = (LanguageFilter, SiteFilter)
     list_display = alias_content_admin_list_display
     # Disable dropdown actions
     actions = None

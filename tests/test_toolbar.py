@@ -3,6 +3,7 @@ from collections import ChainMap
 from unittest import skipUnless
 
 from django.contrib.auth.models import Permission
+from django.urls import reverse
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
@@ -16,6 +17,7 @@ from cms.utils.urlutils import admin_reverse
 
 from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
 from djangocms_alias.constants import USAGE_ALIAS_URL_NAME
+from djangocms_alias.models import AliasContent
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
@@ -61,7 +63,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
         break_item = admin_menu.find_first(Break, identifier=ADMINISTRATION_BREAK)  # noqa: E501
         item_positioned_before_admin_break = admin_menu.items[break_item.index - 1]  # noqa: E501
-        self.assertEqual(item_positioned_before_admin_break.name, 'Aliases')
+        self.assertEqual(item_positioned_before_admin_break.name, 'Aliases...')
 
     def test_add_alias_menu_showing_only_on_alias_plugin_views(self):
         alias = self._create_alias([self.plugin])
@@ -410,3 +412,36 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertNotEqual(bool(search_results), False)
         for result in search_results:
             self.assertEqual(result.item.disabled, False)
+
+    def test_site_dropdown_url_renders_admin_changelist(self):
+        request = self.get_page_request(self.page, user=self.superuser)
+        admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
+        site_aliases_url = admin_menu.items[3].url
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                site_aliases_url,
+            )
+
+        content = response.content.decode('utf-8')
+
+        self.assertEqual(response.status_code, 200)
+        # Rendered content should contain admin changelist header
+        self.assertIn("Select alias content to change | Django site admin", content)
+
+    def test_site_dropdown_url_renders_admin_changelist_url(self):
+        request = self.get_page_request(self.page, user=self.superuser)
+        admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
+        site_aliases_url = admin_menu.items[3].url
+        admin_changelist_aliases_url = reverse("admin:{}_aliascontent_changelist".format(
+            AliasContent._meta.app_label)
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                site_aliases_url,
+            )
+
+        self.assertEqual(response.status_code, 200)
+        # Url from site menu renders Alias content
+        self.assertEqual(site_aliases_url, admin_changelist_aliases_url)

@@ -4,6 +4,9 @@ Changelog
 
 Unreleased
 ==========
+
+1.4.1 (2022-04-13)
+==================
 * fix: Re-order AliasContent changelist filters as per the spec
 
 1.4.0 (2022-04-12)

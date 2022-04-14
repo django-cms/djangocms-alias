@@ -19,7 +19,7 @@ Run::
 
     pip install djangocms-alias
 
-Add ``djangocms_alias`` to your project's ``INSTALLED_APPS``.
+Add ``djangocms_alias`` and ``parler`` to your project's ``INSTALLED_APPS``.
 
 Run::
 

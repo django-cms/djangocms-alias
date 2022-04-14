@@ -4,6 +4,9 @@ Changelog
 
 Unreleased
 ==========
+* build: Added ``long_description_content_type`` for setuptools.
+* ci: Changed test workflow so that the coverage reporting happens after all unittests run
+* ci: Updated deprecated isort v4 CLI flags for the v5 double-dashed arguments
 * fix: Added parler to the installation instructions as an installed app
 
 1.4.1 (2022-04-13)

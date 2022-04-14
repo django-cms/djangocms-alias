@@ -41,6 +41,7 @@ setup(
     version=djangocms_alias.__version__,
     description=djangocms_alias.__doc__,
     long_description=open('README.rst').read(),
+    long_description_content_type='text/x-rst',
     platforms=['OS Independent'],
     classifiers=CLASSIFIERS,
     install_requires=INSTALL_REQUIREMENTS,

@@ -5,6 +5,23 @@ Changelog
 Unreleased
 ==========
 
+1.4.1 (2022-04-13)
+==================
+* fix: Re-order AliasContent changelist filters as per the spec
+
+1.4.0 (2022-04-12)
+==================
+* feat: Add AliasContent admin changelist Site filter
+
+1.3.0 (2022-04-12)
+==================
+* feat: Add site dropdown to create alias wizard and change alias admin
+
+1.2.0 (2022-04-11)
+==================
+* feat: Changed Site dropdown url for Aliases to point to the admin changelist
+* feat: Refactor alias topdown and versioning action menus
+
 1.1.0 (2022-04-06)
 ==================
 * feat: Remove Add cta and hide delete dropdown actions from AliasContent admin ChangeList

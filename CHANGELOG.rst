@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* fix: Added parler to the installation instructions as an installed app
 
 1.4.1 (2022-04-13)
 ==================

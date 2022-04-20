@@ -4,7 +4,7 @@ Changelog
 
 Unreleased
 ==========
-* feat: Add correct icons for Alias Manager actions
+* fix: Add correct icons for Alias Manager actions
 * build: Added ``long_description_content_type`` for setuptools.
 * ci: Changed test workflow so that the coverage reporting happens after all unittests run
 * ci: Updated deprecated isort v4 CLI flags for the v5 double-dashed arguments

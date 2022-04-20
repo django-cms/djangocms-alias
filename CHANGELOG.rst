@@ -4,6 +4,21 @@ Changelog
 
 Unreleased
 ==========
+* build: Added ``long_description_content_type`` for setuptools.
+* ci: Changed test workflow so that the coverage reporting happens after all unittests run
+* ci: Updated deprecated isort v4 CLI flags for the v5 double-dashed arguments
+* fix: Added parler to the installation instructions as an installed app
+
+1.4.1 (2022-04-13)
+==================
+* fix: Re-order AliasContent changelist filters as per the spec
+
+1.4.0 (2022-04-12)
+==================
+* feat: Add AliasContent admin changelist Site filter
+
+1.3.0 (2022-04-12)
+==================
 * feat: Add site dropdown to create alias wizard and change alias admin
 
 1.2.0 (2022-04-11)

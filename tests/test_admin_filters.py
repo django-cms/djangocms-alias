@@ -166,3 +166,37 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
             set(response_empty_site.context["cl"].queryset),
             set([])
         )
+
+
+@skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
+
+    def test_unpublished_filter(self):
+        category = Category.objects.create(name='Language Filter Category')
+        alias = AliasModel.objects.create(
+         category=category,
+         position=0,
+        )
+        expected_en_content = AliasContent.objects.create(
+         alias=alias,
+         name="EN Alias Content",
+         language="en",
+        )
+        expected_unpublished = expected_en_content = AliasContent.objects.create(
+         alias=alias,
+         name="EN Alias Content",
+         language="en",
+         version__state=UNPUBLISHED
+        )
+        model = AliasContent
+        base_url = self.get_admin_url(model, "changelist")
+        with self.login_user_context(self.get_superuser()):
+        # en is the default language configured for the site
+        response_default = self.client.get(base_url)
+        qs_default = response_default.context["cl"].queryset
+        response_unpublished = self.client.get(base_url + "?unpublished=1")
+        qs_unpublished = response_unpublished.context["cl"].queryset
+
+        self.assertEqual(set(qs_default), set(expected_en_content))
+        self.assertEqual(set(qs_unpublished), set(expected_unpublished))
+

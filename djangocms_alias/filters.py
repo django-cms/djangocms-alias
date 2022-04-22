@@ -4,13 +4,13 @@ from django.utils.translation import gettext_lazy as _
 from cms.forms.utils import get_sites
 from cms.utils.i18n import get_language_tuple, get_site_language_from_request
 
-
 from .cms_config import AliasCMSConfig
 from .constants import (
     LANGUAGE_FILTER_URL_PARAM,
     SITE_FILTER_NO_SITE_VALUE,
     SITE_FILTER_URL_PARAM,
 )
+
 
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 

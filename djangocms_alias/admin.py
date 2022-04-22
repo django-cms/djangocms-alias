@@ -33,6 +33,7 @@ djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
     from djangocms_versioning.admin import ExtendedVersionAdminMixin
+
     from .filters import UnpublishedFilter
     alias_content_admin_classes.insert(0, ExtendedVersionAdminMixin)
     alias_content_admin_list_display = ('name', 'get_category',)

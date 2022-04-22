@@ -1,3 +1,5 @@
+from unittest import skipUnless
+
 from django.contrib.sites.models import Site
 
 from cms.utils import get_current_site
@@ -172,31 +174,47 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
 class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
 
     def test_unpublished_filter(self):
-        category = Category.objects.create(name='Language Filter Category')
+        from djangocms_versioning.constants import UNPUBLISHED
+        from djangocms_versioning.models import Version
+
+        category = Category.objects.create(name='Alias Filter Category')
+        # category1 = Category.objects.create(name='Unpublished alias Filter Category')
+
         alias = AliasModel.objects.create(
          category=category,
          position=0,
+        )
+        unpublished_alias = AliasModel.objects.create(
+            category=category,
+            position=0,
         )
         expected_en_content = AliasContent.objects.create(
          alias=alias,
          name="EN Alias Content",
          language="en",
         )
-        expected_unpublished = expected_en_content = AliasContent.objects.create(
-         alias=alias,
-         name="EN Alias Content",
+        Version.objects.create(content=expected_en_content, created_by=self.superuser)
+
+        expected_unpublished = AliasContent.objects.create(
+         alias=unpublished_alias,
+         name="EN Alias Content unpublished",
          language="en",
-         version__state=UNPUBLISHED
         )
-        model = AliasContent
-        base_url = self.get_admin_url(model, "changelist")
+        Version.objects.create(content=expected_unpublished, created_by=self.superuser, state=UNPUBLISHED)
+
+        base_url = self.get_admin_url(AliasContent, "changelist")
+
         with self.login_user_context(self.get_superuser()):
-        # en is the default language configured for the site
+            # en is the default language configured for the site
             response_default = self.client.get(base_url)
+            # filter by unpublished hide
             qs_default = response_default.context["cl"].queryset
             response_unpublished = self.client.get(base_url + "?unpublished=1")
             qs_unpublished = response_unpublished.context["cl"].queryset
+            # filter by unpublished show
 
-        self.assertEqual(set(qs_default), set(expected_en_content))
-        self.assertEqual(set(qs_unpublished), set(expected_unpublished))
+        # show all alias contents  excluding unpublished versions
+        self.assertEqual(set(qs_default), set([expected_en_content]))
 
+        # show all aliase contents including unpublished versions
+        self.assertEqual(set(qs_unpublished), set([expected_unpublished]))

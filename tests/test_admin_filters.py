@@ -180,24 +180,23 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
         category = Category.objects.create(name='Alias Filter Category')
 
         alias = AliasModel.objects.create(
-         category=category,
-         position=0,
+            category=category,
+            position=0
         )
         unpublished_alias = AliasModel.objects.create(
             category=category,
-            position=0,
-        )
+            position=0)
         expected_en_content = AliasContent.objects.create(
-         alias=alias,
-         name="EN Alias Content",
-         language="en",
+            alias=alias,
+            name="EN Alias Content",
+            language="en"
         )
         Version.objects.create(content=expected_en_content, created_by=self.superuser)
 
         expected_unpublished = AliasContent.objects.create(
-         alias=unpublished_alias,
-         name="EN Alias Content unpublished",
-         language="en",
+            alias=unpublished_alias,
+            name="EN Alias Content unpublished",
+            language="en",
         )
         Version.objects.create(content=expected_unpublished, created_by=self.superuser, state=UNPUBLISHED)
 

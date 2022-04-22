@@ -14,6 +14,7 @@ from .constants import (
 
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
+
 class LanguageFilter(admin.SimpleListFilter):
     title = _("Language")
     parameter_name = LANGUAGE_FILTER_URL_PARAM
@@ -80,9 +81,9 @@ class SiteFilter(admin.SimpleListFilter):
                 "display": title,
             }
 
+
 if djangocms_versioning_enabled:
     from djangocms_versioning.constants import UNPUBLISHED
-
 
     class UnpublishedFilter(admin.SimpleListFilter):
         title = _("unpublished")

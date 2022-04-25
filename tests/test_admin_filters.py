@@ -191,7 +191,6 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
             language="en"
         )
         Version.objects.create(content=expected_en_content, created_by=self.superuser)
-
         expected_unpublished = AliasContent.objects.create(
             alias=unpublished_alias,
             name="EN Alias Content unpublished",

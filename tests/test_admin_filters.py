@@ -178,7 +178,6 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
         from djangocms_versioning.models import Version
 
         category = Category.objects.create(name='Alias Filter Category')
-
         alias = AliasModel.objects.create(
             category=category,
             position=0

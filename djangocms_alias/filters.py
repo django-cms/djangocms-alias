@@ -96,7 +96,6 @@ if djangocms_versioning_enabled:
             show = self.value()
             if show == "1":
                 return queryset.filter(versions__state=UNPUBLISHED)
-            else:
                 return queryset.exclude(versions__state=UNPUBLISHED)
 
         def choices(self, changelist):

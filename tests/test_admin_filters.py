@@ -174,11 +174,14 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
 class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
 
     def test_unpublished_filter(self):
+        """
+        When rendering aliascontent manager unpublished filter changing the show/hide unblished version option
+        should filter the results.
+        """
         from djangocms_versioning.constants import UNPUBLISHED
         from djangocms_versioning.models import Version
 
         category = Category.objects.create(name='Alias Filter Category')
-
         alias = AliasModel.objects.create(
             category=category,
             position=0
@@ -192,14 +195,12 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
             language="en"
         )
         Version.objects.create(content=expected_en_content, created_by=self.superuser)
-
         expected_unpublished = AliasContent.objects.create(
             alias=unpublished_alias,
             name="EN Alias Content unpublished",
             language="en",
         )
         Version.objects.create(content=expected_unpublished, created_by=self.superuser, state=UNPUBLISHED)
-
         base_url = self.get_admin_url(AliasContent, "changelist")
 
         with self.login_user_context(self.get_superuser()):
@@ -213,6 +214,5 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
 
         # show all alias contents  excluding unpublished versions
         self.assertEqual(set(qs_default), set([expected_en_content]))
-
         # show all aliase contents including unpublished versions
         self.assertEqual(set(qs_unpublished), set([expected_unpublished]))

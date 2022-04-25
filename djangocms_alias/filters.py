@@ -86,7 +86,7 @@ if djangocms_versioning_enabled:
     from djangocms_versioning.constants import UNPUBLISHED
 
     class UnpublishedFilter(admin.SimpleListFilter):
-        title = _("unpublished")
+        title = _("Unpublished")
         parameter_name = "unpublished"
 
         def lookups(self, request, model_admin):

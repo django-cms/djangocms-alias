@@ -211,6 +211,5 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
 
         # show all alias contents  excluding unpublished versions
         self.assertEqual(set(qs_default), set([expected_en_content]))
-
         # show all aliase contents including unpublished versions
         self.assertEqual(set(qs_unpublished), set([expected_unpublished]))

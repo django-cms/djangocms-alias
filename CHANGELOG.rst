@@ -4,6 +4,9 @@ Changelog
 
 Unreleased
 ==========
+
+1.5.0 (2022-04-26)
+==================
 * feat: Add AliasContent admin changelist UnPublished filter
 * fix: Add correct icons for Alias Manager actions
 * build: Added ``long_description_content_type`` for setuptools.

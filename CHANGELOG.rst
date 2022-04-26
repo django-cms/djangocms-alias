@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* feat: Add AliasContent admin changelist UnPublished filter
 * fix: Add correct icons for Alias Manager actions
 * build: Added ``long_description_content_type`` for setuptools.
 * ci: Changed test workflow so that the coverage reporting happens after all unittests run

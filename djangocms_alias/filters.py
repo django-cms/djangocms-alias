@@ -86,7 +86,7 @@ if djangocms_versioning_enabled:
     from djangocms_versioning.constants import UNPUBLISHED
 
     class UnpublishedFilter(admin.SimpleListFilter):
-        title = _("unpublished")
+        title = _("Unpublished")
         parameter_name = "unpublished"
 
         def lookups(self, request, model_admin):
@@ -96,8 +96,7 @@ if djangocms_versioning_enabled:
             show = self.value()
             if show == "1":
                 return queryset.filter(versions__state=UNPUBLISHED)
-            else:
-                return queryset.exclude(versions__state=UNPUBLISHED)
+            return queryset.exclude(versions__state=UNPUBLISHED)
 
         def choices(self, changelist):
             yield {

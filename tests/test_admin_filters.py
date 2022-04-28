@@ -214,15 +214,16 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
 
         # show all alias contents  excluding unpublished versions
         self.assertEqual(set(qs_default), set([expected_en_content]))
-        # show all alias contents including unpublished versions
+        # show all aliase contents including unpublished versions
         self.assertEqual(set(qs_unpublished), set([expected_unpublished]))
 
 
 class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
 
-    def test_category_filter(self):
+    @skipUnless(not is_versioning_enabled(), 'Test only relevant when no versioning')
+    def test_category_filter_no_verisoning(self):
         """
-        When rendering aliascontent manager language filter changing the category
+        When rendering aliascontent manager category filter, changing the category
         should filter the results.
         """
         category_one = Category.objects.create(name='one')
@@ -232,17 +233,17 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         )
         expected_category_one_content = AliasContent.objects.create(
             alias=alias_one,
-            name="EN Alias Content",
+            name="EN Alias Content one",
             language="en",
         )
         category_two = Category.objects.create(name='two')
         alias_two = AliasModel.objects.create(
             category=category_two,
-            position=0,
+            position=1,
         )
         expected_category_two_content = AliasContent.objects.create(
             alias=alias_two,
-            name="EN Alias Content",
+            name="EN Alias Content two",
             language="en",
         )
         base_url = self.get_admin_url(AliasContent, "changelist")
@@ -250,11 +251,69 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             response_default = self.client.get(base_url)
             # category one should have a result
-            category_one_filter_response = self.client.get(base_url + "?category=one")
-            # categopry two should have a result
-            category_two_filter_response = self.client.get(base_url + "?category=two")
+            category_one_filter_response = self.client.get(base_url + f"?alias__category__id__exact={category_one.id}")
+            # category two should have a result
+            category_two_filter_response = self.client.get(base_url + f"?alias__category__id__exact={category_two.id}")
 
-        # By default all alias are shown
+        # By default all alias contents are shown
+        self.assertEqual(
+            set(response_default.context["cl"].queryset),
+            set([
+                expected_category_one_content,
+                expected_category_two_content,
+            ])
+        )
+        # show alias contents filter by category one
+        self.assertEqual(
+            set(category_one_filter_response.context["cl"].queryset),
+            set([expected_category_one_content])
+        )
+        # show alias contents filter by category two
+        self.assertEqual(
+            set(category_two_filter_response.context["cl"].queryset),
+            set([expected_category_two_content])
+        )
+
+    @skipUnless(is_versioning_enabled(), 'Test only relevant when versioning enabled')
+    def test_category_filter_with_verisoning(self):
+        """
+        When rendering aliascontent manager category filter, changing the category
+        should filter the results.
+        """
+        from djangocms_versioning.models import Version
+
+        category_one = Category.objects.create(name='one')
+        alias_one = AliasModel.objects.create(
+            category=category_one,
+            position=0,
+        )
+        expected_category_one_content = AliasContent.objects.create(
+            alias=alias_one,
+            name="EN Alias Content one",
+            language="en",
+        )
+        Version.objects.create(content=expected_category_one_content, created_by=self.superuser)
+        category_two = Category.objects.create(name='two')
+        alias_two = AliasModel.objects.create(
+            category=category_two,
+            position=1,
+        )
+        expected_category_two_content = AliasContent.objects.create(
+            alias=alias_two,
+            name="EN Alias Content two",
+            language="en",
+        )
+        Version.objects.create(content=expected_category_two_content, created_by=self.superuser)
+        base_url = self.get_admin_url(AliasContent, "changelist")
+
+        with self.login_user_context(self.superuser):
+            response_default = self.client.get(base_url)
+            # category one should have a result
+            category_one_filter_response = self.client.get(base_url + f"?alias__category__id__exact={category_one.id}")
+            # categopry two should have a result
+            category_two_filter_response = self.client.get(base_url + f"?alias__category__id__exact={category_two.id}")
+
+        # By default all alias contents are shown
         self.assertEqual(
             set(response_default.context["cl"].queryset),
             set([

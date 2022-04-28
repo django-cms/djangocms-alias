@@ -4,6 +4,12 @@ Changelog
 
 Unreleased
 ==========
+* feat: Add AliasContent admin changelist Category filter
+
+1.5.0 (2022-04-26)
+==================
+* feat: Add AliasContent admin changelist UnPublished filter
+* fix: Add correct icons for Alias Manager actions
 * build: Added ``long_description_content_type`` for setuptools.
 * ci: Changed test workflow so that the coverage reporting happens after all unittests run
 * ci: Updated deprecated isort v4 CLI flags for the v5 double-dashed arguments

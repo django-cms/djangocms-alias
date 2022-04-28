@@ -85,9 +85,11 @@ class SiteFilter(admin.SimpleListFilter):
 if djangocms_versioning_enabled:
     from djangocms_versioning.constants import UNPUBLISHED
 
+    from .constants import UNPUBLISHED_FILTER_URL_PARAM
+
     class UnpublishedFilter(admin.SimpleListFilter):
         title = _("Unpublished")
-        parameter_name = "unpublished"
+        parameter_name = UNPUBLISHED_FILTER_URL_PARAM
 
         def lookups(self, request, model_admin):
             return (("1", _("Show")),)

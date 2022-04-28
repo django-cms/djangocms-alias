@@ -5,7 +5,7 @@ Changelog
 Unreleased
 ==========
 
-1.6.0 (2022-04-28)
+1.6.0 (2022-04-29)
 ==================
 * feat: Add AliasContent admin changelist Category filter
 

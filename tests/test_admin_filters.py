@@ -7,6 +7,7 @@ from cms.utils import get_current_site
 from djangocms_alias.constants import (
     SITE_FILTER_NO_SITE_VALUE,
     SITE_FILTER_URL_PARAM,
+    UNPUBLISHED_FILTER_URL_PARAM,
 )
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
@@ -208,7 +209,7 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
             response_default = self.client.get(base_url)
             # filter by unpublished hide
             qs_default = response_default.context["cl"].queryset
-            response_unpublished = self.client.get(base_url + "?unpublished=1")
+            response_unpublished = self.client.get(f"{base_url}?{UNPUBLISHED_FILTER_URL_PARAM}=1")
             qs_unpublished = response_unpublished.context["cl"].queryset
             # filter by unpublished show
 
@@ -251,9 +252,9 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             response_default = self.client.get(base_url)
             # category one should have a result
-            category_one_filter_response = self.client.get(base_url + f"?alias__category__id__exact={category_one.id}")
+            category_one_filter_response = self.client.get(f"{base_url}?alias__category__id__exact="{category_one.id}")
             # category two should have a result
-            category_two_filter_response = self.client.get(base_url + f"?alias__category__id__exact={category_two.id}")
+            category_two_filter_response = self.client.get(f"{base_url}?alias__category__id__exact={category_two.id}")
 
         # By default all alias contents are shown
         self.assertEqual(
@@ -309,9 +310,9 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             response_default = self.client.get(base_url)
             # category one should have a result
-            category_one_filter_response = self.client.get(base_url + f"?alias__category__id__exact={category_one.id}")
+            category_one_filter_response = self.client.get(f"{base_url}?alias__category__id__exact={category_one.id}")
             # categopry two should have a result
-            category_two_filter_response = self.client.get(base_url + f"?alias__category__id__exact={category_two.id}")
+            category_two_filter_response = self.client.get(f"{base_url}?alias__category__id__exact={category_two.id}")
 
         # By default all alias contents are shown
         self.assertEqual(

@@ -1,5 +1,5 @@
 from django.template import RequestContext
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from cms.toolbar.utils import get_toolbar_from_request
 

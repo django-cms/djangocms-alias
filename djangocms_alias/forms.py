@@ -272,6 +272,7 @@ class Select2Mixin:
             'admin/js/jquery.init.js',
             'cms/js/select2/select2.js',
             'djangocms_alias/js/dist/bundle.alias.create.min.js',
+            #'djangocms_alias/js/select2Bindings.js',
         )
 
 
@@ -328,6 +329,18 @@ class AliasPluginForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             self.fields['category'].initial = self.instance.alias.category_id
         self.fields['site'].initial = get_current_site()
+
+        self._set_category_widget_value()
+
+    def _set_category_widget_value(self):
+        site = self.fields["site"]
+        category = self.fields["category"]
+
+        # Get all categories that are linked to the site
+        print(f"Site is set as: {site}")
+        print(f"Category is set as: {category}")
+        print(f"Available plugins: {None}")
+        return
 
     class Meta:
         model = AliasPlugin

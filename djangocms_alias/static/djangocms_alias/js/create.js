@@ -1,13 +1,38 @@
 import $ from 'jquery';
 
+/*
+Create a view for the category
+Wire in the view to select2
+
+Drive the category list based on the site chosen (hardest query as it needs to go through Alias's
+
+ */
 $(function() {
     var itemsPerPage = 30;
+    var siteField = $('#id_site');
     var categoryField = $('#id_category');
     var aliasField = $('#id_alias');
+    var categoryEndpoint = categoryField.attr('data-select2-url');
     var aliasEndpoint = aliasField.attr('data-select2-url');
 
     categoryField.select2({
-        allowClear: true
+        allowClear: true,
+        ajax: {
+            url: categoryEndpoint,
+            dataType: 'json',
+            quietMillis: 250,
+            data: function(term, page) {
+                return {
+                    term: term,
+                    page: page,
+                    limit: itemsPerPage,
+                    site: siteField.val(),
+                };
+            },
+            results: function(data) {
+                return data;
+            }
+        },
     });
     aliasField.select2({
         ajax: {
@@ -19,6 +44,7 @@ $(function() {
                     term: term,
                     page: page,
                     limit: itemsPerPage,
+                    site: siteField.val(),
                     category: categoryField.val()
                 };
             },

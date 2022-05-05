@@ -18,7 +18,7 @@ from cms.utils.urlutils import admin_reverse
 
 from parler.forms import TranslatableModelForm
 
-from .constants import SELECT2_ALIAS_URL_NAME
+from .constants import CATEGORY_SELECT2_URL_NAME, SELECT2_ALIAS_URL_NAME
 from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
 from .utils import emit_content_change, is_versioning_enabled
 
@@ -280,8 +280,14 @@ class SiteSelectWidget(Select2Mixin, forms.Select):
     pass
 
 
-class CategorySelectWidget(Select2Mixin, forms.Select):
-    pass
+class CategorySelectWidget(Select2Mixin, forms.TextInput):
+    def get_url(self):
+        return admin_reverse(CATEGORY_SELECT2_URL_NAME)
+
+    def build_attrs(self, *args, **kwargs):
+        attrs = super().build_attrs(*args, **kwargs)
+        attrs.setdefault('data-select2-url', self.get_url())
+        return attrs
 
 
 class AliasSelectWidget(Select2Mixin, forms.TextInput):

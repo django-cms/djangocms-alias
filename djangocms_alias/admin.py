@@ -9,7 +9,7 @@ from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
 from .constants import USAGE_ALIAS_URL_NAME
-from .filters import LanguageFilter, SiteFilter
+from .filters import CategoryFilter, LanguageFilter, SiteFilter
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
@@ -28,7 +28,7 @@ __all__ = [
 
 alias_content_admin_classes = [admin.ModelAdmin]
 alias_content_admin_list_display = ('name', 'get_category',)
-alias_content_admin_list_filter = (SiteFilter, LanguageFilter, 'alias__category', )
+alias_content_admin_list_filter = (SiteFilter, CategoryFilter, LanguageFilter,)
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
@@ -38,7 +38,7 @@ if djangocms_versioning_enabled:
     alias_content_admin_classes.insert(0, ExtendedVersionAdminMixin)
     alias_content_admin_list_display = ('name', 'get_category',)
     alias_content_admin_list_filter = (SiteFilter, LanguageFilter, UnpublishedFilter)
-    alias_content_admin_list_filter = (SiteFilter, 'alias__category', LanguageFilter, UnpublishedFilter)
+    alias_content_admin_list_filter = (SiteFilter, CategoryFilter, LanguageFilter, UnpublishedFilter)
 
 
 @admin.register(Category)

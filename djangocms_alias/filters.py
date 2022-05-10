@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.encoding import smart_text
 from django.utils.translation import gettext_lazy as _
 
 from cms.forms.utils import get_sites
@@ -6,10 +7,12 @@ from cms.utils.i18n import get_language_tuple, get_site_language_from_request
 
 from .cms_config import AliasCMSConfig
 from .constants import (
+    CATEGORY_FILTER_PARAM,
     LANGUAGE_FILTER_URL_PARAM,
     SITE_FILTER_NO_SITE_VALUE,
     SITE_FILTER_URL_PARAM,
 )
+from .models import Category
 
 
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
@@ -71,6 +74,37 @@ class SiteFilter(admin.SimpleListFilter):
                 {self.parameter_name: SITE_FILTER_NO_SITE_VALUE}
             ),
             "display": _("No site"),
+        }
+        for lookup, title in self.lookup_choices:
+            yield {
+                "selected": self.value() == str(lookup),
+                "query_string": changelist.get_query_string(
+                    {self.parameter_name: lookup}
+                ),
+                "display": title,
+            }
+
+
+class CategoryFilter(admin.SimpleListFilter):
+    title = _("Category")
+    parameter_name = CATEGORY_FILTER_PARAM
+
+    def lookups(self, request, model_admin):
+        qs = model_admin.get_queryset(request)
+        cat_id = qs.values_list('alias__category', flat=True).distinct()
+        cat = Category.objects.filter(pk__in=cat_id).order_by('translations__name')
+        for obj in cat:
+            yield str(obj.pk), smart_text(obj)
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(alias__category=self.value()).distinct()
+
+    def choices(self, changelist):
+        yield {
+            "selected": self.value() is None,
+            "query_string": changelist.get_query_string(remove=[self.parameter_name]),
+            "display": _("All"),
         }
         for lookup, title in self.lookup_choices:
             yield {

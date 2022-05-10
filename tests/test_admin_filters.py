@@ -174,6 +174,27 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
 @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
 class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
 
+    def setUp(self):
+        category = Category.objects.create(name='Alias Filter Category')
+        self.alias = AliasModel.objects.create(
+            category=category,
+            position=0
+        )
+        self.unpublished_alias = AliasModel.objects.create(
+            category=category,
+            position=0)
+        self.expected_en_content = AliasContent.objects.create(
+            alias=self.alias,
+            name="EN Alias Content",
+            language="en"
+        )
+        self.expected_unpublished = AliasContent.objects.create(
+            alias=self.unpublished_alias,
+            name="EN Alias Content unpublished",
+            language="en",
+        )
+        self.superuser = self.get_superuser()
+
     def test_unpublished_filter(self):
         """
         When rendering aliascontent manager unpublished filter changing the show/hide unblished version option
@@ -182,26 +203,8 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
         from djangocms_versioning.constants import UNPUBLISHED
         from djangocms_versioning.models import Version
 
-        category = Category.objects.create(name='Alias Filter Category')
-        alias = AliasModel.objects.create(
-            category=category,
-            position=0
-        )
-        unpublished_alias = AliasModel.objects.create(
-            category=category,
-            position=0)
-        expected_en_content = AliasContent.objects.create(
-            alias=alias,
-            name="EN Alias Content",
-            language="en"
-        )
-        Version.objects.create(content=expected_en_content, created_by=self.superuser)
-        expected_unpublished = AliasContent.objects.create(
-            alias=unpublished_alias,
-            name="EN Alias Content unpublished",
-            language="en",
-        )
-        Version.objects.create(content=expected_unpublished, created_by=self.superuser, state=UNPUBLISHED)
+        Version.objects.create(content=self.expected_en_content, created_by=self.superuser)
+        Version.objects.create(content=self.expected_unpublished, created_by=self.superuser, state=UNPUBLISHED)
         base_url = self.get_admin_url(AliasContent, "changelist")
 
         with self.login_user_context(self.get_superuser()):
@@ -214,12 +217,43 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
             # filter by unpublished show
 
         # show all alias contents  excluding unpublished versions
-        self.assertEqual(set(qs_default), set([expected_en_content]))
+        self.assertEqual(set(qs_default), set([self.expected_en_content]))
         # show all aliase contents including unpublished versions
-        self.assertEqual(set(qs_unpublished), set([expected_unpublished]))
+        self.assertEqual(set(qs_unpublished), set([self.expected_unpublished]))
+
+    def test_unpublished_filter_returns_single_per_state(self):
+        from djangocms_versioning.constants import UNPUBLISHED
+        from djangocms_versioning.models import Version
+
+        additional_unpublished = AliasContent.objects.create(
+            alias=self.unpublished_alias,
+            name="EN Alias Content unpublished 2",
+            language="en",
+        )
+        additional_en_content = AliasContent.objects.create(
+            alias=self.alias,
+            name="EN Alias Content 2",
+            language="en"
+        )
+        Version.objects.create(content=self.expected_en_content, created_by=self.superuser)
+        Version.objects.create(content=additional_en_content, created_by=self.superuser)
+        Version.objects.create(content=self.expected_unpublished, created_by=self.superuser, state=UNPUBLISHED)
+        Version.objects.create(content=additional_unpublished, created_by=self.superuser, state=UNPUBLISHED)
+        base_url = self.get_admin_url(AliasContent, "changelist")
+
+        with self.login_user_context(self.get_superuser()):
+            # en is the default language configured for the site
+            response_default = self.client.get(base_url)
+            # filter by unpublished hide
+            qs_default = response_default.context["cl"].queryset
+            response_unpublished = self.client.get(f"{base_url}?{UNPUBLISHED_FILTER_URL_PARAM}=1")
+            qs_unpublished = response_unpublished.context["cl"].queryset
+
+        self.assertEqual(set(qs_default), set([self.expected_en_content, additional_en_content]))
+        self.assertEqual(set(qs_unpublished), set([self.expected_unpublished, additional_unpublished]))
 
 
-class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
+class CategoryFiltersTestCase(BaseAliasPluginTestCase):
 
     @skipUnless(not is_versioning_enabled(), 'Test only relevant when no versioning')
     def test_category_filter_no_verisoning(self):

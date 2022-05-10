@@ -28,12 +28,17 @@ __all__ = [
 
 alias_content_admin_classes = [admin.ModelAdmin]
 alias_content_admin_list_display = ('name', 'get_category',)
+alias_content_admin_list_filter = (SiteFilter, LanguageFilter, 'alias__category', )
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
     from djangocms_versioning.admin import ExtendedVersionAdminMixin
+
+    from .filters import UnpublishedFilter
     alias_content_admin_classes.insert(0, ExtendedVersionAdminMixin)
     alias_content_admin_list_display = ('name', 'get_category',)
+    alias_content_admin_list_filter = (SiteFilter, LanguageFilter, UnpublishedFilter)
+    alias_content_admin_list_filter = (SiteFilter, LanguageFilter, 'alias__category', UnpublishedFilter)
 
 
 @admin.register(Category)
@@ -101,7 +106,7 @@ class AliasAdmin(admin.ModelAdmin):
 @admin.register(AliasContent)
 class AliasContentAdmin(*alias_content_admin_classes):
     form = AliasContentForm
-    list_filter = (SiteFilter, LanguageFilter)
+    list_filter = alias_content_admin_list_filter
     list_display = alias_content_admin_list_display
     # Disable dropdown actions
     actions = None

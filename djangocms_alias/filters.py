@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
 
 from cms.forms.utils import get_sites
@@ -95,7 +95,7 @@ class CategoryFilter(admin.SimpleListFilter):
         # Ensure the category is ordered by the name alphabetically by default
         cat = Category.objects.filter(pk__in=cat_id).order_by('translations__name')
         for obj in cat:
-            yield str(obj.pk), smart_text(obj)
+            yield str(obj.pk), smart_str(obj)
 
     def queryset(self, request, queryset):
         if self.value():

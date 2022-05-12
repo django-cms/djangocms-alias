@@ -252,9 +252,9 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             response_default = self.client.get(base_url)
             # category one should have a result
-            category_one_filter_response = self.client.get(f"{base_url}?alias__category__id__exact={category_one.id}")
+            category_one_filter_response = self.client.get(f"{base_url}?category={category_one.id}")
             # category two should have a result
-            category_two_filter_response = self.client.get(f"{base_url}?alias__category__id__exact={category_two.id}")
+            category_two_filter_response = self.client.get(f"{base_url}?category={category_two.id}")
 
         # By default all alias contents are shown
         self.assertEqual(

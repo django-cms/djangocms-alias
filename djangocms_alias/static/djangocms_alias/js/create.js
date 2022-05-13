@@ -1,12 +1,5 @@
 import $ from 'jquery';
 
-/*
-Create a view for the category
-Wire in the view to select2
-
-Drive the category list based on the site chosen (hardest query as it needs to go through Alias's
-
- */
 $(function() {
     var itemsPerPage = 30;
     var siteField = $('#id_site');

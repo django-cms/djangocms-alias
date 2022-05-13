@@ -365,7 +365,7 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         # Get the first choice in the filter lookup object
         first_lookup_value = category_filter.lookup_choices[0][1]
         # Lookup value should match the category name linked to alias content
-        self.assertEquals(
+        self.assertEqual(
             first_lookup_value, category_two.name
         )
         self.assertNotEqual(

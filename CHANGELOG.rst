@@ -5,6 +5,7 @@ Changelog
 Unreleased
 ==========
 * fix: Moved category list filter after site
+* fix: Ordering category filter by name
 
 1.6.0 (2022-04-29)
 ==================

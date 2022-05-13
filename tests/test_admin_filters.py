@@ -1,5 +1,6 @@
 from unittest import skipUnless
 
+from django.contrib import admin
 from django.contrib.sites.models import Site
 
 from cms.utils import get_current_site
@@ -9,6 +10,7 @@ from djangocms_alias.constants import (
     SITE_FILTER_URL_PARAM,
     UNPUBLISHED_FILTER_URL_PARAM,
 )
+from djangocms_alias.filters import CategoryFilter
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
@@ -331,4 +333,77 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         self.assertEqual(
             set(category_two_filter_response.context["cl"].queryset),
             set([expected_category_two_content])
+        )
+
+    def test_category_filter_lookups_ordered_alphabetical(self):
+        """
+        Category filter lookup choices should be ordered in alphabetical order
+        """
+        category_one = Category.objects.create(name='b - category')
+        alias_one = AliasModel.objects.create(
+            category=category_one,
+            position=0,
+        )
+        expected_category_one_content = AliasContent.objects.create(
+            alias=alias_one,
+            name="EN Alias Content one",
+            language="en",
+        )
+        category_two = Category.objects.create(name='a - category')
+        alias_two = AliasModel.objects.create(
+            category=category_two,
+            position=1,
+        )
+        expected_category_two_content = AliasContent.objects.create(
+            alias=alias_two,
+            name="EN Alias Content two",
+            language="en",
+        )
+
+        version_admin = admin.site._registry[AliasContent]
+        category_filter = CategoryFilter(None, {"category": ""}, AliasContent, version_admin)
+        # Get the first choice in the filter lookup object
+        first_lookup_value = category_filter.lookup_choices[0][1]
+        # Lookup value should match the category name linked to alias content
+        self.assertEquals(
+            first_lookup_value, category_two.name
+        )
+        self.assertNotEqual(
+            first_lookup_value, category_one.name
+        )
+
+    def test_category_filter_lookup_should_only_show_aliases_linked_to_content(self):
+        """
+        Category not linked to content should not be listed in the category filter lookups
+        """
+        category_one = Category.objects.create(name='b - category')
+        alias_one = AliasModel.objects.create(
+            category=category_one,
+            position=0,
+        )
+        expected_category_one_content = AliasContent.objects.create(
+            alias=alias_one,
+            name="EN Alias Content one",
+            language="en",
+        )
+        category_two = Category.objects.create(name='a - category')
+        alias_two = AliasModel.objects.create(
+            category=category_two,
+            position=1,
+        )
+
+        version_admin = admin.site._registry[AliasContent]
+        category_filter = CategoryFilter(None, {"category": ""}, AliasContent, version_admin)
+
+        # Get the first choice in the filter lookup object
+        first_lookup_value = category_filter.lookup_choices[0][1]
+        # Lookup choices should only display the category linked to content
+        self.assertEqual(len(category_filter.lookup_choices), 1)
+        # Lookup value should match the category name linked to alias content
+        self.assertEquals(
+            first_lookup_value, category_one.name
+        )
+        # Category not linked to alias content should not be listed in the choices
+        self.assertNotEqual(
+            first_lookup_value, category_two.name
         )

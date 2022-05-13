@@ -344,7 +344,7 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
             category=category_one,
             position=0,
         )
-        expected_category_one_content = AliasContent.objects.create(
+        AliasContent.objects.create(
             alias=alias_one,
             name="EN Alias Content one",
             language="en",
@@ -354,7 +354,7 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
             category=category_two,
             position=1,
         )
-        expected_category_two_content = AliasContent.objects.create(
+        AliasContent.objects.create(
             alias=alias_two,
             name="EN Alias Content two",
             language="en",
@@ -381,13 +381,13 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
             category=category_one,
             position=0,
         )
-        expected_category_one_content = AliasContent.objects.create(
+        AliasContent.objects.create(
             alias=alias_one,
             name="EN Alias Content one",
             language="en",
         )
         category_two = Category.objects.create(name='a - category')
-        alias_two = AliasModel.objects.create(
+        AliasModel.objects.create(
             category=category_two,
             position=1,
         )

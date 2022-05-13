@@ -5,6 +5,24 @@ Changelog
 Unreleased
 ==========
 
+1.6.1 (2022-05-13)
+==================
+* fix: Moved category list filter after site
+* fix: Ordering category filter by name
+
+1.6.0 (2022-04-29)
+==================
+* feat: Add AliasContent admin changelist Category filter
+
+1.5.0 (2022-04-26)
+==================
+* feat: Add AliasContent admin changelist UnPublished filter
+* fix: Add correct icons for Alias Manager actions
+* build: Added ``long_description_content_type`` for setuptools.
+* ci: Changed test workflow so that the coverage reporting happens after all unittests run
+* ci: Updated deprecated isort v4 CLI flags for the v5 double-dashed arguments
+* fix: Added parler to the installation instructions as an installed app
+
 1.4.1 (2022-04-13)
 ==================
 * fix: Re-order AliasContent changelist filters as per the spec

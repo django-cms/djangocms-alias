@@ -4,10 +4,12 @@ from django.contrib.admin.widgets import (
     AdminTextInputWidget,
     RelatedFieldWidgetWrapper,
 )
+from django.contrib.sites.models import Site
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from cms.models import CMSPlugin, Placeholder
+from cms.utils import get_current_site
 from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
@@ -86,6 +88,10 @@ class BaseCreateAliasForm(forms.Form):
 
 class CreateAliasForm(BaseCreateAliasForm):
     name = forms.CharField(required=True, widget=AdminTextInputWidget())
+    site = forms.ModelChoiceField(
+        queryset=Site.objects.all(),
+        required=False,
+    )
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
         required=True,
@@ -105,6 +111,7 @@ class CreateAliasForm(BaseCreateAliasForm):
             self.fields['replace'].widget = forms.HiddenInput()
 
         self.set_category_widget(self.user)
+        self.fields["site"].initial = get_current_site()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -139,6 +146,7 @@ class CreateAliasForm(BaseCreateAliasForm):
     def save(self):
         alias = AliasModel.objects.create(
             category=self.cleaned_data.get('category'),
+            site=self.cleaned_data.get('site'),
         )
         alias_content = AliasContent.objects.create(
             alias=alias,
@@ -169,6 +177,10 @@ class CreateAliasWizardForm(forms.Form):
         required=True,
         widget=AdminTextInputWidget()
     )
+    site = forms.ModelChoiceField(
+        queryset=Site.objects.all(),
+        required=False,
+    )
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
         required=True,
@@ -179,6 +191,7 @@ class CreateAliasWizardForm(forms.Form):
         if not getattr(self, 'user', None):
             self.user = self._request.user
         self.set_category_widget(self.user)
+        self.fields["site"].initial = get_current_site()
 
     def set_category_widget(self, user):
         formfield = self.fields['category']
@@ -188,6 +201,7 @@ class CreateAliasWizardForm(forms.Form):
     def save(self):
         alias = AliasModel.objects.create(
             category=self.cleaned_data.get('category'),
+            site=self.cleaned_data.get('site'),
         )
         alias_content = AliasContent.objects.create(
             alias=alias,
@@ -261,6 +275,10 @@ class Select2Mixin:
         )
 
 
+class SiteSelectWidget(Select2Mixin, forms.Select):
+    pass
+
+
 class CategorySelectWidget(Select2Mixin, forms.Select):
     pass
 
@@ -277,6 +295,13 @@ class AliasSelectWidget(Select2Mixin, forms.TextInput):
 
 
 class AliasPluginForm(forms.ModelForm):
+    site = forms.ModelChoiceField(
+        label=_("Site"),
+        queryset=Site.objects.all(),
+        widget=SiteSelectWidget(attrs={"data-placeholder": _("Select site")}),
+        required=False,
+    )
+
     category = forms.ModelChoiceField(
         label=_('Category'),
         queryset=Category.objects.all(),
@@ -302,10 +327,12 @@ class AliasPluginForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
             self.fields['category'].initial = self.instance.alias.category_id
+        self.fields['site'].initial = get_current_site()
 
     class Meta:
         model = AliasPlugin
         fields = (
+            'site',
             'category',
             'alias',
             'template',

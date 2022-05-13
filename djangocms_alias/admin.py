@@ -3,11 +3,13 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
 from cms.utils.permissions import get_model_permission_codename
+from cms.utils.urlutils import admin_reverse
 
 from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
-from .filters import LanguageFilter
+from .constants import USAGE_ALIAS_URL_NAME
+from .filters import LanguageFilter, SiteFilter
 from .forms import AliasContentForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
@@ -26,12 +28,17 @@ __all__ = [
 
 alias_content_admin_classes = [admin.ModelAdmin]
 alias_content_admin_list_display = ('name', 'get_category',)
+alias_content_admin_list_filter = (SiteFilter, LanguageFilter, 'alias__category', )
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
     from djangocms_versioning.admin import ExtendedVersionAdminMixin
+
+    from .filters import UnpublishedFilter
     alias_content_admin_classes.insert(0, ExtendedVersionAdminMixin)
     alias_content_admin_list_display = ('name', 'get_category',)
+    alias_content_admin_list_filter = (SiteFilter, LanguageFilter, UnpublishedFilter)
+    alias_content_admin_list_filter = (SiteFilter, 'alias__category', LanguageFilter, UnpublishedFilter)
 
 
 @admin.register(Category)
@@ -54,8 +61,8 @@ class CategoryAdmin(TranslatableAdmin):
 class AliasAdmin(admin.ModelAdmin):
     list_display = ['name', 'category']
     list_filter = ['site', 'category']
-    fields = ('category',)
-    readonly_fields = ('static_code', 'site')
+    fields = ('category', 'site')
+    readonly_fields = ('static_code', )
 
     def get_urls(self):
         return urlpatterns + super().get_urls()
@@ -99,8 +106,10 @@ class AliasAdmin(admin.ModelAdmin):
 @admin.register(AliasContent)
 class AliasContentAdmin(*alias_content_admin_classes):
     form = AliasContentForm
-    list_filter = (LanguageFilter, )
+    list_filter = alias_content_admin_list_filter
     list_display = alias_content_admin_list_display
+    # Disable dropdown actions
+    actions = None
     change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"
 
     # Add Alias category in the admin manager list and order field
@@ -109,6 +118,11 @@ class AliasContentAdmin(*alias_content_admin_classes):
 
     get_category.short_description = _('category')
     get_category.admin_order_field = "alias__category"
+
+    def has_add_permission(self, request, obj=None):
+        # FIXME: It is not currently possible to add an alias from the django admin changelist issue #97
+        # https://github.com/django-cms/djangocms-alias/issues/97
+        return False
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
@@ -133,7 +147,43 @@ class AliasContentAdmin(*alias_content_admin_classes):
         return [
             self._get_preview_link,
             self._get_manage_versions_link,
+            self._get_change_alias_settings_link,
+            self._get_rename_alias_link,
+            self._get_alias_usage_link,
         ]
+
+    def get_list_display_links(self, request, list_display):
+        """
+        Remove the linked text when versioning is enabled, because versioning adds actions
+        """
+        if is_versioning_enabled():
+            self.list_display_links = None
+        return super().get_list_display_links(request, list_display)
+
+    def _get_rename_alias_link(self, obj, request, disabled=False):
+        url = admin_reverse('{}_{}_change'.format(
+            obj._meta.app_label, obj._meta.model_name), args=(obj.pk,)
+        )
+        return render_to_string(
+            "admin/djangocms_alias/icons/rename_alias.html",
+            {"url": url, "disabled": disabled},
+        )
+
+    def _get_alias_usage_link(self, obj, request, disabled=False):
+        url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.alias.pk])
+        return render_to_string(
+            "admin/djangocms_alias/icons/view_usage.html",
+            {"url": url, "disabled": disabled},
+        )
+
+    def _get_change_alias_settings_link(self, obj, request, disabled=False):
+        url = admin_reverse('{}_{}_change'.format(
+            obj._meta.app_label, obj.alias._meta.model_name), args=(obj.alias.pk,)
+        )
+        return render_to_string(
+            "admin/djangocms_alias/icons/change_alias_settings.html",
+            {"url": url, "disabled": disabled},
+        )
 
     def _get_preview_link(self, obj, request, disabled=False):
         """

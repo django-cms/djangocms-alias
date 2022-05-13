@@ -181,8 +181,8 @@ class BaseAliasPluginTestCase(CMSTestCase):
         return request
 
     def _process_request_by_toolbar_middleware(self, request, obj=None):
-        midleware = ToolbarMiddleware()
-        midleware.process_request(request)
+        middleware = ToolbarMiddleware(request)
+        middleware.process_request(request)
         if hasattr(request, 'toolbar'):
             if obj:
                 request.toolbar.set_object(obj)

@@ -1,5 +1,5 @@
 import re
-from unittest import skipIf, skipUnless
+from unittest import skip, skipIf, skipUnless
 
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -1055,7 +1055,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         category2 = Category.objects.create(name='test 2')
         alias1 = self._create_alias(name='test 2', category=category2)
         alias2 = self._create_alias(name='foo', category=category2, position=1)
-        # This shouldnt show becuase it's in different Category
+        # This shouldnt show because it's in different Category
         self._create_alias(name='three')
         with self.login_user_context(self.superuser):
             response = self.client.get(
@@ -1108,6 +1108,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             [alias1.pk],
         )
 
+    @skip(
+        "It is not currently possible to add an alias from the django admin changelist issue "
+        "#https://github.com/django-cms/djangocms-alias/issues/97#97"
+    )
     def test_aliascontent_add_view(self):
         alias = Alias.objects.create(category=self.category)
         with self.login_user_context(self.superuser):
@@ -1128,6 +1132,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(alias_content.language, 'de')
         self.assertEqual(alias_content.name, 'alias test de 1')
 
+    @skip(
+        "It is not currently possible to add an alias from the django admin changelist issue "
+        "#https://github.com/django-cms/djangocms-alias/issues/97#97"
+    )
     def test_aliascontent_add_view_get(self):
         alias = Alias.objects.create(category=self.category)
         with self.login_user_context(self.superuser):
@@ -1144,6 +1152,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, 'type="hidden" name="language" value="fr"')
         self.assertContains(response, 'type="hidden" name="alias" value="{}"'.format(alias.pk))
 
+    @skip(
+        "It is not currently possible to add an alias from the django admin changelist issue "
+        "#https://github.com/django-cms/djangocms-alias/issues/97#97"
+    )
     def test_aliascontent_add_view_invalid_data(self):
         alias = Alias.objects.create(category=self.category)
         self._create_alias(
@@ -1168,6 +1180,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             'Alias with this Name and Category already exists',
         )
 
+    @skip(
+        "It is not currently possible to add an alias from the django admin changelist issue "
+        "#https://github.com/django-cms/djangocms-alias/issues/97#97"
+    )
     def test_aliascontent_add_view_valid_data(self):
         alias = Alias.objects.create(category=self.category)
         if is_versioning_enabled():

@@ -400,7 +400,7 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         # Lookup choices should only display the category linked to content
         self.assertEqual(len(category_filter.lookup_choices), 1)
         # Lookup value should match the category name linked to alias content
-        self.assertEquals(
+        self.assertEqual(
             first_lookup_value, category_one.name
         )
         # Category not linked to alias content should not be listed in the choices

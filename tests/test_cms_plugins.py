@@ -322,6 +322,15 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
 
     def test_create_alias_plugin_form_initial_site(self):
         current_site = get_current_site()
+
+        # Initially load the empty add form
+        form = AliasPluginForm(data={})
+
+        self.assertEqual(form.fields['site'].initial, current_site)
+        self.assertEqual(form.fields['category'].initial, None)
+
+    def test_change_alias_plugin_form_initial_site(self):
+        current_site = get_current_site()
         alias = self._create_alias(
             self.placeholder.get_plugins(),
         )
@@ -333,4 +342,6 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         )
         form = AliasPluginForm(instance=alias_plugin)
 
-        self.assertEqual(form.fields['site'].initial, current_site)
+        self.assertEqual(form.fields['site'].initial, alias.site)
+        self.assertNotEqual(form.fields['site'].initial, current_site)
+        self.assertEqual(form.fields['category'].initial, alias.category.pk)

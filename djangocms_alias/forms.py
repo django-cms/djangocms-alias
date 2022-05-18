@@ -331,21 +331,20 @@ class AliasPluginForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            self.fields['category'].initial = self.instance.alias.category_id
-        self.fields['site'].initial = get_current_site()
-
         self._set_category_widget_value()
 
     def _set_category_widget_value(self):
-        site = self.fields["site"]
-        category = self.fields["category"]
-
-        # Get all categories that are linked to the site
-        print(f"Site is set as: {site}")
-        print(f"Category is set as: {category}")
-        print(f"Available plugins: {None}")
-        return
+        """
+        When the user loads the form the site and category should be pre selected
+        """
+        # If the form is changing an existing Alias
+        # Be sure to show the values for an Alias
+        if self.instance and self.instance.pk:
+            self.fields['site'].initial = self.instance.alias.site_id
+            self.fields['category'].initial = self.instance.alias.category_id
+        # Otherwise this is creation
+        else:
+            self.fields['site'].initial = get_current_site()
 
     class Meta:
         model = AliasPlugin

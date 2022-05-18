@@ -304,7 +304,11 @@ class AliasPluginForm(forms.ModelForm):
     site = forms.ModelChoiceField(
         label=_("Site"),
         queryset=Site.objects.all(),
-        widget=SiteSelectWidget(attrs={"data-placeholder": _("Select site")}),
+        widget=SiteSelectWidget(
+            attrs={
+                "data-placeholder": _("Select site  to restrict the list of aliases below"),
+            }
+        ),
         required=False,
     )
 
@@ -343,6 +347,7 @@ class AliasPluginForm(forms.ModelForm):
             self.fields['site'].initial = self.instance.alias.site_id
             self.fields['category'].initial = self.instance.alias.category_id
         # Otherwise this is creation
+        # Set the site to the current site by default
         else:
             self.fields['site'].initial = get_current_site()
 

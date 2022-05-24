@@ -344,7 +344,7 @@ class AliasPluginForm(forms.ModelForm):
         # If the form is changing an existing Alias
         # Be sure to show the values for an Alias
         if self.instance and self.instance.pk:
-            self.fields['site'].initial = self.instance.alias.site_id
+            self.fields['site'].initial = self.instance.alias.site
             self.fields['category'].initial = self.instance.alias.category
         # Otherwise this is creation
         # Set the site to the current site by default

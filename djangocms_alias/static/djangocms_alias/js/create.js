@@ -26,6 +26,28 @@ $(function() {
                 return data;
             }
         },
+        initSelection: function(element, callback) {
+            var categoryId = element.val();
+
+            $.ajax({
+                url: categoryEndpoint,
+                dataType: 'json',
+                data: {
+                    pk: categoryId
+                }
+            })
+            .done(function(data) {
+                var text = categoryId;
+
+                if (data.results.length) {
+                    text = data.results[0].text;
+                }
+                callback({ id: categoryId, text: text });
+            })
+            .fail(function() {
+                callback({ id: categoryId, text: categoryId });
+            });
+        }
     });
     aliasField.select2({
         ajax: {
@@ -55,17 +77,17 @@ $(function() {
                     pk: aliasId
                 }
             })
-                .done(function(data) {
-                    var text = aliasId;
+            .done(function(data) {
+                var text = aliasId;
 
-                    if (data.results.length) {
-                        text = data.results[0].text;
-                    }
-                    callback({ id: aliasId, text: text });
-                })
-                .fail(function() {
-                    callback({ id: aliasId, text: aliasId });
-                });
+                if (data.results.length) {
+                    text = data.results[0].text;
+                }
+                callback({ id: aliasId, text: text });
+            })
+            .fail(function() {
+                callback({ id: aliasId, text: aliasId });
+            });
         }
     });
 });

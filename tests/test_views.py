@@ -1093,6 +1093,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_select2_view_site(self):
+        """
+        The list should be filtered based on only matching
+        alias with a specific site if it is provided
+        """
         site = get_current_site()
         alias1 = self._create_alias(site=site)
         alias2 = self._create_alias(site=site, position=1)
@@ -1113,6 +1117,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_select2_view_site_and_category(self):
+        """
+        The list should be filtered based on only matching
+        alias with a specific site and category if it is provided
+        """
         category = Category.objects.create(name='category')
         site = get_current_site()
         self._create_alias(site=site)
@@ -1552,6 +1560,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 class AliasCategorySelect2ViewTestCase(BaseAliasPluginTestCase):
 
     def test_select2_view_no_permission(self):
+        """
+        The category list view is private
+        and only intended for use in the admin
+        """
         response = self.client.get(
             admin_reverse(
                 CATEGORY_SELECT2_URL_NAME,
@@ -1608,6 +1620,9 @@ class AliasCategorySelect2ViewTestCase(BaseAliasPluginTestCase):
         self.assertEqual([a['id'] for a in response.json()['results']], expected_result)
 
     def test_select2_view_set_limit(self):
+        """
+        Ensure that the page limit is respected
+        """
         category_1 = Category.objects.create(name='Category 1')
         category_2 = Category.objects.create(name='Category 2')
         category_3 = Category.objects.create(name='Category 3')

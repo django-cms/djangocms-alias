@@ -6,6 +6,7 @@ Unreleased
 ==========
 * feat: Clean out old sass, js and css dist from gulp and package.json
 * feat: Create plugin alias filter to use category and or site
+* fix: Outdated build scripts from Node 5 to Node 16
 
 1.6.1 (2022-05-13)
 ==================

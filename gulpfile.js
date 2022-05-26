@@ -1,10 +1,11 @@
 // #####################################################################################################################
 // #IMPORTS#
 const gulp = require('gulp');
-const gutil = require('gulp-util');
+const log = require('fancy-log');
+const PluginError = require('plugin-error');
 const webpack = require('webpack');
 
-var argv = require('minimist')(process.argv.slice(2)); // eslint-disable-line
+const argv = require('minimist')(process.argv.slice(2)); // eslint-disable-line
 
 // #####################################################################################################################
 // #SETTINGS#
@@ -27,9 +28,9 @@ var webpackBundle = function(opts) {
 
         webpack(config, function(err, stats) {
             if (err) {
-                throw new gutil.PluginError('webpack', err);
+                throw new PluginError('webpack', err);
             }
-            gutil.log('[webpack]', stats.toString({ maxModules: Infinity, colors: true, optimizationBailout: true }));
+            log('[webpack]', stats.toString({ maxModules: Infinity, colors: true, optimizationBailout: true }));
             if (typeof done !== 'undefined' && (!opts || !opts.watch)) {
                 done();
             }
@@ -39,9 +40,3 @@ var webpackBundle = function(opts) {
 
 gulp.task('bundle:watch', webpackBundle({ watch: true }));
 gulp.task('bundle', webpackBundle());
-
-gulp.task('watch', function() {
-    gulp.start('bundle:watch');
-});
-
-gulp.task('default', ['watch']);

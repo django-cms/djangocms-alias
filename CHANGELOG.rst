@@ -4,6 +4,8 @@ Changelog
 
 Unreleased
 ==========
+* feat: Clean out old sass, js and css dist from gulp and package.json
+* feat: Create plugin alias filter to use category and or site
 
 1.6.1 (2022-05-13)
 ==================

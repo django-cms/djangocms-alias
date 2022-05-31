@@ -1094,7 +1094,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_select2_view_site(self):
         """
-        The list should be filtered based on only matching
+        The list is filtered based on only matching
         alias with a specific site if it is provided
         """
         site = get_current_site()
@@ -1118,7 +1118,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_select2_view_site_and_category(self):
         """
-        The list should be filtered based on only matching
+        The list is filtered based on only matching
         alias with a specific site and category if it is provided
         """
         category = Category.objects.create(name='category')
@@ -1645,6 +1645,10 @@ class AliasCategorySelect2ViewTestCase(BaseAliasPluginTestCase):
         self.assertEqual(len(content['results']), 2)
 
     def test_select2_view_text_repr(self):
+        """
+        Ensure that the display / text representation of the object
+        is output to the user.
+        """
         category = Category.objects.create(name='Category 1')
         self._create_alias(name='test 2', category=category)
 

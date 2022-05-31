@@ -259,6 +259,60 @@ def set_alias_position_view(request):
     return JsonResponse({'alias': alias.pk, 'position': alias.position})
 
 
+class CategorySelect2View(ListView):
+    queryset = Category.objects.order_by('translations__name')
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        return JsonResponse({
+            'results': [
+                {
+                    'text': str(obj),
+                    'id': obj.pk,
+                }
+                for obj in context['object_list']
+            ],
+            'more': context['page_obj'].has_next(),
+        })
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        """
+        Only show Categories that have an Alias attached.
+        If site is selected, use that to filter further.
+        """
+        term = self.request.GET.get('term')
+        site = self.request.GET.get('site')
+        queryset = super().get_queryset().distinct()
+        # Only get categories that have aliases attached
+        queryset = queryset.filter(
+            aliases__isnull=False
+        )
+
+        try:
+            pk = int(self.request.GET.get('pk'))
+        except (TypeError, ValueError):
+            pk = None
+
+        q = Q()
+        if term:
+            q &= Q(translations__name__icontains=term)
+        if site:
+            q &= Q(aliases__site=site)
+        if pk:
+            q &= Q(pk=pk)
+
+        return queryset.filter(q)
+
+    def get_paginate_by(self, queryset):
+        return self.request.GET.get('limit', 30)
+
+
 class AliasSelect2View(ListView):
     queryset = AliasModel.objects.order_by('category__translations__name', 'position')
 
@@ -282,23 +336,29 @@ class AliasSelect2View(ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
+        term = self.request.GET.get('term')
+        category = self.request.GET.get('category')
+        site = self.request.GET.get('site')
         # Showing published and unpublished aliases
         queryset = super().get_queryset().filter(
             contents__language=get_current_language(),
         ).distinct()
-        term = self.request.GET.get('term')
-        category = self.request.GET.get('category')
+
         try:
             pk = int(self.request.GET.get('pk'))
         except (TypeError, ValueError):
             pk = None
+
         q = Q()
         if term:
             q &= Q(contents__name__icontains=term)
         if category:
             q &= Q(category=category)
+        if site:
+            q &= Q(site=site)
         if pk:
             q &= Q(pk=pk)
+
         return queryset.filter(q)
 
     def get_paginate_by(self, queryset):

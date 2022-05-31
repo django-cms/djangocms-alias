@@ -72,7 +72,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         return page_content.get_placeholders().get(slot='content')
 
     def _create_alias(self, plugins=None, name='test alias', category=None, position=0,
-                      language=None, published=True, static_code="", site=None):
+                      language=None, published=True, static_code=None, site=None):
         if language is None:
             language = self.language
         if category is None:

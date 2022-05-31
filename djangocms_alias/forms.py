@@ -18,7 +18,7 @@ from cms.utils.urlutils import admin_reverse
 
 from parler.forms import TranslatableModelForm
 
-from .constants import SELECT2_ALIAS_URL_NAME
+from .constants import CATEGORY_SELECT2_URL_NAME, SELECT2_ALIAS_URL_NAME
 from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
 from .utils import emit_content_change, is_versioning_enabled
 
@@ -279,8 +279,14 @@ class SiteSelectWidget(Select2Mixin, forms.Select):
     pass
 
 
-class CategorySelectWidget(Select2Mixin, forms.Select):
-    pass
+class CategorySelectWidget(Select2Mixin, forms.TextInput):
+    def get_url(self):
+        return admin_reverse(CATEGORY_SELECT2_URL_NAME)
+
+    def build_attrs(self, *args, **kwargs):
+        attrs = super().build_attrs(*args, **kwargs)
+        attrs.setdefault('data-select2-url', self.get_url())
+        return attrs
 
 
 class AliasSelectWidget(Select2Mixin, forms.TextInput):
@@ -298,7 +304,11 @@ class AliasPluginForm(forms.ModelForm):
     site = forms.ModelChoiceField(
         label=_("Site"),
         queryset=Site.objects.all(),
-        widget=SiteSelectWidget(attrs={"data-placeholder": _("Select site")}),
+        widget=SiteSelectWidget(
+            attrs={
+                "data-placeholder": _("Select site to restrict the list of aliases below"),
+            }
+        ),
         required=False,
     )
 
@@ -325,9 +335,21 @@ class AliasPluginForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._set_category_widget_value()
+
+    def _set_category_widget_value(self):
+        """
+        When the user loads the form the site and category should be pre selected
+        """
+        # If the form is changing an existing Alias
+        # Be sure to show the values for an Alias
         if self.instance and self.instance.pk:
-            self.fields['category'].initial = self.instance.alias.category_id
-        self.fields['site'].initial = get_current_site()
+            self.fields['site'].initial = self.instance.alias.site
+            self.fields['category'].initial = self.instance.alias.category
+        # Otherwise this is creation
+        # Set the site to the current site by default
+        else:
+            self.fields['site'].initial = get_current_site()
 
     class Meta:
         model = AliasPlugin

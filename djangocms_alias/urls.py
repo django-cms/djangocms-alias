@@ -45,4 +45,11 @@ urlpatterns = [
         views.AliasSelect2View.as_view(),
         name=constants.SELECT2_ALIAS_URL_NAME,
     ),
+    re_path(
+        r'^category-select2/$',
+        views.CategorySelect2View.as_view(),
+        name=constants.CATEGORY_SELECT2_URL_NAME,
+    ),
+
+
 ]

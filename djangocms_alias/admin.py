@@ -114,6 +114,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
+        # Force the category set to Lower, to be able to sort the category in ascending/descending order
         queryset = queryset.annotate(alias_category_translations_ordered=Lower("alias__category__translations__name"))
         return queryset
 

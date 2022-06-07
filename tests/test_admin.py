@@ -6,7 +6,7 @@ from django.utils.timezone import localtime
 from cms.test_utils.testcases import CMSTestCase
 from cms.utils.urlutils import admin_reverse
 
-from bs4 import BeautifulSoup as bs
+from bs4 import BeautifulSoup
 
 from djangocms_alias.constants import USAGE_ALIAS_URL_NAME
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
@@ -276,7 +276,6 @@ class AliasContentManagerTestCase(CMSTestCase):
         last_category, last_alias, last_alias_content = self._create_alias_and_categories(
             "Z Order Test Case Upper"
         )
-
         # Create the versions for each alias content
         from djangocms_versioning.models import Version
         Version.objects.create(content=first_alias_content, created_by=self.superuser)
@@ -291,7 +290,7 @@ class AliasContentManagerTestCase(CMSTestCase):
             base_url += "?o=1"
             # en is the default language configured for the site
             response = self.client.get(base_url)
-        soup = bs(response.content, "html.parser")
+        soup = BeautifulSoup(response.content, "html.parser")
         results = soup.find_all("td", class_="field-get_category")
 
         # Test results are in ascending alphabetical order
@@ -307,7 +306,7 @@ class AliasContentManagerTestCase(CMSTestCase):
             base_url += "?o=-1"
             # en is the default language configured for the site
             response = self.client.get(base_url)
-        soup = bs(response.content, "html.parser")
+        soup = BeautifulSoup(response.content, "html.parser")
         results = soup.find_all("td", class_="field-get_category")
 
         # Test results are in descending alphabetical order

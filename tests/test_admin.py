@@ -256,9 +256,10 @@ class AliasContentManagerTestCase(CMSTestCase):
         )
         return category, alias, alias_content
 
-    def test_category_field_ordering(self):
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_category_field_ordering_versioned(self):
         """
-        Related category can be ordered by name, both in ascending and descending order
+        Related category can be ordered by name, both in ascending and descending order, with versioning
         """
         # Create a number of categories, aliases, and alias content to order
         first_category, first_alias, first_alias_content = self._create_alias_and_categories("First Order Test Case")
@@ -283,6 +284,60 @@ class AliasContentManagerTestCase(CMSTestCase):
         Version.objects.create(content=middle_alias_content, created_by=self.superuser)
         Version.objects.create(content=last_alias_content_lower, created_by=self.superuser)
         Version.objects.create(content=last_alias_content, created_by=self.superuser)
+
+        with self.login_user_context(self.superuser):
+            base_url = self.get_admin_url(AliasContent, "changelist")
+            # o=1 indicates ascending alphabetical order on list_displays second entry
+            base_url += "?o=1"
+            # en is the default language configured for the site
+            response = self.client.get(base_url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        results = soup.find_all("td", class_="field-get_category")
+
+        # Test results are in ascending alphabetical order
+        self.assertEqual(results[0].text, first_alias_content.name)
+        self.assertEqual(results[1].text, first_alias_content_lower.name)
+        self.assertEqual(results[2].text, middle_alias_content.name)
+        self.assertEqual(results[3].text, last_alias_content_lower.name)
+        self.assertEqual(results[4].text, last_alias_content.name)
+
+        with self.login_user_context(self.superuser):
+            base_url = self.get_admin_url(AliasContent, "changelist")
+            # o=-1 indicates descending alphabetical order on list_displays second entry
+            base_url += "?o=-1"
+            # en is the default language configured for the site
+            response = self.client.get(base_url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        results = soup.find_all("td", class_="field-get_category")
+
+        # Test results are in descending alphabetical order
+        self.assertEqual(results[4].text, first_alias_content.name)
+        self.assertEqual(results[3].text, first_alias_content_lower.name)
+        self.assertEqual(results[2].text, middle_alias_content.name)
+        self.assertEqual(results[1].text, last_alias_content_lower.name)
+        self.assertEqual(results[0].text, last_alias_content.name)
+
+    @skipUnless(not is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_category_field_ordering_unversioned(self):
+        """
+        Related category can be ordered by name, both in ascending and descending order, without versioning
+        """
+        # Create a number of categories, aliases, and alias content to order
+        first_category, first_alias, first_alias_content = self._create_alias_and_categories("First Order Test Case")
+        # Previously lowercase and upper case would be sorted separately, test they are ordered together
+        first_category_lower, first_alias_lower, first_alias_content_lower = self._create_alias_and_categories(
+            "first order test case lower"
+        )
+        middle_category, middle_alias, middle_alias_content = self._create_alias_and_categories(
+            "Middle Order Test Case"
+        )
+        # Previously lowercase and upper case would be sorted separately, test they are ordered together
+        last_category_lower, last_alias_lower, last_alias_content_lower = self._create_alias_and_categories(
+            "z order test case lower"
+        )
+        last_category, last_alias, last_alias_content = self._create_alias_and_categories(
+            "Z Order Test Case Upper"
+        )
 
         with self.login_user_context(self.superuser):
             base_url = self.get_admin_url(AliasContent, "changelist")

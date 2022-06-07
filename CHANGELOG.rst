@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* fix: AliasContent Category admin_order_field incorrect ordering
 
 1.7.0 (2022-05-31)
 ==================

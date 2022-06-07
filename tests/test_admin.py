@@ -258,7 +258,7 @@ class AliasContentManagerTestCase(CMSTestCase):
 
     def test_category_field_ordering(self):
         """
-        Category can be ordered by name, both in ascending and descending order
+        Related category can be ordered by name, both in ascending and descending order
         """
         # Create a number of categories, aliases, and alias content to order
         first_category, first_alias, first_alias_content = self._create_alias_and_categories("First Order Test Case")
@@ -287,7 +287,32 @@ class AliasContentManagerTestCase(CMSTestCase):
 
         with self.login_user_context(self.superuser):
             base_url = self.get_admin_url(AliasContent, "changelist")
+            # o=1 indicates ascending alphabetical order on list_displays second entry
             base_url += "?o=1"
             # en is the default language configured for the site
             response = self.client.get(base_url)
         soup = bs(response.content, "html.parser")
+        results = soup.find_all("td", class_="field-get_category")
+
+        # Test results are in ascending alphabetical order
+        self.assertEqual(results[0].text, first_alias_content.name)
+        self.assertEqual(results[1].text, first_alias_content_lower.name)
+        self.assertEqual(results[2].text, middle_alias_content.name)
+        self.assertEqual(results[3].text, last_alias_content_lower.name)
+        self.assertEqual(results[4].text, last_alias_content.name)
+
+        with self.login_user_context(self.superuser):
+            base_url = self.get_admin_url(AliasContent, "changelist")
+            # o=-1 indicates descending alphabetical order on list_displays second entry
+            base_url += "?o=-1"
+            # en is the default language configured for the site
+            response = self.client.get(base_url)
+        soup = bs(response.content, "html.parser")
+        results = soup.find_all("td", class_="field-get_category")
+
+        # Test results are in descending alphabetical order
+        self.assertEqual(results[4].text, first_alias_content.name)
+        self.assertEqual(results[3].text, first_alias_content_lower.name)
+        self.assertEqual(results[2].text, middle_alias_content.name)
+        self.assertEqual(results[1].text, last_alias_content_lower.name)
+        self.assertEqual(results[0].text, last_alias_content.name)

@@ -273,7 +273,6 @@ class Select2Mixin:
             'cms/js/select2/select2.js',
             'djangocms_alias/js/dist/bundle.alias.create.min.js',
             'djangocms_alias/js/alias_plugin.js',
-
         )
 
 

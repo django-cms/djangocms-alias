@@ -13,3 +13,4 @@ local.sqlite
 htmlcov
 .python-version
 venv*
+node_modules

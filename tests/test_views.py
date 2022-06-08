@@ -8,12 +8,14 @@ from django.test.utils import override_settings
 
 from cms.api import add_plugin
 from cms.models import Placeholder
+from cms.utils import get_current_site
 from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from djangocms_alias.compat import DJANGO_GTE_21
 from djangocms_alias.constants import (
+    CATEGORY_SELECT2_URL_NAME,
     DELETE_ALIAS_URL_NAME,
     LIST_ALIASES_URL_NAME,
     SELECT2_ALIAS_URL_NAME,
@@ -1090,6 +1092,59 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             [alias1.pk],
         )
 
+    def test_select2_view_site(self):
+        """
+        The list is filtered based on only matching
+        alias with a specific site if it is provided
+        """
+        site = get_current_site()
+        alias1 = self._create_alias(site=site)
+        alias2 = self._create_alias(site=site, position=1)
+        self._create_alias(position=2)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+                data={'site': site.pk},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [alias1.pk, alias2.pk],
+        )
+
+    def test_select2_view_site_and_category(self):
+        """
+        The list is filtered based on only matching
+        alias with a specific site and category if it is provided
+        """
+        category = Category.objects.create(name='category')
+        site = get_current_site()
+        self._create_alias(site=site)
+        alias2 = self._create_alias(site=site, category=category, position=1)
+        self._create_alias(position=2)
+        self._create_alias(position=3)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+                data={
+                    'site': site.pk,
+                    'category': category.pk,
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [alias2.pk],
+        )
+
     def test_select2_view_pk(self):
         alias1 = self._create_alias(name='test 2')
         self._create_alias(name='foo', position=1)
@@ -1500,6 +1555,168 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             response = self.client.get(site2_page.get_absolute_url())
         self.assertContains(response, 'test alias multisite')
         self.assertContains(response, 'Another alias plugin')
+
+
+class AliasCategorySelect2ViewTestCase(BaseAliasPluginTestCase):
+
+    def test_select2_view_no_permission(self):
+        """
+        The category list view is private
+        and only intended for use in the admin
+        """
+        response = self.client.get(
+            admin_reverse(
+                CATEGORY_SELECT2_URL_NAME,
+            ),
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_select2_view_alias_not_set(self):
+        """
+        When categories exist but are not attached to an alias
+        they are ignored
+        """
+        Category.objects.create(name='Category 1')
+        category_2 = Category.objects.create(name='Category 2')
+        Category.objects.create(name='Category 3')
+        self._create_alias(category=category_2)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+            )
+
+        expected_result = [category_2.pk]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([a['id'] for a in response.json()['results']], expected_result)
+
+    def test_select2_view_alias_site_set(self):
+        """
+        When a site is supplied only categories with site entries
+        are returned
+        """
+        site = get_current_site()
+        category_1 = Category.objects.create(name='Category 1')
+        category_2 = Category.objects.create(name='Category 2')
+        category_3 = Category.objects.create(name='Category 3')
+        self._create_alias(category=category_1, site=site)
+        self._create_alias(category=category_2)
+        self._create_alias(category=category_3)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+                data={'site': site.pk},
+            )
+
+        expected_result = [category_1.pk]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([a['id'] for a in response.json()['results']], expected_result)
+
+    def test_select2_view_set_limit(self):
+        """
+        Ensure that the page limit is respected
+        """
+        category_1 = Category.objects.create(name='Category 1')
+        category_2 = Category.objects.create(name='Category 2')
+        category_3 = Category.objects.create(name='Category 3')
+        self._create_alias(category=category_1)
+        self._create_alias(category=category_2, position=1)
+        self._create_alias(category=category_3, position=2)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+                data={'limit': 2},
+            )
+
+        content = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(content['more'])
+        self.assertEqual(len(content['results']), 2)
+
+    def test_select2_view_text_repr(self):
+        """
+        Ensure that the display / text representation of the object
+        is output to the user.
+        """
+        category = Category.objects.create(name='Category 1')
+        self._create_alias(name='test 2', category=category)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json()['results'][0]['text'],
+            category.name,
+        )
+
+    def test_select2_view_term(self):
+        """
+        Given a term, the response should return only
+        categories that match the term.
+        """
+        category_1 = Category.objects.create(name='ategory 1')
+        category_2 = Category.objects.create(name='Category 2')
+        category_3 = Category.objects.create(name='tegory 3')
+        category_4 = Category.objects.create(name='tegory 4')
+        self._create_alias(category=category_1)
+        self._create_alias(category=category_2)
+        self._create_alias(category=category_3)
+        self._create_alias(category=category_4)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+                data={'term': 'ate'},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [category_2.pk, category_1.pk],
+        )
+
+    def test_select2_view_pk(self):
+        """
+        When a pk is provided that record should be returned
+        """
+        category_1 = Category.objects.create(name='Category 1')
+        category_2 = Category.objects.create(name='Category 2')
+        category_3 = Category.objects.create(name='Category 3')
+        self._create_alias(category=category_1)
+        self._create_alias(category=category_2)
+        self._create_alias(category=category_3)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+                data={'pk': category_2.pk},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [category_2.pk],
+        )
 
 
 class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):

@@ -15,8 +15,6 @@ module.exports = function (opts) {
         devtool: false,
         watch: !!opts.watch,
         entry: {
-            // CMS frontend
-            'alias': PROJECT_PATH.js + '/base.js',
             'alias.create': PROJECT_PATH.js + '/create.js',
         },
         output: {

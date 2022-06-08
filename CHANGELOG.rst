@@ -4,6 +4,15 @@ Changelog
 
 Unreleased
 ==========
+
+1.7.0 (2022-05-31)
+==================
+* feat: Clean out old sass, js and css dist from gulp and package.json
+* feat: Create plugin alias filter to use category and or site
+* fix: Outdated build scripts from Node 5 to Node 16
+
+1.6.1 (2022-05-13)
+==================
 * fix: Moved category list filter after site
 * fix: Ordering category filter by name
 

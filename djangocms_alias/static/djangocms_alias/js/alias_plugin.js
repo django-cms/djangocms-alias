@@ -3,9 +3,8 @@ Once the site is selected with a value the Category field becomes active
 In the Category field, the list of available categories is updated based on the selected Site
 Once the Category field is selected, the Alias field becomes active
 In the Alias field, the list of available aliases is updated based on the selected Category
-If the Site field is updated, the Category field will be reset and Alias field inactive until the Category selection
-is made
-*/
+If the Site field is updated, the Category field will be reset and Alias field inactive until the
+Category selection is made */
 
 const siteDropDownDefault = "---------";
 

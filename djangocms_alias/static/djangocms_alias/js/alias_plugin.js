@@ -2,10 +2,12 @@
 // Once the site is selected with a value the Category field becomes active
 // In the Category field, the list of available categories is updated based on the selected Site
 // Once the Category field is selected, the Alias field becomes active
-// In the Alias field, the list of available aliases is updated based on the selected Category (Existing)
+// In the Alias field, the list of available aliases is updated based on the selected Category
 // If the Site field is updated, the Category field will be reset and Alias field inactive until the Category selection is made
-// If the user Saves without selecting an Alias, an error message will be displayed and the Plugin will not save. (Existing)
-// The Save CTA will remain active at all time. (Existing)
+
+const aliasDropdownFirst = "Select an alias";
+const categoryDropdownFirst = "Select category to restrict the list of aliases below";
+const siteDropDownFirst = "---------";
 
 function disableAlias(param){
     $('#id_alias').prop( "disabled", param );
@@ -21,15 +23,15 @@ function disableCategory(param){
 $(document).ready(function() {
     let catDiv = $('.field-category');
     if (catDiv.length){
-        let aliasSpanTag = $("#s2id_id_alias > a > span")
-        let aliasSpanText = aliasSpanTag[0].childNodes[0].textContent
-        if (aliasSpanText == "Select an alias"){
+        let aliasSpanTag = $("#s2id_id_alias > a > span");
+        let aliasSpanText = aliasSpanTag[0].childNodes[0].textContent;
+        if (aliasSpanText == aliasDropdownFirst){
             // This means alias is not set so lets check category
-            let catSpanTag = $("#s2id_id_category > a > span")
-            let spanText = catSpanTag[0].childNodes[0].textContent
-            if (spanText == "Select category to restrict the list of aliases below") {
+            let catSpanTag = $("#s2id_id_category > a > span");
+            let spanText = catSpanTag[0].childNodes[0].textContent;
+            if (spanText == categoryDropdownFirst) {
                 // Category is not set so let's disable alias
-                disableAlias(true)
+                disableAlias(true);
             }
         }
     }
@@ -42,7 +44,7 @@ $(document).ready(function() {
         let spanText = catSpanTag[0].childNodes[0].textContent
         // if category is set, remove the disable attribute
         console.log(spanText)
-        if (spanText != "Select category to restrict the list of aliases below") {
+        if (spanText != categoryDropdownFirst) {
             disableAlias(false)
         }
         // in case the category field is cleared, we need to disable the alias field again
@@ -57,12 +59,12 @@ $(document).ready(function() {
     $('#id_site').change(function(){
         // If the site changes, category should be reset
         let catSpanTag = $("#s2id_id_category > a > span")
-        catSpanTag[0].childNodes[0].textContent = "Select category to restrict the list of aliases below"
+        catSpanTag[0].childNodes[0].textContent = categoryDropdownFirst
         disableAlias(true)
 
         var siteName = $('#id_site').find(":selected").text();
         // If the site is changed to none, alias should be disabled
-        if(siteName == "---------"){
+        if(siteName == siteDropDownFirst){
             disableAlias(true)
             disableCategory(true)
         }

@@ -28,8 +28,8 @@ $(document).ready(function() {
         if (aliasSpanText == aliasDropdownFirst){
             // This means alias is not set so lets check category
             let catSpanTag = $("#s2id_id_category > a > span");
-            let spanText = catSpanTag[0].childNodes[0].textContent;
-            if (spanText == categoryDropdownFirst) {
+            let catSpanText = catSpanTag[0].childNodes[0].textContent;
+            if (catSpanText == categoryDropdownFirst) {
                 // Category is not set so let's disable alias
                 disableAlias(true);
             }
@@ -41,13 +41,12 @@ $(document).ready(function() {
 $(document).ready(function() {
     $('#id_category').change(function(){
         let catSpanTag = $("#s2id_id_category > a > span")
-        let spanText = catSpanTag[0].childNodes[0].textContent
+        let catSpanText = catSpanTag[0].childNodes[0].textContent
         // if category is set, remove the disable attribute
-        console.log(spanText)
-        if (spanText != categoryDropdownFirst) {
+        if (catSpanText != categoryDropdownFirst) {
             disableAlias(false)
         }
-        // in case the category field is cleared, we need to disable the alias field again
+        // In case the category field is cleared, we need to disable the alias field again
         else{
              disableAlias(true)
         }
@@ -62,7 +61,7 @@ $(document).ready(function() {
         catSpanTag[0].childNodes[0].textContent = categoryDropdownFirst
         disableAlias(true)
 
-        var siteName = $('#id_site').find(":selected").text();
+        let siteName = $('#id_site').find(":selected").text();
         // If the site is changed to none, alias should be disabled
         if(siteName == siteDropDownFirst){
             disableAlias(true)

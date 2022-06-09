@@ -3,10 +3,9 @@ Once the site is selected with a value the Category field becomes active
 In the Category field, the list of available categories is updated based on the selected Site
 Once the Category field is selected, the Alias field becomes active
 In the Alias field, the list of available aliases is updated based on the selected Category
-If the Site field is updated, the Category field will be reset and Alias field inactive until the
-Category selection is made */
-
-const siteDropDownDefault = "---------";
+If the Site field is updated, the Category field will be reset and Alias field inactive until the Category selection
+is made
+*/
 
 function disableAlias(param){
     $('#id_alias').prop( "disabled", param );
@@ -58,9 +57,9 @@ $(document).ready(function() {
         catSpanTag[0].childNodes[0].textContent = categoryDropdownDefault
         disableAlias(true)
 
-        let siteName = $('#id_site').find(":selected").text();
-        // If the site is changed to none, alias should be disabled
-        if(siteName == siteDropDownDefault){
+        let siteName = $('#id_site').find(":selected").val();
+        // If the site is changed to the default value, category and alias should be disabled
+        if(!siteName){
             disableAlias(true)
             disableCategory(true)
         }

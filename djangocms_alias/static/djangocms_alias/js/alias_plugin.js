@@ -31,37 +31,33 @@ $(document).ready(function() {
             }
         }
     }
-});
 
-// Category field change event
-$(document).ready(function() {
+    // Category field change event
     $('#id_category').change(function(){
         let categoryValue = $("#s2id_id_category > a").hasClass("select2-default");
         // if category is set, remove the disable attribute
         if (categoryValue == false) {
-            disableAlias(false)
+            disableAlias(false);
         }
         // In case the category field is cleared, we need to disable the alias field again
         else{
-             disableAlias(true)
+             disableAlias(true);
         }
     });
-})
 
-// Site field change event
-$(document).ready(function() {
+    // Site field change event
     $('#id_site').change(function(){
         // If the site changes, category should be reset to default
         const categoryDropdownDefault = $('#id_category').attr("data-placeholder");
         let catSpanTag = $("#s2id_id_category > a > span");
-        catSpanTag[0].childNodes[0].textContent = categoryDropdownDefault
-        disableAlias(true)
+        catSpanTag[0].childNodes[0].textContent = categoryDropdownDefault;
+        disableAlias(true);
 
         let siteName = $('#id_site').find(":selected").val();
         // If the site is changed to the default value, category and alias should be disabled
         if(!siteName){
-            disableAlias(true)
-            disableCategory(true)
+            disableAlias(true);
+            disableCategory(true);
         }
         else{
             disableCategory(false)

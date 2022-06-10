@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models.functions import Lower
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
@@ -111,12 +112,18 @@ class AliasContentAdmin(*alias_content_admin_classes):
     actions = None
     change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        # Force the category set to Lower, to be able to sort the category in ascending/descending order
+        queryset = queryset.annotate(alias_category_translations_ordered=Lower("alias__category__translations__name"))
+        return queryset
+
     # Add Alias category in the admin manager list and order field
     def get_category(self, obj):
         return obj.alias.category
 
     get_category.short_description = _('category')
-    get_category.admin_order_field = "alias__category"
+    get_category.admin_order_field = "alias_category_translations_ordered"
 
     def has_add_permission(self, request, obj=None):
         # FIXME: It is not currently possible to add an alias from the django admin changelist issue #97

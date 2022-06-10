@@ -5,6 +5,7 @@ Changelog
 Unreleased
 ==========
 * fix: AliasContent Category admin_order_field incorrect ordering
+* fix: Alias field in plugin should be disabled unless site/category is populated
 
 1.7.0 (2022-05-31)
 ==================

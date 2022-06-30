@@ -446,51 +446,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, alias2.get_absolute_url())
         self.assertContains(response, alias3.get_absolute_url())
 
-    def test_list_view_standard_user(self):
-        category = Category.objects.create(
-            name='Category 1',
-        )
-
-        with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.get_list_aliascontent_endpoint())
-        self.assertEqual(response.status_code, 403)
-
-    @skipUnless(DJANGO_GTE_21, "Django>=2.1")
-    def test_list_view_staff_user_without_permission_dj21(self):
-        category = Category.objects.create(
-            name='Category 1',
-        )
-
-        url = self.get_list_aliascontent_endpoint()
-        with self.login_user_context(self.get_staff_user_with_std_permissions()):
-            response = self.client.get(url)
-        self.assertEqual(response.status_code, 403)
-
-    @skipUnless(not DJANGO_GTE_21, "Django<2.1")
-    def test_list_view_staff_user_without_permission(self):
-        category = Category.objects.create(
-            name='Category 1',
-        )
-
-        url = self.get_list_aliascontent_endpoint()
-        with self.login_user_context(self.get_staff_user_with_std_permissions()):
-            response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/accounts/login/?next={}".format(url))
-
-    def test_list_view_staff_user_with_permission(self):
-        category = Category.objects.create(
-            name='Category 1',
-        )
-
-        user = self.get_staff_user_with_std_permissions()
-        user.user_permissions.add(Permission.objects.get(
-            content_type__app_label='djangocms_alias',
-            codename='change_alias'))
-        with self.login_user_context(user):
-            response = self.client.get(self.get_list_aliascontent_endpoint())
-        self.assertEqual(response.status_code, 200)
-
     def test_category_list_view(self):
         Category.objects.all().delete()
         category1 = Category.objects.create()

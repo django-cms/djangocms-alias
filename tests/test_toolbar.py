@@ -1,6 +1,7 @@
 import itertools
 from collections import ChainMap
 from unittest import skipUnless
+from unittest.mock import patch, MagicMock
 
 from django.contrib.auth.models import Permission
 from django.urls import reverse
@@ -69,7 +70,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias([self.plugin])
         for endpoint in [
             self.get_category_list_endpoint(),
-            self.get_list_aliases_endpoint(alias.category_id),
+            self.get_list_aliascontent_endpoint(),
             self.page.get_absolute_url(language=self.language),
         ]:
             request = self.get_page_request(page=None, path=endpoint, user=self.superuser)
@@ -301,7 +302,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         create_button = self._get_wizard_create_button(request)
         self.assertEqual(create_button.disabled, False)
 
-    @skipUnless(not is_versioning_enabled(), 'Test only relevant when no versioning')
+    @patch("djangocms_alias.cms_toolbars.is_versioning_enabled", MagicMock(return_value=False))
     def test_delete_button_show_on_edit_alias_view_no_versioning(self):
         """
         When versioning is not installed deletion should be possible. The delete button
@@ -326,7 +327,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertEqual(button.url, self.get_delete_alias_endpoint(alias.pk))
         self.assertEqual(
             button.on_close,
-            self.get_list_aliases_endpoint(alias.category_id),
+            self.get_list_aliascontent_endpoint(),
         )
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')

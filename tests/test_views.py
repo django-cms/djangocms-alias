@@ -395,7 +395,11 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(plugins[1].get_bound_plugin().body, 'test 2')
         self.assertEqual(plugins[2].get_bound_plugin().body, 'test 88')
 
-    def test_list_view(self):
+    def test_aliascontent_list_view(self):
+        """
+        Test that the AliasContent list view displays correct
+        details about the objects
+        """
         category1 = Category.objects.create(
             name='Category 1',
         )
@@ -422,48 +426,25 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
         alias3 = self._create_alias(
             [plugin],
-            name='Alias test 3',
+            name='Alias 3',
             category=category1,
             published=False,
         )
 
         with self.login_user_context(self.superuser):
             response = self.client.get(
-                self.get_list_aliases_endpoint(category1.pk),
+                self.get_list_aliascontent_endpoint(),
             )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, category1.name)
-        self.assertNotContains(response, category2.name)
+        self.assertContains(response, category2.name)
         self.assertContains(response, 'Alias 1')
-        self.assertNotContains(response, 'Alias 2')
-        if is_versioning_enabled():
-            self.assertContains(response, '{} (Not published)'.format('Alias test 3'))
-        else:
-            self.assertContains(response, 'Alias test 3')
-
-        alias1_content = alias1.get_content(language=self.language)
-        alias1_url = alias1_content.get_absolute_url()
-        if is_versioning_enabled():
-            from djangocms_versioning.helpers import (
-                version_list_url_for_grouper,
-            )
-
-            alias1_url = version_list_url_for_grouper(alias1)
-
-        self.assertContains(response, alias1_url)
-        self.assertNotContains(response, alias2.get_absolute_url())
-        self.assertContains(response, 'This is basic content')
-
-        with self.login_user_context(self.superuser):
-            with force_language('it'):
-                response = self.client.get(
-                    self.get_list_aliases_endpoint(category1.pk),
-                )
-        self.assertContains(response, 'Alias {} (No content)'.format(alias1.pk))
-        self.assertContains(response, 'Alias {} (No content)'.format(alias3.pk))
-        self.assertNotContains(response, 'Alias {} (No content)'.format(alias2.pk))
-        self.assertNotContains(response, 'This is basic content')
+        self.assertContains(response, 'Alias 2')
+        self.assertContains(response, 'Alias 3')
+        self.assertContains(response, alias1.get_absolute_url())
+        self.assertContains(response, alias2.get_absolute_url())
+        self.assertContains(response, alias3.get_absolute_url())
 
     def test_list_view_standard_user(self):
         category = Category.objects.create(
@@ -471,7 +452,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
 
         with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.get_list_aliases_endpoint(category.pk))
+            response = self.client.get(self.get_list_aliascontent_endpoint())
         self.assertEqual(response.status_code, 403)
 
     @skipUnless(DJANGO_GTE_21, "Django>=2.1")
@@ -480,7 +461,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             name='Category 1',
         )
 
-        url = self.get_list_aliases_endpoint(category.pk)
+        url = self.get_list_aliascontent_endpoint()
         with self.login_user_context(self.get_staff_user_with_std_permissions()):
             response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
@@ -491,7 +472,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             name='Category 1',
         )
 
-        url = self.get_list_aliases_endpoint(category.pk)
+        url = self.get_list_aliascontent_endpoint()
         with self.login_user_context(self.get_staff_user_with_std_permissions()):
             response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
@@ -507,7 +488,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             content_type__app_label='djangocms_alias',
             codename='change_alias'))
         with self.login_user_context(user):
-            response = self.client.get(self.get_list_aliases_endpoint(category.pk))
+            response = self.client.get(self.get_list_aliascontent_endpoint())
         self.assertEqual(response.status_code, 200)
 
     def test_category_list_view(self):

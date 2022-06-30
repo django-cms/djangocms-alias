@@ -1,3 +1,4 @@
+bs4
 coverage
 django-app-helper
 flake8

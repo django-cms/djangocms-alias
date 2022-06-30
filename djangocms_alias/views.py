@@ -88,41 +88,6 @@ def delete_alias_view(request, pk, *args, **kwargs):
     return response
 
 
-class AliasListView(PermissionRequiredMixin, ListView):
-    model = AliasModel
-    permission_required = 'djangocms_alias.change_alias'
-    context_object_name = 'aliases'
-    template_name = 'djangocms_alias/alias_list.html'
-
-    def get_queryset(self):
-        site_id = self.request.GET.get('site', None)
-        if site_id:
-            site_id = conditional_escape(site_id)
-            return self.category.aliases.filter(site_id=site_id)
-        return self.category.aliases.all()
-
-    def get_context_data(self, **kwargs):
-        kwargs.update({
-            'category': self.category,
-        })
-        context = super().get_context_data(**kwargs)
-        context['sites'] = Site.objects.all()
-        site_id = self.request.GET.get('site', None)
-        if site_id:
-            site_id = conditional_escape(site_id)
-        context['site_selected'] = site_id
-        return context
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            raise PermissionDenied
-        self.category = get_object_or_404(
-            Category,
-            pk=self.kwargs['category_pk'],
-        )
-        return super().dispatch(request, *args, **kwargs)
-
-
 class CategoryListView(PermissionRequiredMixin, ListView):
     model = Category
     permission_required = 'djangocms_alias.change_category'

@@ -17,7 +17,7 @@ from djangocms_alias.compat import DJANGO_GTE_21
 from djangocms_alias.constants import (
     CATEGORY_SELECT2_URL_NAME,
     DELETE_ALIAS_URL_NAME,
-    LIST_ALIASES_URL_NAME,
+    LIST_ALIASCONTENT_URL_NAME,
     SELECT2_ALIAS_URL_NAME,
     SET_ALIAS_POSITION_URL_NAME,
     USAGE_ALIAS_URL_NAME,
@@ -547,67 +547,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, alias.name)
         self.assertContains(response, self.plugin.body)
 
-    @skipIf(is_versioning_enabled(), 'Right now this feature wont work with versioning')
-    def test_view_multilanguage(self):
-        en_plugin = add_plugin(
-            self.placeholder,
-            'TextPlugin',
-            language='en',
-            body='This is text in English',
-        )
-        de_plugin = add_plugin(
-            self.placeholder,
-            'TextPlugin',
-            language='de',
-            body='Das ist Text auf Deutsch',
-        )
-        fr_plugin = add_plugin(
-            self.placeholder,
-            'TextPlugin',
-            language='fr',
-            body='C\'est le texte en français',
-        )
-        alias = self._create_alias([en_plugin])
-        alias_content_de = AliasContent.objects.create(
-            alias=alias,
-            name='test alias',
-            language='de',
-        )
-        alias_content_de.populate(plugins=[de_plugin])
-        alias_content_fr = AliasContent.objects.create(
-            alias=alias,
-            name='test alias',
-            language='fr',
-        )
-        alias_content_fr.populate(plugins=[fr_plugin])
-
-        with self.login_user_context(self.superuser):
-            with force_language('de'):
-                detail_response = self.client.get(alias.get_absolute_url())
-                list_response = self.client.get(
-                    admin_reverse(LIST_ALIASES_URL_NAME, args=[alias.category.pk]),
-                )
-        self.assertContains(detail_response, de_plugin.body)
-        self.assertContains(list_response, de_plugin.body)
-        self.assertNotContains(detail_response, fr_plugin.body)
-        self.assertNotContains(list_response, fr_plugin.body)
-        self.assertNotContains(detail_response, en_plugin.body)
-        self.assertNotContains(list_response, en_plugin.body)
-
-        with self.login_user_context(self.superuser):
-            with force_language('fr'):
-                detail_response = self.client.get(alias.get_absolute_url())
-                list_response = self.client.get(
-                    admin_reverse(LIST_ALIASES_URL_NAME, args=[alias.category.pk]),  # noqa: E501
-                )
-
-        self.assertContains(detail_response, fr_plugin.body)
-        self.assertContains(list_response, fr_plugin.body)
-        self.assertNotContains(detail_response, de_plugin.body)
-        self.assertNotContains(list_response, de_plugin.body)
-        self.assertNotContains(detail_response, en_plugin.body)
-        self.assertNotContains(list_response, en_plugin.body)
-
     def test_view_aliases_using_site_filter(self):
         site1 = Site.objects.create(domain='site1.com', name='1')
         site2 = Site.objects.create(domain='site2.com', name='2')
@@ -623,43 +562,31 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             language='en',
             body='Das ist Text auf Deutsch',
         )
-        site1_alias = self._create_alias([site1_plugin], site=site1, name='site1_alias', category=self.category)
-        site2_alias = self._create_alias([site1_plugin], site=site2, name='site2_alias', category=self.category)
-        alias_content_site1 = AliasContent.objects.create(
-            alias=site1_alias,
-            name='test alias site1',
-            language='en',
-        )
-        alias_content_site1.populate(plugins=[site1_plugin])
-        alias_content_site2 = AliasContent.objects.create(
-            alias=site2_alias,
-            name='test alias site2',
-            language='en',
-        )
-        alias_content_site2.populate(plugins=[site2_plugin])
+        site1_alias = self._create_alias(plugins=[site1_plugin], site=site1, name='site1_alias', category=self.category)
+        site2_alias = self._create_alias(plugins=[site2_plugin], site=site2, name='site2_alias', category=self.category)
+        aliascontent_list_url = admin_reverse(LIST_ALIASCONTENT_URL_NAME)
 
+        # when no filter used both objects are displayed
         with self.login_user_context(self.superuser):
             with force_language('en'):
-                list_response = self.client.get(
-                    admin_reverse(LIST_ALIASES_URL_NAME, args=[site1_alias.category.pk]),
-                )
+                list_response = self.client.get(aliascontent_list_url)
 
         self.assertContains(list_response, site1_alias.name)
         self.assertContains(list_response, site2_alias.name)
 
+        # when no filtering by site 1 only first object displayed
         with self.login_user_context(self.superuser):
             with force_language('en'):
-                aliases_list_url = admin_reverse(LIST_ALIASES_URL_NAME, args=[site1_alias.category.pk])
-                site1_aliases_filter_url = "{}?site={}".format(aliases_list_url, site1_alias.site.id)
+                site1_aliases_filter_url = f"{aliascontent_list_url}?site={site1_alias.site.id}"
                 list_response = self.client.get(site1_aliases_filter_url)
 
         self.assertContains(list_response, site1_alias.name)
         self.assertNotContains(list_response, site2_alias.name)
 
+        # when no filtering by site 2 only first object displayed
         with self.login_user_context(self.superuser):
             with force_language('en'):
-                aliases_list_url = admin_reverse(LIST_ALIASES_URL_NAME, args=[site2_alias.category.pk])
-                site2_aliases_filter_url = "{}?site={}".format(aliases_list_url, site2_alias.site.id)
+                site2_aliases_filter_url = f"{aliascontent_list_url}?site={site2_alias.site.id}"
                 list_response = self.client.get(site2_aliases_filter_url)
 
         self.assertNotContains(list_response, site1_alias.name)

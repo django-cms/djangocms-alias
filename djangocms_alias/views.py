@@ -3,19 +3,15 @@ import operator
 
 from django.contrib import admin
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
-from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils.html import conditional_escape
 from django.utils.translation import (
     get_language_from_request,
     gettext_lazy as _,
 )
-from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 
 from cms.models import Page
@@ -23,7 +19,7 @@ from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
 from cms.utils.i18n import get_current_language
 
 from .cms_plugins import Alias
-from .forms import BaseCreateAliasForm, CreateAliasForm, SetAliasPositionForm
+from .forms import BaseCreateAliasForm, CreateAliasForm
 from .models import Alias as AliasModel, AliasPlugin, Category
 from .utils import emit_content_change
 
@@ -204,24 +200,6 @@ def render_replace_response(request, new_plugins, source_placeholder=None,
             'deleted': True,
         })
     return render(request, 'djangocms_alias/alias_replace.html', context)
-
-
-@require_POST
-@transaction.atomic
-def set_alias_position_view(request):
-    if (
-        not request.user.is_staff
-        or not request.user.has_perm('djangocms_alias.change_alias')
-    ):
-        raise PermissionDenied
-
-    form = SetAliasPositionForm(request.POST or None)
-
-    if not form.is_valid():
-        return JsonResponse({'errors': form.errors}, status=400)
-
-    alias = form.save()
-    return JsonResponse({'alias': alias.pk, 'position': alias.position})
 
 
 class CategorySelect2View(ListView):

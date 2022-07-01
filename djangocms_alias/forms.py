@@ -226,42 +226,6 @@ class CreateCategoryWizardForm(TranslatableModelForm):
         ]
 
 
-class SetAliasPositionForm(forms.Form):
-    alias = forms.ModelChoiceField(queryset=AliasModel.objects.all())
-    position = forms.IntegerField(min_value=0)
-
-    def clean(self):
-        cleaned_data = super().clean()
-        position = cleaned_data.get('position')
-        alias = cleaned_data.get('alias')
-
-        if position is not None and alias:
-            if position == alias.position:
-                raise forms.ValidationError({
-                    'position': _(
-                        'Argument position have to be different than current '
-                        'alias position'
-                    ),
-                })
-
-            alias_count = alias.category.aliases.count()
-            if position > alias_count - 1:
-                raise forms.ValidationError({
-                    'position': _(
-                        'Invalid position in category list, '
-                        'available positions are: {}'
-                    ).format([i for i in range(0, alias_count)])
-                })
-
-        return cleaned_data
-
-    def save(self, *args, **kwargs):
-        position = self.cleaned_data['position']
-        alias = self.cleaned_data['alias']
-        alias._set_position(position)
-        return alias
-
-
 class Select2Mixin:
 
     class Media:

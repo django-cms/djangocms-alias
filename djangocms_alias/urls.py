@@ -31,11 +31,6 @@ urlpatterns = [
         name=constants.DELETE_ALIAS_URL_NAME,
     ),
     re_path(
-        r'^set-alias-position/$',
-        views.set_alias_position_view,
-        name=constants.SET_ALIAS_POSITION_URL_NAME,
-    ),
-    re_path(
         r'^select2/$',
         views.AliasSelect2View.as_view(),
         name=constants.SELECT2_ALIAS_URL_NAME,

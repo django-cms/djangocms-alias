@@ -19,6 +19,7 @@ from cms.utils.urlutils import admin_reverse
 
 from parler.models import TranslatableModel, TranslatedFields
 
+from .constants import CHANGE_ALIASCONTENT_URL_NAME
 from .utils import is_versioning_enabled
 
 

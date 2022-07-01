@@ -20,7 +20,7 @@ from djangocms_alias.constants import (
     LIST_ALIASCONTENT_URL_NAME,
     SELECT2_ALIAS_URL_NAME,
     SET_ALIAS_POSITION_URL_NAME,
-    USAGE_ALIAS_URL_NAME,
+    USAGE_ALIAS_URL_NAME, CHANGE_ALIASCONTENT_URL_NAME,
 )
 from djangocms_alias.models import Alias, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
@@ -397,7 +397,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_aliascontent_list_view(self):
         """
-        Test that the AliasContent list view displays correct
+        Test that the AliasContent admin change list displays correct
         details about the objects
         """
         category1 = Category.objects.create(
@@ -442,9 +442,39 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, 'Alias 1')
         self.assertContains(response, 'Alias 2')
         self.assertContains(response, 'Alias 3')
-        self.assertContains(response, alias1.get_absolute_url())
-        self.assertContains(response, alias2.get_absolute_url())
-        self.assertContains(response, alias3.get_absolute_url())
+
+        if is_versioning_enabled():
+            # we have both published and draft aliases so both should
+            # be displayed
+            self.assertContains(response, "Published")
+            self.assertContains(response, "Draft")
+        else:
+            self.assertNotContains(response, "Published")
+            self.assertNotContains(response, "Draft")
+
+        aliascontent1_url = alias1.get_absolute_url()
+        aliascontent2_url = alias2.get_absolute_url()
+        aliascontent3_url = alias3.get_absolute_url()
+
+        # when versioning is not enabled, the django admin change form
+        # is used which used links to the aliascontent_change view
+        if not is_versioning_enabled():
+            alias1_content = alias1.get_content(language=self.language)
+            alias2_content = alias2.get_content(language=self.language)
+            alias3_content = alias3.get_content(language=self.language)
+            aliascontent1_url = admin_reverse(
+                CHANGE_ALIASCONTENT_URL_NAME, args=[alias1_content.pk]
+            )
+            aliascontent2_url = admin_reverse(
+                CHANGE_ALIASCONTENT_URL_NAME, args=[alias2_content.pk]
+            )
+            aliascontent3_url = admin_reverse(
+                CHANGE_ALIASCONTENT_URL_NAME, args=[alias3_content.pk]
+        )
+
+        self.assertContains(response, aliascontent1_url)
+        self.assertContains(response, aliascontent2_url)
+        self.assertContains(response, aliascontent3_url)
 
     def test_category_list_view(self):
         Category.objects.all().delete()

@@ -13,7 +13,6 @@ from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
-from djangocms_alias.compat import DJANGO_GTE_21
 from djangocms_alias.constants import (
     CATEGORY_SELECT2_URL_NAME,
     DELETE_ALIAS_URL_NAME,
@@ -475,83 +474,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, aliascontent2_url)
         self.assertContains(response, aliascontent3_url)
 
-    def test_category_list_view(self):
-        Category.objects.all().delete()
-        category1 = Category.objects.create()
-        category2 = Category.objects.create()
-        category1.translations.create(language_code='en', name='Category 1')
-        category2.translations.create(language_code='en', name='Category 2')
-        category1.translations.create(language_code='de', name='Kategorie 1')
-        category2.translations.create(language_code='fr', name='Catégorie 2')
-        category1.translations.create(language_code='it', name='Categoria 1')
-
-        with self.login_user_context(self.superuser):
-            with force_language('en'):
-                en_response = self.client.get(self.get_category_list_endpoint())
-            with force_language('de'):
-                de_response = self.client.get(self.get_category_list_endpoint())
-            with force_language('fr'):
-                fr_response = self.client.get(self.get_category_list_endpoint())
-            with force_language('it'):
-                it_response = self.client.get(self.get_category_list_endpoint())
-
-        self.assertContains(en_response, 'Category 1')
-        self.assertContains(en_response, 'Category 2')
-        self.assertNotContains(en_response, 'Kategorie 1')
-        self.assertNotContains(en_response, 'Catégorie 2')
-        self.assertNotContains(en_response, 'Categoria 1')
-
-        self.assertContains(de_response, 'Kategorie 1')
-        self.assertContains(de_response, 'Category 2')  # fallback
-        self.assertNotContains(de_response, 'Category 1')
-        self.assertNotContains(de_response, 'Catégorie 2')
-        self.assertNotContains(de_response, 'Categoria 1')
-
-        self.assertContains(fr_response, 'Category 1')  # fallback
-        self.assertContains(fr_response, 'Catégorie 2')
-        self.assertNotContains(fr_response, 'Category 2')
-        self.assertNotContains(fr_response, 'Kategorie 1')
-        self.assertNotContains(fr_response, 'Categoria 2')
-
-        self.assertContains(it_response, 'Catégorie 2')  # fallback
-        self.assertNotContains(it_response, 'Category 1')
-        self.assertNotContains(it_response, 'Category 2')
-        self.assertNotContains(it_response, 'Kategorie 1')
-        self.assertNotContains(it_response, 'Categoria 2')
-
-    def test_category_list_view_standard_user(self):
-        """
-        Expect a 302 redirect as the view is handled by the django admin
-        """
-        with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.get_category_list_endpoint())
-        self.assertEqual(response.status_code, 302)
-
-    @skipUnless(DJANGO_GTE_21, "Django>=2.1")
-    def test_category_list_view_staff_user_without_permission_dj21(self):
-        url = self.get_category_list_endpoint()
-        with self.login_user_context(self.get_staff_user_with_std_permissions()):
-            response = self.client.get(url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_category_list_view_staff_user_with_permission(self):
-        user = self.get_staff_user_with_std_permissions()
-        user.user_permissions.add(Permission.objects.get(
-            content_type__app_label='djangocms_alias',
-            codename='change_category'))
-        with self.login_user_context(user):
-            response = self.client.get(self.get_category_list_endpoint())
-        self.assertEqual(response.status_code, 200)
-
-    def test_category_list_edit_button(self):
-        with self.login_user_context(self.superuser):
-            response = self.client.get(self.get_category_list_endpoint())
-
-        self.assertContains(
-            response,
-            '<a href="/en/admin/djangocms_alias/category/1/change/"'
-        )
-
     def test_alias_content_preview_view(self):
         alias = self._create_alias([self.plugin])
         with self.login_user_context(self.superuser):
@@ -963,25 +885,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             self._publish(alias)
         alias_content = alias.contents.first()
         self.assertEqual(alias_content.name, 'test alias')
-
-    def test_category_change_view(self):
-        with self.login_user_context(self.superuser):
-            self.client.post(
-                add_url_parameters(
-                    admin_reverse(
-                        'djangocms_alias_category_change',
-                        args=[self.category.pk],
-                    ),
-                    language='de',
-                ),
-                data={
-                    'name': 'Alias Kategorie',
-                },
-            )
-
-        self.assertEqual(self.category.name, 'test category')
-        self.category.set_current_language('de')
-        self.assertEqual(self.category.name, 'Alias Kategorie')
 
     def test_alias_usage_view(self):
         alias = self._create_alias()

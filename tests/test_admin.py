@@ -1,21 +1,25 @@
 from unittest import skipUnless
 
+from cms.api import add_plugin
+from cms.utils.i18n import force_language
+from django.contrib.auth.models import Permission
 from django.utils.formats import localize
 from django.utils.timezone import localtime
 
 from cms.test_utils.testcases import CMSTestCase
-from cms.utils.urlutils import admin_reverse
+from cms.utils.urlutils import admin_reverse, add_url_parameters
 
 from bs4 import BeautifulSoup
+from djangocms_alias.compat import DJANGO_GTE_21
 
-from djangocms_alias.constants import USAGE_ALIAS_URL_NAME
+from tests.base import BaseAliasPluginTestCase
+
+from djangocms_alias.constants import USAGE_ALIAS_URL_NAME, CHANGE_ALIASCONTENT_URL_NAME
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
 
-class AliasContentManagerTestCase(CMSTestCase):
-    def setUp(self):
-        self.superuser = self.get_superuser()
+class AliasContentManagerTestCase(BaseAliasPluginTestCase):
 
     @skipUnless(not is_versioning_enabled(), 'Test only relevant when no versioning')
     def test_alias_content_manager_rendering_without_versioning_actions(self):
@@ -370,3 +374,183 @@ class AliasContentManagerTestCase(CMSTestCase):
         self.assertEqual(results[2].text, middle_alias_content.name)
         self.assertEqual(results[1].text, last_alias_content_lower.name)
         self.assertEqual(results[0].text, last_alias_content.name)
+
+    def test_aliascontent_list_view(self):
+        """
+        Test that the AliasContent admin change list displays correct
+        details about the objects
+        """
+        category1 = Category.objects.create(
+            name='Category 1',
+        )
+        category2 = Category.objects.create(
+            name='Category 2',
+        )
+
+        plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language=self.language,
+            body='This is basic content',
+        )
+
+        alias1 = self._create_alias(
+            [plugin],
+            name='Alias 1',
+            category=category1,
+        )
+        alias2 = self._create_alias(
+            [plugin],
+            name='Alias 2',
+            category=category2,
+        )
+        alias3 = self._create_alias(
+            [plugin],
+            name='Alias 3',
+            category=category1,
+            published=False,
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                self.get_list_aliascontent_endpoint(),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, category1.name)
+        self.assertContains(response, category2.name)
+        self.assertContains(response, 'Alias 1')
+        self.assertContains(response, 'Alias 2')
+        self.assertContains(response, 'Alias 3')
+
+        if is_versioning_enabled():
+            # we have both published and draft aliases so both should
+            # be displayed
+            self.assertContains(response, "Published")
+            self.assertContains(response, "Draft")
+        else:
+            self.assertNotContains(response, "Published")
+            self.assertNotContains(response, "Draft")
+
+        aliascontent1_url = alias1.get_absolute_url()
+        aliascontent2_url = alias2.get_absolute_url()
+        aliascontent3_url = alias3.get_absolute_url()
+
+        # when versioning is not enabled, the django admin change form
+        # is used which used links to the aliascontent_change view
+        if not is_versioning_enabled():
+            alias1_content = alias1.get_content(language=self.language)
+            alias2_content = alias2.get_content(language=self.language)
+            alias3_content = alias3.get_content(language=self.language)
+            aliascontent1_url = admin_reverse(
+                CHANGE_ALIASCONTENT_URL_NAME, args=[alias1_content.pk]
+            )
+            aliascontent2_url = admin_reverse(
+                CHANGE_ALIASCONTENT_URL_NAME, args=[alias2_content.pk]
+            )
+            aliascontent3_url = admin_reverse(
+                CHANGE_ALIASCONTENT_URL_NAME, args=[alias3_content.pk]
+        )
+
+        self.assertContains(response, aliascontent1_url)
+        self.assertContains(response, aliascontent2_url)
+        self.assertContains(response, aliascontent3_url)
+
+
+class CategoryAdminViewsTestCase(BaseAliasPluginTestCase):
+
+    def test_changelist(self):
+        Category.objects.all().delete()
+        category1 = Category.objects.create()
+        category2 = Category.objects.create()
+        category1.translations.create(language_code='en', name='Category 1')
+        category2.translations.create(language_code='en', name='Category 2')
+        category1.translations.create(language_code='de', name='Kategorie 1')
+        category2.translations.create(language_code='fr', name='Catégorie 2')
+        category1.translations.create(language_code='it', name='Categoria 1')
+
+        with self.login_user_context(self.superuser):
+            with force_language('en'):
+                en_response = self.client.get(self.get_category_list_endpoint())
+            with force_language('de'):
+                de_response = self.client.get(self.get_category_list_endpoint())
+            with force_language('fr'):
+                fr_response = self.client.get(self.get_category_list_endpoint())
+            with force_language('it'):
+                it_response = self.client.get(self.get_category_list_endpoint())
+
+        self.assertContains(en_response, 'Category 1')
+        self.assertContains(en_response, 'Category 2')
+        self.assertNotContains(en_response, 'Kategorie 1')
+        self.assertNotContains(en_response, 'Catégorie 2')
+        self.assertNotContains(en_response, 'Categoria 1')
+
+        self.assertContains(de_response, 'Kategorie 1')
+        self.assertContains(de_response, 'Category 2')  # fallback
+        self.assertNotContains(de_response, 'Category 1')
+        self.assertNotContains(de_response, 'Catégorie 2')
+        self.assertNotContains(de_response, 'Categoria 1')
+
+        self.assertContains(fr_response, 'Category 1')  # fallback
+        self.assertContains(fr_response, 'Catégorie 2')
+        self.assertNotContains(fr_response, 'Category 2')
+        self.assertNotContains(fr_response, 'Kategorie 1')
+        self.assertNotContains(fr_response, 'Categoria 2')
+
+        self.assertContains(it_response, 'Catégorie 2')  # fallback
+        self.assertNotContains(it_response, 'Category 1')
+        self.assertNotContains(it_response, 'Category 2')
+        self.assertNotContains(it_response, 'Kategorie 1')
+        self.assertNotContains(it_response, 'Categoria 2')
+
+    def test_changelist_standard_user(self):
+        """
+        Expect a 302 redirect as the view is handled by the django admin
+        """
+        with self.login_user_context(self.get_standard_user()):
+            response = self.client.get(self.get_category_list_endpoint())
+        self.assertEqual(response.status_code, 302)
+
+    @skipUnless(DJANGO_GTE_21, "Django>=2.1")
+    def test_changelist_staff_user_without_permission_dj21(self):
+        url = self.get_category_list_endpoint()
+        with self.login_user_context(self.get_staff_user_with_std_permissions()):
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_changelist_staff_user_with_permission(self):
+        user = self.get_staff_user_with_std_permissions()
+        user.user_permissions.add(Permission.objects.get(
+            content_type__app_label='djangocms_alias',
+            codename='change_category'))
+        with self.login_user_context(user):
+            response = self.client.get(self.get_category_list_endpoint())
+        self.assertEqual(response.status_code, 200)
+
+    def test_changelist_edit_button(self):
+        with self.login_user_context(self.superuser):
+            response = self.client.get(self.get_category_list_endpoint())
+
+        self.assertContains(
+            response,
+            '<a href="/en/admin/djangocms_alias/category/1/change/"'
+        )
+
+    def test_change_view(self):
+        with self.login_user_context(self.superuser):
+            self.client.post(
+                add_url_parameters(
+                    admin_reverse(
+                        'djangocms_alias_category_change',
+                        args=[self.category.pk],
+                    ),
+                    language='de',
+                ),
+                data={
+                    'name': 'Alias Kategorie',
+                },
+            )
+
+        self.assertEqual(self.category.name, 'test category')
+        self.category.set_current_language('de')
+        self.assertEqual(self.category.name, 'Alias Kategorie')

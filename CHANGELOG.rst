@@ -5,6 +5,8 @@ Changelog
 Unreleased
 ==========
 
+* fix: remove back button from alias preview and associated unused custom views
+
 1.7.1 (2022-06-10)
 ==================
 * fix: AliasContent Category admin_order_field incorrect ordering

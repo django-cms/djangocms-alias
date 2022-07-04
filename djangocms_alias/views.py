@@ -84,24 +84,6 @@ def delete_alias_view(request, pk, *args, **kwargs):
     return response
 
 
-class CategoryListView(PermissionRequiredMixin, ListView):
-    model = Category
-    permission_required = 'djangocms_alias.change_category'
-    context_object_name = 'categories'
-    template_name = 'djangocms_alias/category_list.html'
-
-    def get_queryset(self):
-        qs = Category.objects.active_translations()
-        # Using `order_by('translations__name')` results in duplicated QuerySet
-        # values.
-        return sorted(qs, key=operator.attrgetter('name'))
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            raise PermissionDenied
-        return super().dispatch(request, *args, **kwargs)
-
-
 def create_alias_view(request):
     if not request.user.is_staff:
         raise PermissionDenied

@@ -5,17 +5,6 @@ from .base import BaseAliasPluginTestCase
 
 class AliasMenuTestCase(BaseAliasPluginTestCase):
 
-    def test_alias_pages_have_no_menu_nodes(self):
-        alias = self._create_alias()
-        with self.login_user_context(self.superuser):
-            response = self.client.get(self.get_category_list_endpoint())
-            self.assertInHTML('<ul class="nav"></ul>', response.content.decode())
-            response = self.client.get(alias.get_absolute_url())
-            if is_versioning_enabled():
-                self.assertNotContains(response, '<ul class="nav">')
-            else:
-                self.assertInHTML('<ul class="nav"></ul>', response.content.decode())
-
     def test_pages_keep_their_menu_nodes(self):
         """Tests that AliasDisableMenu modifier does not affect
         non-alias pages"""

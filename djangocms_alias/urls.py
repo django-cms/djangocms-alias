@@ -11,11 +11,6 @@ urlpatterns = [
         name=constants.CREATE_ALIAS_URL_NAME,
     ),
     re_path(
-        r'^aliases/$',
-        views.CategoryListView.as_view(),
-        name=constants.CATEGORY_LIST_URL_NAME,
-    ),
-    re_path(
         r'^aliases/(?P<pk>\d+)/usage/$',
         views.alias_usage_view,
         name=constants.USAGE_ALIAS_URL_NAME,

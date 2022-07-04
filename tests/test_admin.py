@@ -1,22 +1,23 @@
 from unittest import skipUnless
 
-from cms.api import add_plugin
-from cms.utils.i18n import force_language
 from django.contrib.auth.models import Permission
 from django.utils.formats import localize
 from django.utils.timezone import localtime
 
-from cms.test_utils.testcases import CMSTestCase
-from cms.utils.urlutils import admin_reverse, add_url_parameters
+from cms.api import add_plugin
+from cms.utils.i18n import force_language
+from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from bs4 import BeautifulSoup
+
 from djangocms_alias.compat import DJANGO_GTE_21
-
-from tests.base import BaseAliasPluginTestCase
-
-from djangocms_alias.constants import USAGE_ALIAS_URL_NAME, CHANGE_ALIASCONTENT_URL_NAME
+from djangocms_alias.constants import (
+    CHANGE_ALIASCONTENT_URL_NAME,
+    USAGE_ALIAS_URL_NAME,
+)
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
+from tests.base import BaseAliasPluginTestCase
 
 
 class AliasContentManagerTestCase(BaseAliasPluginTestCase):
@@ -450,7 +451,7 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             )
             aliascontent3_url = admin_reverse(
                 CHANGE_ALIASCONTENT_URL_NAME, args=[alias3_content.pk]
-        )
+            )
 
         self.assertContains(response, aliascontent1_url)
         self.assertContains(response, aliascontent2_url)

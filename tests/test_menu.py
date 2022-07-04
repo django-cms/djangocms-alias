@@ -1,5 +1,3 @@
-from djangocms_alias.utils import is_versioning_enabled
-
 from .base import BaseAliasPluginTestCase
 
 

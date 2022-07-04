@@ -29,7 +29,6 @@ __all__ = [
     'CreateAliasForm',
     'CreateAliasWizardForm',
     'CreateCategoryWizardForm',
-    'SetAliasPositionForm',
 ]
 
 

@@ -15,10 +15,11 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from djangocms_alias.constants import (
     CATEGORY_SELECT2_URL_NAME,
+    CHANGE_ALIASCONTENT_URL_NAME,
     DELETE_ALIAS_URL_NAME,
     LIST_ALIASCONTENT_URL_NAME,
     SELECT2_ALIAS_URL_NAME,
-    USAGE_ALIAS_URL_NAME, CHANGE_ALIASCONTENT_URL_NAME,
+    USAGE_ALIAS_URL_NAME,
 )
 from djangocms_alias.models import Alias, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
@@ -468,7 +469,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
             aliascontent3_url = admin_reverse(
                 CHANGE_ALIASCONTENT_URL_NAME, args=[alias3_content.pk]
-        )
+            )
 
         self.assertContains(response, aliascontent1_url)
         self.assertContains(response, aliascontent2_url)

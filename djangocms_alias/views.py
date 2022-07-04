@@ -1,8 +1,6 @@
 import json
-import operator
 
 from django.contrib import admin
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse

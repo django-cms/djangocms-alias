@@ -1,8 +1,8 @@
 from django.contrib.sites.models import Site
+from django.urls import reverse
 
 from cms.api import add_plugin, create_title
 from cms.models import Placeholder
-from django.urls import reverse
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category

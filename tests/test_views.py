@@ -15,7 +15,6 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from djangocms_alias.constants import (
     CATEGORY_SELECT2_URL_NAME,
-    CHANGE_ALIASCONTENT_URL_NAME,
     DELETE_ALIAS_URL_NAME,
     LIST_ALIASCONTENT_URL_NAME,
     SELECT2_ALIAS_URL_NAME,
@@ -1424,3 +1423,80 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         self.add_alias_plugin_to_page(page, unpublished_alias)
         response = self.client.get(page.get_absolute_url())
         self.assertNotContains(response, body)
+
+    @skipIf(is_versioning_enabled(), 'Right now this feature wont work with versioning')
+    def test_view_multilanguage(self):
+        """
+        Views should only display content related to the selected language
+        """
+        en_plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='en',
+            body='This is text in English',
+        )
+        de_plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='de',
+            body='Das ist Text auf Deutsch',
+        )
+        fr_plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='fr',
+            body='C\'est le texte en français',
+        )
+        alias = self._create_alias([en_plugin], name="English AliasContent object")
+        alias_content_de = AliasContent.objects.create(
+            alias=alias,
+            name='German AliasContent object',
+            language='de',
+        )
+        alias_content_de.populate(plugins=[de_plugin])
+        alias_content_fr = AliasContent.objects.create(
+            alias=alias,
+            name='French AliasContent object',
+            language='fr',
+        )
+        alias_content_fr.populate(plugins=[fr_plugin])
+
+        with self.login_user_context(self.superuser):
+            with force_language('en'):
+                detail_response = self.client.get(alias.get_absolute_url())
+                list_response = self.client.get(
+                    admin_reverse(LIST_ALIASCONTENT_URL_NAME),
+                )
+        self.assertContains(detail_response, en_plugin.body)
+        self.assertContains(list_response, alias.name)
+        self.assertNotContains(detail_response, fr_plugin.body)
+        self.assertNotContains(list_response, alias_content_fr.name)
+        self.assertNotContains(detail_response, de_plugin.body)
+        self.assertNotContains(list_response, alias_content_de.name)
+
+        with self.login_user_context(self.superuser):
+            with force_language('de'):
+                detail_response = self.client.get(alias.get_absolute_url())
+                list_response = self.client.get(
+                    admin_reverse(LIST_ALIASCONTENT_URL_NAME),
+                )
+        self.assertContains(detail_response, de_plugin.body)
+        self.assertContains(list_response, alias_content_de.name)
+        self.assertNotContains(detail_response, fr_plugin.body)
+        self.assertNotContains(list_response, alias_content_fr.name)
+        self.assertNotContains(detail_response, en_plugin.body)
+        self.assertNotContains(list_response, alias.name)
+
+        with self.login_user_context(self.superuser):
+            with force_language('fr'):
+                detail_response = self.client.get(alias.get_absolute_url())
+                list_response = self.client.get(
+                    admin_reverse(LIST_ALIASCONTENT_URL_NAME),  # noqa: E501
+                )
+
+        self.assertContains(detail_response, fr_plugin.body)
+        self.assertContains(list_response, alias_content_fr.name)
+        self.assertNotContains(detail_response, de_plugin.body)
+        self.assertNotContains(list_response, alias_content_de.name)
+        self.assertNotContains(detail_response, en_plugin.body)
+        self.assertNotContains(list_response, alias.name)

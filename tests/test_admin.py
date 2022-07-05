@@ -10,7 +10,6 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from bs4 import BeautifulSoup
 
-from djangocms_alias.compat import DJANGO_GTE_21
 from djangocms_alias.constants import (
     CHANGE_ALIASCONTENT_URL_NAME,
     USAGE_ALIAS_URL_NAME,
@@ -378,8 +377,8 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
 
     def test_aliascontent_list_view(self):
         """
-        Test that the AliasContent admin change list displays correct
-        details about the objects
+        The AliasContent admin change list displays correct details
+        about the objects
         """
         category1 = Category.objects.create(
             name='Category 1',
@@ -512,8 +511,7 @@ class CategoryAdminViewsTestCase(BaseAliasPluginTestCase):
             response = self.client.get(self.get_category_list_endpoint())
         self.assertEqual(response.status_code, 302)
 
-    @skipUnless(DJANGO_GTE_21, "Django>=2.1")
-    def test_changelist_staff_user_without_permission_dj21(self):
+    def test_changelist_staff_user_without_permission(self):
         url = self.get_category_list_endpoint()
         with self.login_user_context(self.get_staff_user_with_std_permissions()):
             response = self.client.get(url)

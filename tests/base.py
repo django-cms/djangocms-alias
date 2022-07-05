@@ -47,9 +47,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         )
 
     def get_list_aliascontent_endpoint(self):
-        return admin_reverse(
-            LIST_ALIASCONTENT_URL_NAME,
-        )
+        return admin_reverse(LIST_ALIASCONTENT_URL_NAME)
 
     def setUp(self):
         self.superuser = self.get_superuser()

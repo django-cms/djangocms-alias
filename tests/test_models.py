@@ -399,6 +399,9 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(Placeholder.objects.count(), 0)
 
     def test_category_get_absolute_url(self):
+        """
+        Category uses the admin change view as its absolute url
+        """
         category = Category.objects.create(name="Test Category")
 
         app_label = category._meta.app_label

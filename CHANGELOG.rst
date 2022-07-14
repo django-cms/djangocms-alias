@@ -4,6 +4,9 @@ Changelog
 
 Unreleased
 ==========
+
+1.7.2 (2022-07-14)
+==================
 * fix: Resetting category field in plugin to null instead of using placeholder when site is changed
 
 1.7.1 (2022-06-10)

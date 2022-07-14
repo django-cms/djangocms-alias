@@ -48,9 +48,7 @@ $(document).ready(function() {
     // Site field change event
     $('#id_site').change(function(){
         // If the site changes, category should be reset to default
-        const categoryDropdownDefault = $('#id_category').attr("data-placeholder");
-        let catSpanTag = $("#s2id_id_category > a > span");
-        catSpanTag[0].childNodes[0].textContent = categoryDropdownDefault;
+        $('#s2id_id_category').select2('data', null);
         disableAlias(true);
 
         let siteName = $('#id_site').find(":selected").val();

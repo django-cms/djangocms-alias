@@ -69,7 +69,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias([self.plugin])
         for endpoint in [
             self.get_category_list_endpoint(),
-            self.get_list_aliases_endpoint(alias.category_id),
+            self.get_list_aliascontent_endpoint(),
             self.page.get_absolute_url(language=self.language),
         ]:
             request = self.get_page_request(page=None, path=endpoint, user=self.superuser)
@@ -326,7 +326,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertEqual(button.url, self.get_delete_alias_endpoint(alias.pk))
         self.assertEqual(
             button.on_close,
-            self.get_list_aliases_endpoint(alias.category_id),
+            self.get_list_aliascontent_endpoint(),
         )
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')

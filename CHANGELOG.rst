@@ -5,6 +5,8 @@ Changelog
 Unreleased
 ==========
 
+* fix: remove back button from alias preview and associated unused custom views
+
 1.7.2 (2022-07-14)
 ==================
 * fix: Resetting category field in plugin to null instead of using placeholder when site is changed

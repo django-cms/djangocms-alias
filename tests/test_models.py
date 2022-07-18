@@ -1,4 +1,5 @@
 from django.contrib.sites.models import Site
+from django.urls import reverse
 
 from cms.api import add_plugin, create_title
 from cms.models import Placeholder
@@ -396,3 +397,16 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.assertFalse(alias.__class__.objects.filter(pk=alias.pk).exists())
         self.assertEqual(alias.cms_plugins.count(), 0)
         self.assertEqual(Placeholder.objects.count(), 0)
+
+    def test_category_get_absolute_url(self):
+        """
+        Category uses the admin change view as its absolute url
+        """
+        category = Category.objects.create(name="Test Category")
+
+        app_label = category._meta.app_label
+        expected = reverse(
+            f"admin:{app_label}_category_change", args=[category.pk]
+        )
+
+        self.assertEqual(category.get_absolute_url(), expected)

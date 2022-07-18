@@ -1424,7 +1424,6 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         response = self.client.get(page.get_absolute_url())
         self.assertNotContains(response, body)
 
-    @skipIf(is_versioning_enabled(), 'Right now this feature wont work with versioning')
     def test_view_multilanguage(self):
         """
         Views should only display content related to the selected language
@@ -1461,9 +1460,22 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         )
         alias_content_fr.populate(plugins=[fr_plugin])
 
+        # when versioning is enabled a Version must be created and published for each language
+        if is_versioning_enabled():
+            from djangocms_versioning.models import Version
+            version_de = Version.objects.create(content=alias_content_de, created_by=self.superuser)
+            version_de.publish(user=self.superuser)
+            version_fr = Version.objects.create(content=alias_content_fr, created_by=self.superuser)
+            version_fr.publish(user=self.superuser)
+
         with self.login_user_context(self.superuser):
             with force_language('en'):
-                detail_response = self.client.get(alias.get_absolute_url())
+                if is_versioning_enabled():
+                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
+                    # otherwise we are taken to the version list url
+                    detail_response = self.client.get(alias.get_content(language="en").get_absolute_url())
+                else:
+                    detail_response = self.client.get(alias.get_absolute_url())
                 list_response = self.client.get(
                     admin_reverse(LIST_ALIASCONTENT_URL_NAME),
                 )
@@ -1476,7 +1488,12 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             with force_language('de'):
-                detail_response = self.client.get(alias.get_absolute_url())
+                if is_versioning_enabled():
+                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
+                    # otherwise we are taken to the version list url
+                    detail_response = self.client.get(alias_content_de.get_absolute_url())
+                else:
+                    detail_response = self.client.get(alias.get_absolute_url())
                 list_response = self.client.get(
                     admin_reverse(LIST_ALIASCONTENT_URL_NAME),
                 )
@@ -1489,7 +1506,12 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             with force_language('fr'):
-                detail_response = self.client.get(alias.get_absolute_url())
+                if is_versioning_enabled():
+                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
+                    # otherwise we are taken to the version list url
+                    detail_response = self.client.get(alias_content_fr.get_absolute_url())
+                else:
+                    detail_response = self.client.get(alias.get_absolute_url())
                 list_response = self.client.get(
                     admin_reverse(LIST_ALIASCONTENT_URL_NAME),  # noqa: E501
                 )

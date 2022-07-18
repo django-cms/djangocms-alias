@@ -5,6 +5,8 @@ Changelog
 Unreleased
 ==========
 
+1.7.3 (2022-07-18)
+==================
 * fix: remove back button from alias preview and associated unused custom views
 
 1.7.2 (2022-07-14)

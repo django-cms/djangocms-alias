@@ -19,7 +19,7 @@ from cms.utils.urlutils import admin_reverse
 
 from parler.models import TranslatableModel, TranslatedFields
 
-from .constants import LIST_ALIASES_URL_NAME
+from .constants import CHANGE_CATEGORY_URL_NAME
 from .utils import is_versioning_enabled
 
 
@@ -65,7 +65,8 @@ class Category(TranslatableModel):
         return self.safe_translation_getter("name", any_language=True)
 
     def get_absolute_url(self):
-        return admin_reverse(LIST_ALIASES_URL_NAME, args=[self.pk])
+        """Builds the url to the admin category change view"""
+        return admin_reverse(CHANGE_CATEGORY_URL_NAME, args=[self.pk])
 
 
 class Alias(models.Model):

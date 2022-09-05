@@ -51,7 +51,7 @@ class Alias(CMSPluginBase):
                 PluginMenuItem(
                     _('Edit Alias'),
                     edit_endpoint,
-                    action='',
+                    action='sideframe',
                     attributes={'icon': 'alias'},
                 ),
             ]

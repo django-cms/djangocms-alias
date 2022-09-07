@@ -4,6 +4,9 @@ Changelog
 
 Unreleased
 ==========
+
+1.9.0 (2022-09-07)
+==================
 * feat: Edit alias plugin opens in side-frame
 
 1.8.0 (2022-07-18)

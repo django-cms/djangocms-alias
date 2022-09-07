@@ -52,6 +52,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         first, second = extra_items
         self.assertEqual(first.name, 'Edit Alias')
         self.assertEqual(first.url, alias.get_absolute_url())
+        self.assertEqual(first.action, 'sideframe')
 
         self.assertEqual(second.name, 'Detach Alias')
         self.assertEqual(second.action, 'modal')

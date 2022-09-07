@@ -105,6 +105,8 @@ HELPER_SETTINGS = {
         ('custom_alias_template', 'Custom Template Name'),
     ],
     "DEFAULT_AUTO_FIELD": "django.db.models.AutoField",
+    # Due to a recent temporary change in develop-4, we now need to confirm that we intend to use v4
+    "CMS_CONFIRM_VERSION4": True,
 }
 
 

@@ -25,7 +25,7 @@ To install
 
 Run::
 
-    pip install djangocms-alias
+    pip install git+https://github.com/django-cms/djangocms-alias@master#egg=djangocms-alias
 
 Add ``djangocms_alias`` and ``parler`` to your project's ``INSTALLED_APPS``.
 

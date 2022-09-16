@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* feat: Enable edit button in AliasContent admin
 
 1.9.0 (2022-09-07)
 ==================

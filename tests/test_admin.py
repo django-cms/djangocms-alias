@@ -114,9 +114,10 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             language="en",
         )
 
+        from djangocms_versioning.helpers import proxy_model
         from djangocms_versioning.models import Version
 
-        Version.objects.create(content=expected_en_content, created_by=self.superuser)
+        alias_version = Version.objects.create(content=expected_en_content, created_by=self.superuser)
 
         with self.login_user_context(self.superuser):
 
@@ -187,6 +188,13 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
                 expected_en_content._meta.model_name
             ), args=(expected_en_content.pk,)
         )
+        version = proxy_model(alias_version, expected_en_content)
+        edit_alias_url = admin_reverse(
+            "{app}_{model}_edit_redirect".format(
+                app=version._meta.app_label, model=version._meta.model_name
+            ),
+            args=(version.pk,),
+        )
 
         self.assertIn(
             usage_url,
@@ -199,6 +207,10 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
         self.assertIn(
             change_category_and_site_url,
             response_content_decoded,
+        )
+        self.assertIn(
+            edit_alias_url,
+            response_content_decoded
         )
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
@@ -217,19 +229,30 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             language="en",
         )
 
+        from djangocms_versioning.helpers import proxy_model
         from djangocms_versioning.models import Version
 
-        Version.objects.create(content=expected_en_content, created_by=self.superuser)
+        alias_version = Version.objects.create(content=expected_en_content, created_by=self.superuser)
+        version = proxy_model(alias_version, expected_en_content)
+        edit_alias_url = admin_reverse(
+            "{app}_{model}_edit_redirect".format(
+                app=version._meta.app_label, model=version._meta.model_name
+            ),
+            args=(version.pk,),
+        )
 
         with self.login_user_context(self.superuser):
             base_url = self.get_admin_url(AliasContent, "changelist")
             # en is the default language configured for the site
             response = self.client.get(base_url)
-
         response_content_decoded = response.content.decode()
 
         self.assertIn(
             expected_en_content.get_absolute_url(),
+            response_content_decoded,
+        )
+        self.assertIn(
+            edit_alias_url,
             response_content_decoded,
         )
         self.assertNotIn(

@@ -1,7 +1,6 @@
 from unittest import skipUnless
 
 from django.contrib.auth.models import Permission
-from django.urls import reverse
 from django.utils.formats import localize
 from django.utils.timezone import localtime
 
@@ -190,8 +189,8 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             ), args=(expected_en_content.pk,)
         )
         version = proxy_model(alias_version, expected_en_content)
-        edit_alias_url = reverse(
-            "admin:{app}_{model}_edit_redirect".format(
+        edit_alias_url = admin_reverse(
+            "{app}_{model}_edit_redirect".format(
                 app=version._meta.app_label, model=version._meta.model_name
             ),
             args=(version.pk,),
@@ -235,8 +234,8 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
 
         alias_version = Version.objects.create(content=expected_en_content, created_by=self.superuser)
         version = proxy_model(alias_version, expected_en_content)
-        edit_alias_url = reverse(
-            "admin:{app}_{model}_edit_redirect".format(
+        edit_alias_url = admin_reverse(
+            "{app}_{model}_edit_redirect".format(
                 app=version._meta.app_label, model=version._meta.model_name
             ),
             args=(version.pk,),

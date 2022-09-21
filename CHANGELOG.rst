@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* feat: Enabled edit button from ExtendedVersionAdminMixin
 
 1.9.0 (2022-09-07)
 ==================

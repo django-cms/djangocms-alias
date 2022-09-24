@@ -152,6 +152,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
         """
         return [
             self._get_preview_link,
+            self._get_edit_link,
             self._get_manage_versions_link,
             self._get_change_alias_settings_link,
             self._get_rename_alias_link,

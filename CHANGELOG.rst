@@ -5,6 +5,10 @@ Changelog
 Unreleased
 ==========
 
+1.10.0 (2022-09-21)
+===================
+* feat: Enabled edit button from ExtendedVersionAdminMixin
+
 1.9.0 (2022-09-07)
 ==================
 * feat: Edit alias plugin opens in side-frame

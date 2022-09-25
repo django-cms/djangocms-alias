@@ -5,6 +5,8 @@ Changelog
 Unreleased
 ==========
 
+* fix: Removed refs to missing static files (#143)
+
 1.10.0 (2022-09-21)
 ===================
 * feat: Enabled edit button from ExtendedVersionAdminMixin

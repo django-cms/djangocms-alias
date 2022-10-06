@@ -597,3 +597,17 @@ class AliasesManagerTestCase(BaseAliasPluginTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_content)
         self.assertNotContains(response, unexpected_content)
+
+    def test_aliases_endpoint_accessible_via_url(self):
+        """
+        Aliases admin endpoint should still be accessible via the endpoint
+        """
+        base_url = self.get_admin_url(AliasModel, "changelist")
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(base_url)
+
+        module_name = response.context_data['module_name']
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(module_name, 'aliases')

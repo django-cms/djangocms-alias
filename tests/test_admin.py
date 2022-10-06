@@ -581,7 +581,7 @@ class CategoryAdminViewsTestCase(BaseAliasPluginTestCase):
 
 class AliasesManagerTestCase(BaseAliasPluginTestCase):
 
-    def test_all_models_are_registered(self):
+    def test_aliases_admin_entry_is_hidden(self):
         """
         Aliases admin entry should not be available via the admin menu
         """

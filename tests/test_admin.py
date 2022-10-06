@@ -1,6 +1,7 @@
 from unittest import skipUnless
 
 from django.contrib.auth.models import Permission
+from django.urls import reverse
 from django.utils.formats import localize
 from django.utils.timezone import localtime
 
@@ -576,3 +577,23 @@ class CategoryAdminViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(self.category.name, 'test category')
         self.category.set_current_language('de')
         self.assertEqual(self.category.name, 'Alias Kategorie')
+
+
+class AliasesManagerTestCase(BaseAliasPluginTestCase):
+
+    def test_all_models_are_registered(self):
+        """
+        Aliases admin entry should not be available via the admin menu
+        """
+        index_url = reverse('admin:index')
+
+        self.client.force_login(self.superuser)
+
+        response = self.client.get(index_url)
+
+        unexpected_content = '<th scope="row"><a href="/en/admin/djangocms_alias/alias/">Aliases</a></th>'
+        expected_content = '<th scope="row"><a href="/en/admin/djangocms_alias/aliascontent/">Alias contents</a></th>'
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected_content)
+        self.assertNotContains(response, unexpected_content)

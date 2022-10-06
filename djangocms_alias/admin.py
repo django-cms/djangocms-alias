@@ -102,6 +102,9 @@ class AliasAdmin(admin.ModelAdmin):
             sender=self.model,
         )
 
+    def has_module_permission(self, request):
+        return False
+
 
 @admin.register(AliasContent)
 class AliasContentAdmin(*alias_content_admin_classes):

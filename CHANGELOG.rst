@@ -4,7 +4,7 @@ Changelog
 
 Unreleased
 ==========
-* feat: Hiding Aliases entry from admin index menu
+* feat: Hiding Aliases entry from admin index menu as aliases are managed through Alias Content
 * fix: Removed refs to missing static files (#143)
 
 1.10.0 (2022-09-21)

@@ -395,8 +395,9 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(Placeholder.objects.count(), 1)
         alias.delete()
         self.assertFalse(alias.__class__.objects.filter(pk=alias.pk).exists())
-        self.assertEqual(alias.cms_plugins.count(), 0)
         self.assertEqual(Placeholder.objects.count(), 0)
+        alias.save()  # Django 4.1+ disallows to use relations (cmsplugins) of unsaved objects.
+        self.assertEqual(alias.cms_plugins.count(), 0)
 
     def test_category_get_absolute_url(self):
         """

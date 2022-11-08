@@ -159,4 +159,4 @@ class StaticAlias(Tag):
             return content
         return ''
 
-@register.tag(StaticAlias.name, StaticAlias)
+register.tag(StaticAlias.name, StaticAlias)

@@ -6,4 +6,4 @@ Django>=4.1,<4.2
 django-classy-tags
 django-fsm>=2.6
 django-sekizai
-django-parler<=2.1
+django-parler

@@ -20,7 +20,7 @@ from djangocms_alias.constants import (
     CREATE_ALIAS_URL_NAME,
     DELETE_ALIAS_URL_NAME,
     DETACH_ALIAS_PLUGIN_URL_NAME,
-    LIST_ALIASES_URL_NAME,
+    LIST_ALIASCONTENT_URL_NAME,
 )
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
@@ -46,11 +46,8 @@ class BaseAliasPluginTestCase(CMSTestCase):
             args=[alias_pk],
         )
 
-    def get_list_aliases_endpoint(self, category_pk):
-        return admin_reverse(
-            LIST_ALIASES_URL_NAME,
-            args=[category_pk],
-        )
+    def get_list_aliascontent_endpoint(self):
+        return admin_reverse(LIST_ALIASCONTENT_URL_NAME)
 
     def setUp(self):
         self.superuser = self.get_superuser()
@@ -72,7 +69,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         return page_content.get_placeholders().get(slot='content')
 
     def _create_alias(self, plugins=None, name='test alias', category=None, position=0,
-                      language=None, published=True, static_code="", site=None):
+                      language=None, published=True, static_code=None, site=None):
         if language is None:
             language = self.language
         if category is None:
@@ -181,8 +178,8 @@ class BaseAliasPluginTestCase(CMSTestCase):
         return request
 
     def _process_request_by_toolbar_middleware(self, request, obj=None):
-        midleware = ToolbarMiddleware()
-        midleware.process_request(request)
+        middleware = ToolbarMiddleware(request)
+        middleware.process_request(request)
         if hasattr(request, 'toolbar'):
             if obj:
                 request.toolbar.set_object(obj)

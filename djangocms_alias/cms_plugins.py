@@ -2,7 +2,7 @@ from copy import copy
 
 from django.utils.translation import (
     get_language_from_request,
-    ugettext_lazy as _,
+    gettext_lazy as _,
 )
 
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
@@ -51,7 +51,7 @@ class Alias(CMSPluginBase):
                 PluginMenuItem(
                     _('Edit Alias'),
                     edit_endpoint,
-                    action='',
+                    action='sideframe',
                     attributes={'icon': 'alias'},
                 ),
             ]

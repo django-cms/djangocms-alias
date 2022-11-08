@@ -1,7 +1,9 @@
 import itertools
 from collections import ChainMap
+from unittest import skipUnless
 
 from django.contrib.auth.models import Permission
+from django.urls import reverse
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
@@ -15,6 +17,7 @@ from cms.utils.urlutils import admin_reverse
 
 from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
 from djangocms_alias.constants import USAGE_ALIAS_URL_NAME
+from djangocms_alias.models import AliasContent
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
@@ -60,13 +63,13 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
         break_item = admin_menu.find_first(Break, identifier=ADMINISTRATION_BREAK)  # noqa: E501
         item_positioned_before_admin_break = admin_menu.items[break_item.index - 1]  # noqa: E501
-        self.assertEqual(item_positioned_before_admin_break.name, 'Aliases')
+        self.assertEqual(item_positioned_before_admin_break.name, 'Aliases...')
 
     def test_add_alias_menu_showing_only_on_alias_plugin_views(self):
         alias = self._create_alias([self.plugin])
         for endpoint in [
             self.get_category_list_endpoint(),
-            self.get_list_aliases_endpoint(alias.category_id),
+            self.get_list_aliascontent_endpoint(),
             self.page.get_absolute_url(language=self.language),
         ]:
             request = self.get_page_request(page=None, path=endpoint, user=self.superuser)
@@ -197,7 +200,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             ),
             language_menu_first_items['Delete Translation'].url,
         )
-        self.assertRegexpMatches(
+        self.assertRegex(
             language_menu_first_items['Copy all plugins'].action,
             r'en\/admin\/([\w\/]+)\/copy-plugins\/',
         )
@@ -242,8 +245,8 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             [item.name for item in language_menu.items], expected_result
         )
 
-    def test_alias_change_category_button_is_visible_on_alias_edit_view(self):
-        button_label = 'Change category...'
+    def test_change_alias_settings_button_is_visible_on_alias_edit_view(self):
+        button_label = 'Change alias settings...'
         alias_change_viewname = 'djangocms_alias_alias_change'
         alias = self._create_alias()
         with force_language('en'):
@@ -298,33 +301,61 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         create_button = self._get_wizard_create_button(request)
         self.assertEqual(create_button.disabled, False)
 
-    def test_delete_button_show_on_edit_alias_view(self):
+    @skipUnless(not is_versioning_enabled(), 'Test only relevant when no versioning')
+    def test_delete_button_show_on_edit_alias_view_no_versioning(self):
+        """
+        When versioning is not installed deletion should be possible. The delete button
+        should be available in the toolbar.
+        """
         alias = self._create_alias()
         request = self.get_alias_request(
             alias=alias,
             user=self.superuser,
             edit=True,
         )
-        button_label = 'Delete Alias...'
+        button_label = 'Delete alias...'
         alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+
         search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
+
         self.assertIsNotNone(search_result)
+
         button = search_result.item
+
         self.assertEqual(button.name, button_label)
         self.assertEqual(button.url, self.get_delete_alias_endpoint(alias.pk))
         self.assertEqual(
             button.on_close,
-            self.get_list_aliases_endpoint(alias.category_id),
+            self.get_list_aliascontent_endpoint(),
         )
 
-    def test_edit_alias_details_show_on_edit_alias_view(self):
+    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    def test_delete_button_not_shown_on_edit_alias_view_with_versioning(self):
+        """
+        When versioning is installed no deletion should be possible. The delete button
+        should not be available in the toolbar.
+        """
         alias = self._create_alias()
         request = self.get_alias_request(
             alias=alias,
             user=self.superuser,
             edit=True,
         )
-        button_label = 'Edit alias details...'
+        button_label = 'Delete alias...'
+        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
+        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
+
+        # No button should be found for delete
+        self.assertIsNone(search_result)
+
+    def test_rename_alias_show_on_edit_alias_view(self):
+        alias = self._create_alias()
+        request = self.get_alias_request(
+            alias=alias,
+            user=self.superuser,
+            edit=True,
+        )
+        button_label = 'Rename alias...'
         alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
         search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
         self.assertIsNotNone(search_result)
@@ -381,3 +412,36 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertNotEqual(bool(search_results), False)
         for result in search_results:
             self.assertEqual(result.item.disabled, False)
+
+    def test_site_dropdown_url_renders_admin_changelist(self):
+        request = self.get_page_request(self.page, user=self.superuser)
+        admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
+        site_aliases_url = admin_menu.items[3].url
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                site_aliases_url,
+            )
+
+        content = response.content.decode('utf-8')
+
+        self.assertEqual(response.status_code, 200)
+        # Rendered content should contain admin changelist header
+        self.assertIn("Select alias content to change | Django site admin", content)
+
+    def test_site_dropdown_url_renders_admin_changelist_url(self):
+        request = self.get_page_request(self.page, user=self.superuser)
+        admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
+        site_aliases_url = admin_menu.items[3].url
+        admin_changelist_aliases_url = reverse("admin:{}_aliascontent_changelist".format(
+            AliasContent._meta.app_label)
+        )
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                site_aliases_url,
+            )
+
+        self.assertEqual(response.status_code, 200)
+        # Url from site menu renders Alias content
+        self.assertEqual(site_aliases_url, admin_changelist_aliases_url)

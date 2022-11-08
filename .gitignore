@@ -12,3 +12,5 @@ local.sqlite
 .coverage
 htmlcov
 .python-version
+venv*
+node_modules

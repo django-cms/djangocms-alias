@@ -7,8 +7,10 @@ from djangocms_alias import cms_config
 
 
 class ReferenceConfigTestCase(TestCase):
-    def tearDownClass():
+    @classmethod
+    def tearDownClass(cls):
         reload(cms_config)
+        super().tearDownClass()
 
     @override_settings(REFERENCES_ALIAS_MODELS_ENABLED=False)
     def test_references_setting_affects_cms_config_false(self):

@@ -1,8 +1,7 @@
 {
-  "name": "djangoCMS",
+  "name": "djangocms-alias",
   "private": true,
   "devDependencies": {
-    "autoprefixer": "^6.7.7",
     "babel-core": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-loader": "^7.1.0",
@@ -14,22 +13,17 @@
     "eslint": "^4.1.1",
     "eslint-plugin-compat": "^1.0.2",
     "exports-loader": "^0.6.4",
-    "gulp": "3.9.1",
-    "gulp-clean-css": "^3.0.4",
-    "gulp-if": "^2.0.2",
-    "gulp-postcss": "^6.4.0",
-    "gulp-sass": "^3.1.0",
-    "gulp-sourcemaps": "2.4.1",
-    "gulp-util": "3.0.5",
-    "gulp-watch": "^5.0.0",
+    "fancy-log": "^2.0.0",
+    "gulp": "^4.0.2",
+    "gulp-watch": "^5.0.1",
     "imports-loader": "^0.7.1",
     "karma-sourcemap-loader": "^0.3.7",
-    "minimist": "1.2.3",
-    "postcss-flexbugs-fixes": "^3.3.1",
-    "postcss-initial": "^2.0.0",
+    "minimist": "^1.2.6",
+    "plugin-error": "^1.0.1",
     "webpack": "^4.8.1"
   },
   "dependencies": {
-    "babel-runtime": "^6.23.0"
+    "babel-runtime": "^6.23.0",
+    "gulp-cli": "^2.3.0"
   }
 }

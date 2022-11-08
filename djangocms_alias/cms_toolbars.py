@@ -2,8 +2,8 @@ import itertools
 from copy import copy
 
 from django.urls import NoReverseMatch
-from django.utils.encoding import force_text
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.encoding import force_str
+from django.utils.translation import gettext, gettext_lazy as _
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
@@ -23,12 +23,12 @@ from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import (
-    CATEGORY_LIST_URL_NAME,
     DELETE_ALIAS_URL_NAME,
-    LIST_ALIASES_URL_NAME,
+    LIST_ALIASCONTENT_URL_NAME,
     USAGE_ALIAS_URL_NAME,
 )
 from .models import Alias, AliasContent
+from .utils import is_versioning_enabled
 
 
 __all__ = [
@@ -62,9 +62,12 @@ class AliasToolbar(CMSToolbar):
         if not self.request.user.has_perm('djangocms_alias.change_category'):
             return
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
-        admin_menu.add_link_item(
-            _('Aliases'),
-            url=admin_reverse(CATEGORY_LIST_URL_NAME),
+
+        url = admin_reverse(LIST_ALIASCONTENT_URL_NAME)
+
+        admin_menu.add_sideframe_item(
+            _("Aliases"),
+            url=url,
             position=self.get_insert_position(admin_menu, self.plural_name),
         )
 
@@ -75,6 +78,26 @@ class AliasToolbar(CMSToolbar):
             position=1,
         )
 
+        can_change = self.request.user.has_perm(
+            get_model_permission_codename(Alias, 'change'),
+        )
+        disabled = not can_change or not self.toolbar.edit_mode_active
+        alias_menu.add_modal_item(
+            _('Change alias settings'),
+            url=admin_reverse(
+                'djangocms_alias_alias_change',
+                args=[self.toolbar.obj.alias_id],
+            ),
+            disabled=disabled,
+        )
+        alias_menu.add_modal_item(
+            _('Rename alias'),
+            url=admin_reverse(
+                'djangocms_alias_aliascontent_change',
+                args=[self.toolbar.obj.pk],
+            ),
+            disabled=disabled,
+        )
         alias_menu.add_modal_item(
             _('View usage'),
             url=admin_reverse(
@@ -83,38 +106,19 @@ class AliasToolbar(CMSToolbar):
             ),
         )
 
-        can_change = self.request.user.has_perm(
-            get_model_permission_codename(Alias, 'change'),
-        )
-        disabled = not can_change or not self.toolbar.edit_mode_active
-        alias_menu.add_modal_item(
-            _('Edit alias details'),
-            url=admin_reverse(
-                'djangocms_alias_aliascontent_change',
-                args=[self.toolbar.obj.pk],
-            ),
-            disabled=disabled,
-        )
-        alias_menu.add_modal_item(
-            _('Change category'),
-            url=admin_reverse(
-                'djangocms_alias_alias_change',
-                args=[self.toolbar.obj.alias_id],
-            ),
-            disabled=disabled,
-        )
-        alias_menu.add_modal_item(
-            _('Delete Alias'),
-            url=admin_reverse(
-                DELETE_ALIAS_URL_NAME,
-                args=(self.toolbar.obj.alias_id, ),
-            ),
-            on_close=admin_reverse(
-                LIST_ALIASES_URL_NAME,
-                args=(self.toolbar.obj.alias.category_id,),
-            ),
-            disabled=disabled,
-        )
+        # Only show deletion if versioning is not enabled
+        if not is_versioning_enabled():
+            alias_menu.add_modal_item(
+                _('Delete alias'),
+                url=admin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=(self.toolbar.obj.alias_id, ),
+                ),
+                on_close=admin_reverse(
+                    LIST_ALIASCONTENT_URL_NAME,
+                ),
+                disabled=disabled,
+            )
 
     @classmethod
     def get_insert_position(cls, admin_menu, item_name):
@@ -134,7 +138,7 @@ class AliasToolbar(CMSToolbar):
         items = admin_menu.get_items()[start.index + 1: end.index]
         for idx, item in enumerate(items):
             try:
-                if force_text(item_name.lower()) < force_text(item.name.lower()):  # noqa: E501
+                if force_str(item_name.lower()) < force_str(item.name.lower()):  # noqa: E501
                     return idx + start.index + 1
             except AttributeError:
                 # Some item types do not have a 'name' attribute.
@@ -157,10 +161,11 @@ class AliasToolbar(CMSToolbar):
         # There will always be this button, because we are in the context of
         # alias app views
         create_wizard_button = [
-            button for button in buttons if button.name == ugettext('Create')
+            button for button in buttons if button.name == gettext('Create')
         ][0]
 
         from cms.wizards.wizard_pool import entry_choices
+
         # we enable this button when user has permissions to perform actions on
         # wizard
         enable_create_wizard_button = bool(

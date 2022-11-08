@@ -3,6 +3,7 @@ from unittest import skipUnless
 from urllib.parse import urlparse
 
 from cms.api import add_plugin, create_title
+from cms.utils import get_current_site
 from cms.utils.plugins import downcast_plugins
 from cms.utils.urlutils import admin_reverse
 
@@ -51,6 +52,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         first, second = extra_items
         self.assertEqual(first.name, 'Edit Alias')
         self.assertEqual(first.url, alias.get_absolute_url())
+        self.assertEqual(first.action, 'sideframe')
 
         self.assertEqual(second.name, 'Detach Alias')
         self.assertEqual(second.action, 'modal')
@@ -227,7 +229,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             alias=alias,
         )
         form = AliasPluginForm(instance=alias_plugin)
-        self.assertEqual(form.fields['category'].initial, alias.category_id)
+        self.assertEqual(form.fields['category'].initial, alias.category)
 
     def test_create_alias_plugin_form_empty_category(self):
         form = AliasPluginForm()
@@ -318,3 +320,39 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             alias_content.placeholder.get_plugins()[1].get_bound_plugin().body,
             'test 2',
         )
+
+    def test_create_alias_plugin_form_initial_site(self):
+        """
+        By default the initial values should be set
+        for the current site preselected and with no
+        category set.
+        """
+        current_site = get_current_site()
+
+        # Initially load the empty add form
+        form = AliasPluginForm(data={})
+
+        self.assertEqual(form.fields['site'].initial, current_site)
+        self.assertEqual(form.fields['category'].initial, None)
+
+    def test_change_alias_plugin_form_initial_site(self):
+        """
+        By default the initial values should be set
+        that are taken from the alias object currently selected
+        """
+        current_site = get_current_site()
+        alias = self._create_alias(
+            self.placeholder.get_plugins(),
+        )
+        alias_plugin = add_plugin(
+            self.placeholder,
+            Alias,
+            language=self.language,
+            alias=alias,
+        )
+        form = AliasPluginForm(instance=alias_plugin)
+
+        self.assertEqual(form.fields['site'].initial, alias.site)
+        self.assertNotEqual(form.fields['site'].initial, current_site)
+        self.assertEqual(form.fields['category'].initial, alias.category)
+        self.assertNotEqual(form.fields['category'].initial, None)

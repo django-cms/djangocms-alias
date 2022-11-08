@@ -1,5 +1,5 @@
 import re
-from unittest import skipIf, skipUnless
+from unittest import skip, skipIf, skipUnless
 
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -8,16 +8,16 @@ from django.test.utils import override_settings
 
 from cms.api import add_plugin
 from cms.models import Placeholder
+from cms.utils import get_current_site
 from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
-from djangocms_alias.compat import DJANGO_GTE_21
 from djangocms_alias.constants import (
+    CATEGORY_SELECT2_URL_NAME,
     DELETE_ALIAS_URL_NAME,
-    LIST_ALIASES_URL_NAME,
+    LIST_ALIASCONTENT_URL_NAME,
     SELECT2_ALIAS_URL_NAME,
-    SET_ALIAS_POSITION_URL_NAME,
     USAGE_ALIAS_URL_NAME,
 )
 from djangocms_alias.models import Alias, AliasContent, Category
@@ -393,210 +393,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(plugins[1].get_bound_plugin().body, 'test 2')
         self.assertEqual(plugins[2].get_bound_plugin().body, 'test 88')
 
-    def test_list_view(self):
-        category1 = Category.objects.create(
-            name='Category 1',
-        )
-        category2 = Category.objects.create(
-            name='Category 2',
-        )
-
-        plugin = add_plugin(
-            self.placeholder,
-            'TextPlugin',
-            language=self.language,
-            body='This is basic content',
-        )
-
-        alias1 = self._create_alias(
-            [plugin],
-            name='Alias 1',
-            category=category1,
-        )
-        alias2 = self._create_alias(
-            [plugin],
-            name='Alias 2',
-            category=category2,
-        )
-        alias3 = self._create_alias(
-            [plugin],
-            name='Alias test 3',
-            category=category1,
-            published=False,
-        )
-
-        with self.login_user_context(self.superuser):
-            response = self.client.get(
-                self.get_list_aliases_endpoint(category1.pk),
-            )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, category1.name)
-        self.assertNotContains(response, category2.name)
-        self.assertContains(response, 'Alias 1')
-        self.assertNotContains(response, 'Alias 2')
-        if is_versioning_enabled():
-            self.assertContains(response, '{} (Not published)'.format('Alias test 3'))
-        else:
-            self.assertContains(response, 'Alias test 3')
-
-        alias1_content = alias1.get_content(language=self.language)
-        alias1_url = alias1_content.get_absolute_url()
-        if is_versioning_enabled():
-            from djangocms_versioning.helpers import version_list_url_for_grouper
-            alias1_url = version_list_url_for_grouper(alias1)
-
-        self.assertContains(response, alias1_url)
-        self.assertNotContains(response, alias2.get_absolute_url())
-        self.assertContains(response, 'This is basic content')
-
-        with self.login_user_context(self.superuser):
-            with force_language('it'):
-                response = self.client.get(
-                    self.get_list_aliases_endpoint(category1.pk),
-                )
-        self.assertContains(response, 'Alias {} (No content)'.format(alias1.pk))
-        self.assertContains(response, 'Alias {} (No content)'.format(alias3.pk))
-        self.assertNotContains(response, 'Alias {} (No content)'.format(alias2.pk))
-        self.assertNotContains(response, 'This is basic content')
-
-    def test_list_view_standard_user(self):
-        category = Category.objects.create(
-            name='Category 1',
-        )
-
-        with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.get_list_aliases_endpoint(category.pk))
-        self.assertEqual(response.status_code, 403)
-
-    @skipUnless(DJANGO_GTE_21, "Django>=2.1")
-    def test_list_view_staff_user_without_permission_dj21(self):
-        category = Category.objects.create(
-            name='Category 1',
-        )
-
-        url = self.get_list_aliases_endpoint(category.pk)
-        with self.login_user_context(self.get_staff_user_with_std_permissions()):
-            response = self.client.get(url)
-        self.assertEqual(response.status_code, 403)
-
-    @skipUnless(not DJANGO_GTE_21, "Django<2.1")
-    def test_list_view_staff_user_without_permission(self):
-        category = Category.objects.create(
-            name='Category 1',
-        )
-
-        url = self.get_list_aliases_endpoint(category.pk)
-        with self.login_user_context(self.get_staff_user_with_std_permissions()):
-            response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/accounts/login/?next={}".format(url))
-
-    def test_list_view_staff_user_with_permission(self):
-        category = Category.objects.create(
-            name='Category 1',
-        )
-
-        user = self.get_staff_user_with_std_permissions()
-        user.user_permissions.add(Permission.objects.get(
-            content_type__app_label='djangocms_alias',
-            codename='change_alias'))
-        with self.login_user_context(user):
-            response = self.client.get(self.get_list_aliases_endpoint(category.pk))
-        self.assertEqual(response.status_code, 200)
-
-    def test_category_list_view(self):
-        Category.objects.all().delete()
-        category1 = Category.objects.create()
-        category2 = Category.objects.create()
-        category1.translations.create(language_code='en', name='Category 1')
-        category2.translations.create(language_code='en', name='Category 2')
-        category1.translations.create(language_code='de', name='Kategorie 1')
-        category2.translations.create(language_code='fr', name='Catégorie 2')
-        category1.translations.create(language_code='it', name='Categoria 1')
-
-        with self.login_user_context(self.superuser):
-            with force_language('en'):
-                en_response = self.client.get(self.get_category_list_endpoint())
-            with force_language('de'):
-                de_response = self.client.get(self.get_category_list_endpoint())
-            with force_language('fr'):
-                fr_response = self.client.get(self.get_category_list_endpoint())
-            with force_language('it'):
-                it_response = self.client.get(self.get_category_list_endpoint())
-
-        self.assertContains(en_response, 'Category 1')
-        self.assertContains(en_response, 'Category 2')
-        self.assertNotContains(en_response, 'Kategorie 1')
-        self.assertNotContains(en_response, 'Catégorie 2')
-        self.assertNotContains(en_response, 'Categoria 1')
-
-        self.assertContains(de_response, 'Kategorie 1')
-        self.assertContains(de_response, 'Category 2')  # fallback
-        self.assertNotContains(de_response, 'Category 1')
-        self.assertNotContains(de_response, 'Catégorie 2')
-        self.assertNotContains(de_response, 'Categoria 1')
-
-        self.assertContains(fr_response, 'Category 1')  # fallback
-        self.assertContains(fr_response, 'Catégorie 2')
-        self.assertNotContains(fr_response, 'Category 2')
-        self.assertNotContains(fr_response, 'Kategorie 1')
-        self.assertNotContains(fr_response, 'Categoria 2')
-
-        self.assertContains(it_response, 'Catégorie 2')  # fallback
-        self.assertNotContains(it_response, 'Category 1')
-        self.assertNotContains(it_response, 'Category 2')
-        self.assertNotContains(it_response, 'Kategorie 1')
-        self.assertNotContains(it_response, 'Categoria 2')
-
-    def test_category_list_view_standard_user(self):
-        with self.login_user_context(self.get_standard_user()):
-            response = self.client.get(self.get_category_list_endpoint())
-        self.assertEqual(response.status_code, 403)
-
-    @skipUnless(DJANGO_GTE_21, "Django>=2.1")
-    def test_category_list_view_staff_user_without_permission_dj21(self):
-        url = self.get_category_list_endpoint()
-        with self.login_user_context(self.get_staff_user_with_std_permissions()):
-            response = self.client.get(url)
-        self.assertEqual(response.status_code, 403)
-
-    @skipUnless(not DJANGO_GTE_21, "Django<2.1")
-    def test_category_list_view_staff_user_without_permission(self):
-        url = self.get_category_list_endpoint()
-        with self.login_user_context(self.get_staff_user_with_std_permissions()):
-            response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/accounts/login/?next={}".format(url))
-
-    def test_category_list_view_staff_user_with_permission(self):
-        user = self.get_staff_user_with_std_permissions()
-        user.user_permissions.add(Permission.objects.get(
-            content_type__app_label='djangocms_alias',
-            codename='change_category'))
-        with self.login_user_context(user):
-            response = self.client.get(self.get_category_list_endpoint())
-        self.assertEqual(response.status_code, 200)
-
-    def test_category_list_ordering(self):
-        Category.objects.all().delete()
-        category2 = Category.objects.create(name='B category')
-        category1 = Category.objects.create(name='A category')
-
-        with self.login_user_context(self.superuser):
-            response = self.client.get(self.get_category_list_endpoint())
-
-        self.assertEqual([category1, category2], response.context['categories'])
-
-    def test_category_list_edit_button(self):
-        with self.login_user_context(self.superuser):
-            response = self.client.get(self.get_category_list_endpoint())
-
-        self.assertContains(
-            response,
-            '<a href="/en/admin/djangocms_alias/category/1/change/"'
-        )
-
     def test_alias_content_preview_view(self):
         alias = self._create_alias([self.plugin])
         with self.login_user_context(self.superuser):
@@ -605,67 +401,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, alias.name)
         self.assertContains(response, self.plugin.body)
-
-    @skipIf(is_versioning_enabled(), 'Right now this feature wont work with versioning')
-    def test_view_multilanguage(self):
-        en_plugin = add_plugin(
-            self.placeholder,
-            'TextPlugin',
-            language='en',
-            body='This is text in English',
-        )
-        de_plugin = add_plugin(
-            self.placeholder,
-            'TextPlugin',
-            language='de',
-            body='Das ist Text auf Deutsch',
-        )
-        fr_plugin = add_plugin(
-            self.placeholder,
-            'TextPlugin',
-            language='fr',
-            body='C\'est le texte en français',
-        )
-        alias = self._create_alias([en_plugin])
-        alias_content_de = AliasContent.objects.create(
-            alias=alias,
-            name='test alias',
-            language='de',
-        )
-        alias_content_de.populate(plugins=[de_plugin])
-        alias_content_fr = AliasContent.objects.create(
-            alias=alias,
-            name='test alias',
-            language='fr',
-        )
-        alias_content_fr.populate(plugins=[fr_plugin])
-
-        with self.login_user_context(self.superuser):
-            with force_language('de'):
-                detail_response = self.client.get(alias.get_absolute_url())
-                list_response = self.client.get(
-                    admin_reverse(LIST_ALIASES_URL_NAME, args=[alias.category.pk]),
-                )
-        self.assertContains(detail_response, de_plugin.body)
-        self.assertContains(list_response, de_plugin.body)
-        self.assertNotContains(detail_response, fr_plugin.body)
-        self.assertNotContains(list_response, fr_plugin.body)
-        self.assertNotContains(detail_response, en_plugin.body)
-        self.assertNotContains(list_response, en_plugin.body)
-
-        with self.login_user_context(self.superuser):
-            with force_language('fr'):
-                detail_response = self.client.get(alias.get_absolute_url())
-                list_response = self.client.get(
-                    admin_reverse(LIST_ALIASES_URL_NAME, args=[alias.category.pk]),  # noqa: E501
-                )
-
-        self.assertContains(detail_response, fr_plugin.body)
-        self.assertContains(list_response, fr_plugin.body)
-        self.assertNotContains(detail_response, de_plugin.body)
-        self.assertNotContains(list_response, de_plugin.body)
-        self.assertNotContains(detail_response, en_plugin.body)
-        self.assertNotContains(list_response, en_plugin.body)
 
     def test_view_aliases_using_site_filter(self):
         site1 = Site.objects.create(domain='site1.com', name='1')
@@ -682,43 +417,31 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             language='en',
             body='Das ist Text auf Deutsch',
         )
-        site1_alias = self._create_alias([site1_plugin], site=site1, name='site1_alias', category=self.category)
-        site2_alias = self._create_alias([site1_plugin], site=site2, name='site2_alias', category=self.category)
-        alias_content_site1 = AliasContent.objects.create(
-            alias=site1_alias,
-            name='test alias site1',
-            language='en',
-        )
-        alias_content_site1.populate(plugins=[site1_plugin])
-        alias_content_site2 = AliasContent.objects.create(
-            alias=site2_alias,
-            name='test alias site2',
-            language='en',
-        )
-        alias_content_site2.populate(plugins=[site2_plugin])
+        site1_alias = self._create_alias(plugins=[site1_plugin], site=site1, name='site1_alias', category=self.category)
+        site2_alias = self._create_alias(plugins=[site2_plugin], site=site2, name='site2_alias', category=self.category)
+        aliascontent_list_url = admin_reverse(LIST_ALIASCONTENT_URL_NAME)
 
+        # when no filter used both objects are displayed
         with self.login_user_context(self.superuser):
             with force_language('en'):
-                list_response = self.client.get(
-                    admin_reverse(LIST_ALIASES_URL_NAME, args=[site1_alias.category.pk]),
-                )
+                list_response = self.client.get(aliascontent_list_url)
 
         self.assertContains(list_response, site1_alias.name)
         self.assertContains(list_response, site2_alias.name)
 
+        # when no filtering by site 1 only first object displayed
         with self.login_user_context(self.superuser):
             with force_language('en'):
-                aliases_list_url = admin_reverse(LIST_ALIASES_URL_NAME, args=[site1_alias.category.pk])
-                site1_aliases_filter_url = "{}?site={}".format(aliases_list_url, site1_alias.site.id)
+                site1_aliases_filter_url = f"{aliascontent_list_url}?site={site1_alias.site.id}"
                 list_response = self.client.get(site1_aliases_filter_url)
 
         self.assertContains(list_response, site1_alias.name)
         self.assertNotContains(list_response, site2_alias.name)
 
+        # when no filtering by site 2 only first object displayed
         with self.login_user_context(self.superuser):
             with force_language('en'):
-                aliases_list_url = admin_reverse(LIST_ALIASES_URL_NAME, args=[site2_alias.category.pk])
-                site2_aliases_filter_url = "{}?site={}".format(aliases_list_url, site2_alias.site.id)
+                site2_aliases_filter_url = f"{aliascontent_list_url}?site={site2_alias.site.id}"
                 list_response = self.client.get(site2_aliases_filter_url)
 
         self.assertNotContains(list_response, site1_alias.name)
@@ -752,183 +475,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             1,
         )
 
-    def test_set_alias_position_view(self):
-        alias1 = Alias.objects.create(category=self.category)  # 0
-        alias2 = Alias.objects.create(category=self.category)  # 1
-
-        with self.login_user_context(self.superuser):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'alias': alias1.pk, 'position': 1},
-            )
-
-        ordered_aliases = list(
-            alias1.category.aliases.order_by('position').values_list('pk', flat=True)  # noqa: E501
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(ordered_aliases, [alias2.pk, alias1.pk])
-
-        with self.login_user_context(self.superuser):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'alias': alias1.pk, 'position': 0},
-            )
-
-        ordered_aliases = list(
-            alias1.category.aliases.order_by('position').values_list('pk', flat=True)  # noqa: E501
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(ordered_aliases, [alias1.pk, alias2.pk])
-
-        with self.login_user_context(self.superuser):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'alias': alias1.pk, 'position': 1},
-            )
-
-        ordered_aliases = list(
-            alias1.category.aliases.order_by('position').values_list('pk', flat=True)  # noqa: E501
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(ordered_aliases, [alias2.pk, alias1.pk])
-
-    def test_set_alias_position_view_only_staff_users_with_permission(self):
-        alias = Alias.objects.create(category=self.category)
-        Alias.objects.create(category=self.category)
-
-        user = self.get_staff_user_with_std_permissions()
-
-        with self.login_user_context(user):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'alias': alias.pk, 'position': 1},
-            )
-        self.assertEqual(response.status_code, 403)
-
-        user.user_permissions.add(Permission.objects.get(
-            content_type__app_label='djangocms_alias',
-            codename='change_alias'))
-        with self.login_user_context(user):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'alias': alias.pk, 'position': 1},
-            )
-        self.assertEqual(response.status_code, 200)
-
-    def test_set_alias_position_view_bad_request_wrong_position(self):
-        alias = Alias.objects.create(category=self.category)
-        Alias.objects.create(category=self.category)
-        with self.login_user_context(self.superuser):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'alias': alias.pk},
-            )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn(
-            b'This field is required',
-            response.content,
-        )
-
-        with self.login_user_context(self.superuser):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'alias': alias.pk, 'position': 2},
-            )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn(
-            b'Invalid position in category list, available positions are: [0, 1]',  # noqa: E501
-            response.content,
-        )
-
-        with self.login_user_context(self.superuser):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'alias': alias.pk, 'position': -5},
-            )
-        self.assertEqual(response.status_code, 400)
-        self.assertIn(
-            b'Ensure this value is greater than or equal to 0.',
-            response.content,
-        )
-
-    def test_set_alias_position_view_bad_request_the_same_position(self):
-        alias = Alias.objects.create(category=self.category)
-        with self.login_user_context(self.superuser):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'alias': alias.pk, 'position': 0},
-            )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn(
-            b'Argument position have to be different than current alias position',  # noqa: E501
-            response.content,
-        )
-
-    def test_set_alias_position_view_bad_request_wrong_alias_id(self):
-        with self.login_user_context(self.superuser):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'position': 0},
-            )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn(
-            b'This field is required.',
-            response.content,
-        )
-
-        with self.login_user_context(self.superuser):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'alias': 'test', 'position': 0},
-            )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn(
-            b'Select a valid choice. That choice is not one of the available choices.',  # noqa: E501
-            response.content,
-        )
-
-        with self.login_user_context(self.superuser):
-            response = self.client.post(
-                admin_reverse(
-                    SET_ALIAS_POSITION_URL_NAME,
-                ),
-                data={'alias': 5, 'position': 0},
-            )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn(
-            b'Select a valid choice. That choice is not one of the available choices.',  # noqa: E501
-            response.content,
-        )
-
     def test_select2_view_no_permission(self):
         response = self.client.get(
             admin_reverse(
@@ -945,6 +491,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         if is_versioning_enabled():
             from djangocms_versioning.constants import DRAFT
             from djangocms_versioning.models import Version
+
             # This will show because it's a new draft version of the same alias
             draft_content = alias2.contents.create(name='foo', language=self.language)
             Version.objects.create(
@@ -1051,7 +598,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         category2 = Category.objects.create(name='test 2')
         alias1 = self._create_alias(name='test 2', category=category2)
         alias2 = self._create_alias(name='foo', category=category2, position=1)
-        # This shouldnt show becuase it's in different Category
+        # This shouldnt show because it's in different Category
         self._create_alias(name='three')
         with self.login_user_context(self.superuser):
             response = self.client.get(
@@ -1086,6 +633,59 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             [alias1.pk],
         )
 
+    def test_select2_view_site(self):
+        """
+        The list is filtered based on only matching
+        alias with a specific site if it is provided
+        """
+        site = get_current_site()
+        alias1 = self._create_alias(site=site)
+        alias2 = self._create_alias(site=site, position=1)
+        self._create_alias(position=2)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+                data={'site': site.pk},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [alias1.pk, alias2.pk],
+        )
+
+    def test_select2_view_site_and_category(self):
+        """
+        The list is filtered based on only matching
+        alias with a specific site and category if it is provided
+        """
+        category = Category.objects.create(name='category')
+        site = get_current_site()
+        self._create_alias(site=site)
+        alias2 = self._create_alias(site=site, category=category, position=1)
+        self._create_alias(position=2)
+        self._create_alias(position=3)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    SELECT2_ALIAS_URL_NAME,
+                ),
+                data={
+                    'site': site.pk,
+                    'category': category.pk,
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [alias2.pk],
+        )
+
     def test_select2_view_pk(self):
         alias1 = self._create_alias(name='test 2')
         self._create_alias(name='foo', position=1)
@@ -1104,6 +704,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             [alias1.pk],
         )
 
+    @skip(
+        "It is not currently possible to add an alias from the django admin changelist issue "
+        "#https://github.com/django-cms/djangocms-alias/issues/97#97"
+    )
     def test_aliascontent_add_view(self):
         alias = Alias.objects.create(category=self.category)
         with self.login_user_context(self.superuser):
@@ -1124,6 +728,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(alias_content.language, 'de')
         self.assertEqual(alias_content.name, 'alias test de 1')
 
+    @skip(
+        "It is not currently possible to add an alias from the django admin changelist issue "
+        "#https://github.com/django-cms/djangocms-alias/issues/97#97"
+    )
     def test_aliascontent_add_view_get(self):
         alias = Alias.objects.create(category=self.category)
         with self.login_user_context(self.superuser):
@@ -1140,6 +748,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, 'type="hidden" name="language" value="fr"')
         self.assertContains(response, 'type="hidden" name="alias" value="{}"'.format(alias.pk))
 
+    @skip(
+        "It is not currently possible to add an alias from the django admin changelist issue "
+        "#https://github.com/django-cms/djangocms-alias/issues/97#97"
+    )
     def test_aliascontent_add_view_invalid_data(self):
         alias = Alias.objects.create(category=self.category)
         self._create_alias(
@@ -1164,6 +776,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             'Alias with this Name and Category already exists',
         )
 
+    @skip(
+        "It is not currently possible to add an alias from the django admin changelist issue "
+        "#https://github.com/django-cms/djangocms-alias/issues/97#97"
+    )
     def test_aliascontent_add_view_valid_data(self):
         alias = Alias.objects.create(category=self.category)
         if is_versioning_enabled():
@@ -1188,25 +804,6 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             self._publish(alias)
         alias_content = alias.contents.first()
         self.assertEqual(alias_content.name, 'test alias')
-
-    def test_category_change_view(self):
-        with self.login_user_context(self.superuser):
-            self.client.post(
-                add_url_parameters(
-                    admin_reverse(
-                        'djangocms_alias_category_change',
-                        args=[self.category.pk],
-                    ),
-                    language='de',
-                ),
-                data={
-                    'name': 'Alias Kategorie',
-                },
-            )
-
-        self.assertEqual(self.category.name, 'test category')
-        self.category.set_current_language('de')
-        self.assertEqual(self.category.name, 'Alias Kategorie')
 
     def test_alias_usage_view(self):
         alias = self._create_alias()
@@ -1240,21 +837,21 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
         self.assertContains(response, '<td>Page</td>')
         self.assertContains(response, '<td>Alias</td>')
-        self.assertRegexpMatches(
+        self.assertRegex(
             str(response.content),
             r'href="{}"[\w+]?>{}<\/a>'.format(
                 re.escape(self.page.get_absolute_url(self.language)),
                 str(self.page),
             ),
         )
-        self.assertRegexpMatches(
+        self.assertRegex(
             str(response.content),
             r'href="{}"[\w+]?>{}<\/a>'.format(
                 re.escape(root_alias.get_absolute_url()),
                 str(alias),
             ),
         )
-        self.assertRegexpMatches(
+        self.assertRegex(
             str(response.content),
             r'href="{}"[\w+]?>{}<\/a>'.format(
                 re.escape(
@@ -1307,7 +904,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
         self.assertContains(response, 'This alias is used by following objects:')
         test = r'<li>[\s\\n]*Page:[\s\\n]*<a href=\"\/en\/test\/\">test<\/a>[\s\\n]*<\/li>'
-        self.assertRegexpMatches(str(response.content), test)
+        self.assertRegex(str(response.content), test)
 
     def test_delete_alias_view_get_alias_not_used_on_any_page(self):
         alias = self._create_alias([self.plugin])
@@ -1480,6 +1077,168 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             response = self.client.get(site2_page.get_absolute_url())
         self.assertContains(response, 'test alias multisite')
         self.assertContains(response, 'Another alias plugin')
+
+
+class AliasCategorySelect2ViewTestCase(BaseAliasPluginTestCase):
+
+    def test_select2_view_no_permission(self):
+        """
+        The category list view is private
+        and only intended for use in the admin
+        """
+        response = self.client.get(
+            admin_reverse(
+                CATEGORY_SELECT2_URL_NAME,
+            ),
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_select2_view_alias_not_set(self):
+        """
+        When categories exist but are not attached to an alias
+        they are ignored
+        """
+        Category.objects.create(name='Category 1')
+        category_2 = Category.objects.create(name='Category 2')
+        Category.objects.create(name='Category 3')
+        self._create_alias(category=category_2)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+            )
+
+        expected_result = [category_2.pk]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([a['id'] for a in response.json()['results']], expected_result)
+
+    def test_select2_view_alias_site_set(self):
+        """
+        When a site is supplied only categories with site entries
+        are returned
+        """
+        site = get_current_site()
+        category_1 = Category.objects.create(name='Category 1')
+        category_2 = Category.objects.create(name='Category 2')
+        category_3 = Category.objects.create(name='Category 3')
+        self._create_alias(category=category_1, site=site)
+        self._create_alias(category=category_2)
+        self._create_alias(category=category_3)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+                data={'site': site.pk},
+            )
+
+        expected_result = [category_1.pk]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([a['id'] for a in response.json()['results']], expected_result)
+
+    def test_select2_view_set_limit(self):
+        """
+        Ensure that the page limit is respected
+        """
+        category_1 = Category.objects.create(name='Category 1')
+        category_2 = Category.objects.create(name='Category 2')
+        category_3 = Category.objects.create(name='Category 3')
+        self._create_alias(category=category_1)
+        self._create_alias(category=category_2, position=1)
+        self._create_alias(category=category_3, position=2)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+                data={'limit': 2},
+            )
+
+        content = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(content['more'])
+        self.assertEqual(len(content['results']), 2)
+
+    def test_select2_view_text_repr(self):
+        """
+        Ensure that the display / text representation of the object
+        is output to the user.
+        """
+        category = Category.objects.create(name='Category 1')
+        self._create_alias(name='test 2', category=category)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json()['results'][0]['text'],
+            category.name,
+        )
+
+    def test_select2_view_term(self):
+        """
+        Given a term, the response should return only
+        categories that match the term.
+        """
+        category_1 = Category.objects.create(name='ategory 1')
+        category_2 = Category.objects.create(name='Category 2')
+        category_3 = Category.objects.create(name='tegory 3')
+        category_4 = Category.objects.create(name='tegory 4')
+        self._create_alias(category=category_1)
+        self._create_alias(category=category_2)
+        self._create_alias(category=category_3)
+        self._create_alias(category=category_4)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+                data={'term': 'ate'},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [category_2.pk, category_1.pk],
+        )
+
+    def test_select2_view_pk(self):
+        """
+        When a pk is provided that record should be returned
+        """
+        category_1 = Category.objects.create(name='Category 1')
+        category_2 = Category.objects.create(name='Category 2')
+        category_3 = Category.objects.create(name='Category 3')
+        self._create_alias(category=category_1)
+        self._create_alias(category=category_2)
+        self._create_alias(category=category_3)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    CATEGORY_SELECT2_URL_NAME,
+                ),
+                data={'pk': category_2.pk},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [a['id'] for a in response.json()['results']],
+            [category_2.pk],
+        )
 
 
 class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
@@ -1664,3 +1423,102 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         self.add_alias_plugin_to_page(page, unpublished_alias)
         response = self.client.get(page.get_absolute_url())
         self.assertNotContains(response, body)
+
+    def test_view_multilanguage(self):
+        """
+        Views should only display content related to the selected language
+        """
+        en_plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='en',
+            body='This is text in English',
+        )
+        de_plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='de',
+            body='Das ist Text auf Deutsch',
+        )
+        fr_plugin = add_plugin(
+            self.placeholder,
+            'TextPlugin',
+            language='fr',
+            body='C\'est le texte en français',
+        )
+        alias = self._create_alias([en_plugin], name="English AliasContent object")
+        alias_content_de = AliasContent.objects.create(
+            alias=alias,
+            name='German AliasContent object',
+            language='de',
+        )
+        alias_content_de.populate(plugins=[de_plugin])
+        alias_content_fr = AliasContent.objects.create(
+            alias=alias,
+            name='French AliasContent object',
+            language='fr',
+        )
+        alias_content_fr.populate(plugins=[fr_plugin])
+
+        # when versioning is enabled a Version must be created and published for each language
+        if is_versioning_enabled():
+            from djangocms_versioning.models import Version
+            version_de = Version.objects.create(content=alias_content_de, created_by=self.superuser)
+            version_de.publish(user=self.superuser)
+            version_fr = Version.objects.create(content=alias_content_fr, created_by=self.superuser)
+            version_fr.publish(user=self.superuser)
+
+        with self.login_user_context(self.superuser):
+            with force_language('en'):
+                if is_versioning_enabled():
+                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
+                    # otherwise we are taken to the version list url
+                    detail_response = self.client.get(alias.get_content(language="en").get_absolute_url())
+                else:
+                    detail_response = self.client.get(alias.get_absolute_url())
+                list_response = self.client.get(
+                    admin_reverse(LIST_ALIASCONTENT_URL_NAME),
+                )
+        self.assertContains(detail_response, en_plugin.body)
+        self.assertContains(list_response, alias.name)
+        self.assertNotContains(detail_response, fr_plugin.body)
+        self.assertNotContains(list_response, alias_content_fr.name)
+        self.assertNotContains(detail_response, de_plugin.body)
+        self.assertNotContains(list_response, alias_content_de.name)
+
+        with self.login_user_context(self.superuser):
+            with force_language('de'):
+                if is_versioning_enabled():
+                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
+                    # otherwise we are taken to the version list url
+                    detail_response = self.client.get(alias_content_de.get_absolute_url())
+                else:
+                    detail_response = self.client.get(alias.get_absolute_url())
+                list_response = self.client.get(
+                    admin_reverse(LIST_ALIASCONTENT_URL_NAME),
+                )
+        self.assertContains(detail_response, de_plugin.body)
+        self.assertContains(list_response, alias_content_de.name)
+        self.assertNotContains(detail_response, fr_plugin.body)
+        self.assertNotContains(list_response, alias_content_fr.name)
+        self.assertNotContains(detail_response, en_plugin.body)
+        self.assertNotContains(list_response, alias.name)
+
+        with self.login_user_context(self.superuser):
+            with force_language('fr'):
+                if is_versioning_enabled():
+                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
+                    # otherwise we are taken to the version list url
+                    detail_response = self.client.get(alias_content_fr.get_absolute_url())
+                else:
+                    detail_response = self.client.get(alias.get_absolute_url())
+                list_response = self.client.get(
+                    admin_reverse(LIST_ALIASCONTENT_URL_NAME),  # noqa: E501
+                )
+
+        self.assertContains(detail_response, fr_plugin.body)
+        self.assertContains(list_response, alias_content_fr.name)
+        self.assertNotContains(detail_response, de_plugin.body)
+        self.assertNotContains(list_response, alias_content_de.name)
+        self.assertNotContains(detail_response, en_plugin.body)
+        self.assertNotContains(list_response, alias.name)

@@ -5,9 +5,9 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models, transaction
 from django.db.models import F, Q
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from cms.api import add_plugin
 from cms.models import CMSPlugin, Placeholder
@@ -19,7 +19,7 @@ from cms.utils.urlutils import admin_reverse
 
 from parler.models import TranslatableModel, TranslatedFields
 
-from .constants import LIST_ALIASES_URL_NAME
+from .constants import CHANGE_CATEGORY_URL_NAME
 from .utils import is_versioning_enabled
 
 
@@ -65,7 +65,8 @@ class Category(TranslatableModel):
         return self.safe_translation_getter("name", any_language=True)
 
     def get_absolute_url(self):
-        return admin_reverse(LIST_ALIASES_URL_NAME, args=[self.pk])
+        """Builds the url to the admin category change view"""
+        return admin_reverse(CHANGE_CATEGORY_URL_NAME, args=[self.pk])
 
 
 class Alias(models.Model):
@@ -161,7 +162,10 @@ class Alias(models.Model):
 
     def get_absolute_url(self, language=None):
         if is_versioning_enabled():
-            from djangocms_versioning.helpers import version_list_url_for_grouper
+            from djangocms_versioning.helpers import (
+                version_list_url_for_grouper,
+            )
+
             return version_list_url_for_grouper(self)
         content = self.get_content(language=language)
         if content:
@@ -399,7 +403,7 @@ class AliasPlugin(CMSPlugin):
         verbose_name_plural = _('alias plugin models')
 
     def __str__(self):
-        return force_text(self.alias.name)
+        return force_str(self.alias.name)
 
     def is_recursive(self, language=None):
         # When versioning is enabled it will only get published content

@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ==========
 
+1.11.0 (2022-10-14)
+===================
+* feat: Hiding Aliases entry from admin index menu as aliases are managed through Alias Content
+* fix: Removed refs to missing static files (#143)
+
 1.10.0 (2022-09-21)
 ===================
 * feat: Enabled edit button from ExtendedVersionAdminMixin

@@ -1,5 +1,7 @@
 -r requirements_base.txt
 
+https://github.com/django-cms/djangocms-versioning/tarball/master#egg=djangocms-versioning
+
 Django>=2.2,<3.0
 django-classy-tags<2.0.0
 django-fsm>=2.6,<2.7

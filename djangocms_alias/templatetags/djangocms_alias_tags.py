@@ -54,7 +54,6 @@ def render_alias(context, instance, editable=False):
     return ''
 
 
-
 class StaticAlias(Tag):
     """
     This template node is used to render Alias contents and is designed to be a
@@ -158,5 +157,6 @@ class StaticAlias(Tag):
             )
             return content
         return ''
+
 
 register.tag(StaticAlias.name, StaticAlias)

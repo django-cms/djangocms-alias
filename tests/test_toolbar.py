@@ -53,7 +53,10 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         user.user_permissions.add(Permission.objects.get(
             content_type__app_label='djangocms_alias',
             codename='change_category'))
-        page_url = get_object_edit_url(self.page.get_title_obj(self.language))
+        try:
+            page_url = get_object_edit_url(self.page.get_title_obj(self.language))
+        except AttributeError:
+            page_url = get_object_edit_url(self.page.get_content_obj(self.language))
         with self.login_user_context(user):
             response = self.client.get(page_url)
         self.assertContains(response, '<span>Aliases')

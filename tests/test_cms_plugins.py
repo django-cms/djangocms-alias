@@ -83,8 +83,12 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         alias_plugin = alias.get_content(self.language).populate(
             replaced_placeholder=self.placeholder,
         )
+        try:
+            _obj = self.page.get_title_obj()
+        except AttributeError:
+            _obj = self.page.get_content_obj()
         extra_items = Alias.get_extra_plugin_menu_items(
-            self.get_page_request(page=self.page, obj=self.page.get_title_obj(), user=self.superuser),
+            self.get_page_request(page=self.page, obj=_obj, user=self.superuser),
             alias_plugin,
         )
 

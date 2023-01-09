@@ -1,17 +1,17 @@
-name: CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
+name: CodeCov
 
 concurrency:
-  group: ${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+on:
+  pull_request:
+  push:
+    branches:
+    - master
+
 jobs:
-  tests:
+  unit-tests:
     name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-20.04
 
@@ -51,7 +51,7 @@ jobs:
   coverage:
     name: Coverage
     runs-on: ubuntu-20.04
-    needs: tests
+    needs: unit-tests
     steps:
       - uses: actions/checkout@v2
 

@@ -17,6 +17,7 @@ from .base import BaseAliasPluginTestCase
 DJANGO_VERSION = get_version()
 DJANGO_4_0 = LooseVersion(DJANGO_VERSION) < LooseVersion('4.1')
 
+
 class AliasModelsTestCase(BaseAliasPluginTestCase):
 
     def _get_aliases_positions(self, category):

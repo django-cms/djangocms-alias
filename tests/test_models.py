@@ -1,3 +1,6 @@
+from distutils.version import LooseVersion
+
+from django import get_version
 from django.contrib.sites.models import Site
 from django.urls import reverse
 
@@ -10,6 +13,9 @@ from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
 
+
+DJANGO_VERSION = get_version()
+DJANGO_4_0 = LooseVersion(DJANGO_VERSION) < LooseVersion('4.1')
 
 class AliasModelsTestCase(BaseAliasPluginTestCase):
 
@@ -395,7 +401,8 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(Placeholder.objects.count(), 1)
         alias.delete()
         self.assertFalse(alias.__class__.objects.filter(pk=alias.pk).exists())
-        self.assertEqual(alias.cms_plugins.count(), 0)
+        if DJANGO_4_0:
+            self.assertEqual(alias.cms_plugins.count(), 0)
         self.assertEqual(Placeholder.objects.count(), 0)
 
     def test_category_get_absolute_url(self):

@@ -13,7 +13,7 @@ for django CMS version 4.
 
     This is the development branch for django CMS version 4.1 support.
 
-    For django CMS V4.0 support, see `support/django-cms-4.0.x branch <https://github.com/django-cms/djangocms-versioning/tree/support/django-cms-4.0.x>`_
+    For django CMS V4.0 support, see `support/django-cms-4.0.x branch <https://github.com/django-cms/djangocms-alias/tree/support/django-cms-4.0.x>`_
 
 
 ============

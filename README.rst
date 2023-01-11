@@ -9,6 +9,12 @@ django CMS Alias
 django CMS Alias replicates and extends the alias function of django CMS version 3
 for django CMS version 4.
 
+.. warning::
+
+    This is the development branch for django CMS version 4.1 support.
+
+    For django CMS V4.0 support, see `support/django-cms-4.0.x branch <https://github.com/django-cms/djangocms-versioning/tree/support/django-cms-4.0.x>`_
+
 
 ============
 Installation

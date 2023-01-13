@@ -281,8 +281,10 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
             language='en',
             body='Updated Draft content for: template_example_global_alias_code',
         )
-
-        page_content = page.get_title_obj("en")
+        try:
+            page_content = page.get_title_obj("en")
+        except AttributeError:
+            page_content = page.get_content_obj("en")
         page_live_url = page.get_absolute_url()
         page_edit_url = get_object_edit_url(page_content, "en")
         page_preview_url = get_object_preview_url(page_content, "en")

@@ -1,9 +1,0 @@
--r requirements_base.txt
-
-git+https://github.com/fsbraun/djangocms-versioning@fix/migration-009-mysql#egg=djangocms-versioning
-
-Django>=4.1,<4.2
-django-classy-tags
-django-fsm>=2.6
-django-sekizai
-django-parler

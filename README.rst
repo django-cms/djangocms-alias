@@ -9,6 +9,13 @@ django CMS Alias
 django CMS Alias replicates and extends the alias function of django CMS version 3
 for django CMS version 4.
 
+An alias is a collection of plugins that is managed centrally. A reference
+can be added to any placeholder using the Alias plugin. Since the Alias plugin
+creates a reference any changes to the alias are immediately reflected at all
+places it is used.
+
+django CMS Alias supports versioning aliases by django CMS Versioning.
+
 .. warning::
 
     This is the development branch for django CMS version 4.1 support.

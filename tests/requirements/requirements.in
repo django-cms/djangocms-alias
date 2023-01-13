@@ -1,6 +1,10 @@
 bs4
 coverage
 django-app-helper
+django-classy-tags
+django-fsm>=2.6
+django-sekizai
+django-parler
 flake8
 isort
 pyflakes>=2.1.1

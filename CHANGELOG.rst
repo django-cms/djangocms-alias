@@ -7,6 +7,7 @@ Unreleased
 * Django 4.0 and 4.1 support added
 * Django 2.2 support removed
 * Python 3.7 support removed
+* Changed test setup to run tox from github actions for consistency in testing
 
 1.11.0 (2022-10-14)
 ===================

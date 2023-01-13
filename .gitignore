@@ -9,7 +9,7 @@ dist/
 build/
 .env
 local.sqlite
-.coverage
+.coverage*
 htmlcov
 .python-version
 venv*

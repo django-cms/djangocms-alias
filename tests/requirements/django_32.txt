@@ -1,7 +1,0 @@
--r requirements_base.txt
-
-Django>=3.2,<4.0
-django-classy-tags
-django-fsm>=2.6
-django-sekizai
-django-parler<=2.1

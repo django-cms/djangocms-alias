@@ -5,7 +5,8 @@
 --trusted-host pypi.org
 --trusted-host files.pythonhosted.org
 
-https://github.com/django/django/archive/main.tar.gz
+https://github.com/django/django/archive/main.tar.gz \
+    --hash=sha256:143c5a118f5482f4edee43b1c721287d9dd279831015fe3bcc66b20f41057af2
 
 asgiref==3.6.0 \
     --hash=sha256:71e68008da809b957b7ee4b43dbccff33d1b23519fb8344e33f049897077afac \

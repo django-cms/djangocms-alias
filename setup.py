@@ -25,6 +25,8 @@ CLASSIFIERS = [
     'Framework :: Django :: 3.2',
     'Framework :: Django :: 4.0',
     'Framework :: Django :: 4.1',
+    'Framework :: Django CMS :: 4.0',
+    'Framework :: Django CMS :: 4.1',
 ]
 
 INSTALL_REQUIREMENTS = [

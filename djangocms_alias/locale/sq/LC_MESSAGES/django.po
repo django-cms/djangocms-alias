@@ -1,0 +1,354 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# Besnik Bleta <besnik@programeshqip.org>, 2023
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-01-10 22:20+0100\n"
+"PO-Revision-Date: 2023-01-10 21:21+0000\n"
+"Last-Translator: Besnik Bleta <besnik@programeshqip.org>, 2023\n"
+"Language-Team: Albanian (https://www.transifex.com/divio/teams/58664/sq/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: sq\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: admin.py:128 models.py:60 models.py:85
+msgid "category"
+msgstr "kategori"
+
+#: apps.py:7
+msgid "django CMS Alias"
+msgstr "django CMS Alias"
+
+#: cms_plugins.py:29 cms_toolbars.py:46 forms.py:291 views.py:46 views.py:304
+msgid "Alias"
+msgstr "Alias"
+
+#: cms_plugins.py:52
+msgid "Edit Alias"
+msgstr "Përpunoni Alias"
+
+#: cms_plugins.py:66
+msgid "Detach Alias"
+msgstr "Shqite Aliasin"
+
+#: cms_plugins.py:81 cms_plugins.py:98
+msgid "Create Alias"
+msgstr "Krijo Alias"
+
+#: cms_toolbars.py:47 cms_toolbars.py:69 templates/djangocms_alias/base.html:4
+msgid "Aliases"
+msgstr "Aliase"
+
+#: cms_toolbars.py:86
+#: templates/admin/djangocms_alias/icons/change_alias_settings.html:3
+msgid "Change alias settings"
+msgstr "Ndryshoni rregullime aliasesh"
+
+#: cms_toolbars.py:94
+#: templates/admin/djangocms_alias/icons/rename_alias.html:3
+msgid "Rename alias"
+msgstr "Riemërtojeni aliasin"
+
+#: cms_toolbars.py:102 templates/admin/djangocms_alias/icons/view_usage.html:3
+#: templates/djangocms_alias/alias_usage.html:46
+msgid "View usage"
+msgstr "Shihni përdorim"
+
+#: cms_toolbars.py:112
+msgid "Delete alias"
+msgstr "Fshije aliasin"
+
+#: cms_toolbars.py:164 templates/djangocms_alias/create_alias.html:31
+msgid "Create"
+msgstr "Krijoje"
+
+#: cms_toolbars.py:178 filters.py:22 internal_search.py:31
+msgid "Language"
+msgstr "Gjuhë"
+
+#: cms_toolbars.py:231
+msgid "Add Translation"
+msgstr "Shtoni Përkthim"
+
+#: cms_toolbars.py:242
+msgid "Delete Translation"
+msgstr "Fshije Përkthimin"
+
+#: cms_toolbars.py:260
+msgid "Copy all plugins"
+msgstr "Kopjo krejt shtojcat"
+
+#: cms_toolbars.py:262
+#, python-format
+msgid "from %s"
+msgstr "prej %s"
+
+#: cms_toolbars.py:263
+#, python-format
+msgid "Are you sure you want to copy all plugins from %s?"
+msgstr "Jeni i sigurt se doni të kopjohen krejt shtojcat prej %s?"
+
+#: cms_wizards.py:27
+msgid "New alias"
+msgstr "Alias i ri"
+
+#: cms_wizards.py:31
+msgid "Create a new alias."
+msgstr "Krijoni një alias të ri."
+
+#: cms_wizards.py:34
+msgid "New alias category"
+msgstr "Kategori e re aliasesh"
+
+#: cms_wizards.py:38
+msgid "Create a new alias category."
+msgstr "Krijoni një kategori të re aliasesh."
+
+#: filters.py:38
+msgid "Current"
+msgstr "E tanishmja"
+
+#: filters.py:51 forms.py:269
+msgid "Site"
+msgstr "Sajt"
+
+#: filters.py:69 filters.py:108
+msgid "All"
+msgstr "Krejt"
+
+#: filters.py:76
+msgid "No site"
+msgstr "Pa sajt"
+
+#: filters.py:89 forms.py:280 internal_search.py:24
+msgid "Category"
+msgstr "Kategori"
+
+#: filters.py:126
+msgid "Unpublished"
+msgstr "I papublikuar"
+
+#: filters.py:130
+msgid "Show"
+msgstr "Shfaqe"
+
+#: filters.py:142
+msgid "Hide"
+msgstr "Fshihe"
+
+#: forms.py:74
+msgid "A plugin or placeholder is required to create an alias."
+msgstr "Që të krijohet një alias, lypset një shtojcë, ose një vendmbajtëse."
+
+#: forms.py:80
+msgid "An alias can only be created from a plugin or placeholder, not both."
+msgstr ""
+"Një alias mund të krijohet vetëm nga një shtojcë, ose nga një vendmbajtëse, "
+"jo nga të dy."
+
+#: forms.py:99
+msgid "Replace current plugin"
+msgstr "Zëvendëso shtojcën e tanishme"
+
+#: forms.py:100
+msgid "Replace current plugin with alias"
+msgstr "Zëvendëso shtojcën e tanishme me alias"
+
+#: forms.py:124 forms.py:354
+msgid "Alias with this Name and Category already exists."
+msgstr "Ka tashmë alias me këtë Emër dhe Kategori."
+
+#: forms.py:175 templates/djangocms_alias/alias_usage.html:32
+msgid "Name"
+msgstr "Emër"
+
+#: forms.py:273
+msgid "Select site to restrict the list of aliases below"
+msgstr "Përzgjidhni më poshtë sajt të cilit t’i kufizohet lista e aliaseve"
+
+#: forms.py:284
+msgid "Select category to restrict the list of aliases below"
+msgstr ""
+"Përzgjidhni më poshtë kategori të cilës t’i kufizohet lista e aliaseve"
+
+#: forms.py:295
+msgid "Select an alias"
+msgstr "Përzgjidhni një alias"
+
+#: internal_search.py:17
+msgid "Title"
+msgstr "Titull"
+
+#: internal_search.py:38
+msgid "URL"
+msgstr "URL"
+
+#: internal_search.py:45
+msgid "Version status"
+msgstr "Gjendje versioni"
+
+#: models.py:40
+msgid "Default"
+msgstr "Parazgjedhje"
+
+#: models.py:53 models.py:269
+msgid "name"
+msgstr "emër"
+
+#: models.py:61
+msgid "categories"
+msgstr "kategori"
+
+#: models.py:76
+msgid "by template"
+msgstr "sipas gjedhesh"
+
+#: models.py:77
+msgid "by code"
+msgstr "sipas kodi"
+
+#: models.py:80
+msgid "creation_method"
+msgstr ""
+
+#: models.py:90
+msgid "position"
+msgstr "pozicion"
+
+#: models.py:94
+msgid "static code"
+msgstr "kod statik"
+
+#: models.py:98
+msgid "To render the alias in templates."
+msgstr "Për rikrijim të aliasit në gjedhe."
+
+#: models.py:103 models.py:390
+msgid "alias"
+msgstr "alias"
+
+#: models.py:104
+msgid "aliases"
+msgstr "aliase"
+
+#: models.py:281
+msgid "alias content"
+msgstr "lëndë aliasi"
+
+#: models.py:282
+msgid "alias contents"
+msgstr "lëndë aliasi"
+
+#: models.py:395
+msgid "template"
+msgstr "gjedhe"
+
+#: models.py:402
+msgid "alias plugin model"
+msgstr "model shtojce aliasi"
+
+#: models.py:403
+msgid "alias plugin models"
+msgstr "modele shtojcash aliasesh"
+
+#: templates/admin/djangocms_alias/alias/change_form.html:8
+msgid "Save"
+msgstr "Ruaje"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:9
+#, python-format
+msgid ""
+"You don't have permissions to delete %(object_name)s \"%(escaped_object)s\"."
+" Please request your site admin to add permissions to delete alias, or "
+"delete alias from all places that it being used."
+msgstr ""
+"S’keni leje të fshini %(object_name)s \"%(escaped_object)s\". Ju lutemi, "
+"kërkojini përgjegjësit të sajtit tuaj të shtojë leje për fshirje aliasesh, "
+"ose të fshijë aliasin prej krejt vendeve ku përdoret."
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:11
+#, python-format
+msgid ""
+"Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"?"
+msgstr "Jeni i sigurt se doni të fshihet %(object_name)s \"%(escaped_object)s\"?"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:18
+msgid "This alias is used by following objects:"
+msgstr "Ky alias përdoret nga objektet vijues:"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:28
+msgid "This alias wasn't used by any object."
+msgstr "Ky alias s’është përdorur nga ndonjë object."
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:35
+#: templates/djangocms_alias/detach_alias.html:16
+msgid "Yes, I'm sure"
+msgstr "Po, jam i sigurt"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:37
+#: templates/djangocms_alias/detach_alias.html:17
+msgid "No, take me back"
+msgstr "Jo, kthemëni mbrapsht"
+
+#: templates/djangocms_alias/add_alias.html:5
+msgid "Add alias"
+msgstr "Shtoni alias"
+
+#: templates/djangocms_alias/add_alias.html:14
+#, python-format
+msgid ""
+"Are you sure you want to add alias <a "
+"href=\"%(alias.get_absolute_url)s\">%(alias_name)s</a>?"
+msgstr ""
+"Jeni i sigurt se doni të shtohet aliasi <a "
+"href=\"%(alias.get_absolute_url)s\">%(alias_name)s</a>?"
+
+#: templates/djangocms_alias/add_alias.html:28
+msgid "Add"
+msgstr "Shto"
+
+#: templates/djangocms_alias/alias_usage.html:16
+msgid "Home"
+msgstr "Kreu"
+
+#: templates/djangocms_alias/alias_usage.html:20
+msgid "Usage of alias"
+msgstr "Përdorim aliasesh"
+
+#: templates/djangocms_alias/alias_usage.html:26
+msgid "Back"
+msgstr "Mbrapsht"
+
+#: templates/djangocms_alias/alias_usage.html:31
+msgid "Type"
+msgstr "Lloj"
+
+#: templates/djangocms_alias/create_alias.html:5
+msgid "Create alias"
+msgstr "Krijo alias"
+
+#: templates/djangocms_alias/create_alias.html:8
+msgid "Please correct the error below."
+msgid_plural "Please correct the errors below."
+msgstr[0] "Ju lutemi, ndreqni gabimin më poshtë."
+msgstr[1] "Ju lutemi, ndreqni gabimet më poshtë."
+
+#: templates/djangocms_alias/detach_alias.html:8
+#, python-format
+msgid ""
+"Are you sure you want to detach the %(object_name)s \"%(escaped_object)s\"?"
+msgstr "Jeni i sigurt se doni të shqitet %(object_name)s \"%(escaped_object)s\"?"
+
+#: views.py:297
+msgid "Objects using alias: {}"
+msgstr "Objektet që përdorin alias: {}"

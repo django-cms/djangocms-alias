@@ -39,7 +39,7 @@ msgstr "Alias editieren"
 
 #: cms_plugins.py:66
 msgid "Detach Alias"
-msgstr ""
+msgstr "Alias abtrennen"
 
 #: cms_plugins.py:81 cms_plugins.py:98
 msgid "Create Alias"
@@ -199,7 +199,7 @@ msgstr "Version-Status"
 
 #: models.py:40
 msgid "Default"
-msgstr ""
+msgstr "Vorgabe"
 
 #: models.py:53 models.py:269
 msgid "name"
@@ -211,15 +211,15 @@ msgstr "Kategorien"
 
 #: models.py:76
 msgid "by template"
-msgstr ""
+msgstr "nach Vorlage"
 
 #: models.py:77
 msgid "by code"
-msgstr ""
+msgstr "nach Code"
 
 #: models.py:80
 msgid "creation_method"
-msgstr ""
+msgstr "Erstellungsmethode"
 
 #: models.py:90
 msgid "position"
@@ -227,7 +227,7 @@ msgstr "Position"
 
 #: models.py:94
 msgid "static code"
-msgstr ""
+msgstr "statischer Code"
 
 #: models.py:98
 msgid "To render the alias in templates."
@@ -272,6 +272,10 @@ msgid ""
 " Please request your site admin to add permissions to delete alias, or "
 "delete alias from all places that it being used."
 msgstr ""
+"Sie haben keine Berechtigung, %(object_name)s \"%(escaped_object)s\" zu "
+"löschen. Bitte fragen Sie Ihren Administrator, Ihnen die Rechte zum Löschen "
+"von Aliasen zu erteilen. Oder löschen Sie die alle Plugins, die das Alias "
+"benutzen."
 
 #: templates/admin/djangocms_alias/alias/delete_confirmation.html:11
 #, python-format
@@ -297,7 +301,7 @@ msgstr "Ja, ich bin sicher!"
 #: templates/admin/djangocms_alias/alias/delete_confirmation.html:37
 #: templates/djangocms_alias/detach_alias.html:17
 msgid "No, take me back"
-msgstr ""
+msgstr "Nein, zurück!"
 
 #: templates/djangocms_alias/add_alias.html:5
 msgid "Add alias"
@@ -309,6 +313,8 @@ msgid ""
 "Are you sure you want to add alias <a "
 "href=\"%(alias.get_absolute_url)s\">%(alias_name)s</a>?"
 msgstr ""
+"Sind Sie sicher, dass Sie Alias <a "
+"href=\"%(alias.get_absolute_url)s\">%(alias_name)s</a>  hinzufügen wollen?"
 
 #: templates/djangocms_alias/add_alias.html:28
 msgid "Add"
@@ -345,6 +351,8 @@ msgstr[1] "Bitte korrigieren Sie die Fehler unten."
 msgid ""
 "Are you sure you want to detach the %(object_name)s \"%(escaped_object)s\"?"
 msgstr ""
+"Sind Sie sicher, dass Sie %(object_name)s \"%(escaped_object)s\" abtrennen "
+"wollen? "
 
 #: views.py:297
 msgid "Objects using alias: {}"

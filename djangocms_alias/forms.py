@@ -1,3 +1,4 @@
+from cms.admin.grouper import ExtraGrouperFormMixin, GrouperChangeFormMixin
 from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import (
@@ -19,7 +20,7 @@ from cms.utils.urlutils import admin_reverse
 from parler.forms import TranslatableModelForm
 
 from .constants import CATEGORY_SELECT2_URL_NAME, SELECT2_ALIAS_URL_NAME
-from .models import Alias as AliasModel, AliasContent, AliasPlugin, Category
+from .models import Alias as AliasModel, Alias, AliasContent, AliasPlugin, Category
 from .utils import emit_content_change, is_versioning_enabled
 
 
@@ -202,11 +203,12 @@ class CreateAliasWizardForm(forms.Form):
             category=self.cleaned_data.get('category'),
             site=self.cleaned_data.get('site'),
         )
-        alias_content = AliasContent.objects.create(
+        alias_content = AliasContent(
             alias=alias,
             name=self.cleaned_data.get('name'),
             language=self.language_code,
         )
+        alias_content.save()  # Does not create a Version object
 
         if is_versioning_enabled():
             from djangocms_versioning.models import Version
@@ -337,6 +339,7 @@ class AliasContentForm(forms.ModelForm):
     class Meta:
         model = AliasContent
         fields = ('name',)
+        fields = "__all__"
 
     def clean(self):
         cleaned_data = super().clean()
@@ -355,3 +358,9 @@ class AliasContentForm(forms.ModelForm):
             )
 
         return cleaned_data
+
+
+class AliasGrouperAdminForm(ExtraGrouperFormMixin, GrouperChangeFormMixin(AliasContent), forms.ModelForm):
+    class Meta:
+        model = Alias
+        fields = "__all__"

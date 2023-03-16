@@ -16,7 +16,7 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 from djangocms_alias.constants import (
     CATEGORY_SELECT2_URL_NAME,
     DELETE_ALIAS_URL_NAME,
-    LIST_ALIASCONTENT_URL_NAME,
+    LIST_ALIAS_URL_NAME,
     SELECT2_ALIAS_URL_NAME,
     USAGE_ALIAS_URL_NAME,
 )
@@ -419,7 +419,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
         site1_alias = self._create_alias(plugins=[site1_plugin], site=site1, name='site1_alias', category=self.category)
         site2_alias = self._create_alias(plugins=[site2_plugin], site=site2, name='site2_alias', category=self.category)
-        aliascontent_list_url = admin_reverse(LIST_ALIASCONTENT_URL_NAME)
+        aliascontent_list_url = admin_reverse(LIST_ALIAS_URL_NAME)
 
         # when no filter used both objects are displayed
         with self.login_user_context(self.superuser):
@@ -1477,7 +1477,7 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
                 else:
                     detail_response = self.client.get(alias.get_absolute_url())
                 list_response = self.client.get(
-                    admin_reverse(LIST_ALIASCONTENT_URL_NAME),
+                    admin_reverse(LIST_ALIAS_URL_NAME),
                 )
         self.assertContains(detail_response, en_plugin.body)
         self.assertContains(list_response, alias.name)
@@ -1495,7 +1495,7 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
                 else:
                     detail_response = self.client.get(alias.get_absolute_url())
                 list_response = self.client.get(
-                    admin_reverse(LIST_ALIASCONTENT_URL_NAME),
+                    admin_reverse(LIST_ALIAS_URL_NAME),
                 )
         self.assertContains(detail_response, de_plugin.body)
         self.assertContains(list_response, alias_content_de.name)
@@ -1513,7 +1513,7 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
                 else:
                     detail_response = self.client.get(alias.get_absolute_url())
                 list_response = self.client.get(
-                    admin_reverse(LIST_ALIASCONTENT_URL_NAME),  # noqa: E501
+                    admin_reverse(LIST_ALIAS_URL_NAME),  # noqa: E501
                 )
 
         self.assertContains(detail_response, fr_plugin.body)

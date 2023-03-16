@@ -24,7 +24,7 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import (
     DELETE_ALIAS_URL_NAME,
-    LIST_ALIASCONTENT_URL_NAME,
+    LIST_ALIAS_URL_NAME,
     USAGE_ALIAS_URL_NAME,
 )
 from .models import Alias, AliasContent
@@ -63,7 +63,7 @@ class AliasToolbar(CMSToolbar):
             return
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
 
-        url = admin_reverse(LIST_ALIASCONTENT_URL_NAME)
+        url = admin_reverse(LIST_ALIAS_URL_NAME)
 
         admin_menu.add_sideframe_item(
             _("Aliases"),
@@ -91,14 +91,6 @@ class AliasToolbar(CMSToolbar):
             disabled=disabled,
         )
         alias_menu.add_modal_item(
-            _('Rename alias'),
-            url=admin_reverse(
-                'djangocms_alias_aliascontent_change',
-                args=[self.toolbar.obj.pk],
-            ),
-            disabled=disabled,
-        )
-        alias_menu.add_modal_item(
             _('View usage'),
             url=admin_reverse(
                 USAGE_ALIAS_URL_NAME,
@@ -115,7 +107,7 @@ class AliasToolbar(CMSToolbar):
                     args=(self.toolbar.obj.alias_id, ),
                 ),
                 on_close=admin_reverse(
-                    LIST_ALIASCONTENT_URL_NAME,
+                    LIST_ALIAS_URL_NAME,
                 ),
                 disabled=disabled,
             )

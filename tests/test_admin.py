@@ -12,7 +12,7 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 from bs4 import BeautifulSoup
 
 from djangocms_alias.constants import (
-    CHANGE_ALIASCONTENT_URL_NAME,
+    CHANGE_ALIAS_URL_NAME,
     USAGE_ALIAS_URL_NAME,
 )
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
@@ -467,13 +467,13 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             alias2_content = alias2.get_content(language=self.language)
             alias3_content = alias3.get_content(language=self.language)
             aliascontent1_url = admin_reverse(
-                CHANGE_ALIASCONTENT_URL_NAME, args=[alias1_content.pk]
+                CHANGE_ALIAS_URL_NAME, args=[alias1_content.pk]
             )
             aliascontent2_url = admin_reverse(
-                CHANGE_ALIASCONTENT_URL_NAME, args=[alias2_content.pk]
+                CHANGE_ALIAS_URL_NAME, args=[alias2_content.pk]
             )
             aliascontent3_url = admin_reverse(
-                CHANGE_ALIASCONTENT_URL_NAME, args=[alias3_content.pk]
+                CHANGE_ALIAS_URL_NAME, args=[alias3_content.pk]
             )
 
         self.assertContains(response, aliascontent1_url)

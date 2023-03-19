@@ -1,11 +1,13 @@
-from cms.admin.grouper import GrouperAdminMixin
+from cms.admin.utils import GrouperModelAdmin
 from django.contrib import admin
-from django.db.models import Q
+from django.db.models import Q, Max, Min
 from django.db.models.functions import Lower
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-from django.utils.translation import gettext_lazy as _, get_language
+from django.utils.functional import lazy
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _, get_language, gettext
 
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse, static_with_version
@@ -13,7 +15,7 @@ from cms.utils.urlutils import admin_reverse, static_with_version
 from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
-from .constants import USAGE_ALIAS_URL_NAME, LIST_ALIAS_URL_NAME, CHANGE_ALIAS_URL_NAME
+from .constants import USAGE_ALIAS_URL_NAME, LIST_ALIAS_URL_NAME, CHANGE_ALIAS_URL_NAME, DELETE_ALIAS_URL_NAME
 from .filters import CategoryFilter, LanguageFilter, SiteFilter
 from .forms import AliasContentForm, AliasGrouperAdminForm
 from .models import Alias, AliasContent, Category
@@ -62,45 +64,27 @@ class CategoryAdmin(TranslatableAdmin):
 
 
 @admin.register(Alias)
-class AliasAdmin(GrouperAdminMixin, StateIndicatorMixin, admin.ModelAdmin):
-    list_display = ['name', 'category', 'state_indicator',]
+class AliasAdmin(StateIndicatorMixin, GrouperModelAdmin):
+    list_display = ['get_name', 'category', 'state_indicator', 'admin_list_actions']
+    list_display_links = None
     list_filter = ['site', 'category']
     fields = ('name', 'category', 'site', 'language')
     readonly_fields = ('static_code', )
     form = AliasGrouperAdminForm
     extra_grouping_fields = ("language",)
 
-    class Media:
-        js = (
-            "admin/js/jquery.init.js",
-            "cms/js/admin/actions.js",
-        )
-        css = {"all": (
-            "djangocms_versioning/css/actions.css",
-        )}
-
     def get_urls(self):
         return urlpatterns + super().get_urls()
 
-    def get_list_actions(self):
-        """
-        Collect rendered actions from implemented methods and return as list
-        """
-        if hasattr(super(), "get_list_actions"):
-            list_actions = super().get_list_actions()
-        else:
-            list_actions = []
-        return list_actions + [
-            self._get_alias_usage_link,
-        ]
+    def get_actions_list(self):
+        """Add alias usage list actions"""
+        return super().get_actions_list() + [self._get_alias_usage_link,]
 
-    def get_list_display_links(self, request, list_display):
-        """
-        Remove the linked text when versioning is enabled, because versioning adds actions
-        """
-        if is_versioning_enabled():
-            self.list_display_links = None
-        return super().get_list_display_links(request, list_display)
+    def get_name(self, obj):
+        content = self.get_content_obj(obj)
+        return content.name if content else mark_safe(_("<i>Missing language</i>"))
+    get_name.short_description = AliasContent._meta.get_field("name").verbose_name
+    # get_name.admin_order_field = "lc_content_name"
 
     def can_change_content(self, request, content_obj):
         """Returns True if user can change content_obj"""
@@ -135,12 +119,15 @@ class AliasAdmin(GrouperAdminMixin, StateIndicatorMixin, admin.ModelAdmin):
             AliasContent._base_manager.filter(alias=self.get_content_obj(obj)),
             sender=self.model,
         )
+
     def _get_alias_usage_link(self, obj, request, disabled=False):
         url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.pk])
-        return render_to_string(
-            "admin/djangocms_alias/icons/view_usage.html",
-            {"url": url, "disabled": disabled},
-        )
+        return self.admin_action_button(url, "info",  _("View usage"), disabled=disabled)
+
+    def _get_alias_delete_link(self, obj, request):
+        url = admin_reverse(DELETE_ALIAS_URL_NAME, args=[obj.pk])
+        return self.admin_action_button(url, "bin", _("Delete Alias"),
+                                        disabled=not self.has_delete_permission(request, obj))
 
 
 @admin.register(AliasContent)
@@ -190,7 +177,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
         super().delete_model(request, obj)
 
         # Only emit content changes if Versioning is not installed because
-        # Versioning emits it's own signals for changes
+        # Versioning emits it' own signals for changes
         if not is_versioning_enabled():
             emit_content_delete([obj], sender=self.model)
 

@@ -1,4 +1,4 @@
-from cms.admin.grouper import ExtraGrouperFormMixin, GrouperChangeFormMixin
+from cms.admin.utils import GrouperModelFormMixin
 from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import (
@@ -360,7 +360,7 @@ class AliasContentForm(forms.ModelForm):
         return cleaned_data
 
 
-class AliasGrouperAdminForm(ExtraGrouperFormMixin, GrouperChangeFormMixin(AliasContent), forms.ModelForm):
+class AliasGrouperAdminForm(GrouperModelFormMixin(AliasContent), forms.ModelForm):
     class Meta:
         model = Alias
         fields = "__all__"

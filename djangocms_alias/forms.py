@@ -1,4 +1,4 @@
-from cms.admin.utils import GrouperModelFormMixin
+from cms.admin.utils import GrouperAdminFormMixin
 from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import (
@@ -327,40 +327,21 @@ class AliasPluginForm(forms.ModelForm):
         )
 
 
-class AliasContentForm(forms.ModelForm):
-
-    alias = forms.ModelChoiceField(
-        queryset=AliasModel.objects.all(),
-        required=True,
-        widget=forms.HiddenInput(),
-    )
-    language = forms.CharField(widget=forms.HiddenInput())
-
+class AliasGrouperAdminForm(GrouperAdminFormMixin(AliasContent), forms.ModelForm):
     class Meta:
-        model = AliasContent
-        fields = ('name',)
+        model = Alias
         fields = "__all__"
 
     def clean(self):
         cleaned_data = super().clean()
-
-        alias = cleaned_data.get('alias')
-        if not alias:
-            return cleaned_data
-
-        if AliasContent.objects.filter(
+        print(f"{cleaned_data=}")
+        if AliasContent.admin_manager.filter(
             name=cleaned_data.get('name'),
             language=cleaned_data.get('language'),
-            alias__category=alias.category,
+            alias__category=cleaned_data.get('category'),
         ).exists():
             raise forms.ValidationError(
                 _('Alias with this Name and Category already exists.')
             )
 
         return cleaned_data
-
-
-class AliasGrouperAdminForm(GrouperModelFormMixin(AliasContent), forms.ModelForm):
-    class Meta:
-        model = Alias
-        fields = "__all__"

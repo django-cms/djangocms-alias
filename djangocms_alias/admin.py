@@ -17,7 +17,7 @@ from parler.admin import TranslatableAdmin
 from .cms_config import AliasCMSConfig
 from .constants import USAGE_ALIAS_URL_NAME, LIST_ALIAS_URL_NAME, CHANGE_ALIAS_URL_NAME, DELETE_ALIAS_URL_NAME
 from .filters import CategoryFilter, LanguageFilter, SiteFilter
-from .forms import AliasContentForm, AliasGrouperAdminForm
+from .forms import AliasGrouperAdminForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
 from .utils import (
@@ -65,10 +65,10 @@ class CategoryAdmin(TranslatableAdmin):
 
 @admin.register(Alias)
 class AliasAdmin(StateIndicatorMixin, GrouperModelAdmin):
-    list_display = ['get_name', 'category', 'state_indicator', 'admin_list_actions']
+    list_display = ['content__name', 'category', 'state_indicator', 'admin_list_actions']
     list_display_links = None
     list_filter = ['site', 'category']
-    fields = ('name', 'category', 'site', 'language')
+    fields = ('content__name', 'category', 'site', 'content__language')
     readonly_fields = ('static_code', )
     form = AliasGrouperAdminForm
     extra_grouping_fields = ("language",)
@@ -113,10 +113,17 @@ class AliasAdmin(StateIndicatorMixin, GrouperModelAdmin):
             sender=self.model,
         )
 
+    def get_deleted_objects(self, objs, request):
+        deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
+        # This is bad and I should feel bad.
+        if 'placeholder' in perms_needed:
+            perms_needed.remove('placeholder')
+        return deleted_objects, model_count, perms_needed, protected
+
     def delete_model(self, request, obj):
         super().delete_model(request, obj)
         emit_content_delete(
-            AliasContent._base_manager.filter(alias=self.get_content_obj(obj)),
+            AliasContent._base_manager.filter(alias=obj),
             sender=self.model,
         )
 
@@ -132,7 +139,6 @@ class AliasAdmin(StateIndicatorMixin, GrouperModelAdmin):
 
 @admin.register(AliasContent)
 class AliasContentAdmin(*alias_content_admin_classes):
-    form = AliasContentForm
     list_filter = alias_content_admin_list_filter
     list_display = alias_content_admin_list_display
     # Disable dropdown actions

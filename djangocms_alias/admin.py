@@ -1,21 +1,22 @@
-from cms.admin.utils import GrouperModelAdmin
 from django.contrib import admin
-from django.db.models import Q, Max, Min
-from django.db.models.functions import Lower
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.template.loader import render_to_string
-from django.utils.functional import lazy
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, get_language, gettext
+from django.utils.translation import gettext_lazy as _
 
+from cms.admin.utils import GrouperModelAdmin
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse, static_with_version
 
 from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
-from .constants import USAGE_ALIAS_URL_NAME, LIST_ALIAS_URL_NAME, CHANGE_ALIAS_URL_NAME, DELETE_ALIAS_URL_NAME
+from .constants import (
+    CHANGE_ALIAS_URL_NAME,
+    DELETE_ALIAS_URL_NAME,
+    LIST_ALIAS_URL_NAME,
+    USAGE_ALIAS_URL_NAME,
+)
 from .filters import CategoryFilter, LanguageFilter, SiteFilter
 from .forms import AliasGrouperAdminForm
 from .models import Alias, AliasContent, Category
@@ -39,7 +40,10 @@ alias_content_admin_list_filter = (SiteFilter, CategoryFilter, LanguageFilter,)
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
-    from djangocms_versioning.admin import ExtendedIndicatorVersionAdminMixin, StateIndicatorMixin
+    from djangocms_versioning.admin import (
+        ExtendedIndicatorVersionAdminMixin,
+        StateIndicatorMixin,
+    )
 
     from .filters import UnpublishedFilter
     alias_content_admin_classes.insert(0, ExtendedIndicatorVersionAdminMixin)
@@ -72,6 +76,7 @@ class AliasAdmin(StateIndicatorMixin, GrouperModelAdmin):
     readonly_fields = ('static_code', )
     form = AliasGrouperAdminForm
     extra_grouping_fields = ("language",)
+    EMPTY_CONTENT_VALUE = mark_safe(_("<i>Missing language</i>"))
 
     def get_urls(self):
         return urlpatterns + super().get_urls()
@@ -129,7 +134,7 @@ class AliasAdmin(StateIndicatorMixin, GrouperModelAdmin):
 
     def _get_alias_usage_link(self, obj, request, disabled=False):
         url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.pk])
-        return self.admin_action_button(url, "info",  _("View usage"), disabled=disabled)
+        return self.admin_action_button(url, "info", _("View usage"), disabled=disabled)
 
     def _get_alias_delete_link(self, obj, request):
         url = admin_reverse(DELETE_ALIAS_URL_NAME, args=[obj.pk])
@@ -190,8 +195,8 @@ class AliasContentAdmin(*alias_content_admin_classes):
     def changelist_view(self, request, extra_context=None):
         """Needed for the Alias Content Admin breadcrumbs"""
         return HttpResponseRedirect(admin_reverse(
-                LIST_ALIAS_URL_NAME,
-            ))
+            LIST_ALIAS_URL_NAME,
+        ))
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """Needed for the Alias Content Admin breadcrumbs"""

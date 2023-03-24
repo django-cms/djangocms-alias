@@ -1,7 +1,7 @@
 [main]
 host = https://www.transifex.com
 
-[o:divio:p:django-cms-alias:r:djangopo]
+[o:divio:p:django-cms-alias:r:djangocms-alias-locale-en-lc-messages-django-po--master]
 file_filter   = djangocms_alias/locale/<lang>/LC_MESSAGES/django.po
 source_file   = djangocms_alias/locale/en/LC_MESSAGES/django.po
 type          = PO

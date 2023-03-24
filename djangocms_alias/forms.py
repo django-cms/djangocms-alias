@@ -1,4 +1,3 @@
-from cms.admin.utils import GrouperAdminFormMixin
 from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import (
@@ -20,7 +19,13 @@ from cms.utils.urlutils import admin_reverse
 from parler.forms import TranslatableModelForm
 
 from .constants import CATEGORY_SELECT2_URL_NAME, SELECT2_ALIAS_URL_NAME
-from .models import Alias as AliasModel, Alias, AliasContent, AliasPlugin, Category
+from .models import (
+    Alias,
+    Alias as AliasModel,
+    AliasContent,
+    AliasPlugin,
+    Category,
+)
 from .utils import emit_content_change, is_versioning_enabled
 
 
@@ -327,7 +332,7 @@ class AliasPluginForm(forms.ModelForm):
         )
 
 
-class AliasGrouperAdminForm(GrouperAdminFormMixin(AliasContent), forms.ModelForm):
+class AliasGrouperAdminForm(forms.ModelForm):
     class Meta:
         model = Alias
         fields = "__all__"

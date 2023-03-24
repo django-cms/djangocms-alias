@@ -1,18 +1,18 @@
 import operator
 from collections import defaultdict
 
-from cms.models.managers import WithUserMixin
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models, transaction
 from django.db.models import F, Q
 from django.utils.encoding import force_str
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, get_language
+from django.utils.translation import get_language, gettext_lazy as _
 
 from cms.api import add_plugin
 from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderRelationField
+from cms.models.managers import WithUserMixin
 from cms.toolbar.utils import get_object_preview_url
 from cms.utils.plugins import copy_plugins_to_placeholder
 from cms.utils.urlutils import admin_reverse
@@ -252,6 +252,7 @@ class Alias(models.Model):
         self.position = position
         self.save()
         self.category.aliases.filter(*filters).update(position=op(F('position'), 1))  # noqa: E501
+
 
 class AliasContentManager(WithUserMixin, models.Manager):
     """Adds with_user syntax to AliasContent w/o using versioning"""

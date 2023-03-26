@@ -86,16 +86,16 @@ class StaticAlias(Tag):
         else:
             alias_filter_kwargs['site_id__isnull'] = True
 
+        language = get_language_from_request(request)
         # Try and find an Alias to render
         alias = Alias.objects.filter(**alias_filter_kwargs).first()
         # If there is no alias found we need to create one
         if not alias:
 
-            # If versioning is enabled we can only create the records with a logged in user / staff member
+            # If versioning is enabled we can only create the records with a logged-in user / staff member
             if is_versioning_enabled() and not request.user.is_authenticated:
                 return None
 
-            language = get_default_language_for_site(current_site)
             # Parlers get_or_create doesn't work well with translations, so we must perform our own get or create
             default_category = Category.objects.filter(translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME).first()
             if not default_category:
@@ -110,6 +110,13 @@ class StaticAlias(Tag):
                 alias_creation_kwargs['site'] = current_site
 
             alias = Alias.objects.create(category=default_category, **alias_creation_kwargs)
+
+        if not AliasContent._default_manager.filter(alias=alias, language=language).exists():
+            # Create a first content object if none exists in the given language.
+            # If versioning is enabled we can only create the records with a logged-in user / staff member
+            if is_versioning_enabled() and not request.user.is_authenticated:
+                return None
+
             alias_content = AliasContent.objects.create(
                 alias=alias,
                 name=static_code,
@@ -120,6 +127,7 @@ class StaticAlias(Tag):
                 from djangocms_versioning.models import Version
 
                 Version.objects.create(content=alias_content, created_by=request.user)
+            alias._content_cache[language] = alias_content
 
         return alias
 

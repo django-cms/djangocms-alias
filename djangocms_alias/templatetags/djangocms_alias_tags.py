@@ -5,7 +5,7 @@ from django import template
 from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_toolbar_from_request
 from cms.utils import get_current_site, get_language_from_request
-from cms.utils.i18n import get_default_language_for_site, get_language_list
+from cms.utils.i18n import get_language_list
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 

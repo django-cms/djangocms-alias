@@ -326,9 +326,11 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         self._publish(page, "en")
         self._publish(page, "de")
         if hasattr(page, 'get_title_obj'):
-            page_edit_url = lambda lang: get_object_edit_url(page.get_title_obj(lang))
+            def page_edit_url(lang):
+                return get_object_edit_url(page.get_title_obj(lang))
         else:
-            page_edit_url = lambda lang: get_object_edit_url(page.get_content_obj(lang))
+            def page_edit_url(lang):
+                return get_object_edit_url(page.get_content_obj(lang))
 
         with self.login_user_context(self.superuser):
             self.client.get(page_edit_url("en"))  # supposed to create the alias and alias content for en

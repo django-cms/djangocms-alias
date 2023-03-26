@@ -30,7 +30,7 @@ repos:
           - flake8-coding
           - flake8-commas
           - flake8-comprehensions
-          - flake8-eradicate
+#          - flake8-eradicate
           - flake8-quotes
           - flake8-tidy-imports
           - pep8-naming

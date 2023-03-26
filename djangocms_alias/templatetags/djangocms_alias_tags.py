@@ -5,7 +5,7 @@ from django import template
 from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_toolbar_from_request
 from cms.utils import get_current_site, get_language_from_request
-from cms.utils.i18n import get_default_language_for_site
+from cms.utils.i18n import get_default_language_for_site, get_language_list
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
@@ -86,7 +86,13 @@ class StaticAlias(Tag):
         else:
             alias_filter_kwargs['site_id__isnull'] = True
 
-        language = get_language_from_request(request)
+        if hasattr(request, "toolbar") and False:
+            # Try getting language from the toolbar first (end and view endpoints)
+            language = getattr(request.toolbar.get_object(), "language", None)
+            if language not in get_language_list(current_site):
+                language = None
+        else:
+            language = get_language_from_request(request)
         # Try and find an Alias to render
         alias = Alias.objects.filter(**alias_filter_kwargs).first()
         # If there is no alias found we need to create one

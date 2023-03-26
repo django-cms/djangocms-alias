@@ -122,11 +122,13 @@ class AliasContentAdmin(*alias_content_admin_classes):
         return queryset
 
     # Add Alias category in the admin manager list and order field
+    @admin.display(
+        description=_('category'),
+        ordering="alias_category_translations_ordered",
+    )
     def get_category(self, obj):
         return obj.alias.category
 
-    get_category.short_description = _('category')
-    get_category.admin_order_field = "alias_category_translations_ordered"
 
     def has_add_permission(self, request, obj=None):
         # FIXME: It is not currently possible to add an alias from the django admin changelist issue #97

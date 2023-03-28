@@ -351,26 +351,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         # No button should be found for delete
         self.assertIsNone(search_result)
 
-    def test_rename_alias_show_on_edit_alias_view(self):
-        alias = self._create_alias()
-        request = self.get_alias_request(
-            alias=alias,
-            user=self.superuser,
-            edit=True,
-        )
-        button_label = 'Rename alias...'
-        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
-        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
-        self.assertIsNotNone(search_result)
-        button = search_result.item
-        self.assertEqual(button.name, button_label)
-        self.assertEqual(button.url, admin_reverse(
-            'djangocms_alias_aliascontent_change',
-            args=[alias.get_content().pk],
-        ))
-        self.assertEqual(button.on_close, 'REFRESH_PAGE')
-
-    def test_disable_buttons_when_in_preview_mode(self):
+    def test_do_not_disable_buttons_when_in_preview_mode(self):
         alias = self._create_alias()
         request = self.get_alias_request(
             alias=alias,
@@ -384,7 +365,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             if result.item.name == 'View usage...':
                 self.assertEqual(result.item.disabled, False)
             else:
-                self.assertEqual(result.item.disabled, True)
+                self.assertEqual(result.item.disabled, False)
 
     def test_disable_buttons_when_not_have_perms(self):
         alias = self._create_alias()

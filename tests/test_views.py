@@ -918,7 +918,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, 'This alias wasn\'t used by any object.')
 
     def test_delete_alias_view_post(self):
-        from djangocms_alias.views import JAVASCRIPT_SUCCESS_RESPONSE
+        """Tests the admin delete view (as opposed to the djangocms_alias.views.delete_view)"""
         alias = self._create_alias([self.plugin])
         self.assertIn(alias, Alias.objects.all())
         with self.login_user_context(self.superuser):
@@ -929,8 +929,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 ),
                 data={'post': 'yes'},
             )
-        self.assertContains(response, JAVASCRIPT_SUCCESS_RESPONSE)
-        self.assertFalse(Alias.objects.filter(pk=alias.pk).exists())
+        self.assertEqual(response.status_code, 302)  # Successful delete returns a redirect
+        self.assertFalse(Alias.objects.filter(pk=alias.pk).exists())  # Ensure it's gone
 
     def test_delete_alias_view_user_with_no_perms(self):
         alias = self._create_alias([self.plugin])
@@ -974,7 +974,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 ),
                 data={'post': 'yes'},
             )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
         self.assertFalse(Alias.objects.filter(pk=alias.pk).exists())
 
     def test_delete_alias_view_alias_being_used_on_pages(self):

@@ -81,14 +81,13 @@ class AliasToolbar(CMSToolbar):
         can_change = self.request.user.has_perm(
             get_model_permission_codename(Alias, 'change'),
         )
-        disabled = not can_change or not self.toolbar.edit_mode_active
         alias_menu.add_modal_item(
             _('Change alias settings'),
             url=admin_reverse(
                 'djangocms_alias_alias_change',
                 args=[self.toolbar.obj.alias_id],
             ),
-            disabled=disabled,
+            disabled=not can_change,
         )
         alias_menu.add_modal_item(
             _('View usage'),

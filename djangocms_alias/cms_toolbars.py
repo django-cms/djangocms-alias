@@ -108,7 +108,7 @@ class AliasToolbar(CMSToolbar):
                 on_close=admin_reverse(
                     LIST_ALIAS_URL_NAME,
                 ),
-                disabled=disabled,
+                disabled=not can_change,
             )
 
     @classmethod

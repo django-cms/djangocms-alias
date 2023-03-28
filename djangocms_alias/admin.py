@@ -1,5 +1,7 @@
 from django.contrib import admin
-from django.http import HttpResponseRedirect
+from django.db import models
+from django.db.models import OuterRef, Subquery, functions
+from django.http import HttpResponseRedirect, HttpRequest
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -40,8 +42,63 @@ djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
     from djangocms_versioning.admin import StateIndicatorMixin
+    from djangocms_versioning.helpers import get_latest_admin_viewable_content
+    from djangocms_versioning.models import Version
+    from djangocms_versioning.versionables import for_content
 
+    class ExtendedGrouperVersioningMixin:
+        def get_queryset(self, request):
+            alias_content_types = for_content(AliasContent).content_types
+            qs = super().get_queryset(request)
+            versions = Version.objects.filter(object_id=OuterRef("pk"), content_type__in=alias_content_types)
+            contents = AliasContent.admin_manager.latest_content(
+                alias=OuterRef("pk"), language=self.language,
+            ).annotate(
+                content_created_by=Subquery(versions.values("created_by")[:1]),
+                content_modified=functions.Lower(Subquery(versions.values("modified")[:1])),
+            )
+            qs = qs.annotate(
+                content_created_by=Subquery(contents.values("content_created_by")[:1]),
+                content_modified=Subquery(contents.values("content_modified")[:1]),
+            )
+            return qs
+
+        def get_version(self, obj):
+            """
+            Return the latest version of a given object
+            :param obj: Versioned Content instance
+            :return: Latest Version linked with content instance
+            """
+            content = get_latest_admin_viewable_content(obj, language=self.language)
+            return content.versions.first() if content else None
+
+        def get_author(self, obj):
+            """
+            Return the author who created a version
+            :param obj: Versioned content model Instance
+            :return: Author
+            """
+            return getattr(self.get_version(obj), "created_by", None)
+
+        # This needs to target the annotation, or ordering will be alphabetically, with uppercase then lowercase
+        get_author.admin_order_field = "content_created_by"
+        get_author.short_description = _("Author")
+
+        def get_modified_date(self, obj):
+            """
+            Get the last modified date of a version
+            :param obj: Versioned content model Instance
+            :return: Modified Date
+            """
+            return getattr(self.get_version(obj), "modified", None)
+
+        get_modified_date.admin_order_field = "content_modified"
+        get_modified_date.short_description = _("Modified")
+
+    alias_admin_classes.insert(0, ExtendedGrouperVersioningMixin)
     alias_admin_classes.insert(0, StateIndicatorMixin)
+    alias_admin_list_display.insert(-1, "get_author")
+    alias_admin_list_display.insert(-1, "get_modified_date")
     alias_admin_list_display.insert(-1, "state_indicator")
 
 
@@ -78,14 +135,6 @@ class AliasAdmin(*alias_admin_classes):
     def get_actions_list(self):
         """Add alias usage list actions"""
         return super().get_actions_list() + [self._get_alias_usage_link,]
-
-    @admin.display(
-        description=AliasContent._meta.get_field("name").verbose_name
-    )
-    def get_name(self, obj):
-        content = self.get_content_obj(obj)
-        return content.name if content else mark_safe(_("<i>Missing language</i>"))
-    # get_name.admin_order_field = "lc_content_name"
 
     def can_change_content(self, request, content_obj):
         """Returns True if user can change content_obj"""

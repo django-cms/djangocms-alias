@@ -4,10 +4,6 @@
 #
 #    requirements/compile.py
 #
---trusted-host pypi.python.org
---trusted-host pypi.org
---trusted-host files.pythonhosted.org
-
 asgiref==3.6.0
     # via django
 beautifulsoup4==4.11.1
@@ -18,7 +14,7 @@ coverage==7.0.5
     # via -r requirements.in
 dj-database-url==1.2.0
     # via django-app-helper
-django==3.2.16
+django==3.2.18
     # via
     #   dj-database-url
     #   django-classy-tags
@@ -35,7 +31,7 @@ django-classy-tags==4.0.0
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-django-cms @ https://github.com/django-cms/django-cms/tarball/develop-4
+django-cms @ https://github.com/fsbraun/django-cms/tarball/feat/grouping_tools
     # via
     #   -r requirements.in
     #   djangocms-versioning

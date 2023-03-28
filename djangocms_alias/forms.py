@@ -339,7 +339,6 @@ class AliasGrouperAdminForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        print(f"{cleaned_data=}")
         if AliasContent.admin_manager.filter(
             name=cleaned_data.get('name'),
             language=cleaned_data.get('language'),

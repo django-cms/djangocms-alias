@@ -2,8 +2,6 @@ from unittest import skipUnless
 
 from django.contrib.auth.models import Permission
 from django.urls import reverse
-from django.utils.formats import localize
-from django.utils.timezone import localtime
 
 from cms.api import add_plugin
 from cms.utils.i18n import force_language

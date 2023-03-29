@@ -2,14 +2,14 @@ from unittest import skipUnless
 
 from django.contrib.auth.models import Permission
 from django.urls import reverse
+from django.utils.formats import localize
+from django.utils.timezone import localtime
 
 from cms.api import add_plugin
 from cms.utils.i18n import force_language
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from bs4 import BeautifulSoup
-from django.utils.formats import localize
-from django.utils.timezone import localtime
 
 from djangocms_alias.constants import (
     CHANGE_ALIAS_URL_NAME,

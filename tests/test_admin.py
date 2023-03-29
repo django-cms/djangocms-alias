@@ -8,6 +8,8 @@ from cms.utils.i18n import force_language
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from bs4 import BeautifulSoup
+from django.utils.formats import localize
+from django.utils.timezone import localtime
 
 from djangocms_alias.constants import (
     CHANGE_ALIAS_URL_NAME,
@@ -118,10 +120,9 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             language="en",
         )
 
-        from djangocms_versioning.helpers import proxy_model
         from djangocms_versioning.models import Version
 
-        alias_version = Version.objects.create(content=expected_en_content, created_by=self.superuser)
+        Version.objects.create(content=expected_en_content, created_by=self.superuser)
 
         with self.login_user_context(self.superuser):
 
@@ -136,14 +137,14 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             'Category',
             response_content_decoded,
         )
-        # self.assertInHTML(
-        #     'Author',
-        #     response_content_decoded,
-        # )
-        # self.assertInHTML(
-        #     'Modified',
-        #     response_content_decoded,
-        # )
+        self.assertInHTML(
+            'Author',
+            response_content_decoded,
+        )
+        self.assertInHTML(
+            'Modified',
+            response_content_decoded,
+        )
         self.assertInHTML(
             'State',
             response_content_decoded,
@@ -165,53 +166,35 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
 
         latest_alias_content_version = expected_en_content.versions.all()[0]
 
-        # self.assertInHTML(
-        #     f'<td class="field-get_author">{latest_alias_content_version.created_by.username}</td>',  # noqa: E501
-        #     response_content_decoded,
-        # )
-        # self.assertIn(
-        #     latest_alias_content_version.get_state_display(),
-        #     response_content_decoded,
-        # )
-        #
-        # self.assertIn(
-        #     localize(localtime(latest_alias_content_version.modified)),
-        #     response_content_decoded,
-        # )
+        self.assertInHTML(
+            f'<td class="field-get_author">{latest_alias_content_version.created_by.username}</td>',  # noqa: E501
+            response_content_decoded,
+        )
+        self.assertIn(
+            latest_alias_content_version.get_state_display(),
+            response_content_decoded,
+        )
+        self.assertIn(
+            localize(localtime(latest_alias_content_version.modified)),
+            response_content_decoded,
+        )
 
         usage_url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[expected_en_content.alias.pk])
-        change_category_and_site_url = admin_reverse(
+        settings_url = admin_reverse(
             '{}_{}_change'.format(
                 expected_en_content._meta.app_label,
                 expected_en_content.alias._meta.model_name
             ), args=(expected_en_content.alias.pk,)
         )
-        rename_alias_url = admin_reverse(
-            '{}_{}_change'.format(
-                expected_en_content._meta.app_label,
-                expected_en_content._meta.model_name
-            ), args=(expected_en_content.pk,)
-        )
-        # version = proxy_model(alias_version, expected_en_content)
-        # view_alias_url = admin_reverse(
-        #     "{app}_{model}_view".format(
-        #         app=version._meta.app_label, model=version._meta.model_name
-        #     ),
-        #     args=(version.pk,),
-        # )
 
         self.assertIn(
             usage_url,
             response_content_decoded,
         )
         self.assertIn(
-            change_category_and_site_url,
+            settings_url,
             response_content_decoded,
         )
-        # self.assertIn(
-        #     view_alias_url,
-        #     response_content_decoded
-        # )
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_alias_content_manager_rendering_preview_add_url(self):
@@ -229,17 +212,9 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             language="en",
         )
 
-        from djangocms_versioning.helpers import proxy_model
         from djangocms_versioning.models import Version
 
-        alias_version = Version.objects.create(content=expected_en_content, created_by=self.superuser)
-        version = proxy_model(alias_version, expected_en_content)
-        # view_alias_url = admin_reverse(
-        #     "{app}_{model}_view".format(
-        #         app=version._meta.app_label, model=version._meta.model_name
-        #     ),
-        #     args=(version.pk,),
-        # )
+        Version.objects.create(content=expected_en_content, created_by=self.superuser)
 
         with self.login_user_context(self.superuser):
             base_url = self.get_admin_url(Alias, "changelist")
@@ -251,10 +226,6 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             expected_en_content.get_absolute_url(),
             response_content_decoded,
         )
-        # self.assertIn(
-        #     view_alias_url,
-        #     response_content_decoded,
-        # )
         self.assertNotIn(
             '<option value="delete_selected">Delete selected alias contents</option>',  # noqa: E501
             response_content_decoded

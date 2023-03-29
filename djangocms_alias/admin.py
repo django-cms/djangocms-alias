@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.db import models
-from django.db.models import OuterRef, Subquery, functions
-from django.http import HttpResponseRedirect, HttpRequest
+from django.db.models import OuterRef, Subquery
+from django.db.models.functions import Cast, Lower, Trunc
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -54,12 +55,12 @@ if djangocms_versioning_enabled:
             contents = AliasContent.admin_manager.latest_content(
                 alias=OuterRef("pk"), language=self.language,
             ).annotate(
-                content_created_by=Subquery(versions.values("created_by")[:1]),
-                content_modified=functions.Lower(Subquery(versions.values("modified")[:1])),
+                content_created_by=Cast(Subquery(versions.values("created_by")[:1]), models.DateTimeField()),
+                content_modified=Subquery(versions.values("modified")[:1]),
             )
             qs = qs.annotate(
-                content_created_by=Subquery(contents.values("content_created_by")[:1]),
-                content_modified=Subquery(contents.values("content_modified")[:1]),
+                content_created_by=Trunc(Subquery(contents.values("content_created_by")[:1]), "second"),
+                content_modified=Lower(Subquery(contents.values("content_modified")[:1])),
             )
             return qs
 
@@ -122,7 +123,7 @@ class CategoryAdmin(TranslatableAdmin):
 class AliasAdmin(*alias_admin_classes):
     list_display = alias_admin_list_display
     list_display_links = None
-    list_filter = (SiteFilter, CategoryFilter, )
+    list_filter = (SiteFilter, CategoryFilter,)
     fields = ('content__name', 'category', 'site', 'content__language')
     readonly_fields = ('static_code', )
     form = AliasGrouperAdminForm

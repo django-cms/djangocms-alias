@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 from django.db.models import OuterRef, Subquery
 from django.db.models.functions import Cast, Lower
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -225,7 +225,9 @@ class AliasContentAdmin(admin.ModelAdmin):
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """Needed for the Alias Content Admin breadcrumbs"""
-        obj = get_object_or_404(self.model, pk=object_id)
+        obj = self.model.admin_manager.filter(pk=object_id).first()
+        if not obj:
+            raise Http404()
         return HttpResponseRedirect(admin_reverse(
             CHANGE_ALIAS_URL_NAME, args=(obj.alias_id,)
         ) + f"?language={obj.language}")

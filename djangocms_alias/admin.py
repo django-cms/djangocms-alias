@@ -1,9 +1,14 @@
+from django import forms
 from django.contrib import admin
 from django.db import models
 from django.db.models import OuterRef, Subquery
 from django.db.models.functions import Cast, Lower
-from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import get_object_or_404
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+)
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
@@ -48,6 +53,7 @@ if djangocms_versioning_enabled:
     from djangocms_versioning.versionables import for_content
 
     class ExtendedGrouperVersioningMixin:
+        """This needs to move to djangocms-versioning."""
         def get_queryset(self, request):
             alias_content_types = for_content(AliasContent).content_types
             qs = super().get_queryset(request)
@@ -130,14 +136,14 @@ class AliasAdmin(*alias_admin_classes):
     extra_grouping_fields = ("language",)
     EMPTY_CONTENT_VALUE = mark_safe(_("<i>Missing language</i>"))
 
-    def get_urls(self):
+    def get_urls(self) -> list:
         return urlpatterns + super().get_urls()
 
-    def get_actions_list(self):
+    def get_actions_list(self) -> list:
         """Add alias usage list actions"""
-        return super().get_actions_list() + [self._get_alias_usage_link,]
+        return super().get_actions_list() + [self._get_alias_usage_link]
 
-    def can_change_content(self, request, content_obj):
+    def can_change_content(self, request: HttpRequest, content_obj: AliasContent) -> bool:
         """Returns True if user can change content_obj"""
         if content_obj and is_versioning_enabled():
             from djangocms_versioning.models import Version
@@ -146,7 +152,7 @@ class AliasAdmin(*alias_admin_classes):
             return version.check_modify.as_bool(request.user)
         return True
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: Alias = None) -> bool:
         # Alias can be deleted by users who can add aliases,
         # if that alias is not referenced anywhere.
         if obj:
@@ -157,7 +163,7 @@ class AliasAdmin(*alias_admin_classes):
             return request.user.is_superuser
         return False
 
-    def save_model(self, request, obj, form, change):
+    def save_model(self, request: HttpRequest, obj: Alias, form: forms.Form, change: bool) -> None:
         super().save_model(request, obj, form, change)
 
         # Only emit content changes if Versioning is not installed because
@@ -168,14 +174,14 @@ class AliasAdmin(*alias_admin_classes):
                 sender=self.model,
             )
 
-    def get_deleted_objects(self, objs, request):
+    def get_deleted_objects(self, objs, request: HttpRequest) -> tuple:
         deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         # This is bad and I should feel bad.
         if 'placeholder' in perms_needed:
             perms_needed.remove('placeholder')
         return deleted_objects, model_count, perms_needed, protected
 
-    def delete_model(self, request, obj):
+    def delete_model(self, request: HttpRequest, obj: Alias):
         super().delete_model(request, obj)
 
         # Only emit content changes if Versioning is not installed because
@@ -186,11 +192,11 @@ class AliasAdmin(*alias_admin_classes):
                 sender=self.model,
             )
 
-    def _get_alias_usage_link(self, obj, request, disabled=False):
+    def _get_alias_usage_link(self, obj: Alias, request: HttpRequest, disabled: bool = False) -> str:
         url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.pk])
         return self.admin_action_button(url, "info", _("View usage"), disabled=disabled)
 
-    def _get_alias_delete_link(self, obj, request):
+    def _get_alias_delete_link(self, obj: Alias, request: HttpRequest) -> str:
         url = admin_reverse(DELETE_ALIAS_URL_NAME, args=[obj.pk])
         return self.admin_action_button(url, "bin", _("Delete Alias"),
                                         disabled=not self.has_delete_permission(request, obj))
@@ -209,21 +215,13 @@ class AliasContentAdmin(admin.ModelAdmin):
             )
         }
 
-    # Add Alias category in the admin manager list and order field
-    @admin.display(
-        description=_('category'),
-        ordering="alias_category_translations_ordered",
-    )
-    def get_category(self, obj):
-        return obj.alias.category
-
-    def changelist_view(self, request, extra_context=None):
+    def changelist_view(self, request: HttpRequest, extra_context: dict = None) -> HttpResponse:
         """Needed for the Alias Content Admin breadcrumbs"""
         return HttpResponseRedirect(admin_reverse(
             LIST_ALIAS_URL_NAME,
         ))
 
-    def change_view(self, request, object_id, form_url='', extra_context=None):
+    def change_view(self, request: HttpRequest, object_id: int, form_url: str = '', extra_context: dict = None) -> HttpResponse:
         """Needed for the Alias Content Admin breadcrumbs"""
         obj = self.model.admin_manager.filter(pk=object_id).first()
         if not obj:
@@ -232,6 +230,6 @@ class AliasContentAdmin(admin.ModelAdmin):
             CHANGE_ALIAS_URL_NAME, args=(obj.alias_id,)
         ) + f"?language={obj.language}")
 
-    def has_module_permission(self, request):
+    def has_module_permission(self, request: HttpRequest) -> bool:
         """Hides admin class in admin site overview"""
         return False

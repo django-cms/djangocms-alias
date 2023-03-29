@@ -8,6 +8,7 @@ Unreleased
 * Django 2.2 support removed
 * Python 3.7 support removed
 * Changed test setup to run tox from github actions for consistency in testing
+* Use django CMS 4.1 GrouperModelAdmin utility (breaking change wrt. django CMS 4.0)
 
 1.11.0 (2022-10-14)
 ===================

@@ -58,7 +58,7 @@ if djangocms_versioning_enabled:
             alias_content_types = for_content(AliasContent).content_types
             qs = super().get_queryset(request)
             versions = Version.objects.filter(object_id=OuterRef("pk"), content_type__in=alias_content_types)
-            contents = AliasContent.admin_manager.latest_content(
+            contents = AliasContent.admin_manager.current_content(
                 alias=OuterRef("pk"), language=self.language,
             ).annotate(
                 content_created_by=Subquery(versions.values("created_by")[:1]),

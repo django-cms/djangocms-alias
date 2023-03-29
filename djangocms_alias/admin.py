@@ -13,8 +13,8 @@ from django.utils.translation import gettext_lazy as _
 from cms.admin.utils import GrouperModelAdmin
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse, static_with_version
-from djangocms_versioning.conf import USERNAME_FIELD
 
+from djangocms_versioning.conf import USERNAME_FIELD
 from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
@@ -49,9 +49,9 @@ if djangocms_versioning_enabled:
     from django.db.models import OuterRef, Subquery
     from django.db.models.functions import Cast
 
+    from djangocms_versioning import versionables
     from djangocms_versioning.admin import StateIndicatorMixin
     from djangocms_versioning.models import Version
-    from djangocms_versioning import versionables
 
     class ExtendedGrouperVersioningMixin:
         """This needs to move to djangocms-versioning."""

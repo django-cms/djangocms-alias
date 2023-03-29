@@ -1,8 +1,6 @@
 from django import forms
 from django.contrib import admin
 from django.db import models
-from django.db.models import OuterRef, Subquery
-from django.db.models.functions import Cast, Lower
 from django.http import (
     Http404,
     HttpRequest,
@@ -15,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from cms.admin.utils import GrouperModelAdmin
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse, static_with_version
+from djangocms_versioning.conf import USERNAME_FIELD
 
 from parler.admin import TranslatableAdmin
 
@@ -47,45 +46,39 @@ alias_admin_list_display = ['content__name', 'category', 'admin_list_actions']
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
+    from django.db.models import OuterRef, Subquery
+    from django.db.models.functions import Cast
+
     from djangocms_versioning.admin import StateIndicatorMixin
-    from djangocms_versioning.helpers import get_latest_admin_viewable_content
     from djangocms_versioning.models import Version
-    from djangocms_versioning.versionables import for_content
+    from djangocms_versioning import versionables
 
     class ExtendedGrouperVersioningMixin:
         """This needs to move to djangocms-versioning."""
-        def get_queryset(self, request):
-            alias_content_types = for_content(AliasContent).content_types
+        def get_queryset(self, request: HttpRequest) -> models.QuerySet:
+            alias_content_types = versionables.for_grouper(self.model).content_types
             qs = super().get_queryset(request)
             versions = Version.objects.filter(object_id=OuterRef("pk"), content_type__in=alias_content_types)
-            contents = AliasContent.admin_manager.current_content(
-                alias=OuterRef("pk"), language=self.language,
+            contents = self.content_model.admin_manager.latest_content(
+                **{self.grouper_field_name: OuterRef("pk"), **self.current_content_filters}
             ).annotate(
-                content_created_by=Subquery(versions.values("created_by")[:1]),
+                content_created_by=Subquery(versions.values(f"created_by__{USERNAME_FIELD}")[:1]),
                 content_modified=Subquery(versions.values("modified")[:1]),
             )
             qs = qs.annotate(
-                content_created_by=Lower(Subquery(contents.values("content_created_by")[:1])),
+                content_created_by=Subquery(contents.values("content_created_by")[:1]),
+                # cast is necessary for mysql
                 content_modified=Cast(Subquery(contents.values("content_modified")[:1]), models.DateTimeField()),
             )
             return qs
 
-        def get_version(self, obj):
-            """
-            Return the latest version of a given object
-            :param obj: Versioned Content instance
-            :return: Latest Version linked with content instance
-            """
-            content = get_latest_admin_viewable_content(obj, language=self.language)
-            return content.versions.first() if content else None
-
-        def get_author(self, obj):
+        def get_author(self, obj) -> str:
             """
             Return the author who created a version
             :param obj: Versioned content model Instance
             :return: Author
             """
-            return getattr(self.get_version(obj), "created_by", None)
+            return getattr(obj, "content_created_by", None)
 
         # This needs to target the annotation, or ordering will be alphabetically, with uppercase then lowercase
         get_author.admin_order_field = "content_created_by"
@@ -97,7 +90,7 @@ if djangocms_versioning_enabled:
             :param obj: Versioned content model Instance
             :return: Modified Date
             """
-            return getattr(self.get_version(obj), "modified", None)
+            return getattr(obj, "content_modified", None)
 
         get_modified_date.admin_order_field = "content_modified"
         get_modified_date.short_description = _("Modified")

@@ -1,3 +1,5 @@
+import typing
+
 from django import forms
 from django.contrib import admin
 from django.db import models
@@ -51,6 +53,7 @@ if djangocms_versioning_enabled:
 
     from djangocms_versioning import versionables
     from djangocms_versioning.admin import StateIndicatorMixin
+    from djangocms_versioning.constants import VERSION_STATES
     from djangocms_versioning.models import Version
 
     class ExtendedGrouperVersioningMixin:
@@ -63,14 +66,22 @@ if djangocms_versioning_enabled:
                 **{self.grouper_field_name: OuterRef("pk"), **self.current_content_filters}
             ).annotate(
                 content_created_by=Subquery(versions.values(f"created_by__{USERNAME_FIELD}")[:1]),
+                content_state=Subquery(versions.values("state")),
                 content_modified=Subquery(versions.values("modified")[:1]),
             )
             qs = qs.annotate(
                 content_created_by=Subquery(contents.values("content_created_by")[:1]),
+                content_state=Subquery(contents.values("content_state")),
                 # cast is necessary for mysql
                 content_modified=Cast(Subquery(contents.values("content_modified")[:1]), models.DateTimeField()),
             )
             return qs
+
+        def get_versioning_state(self, obj: models.Model) -> typing.Union[str, None]:
+            return dict(VERSION_STATES).get(obj.content_state)
+
+        get_versioning_state.admin_order_field = "content_state"
+        get_versioning_state.short_description = _("State")
 
         def get_author(self, obj) -> str:
             """
@@ -100,6 +111,7 @@ if djangocms_versioning_enabled:
     alias_admin_list_display.insert(-1, "get_author")
     alias_admin_list_display.insert(-1, "get_modified_date")
     alias_admin_list_display.insert(-1, "state_indicator")
+    alias_admin_list_display.insert(-1, "get_versioning_state")
 
 
 @admin.register(Category)

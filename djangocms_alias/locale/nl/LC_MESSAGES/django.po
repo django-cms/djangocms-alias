@@ -1,0 +1,356 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# Stefan van den Eertwegh <stefan@corebyte.nl>, 2023
+# Fabian Braun <fsbraun@gmx.de>, 2023
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-01-10 22:20+0100\n"
+"PO-Revision-Date: 2023-01-10 21:21+0000\n"
+"Last-Translator: Fabian Braun <fsbraun@gmx.de>, 2023\n"
+"Language-Team: Dutch (https://www.transifex.com/divio/teams/58664/nl/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: nl\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: admin.py:128 models.py:60 models.py:85
+msgid "category"
+msgstr "categorie"
+
+#: apps.py:7
+msgid "django CMS Alias"
+msgstr "django CMS Alias"
+
+#: cms_plugins.py:29 cms_toolbars.py:46 forms.py:291 views.py:46 views.py:304
+msgid "Alias"
+msgstr "Alias"
+
+#: cms_plugins.py:52
+msgid "Edit Alias"
+msgstr "Bewerk Alias"
+
+#: cms_plugins.py:66
+msgid "Detach Alias"
+msgstr "Ontkoppel Alias"
+
+#: cms_plugins.py:81 cms_plugins.py:98
+msgid "Create Alias"
+msgstr "Alias maken"
+
+#: cms_toolbars.py:47 cms_toolbars.py:69 templates/djangocms_alias/base.html:4
+msgid "Aliases"
+msgstr "Aliases"
+
+#: cms_toolbars.py:86
+#: templates/admin/djangocms_alias/icons/change_alias_settings.html:3
+msgid "Change alias settings"
+msgstr "Wijzig alias instellingen"
+
+#: cms_toolbars.py:94
+#: templates/admin/djangocms_alias/icons/rename_alias.html:3
+msgid "Rename alias"
+msgstr "Hernoem alias"
+
+#: cms_toolbars.py:102 templates/admin/djangocms_alias/icons/view_usage.html:3
+#: templates/djangocms_alias/alias_usage.html:46
+msgid "View usage"
+msgstr "Bekijk gebruik"
+
+#: cms_toolbars.py:112
+msgid "Delete alias"
+msgstr "Verwijder alias"
+
+#: cms_toolbars.py:164 templates/djangocms_alias/create_alias.html:31
+msgid "Create"
+msgstr "Aanmaken"
+
+#: cms_toolbars.py:178 filters.py:22 internal_search.py:31
+msgid "Language"
+msgstr "Taal"
+
+#: cms_toolbars.py:231
+msgid "Add Translation"
+msgstr "Vertaling toevoegen"
+
+#: cms_toolbars.py:242
+msgid "Delete Translation"
+msgstr "Verwijder Vertaling"
+
+#: cms_toolbars.py:260
+msgid "Copy all plugins"
+msgstr "Kopieer alle plugins"
+
+#: cms_toolbars.py:262
+#, python-format
+msgid "from %s"
+msgstr "van %s"
+
+#: cms_toolbars.py:263
+#, python-format
+msgid "Are you sure you want to copy all plugins from %s?"
+msgstr "Ben je zeker om alle plugins te kopieren van %s?"
+
+#: cms_wizards.py:27
+msgid "New alias"
+msgstr "Nieuwe alias"
+
+#: cms_wizards.py:31
+msgid "Create a new alias."
+msgstr "Maak een nieuwe alias."
+
+#: cms_wizards.py:34
+msgid "New alias category"
+msgstr "Nieuwe alias categorie"
+
+#: cms_wizards.py:38
+msgid "Create a new alias category."
+msgstr "Maak een nieuwe alias categorie"
+
+#: filters.py:38
+msgid "Current"
+msgstr "Huidig"
+
+#: filters.py:51 forms.py:269
+msgid "Site"
+msgstr "Site"
+
+#: filters.py:69 filters.py:108
+msgid "All"
+msgstr "Alles"
+
+#: filters.py:76
+msgid "No site"
+msgstr "Geen site"
+
+#: filters.py:89 forms.py:280 internal_search.py:24
+msgid "Category"
+msgstr "Categorie"
+
+#: filters.py:126
+msgid "Unpublished"
+msgstr "Ongepubliseerd"
+
+#: filters.py:130
+msgid "Show"
+msgstr "Bekijk"
+
+#: filters.py:142
+msgid "Hide"
+msgstr "Verberg"
+
+#: forms.py:74
+msgid "A plugin or placeholder is required to create an alias."
+msgstr "Een plugin of placeholder is verplicht om een alias te maken."
+
+#: forms.py:80
+msgid "An alias can only be created from a plugin or placeholder, not both."
+msgstr ""
+"Een alias kan alleen worden aangemaakt. van een plugin of placeholder, niet "
+"beide."
+
+#: forms.py:99
+msgid "Replace current plugin"
+msgstr "Verplaats huidige plugin"
+
+#: forms.py:100
+msgid "Replace current plugin with alias"
+msgstr "Verplaats huidige plugin met alias"
+
+#: forms.py:124 forms.py:354
+msgid "Alias with this Name and Category already exists."
+msgstr "Alias met deze Naam en Categorie bestaat al reeks."
+
+#: forms.py:175 templates/djangocms_alias/alias_usage.html:32
+msgid "Name"
+msgstr "Naam"
+
+#: forms.py:273
+msgid "Select site to restrict the list of aliases below"
+msgstr "Selecteer een site om deze lijst met aliassen te beperken"
+
+#: forms.py:284
+msgid "Select category to restrict the list of aliases below"
+msgstr "Selecteer categorie om deze lijst met aliassen te beperken"
+
+#: forms.py:295
+msgid "Select an alias"
+msgstr "Selecteer een alias"
+
+#: internal_search.py:17
+msgid "Title"
+msgstr "Titel"
+
+#: internal_search.py:38
+msgid "URL"
+msgstr "URL"
+
+#: internal_search.py:45
+msgid "Version status"
+msgstr "Versie status"
+
+#: models.py:40
+msgid "Default"
+msgstr "Standaard"
+
+#: models.py:53 models.py:269
+msgid "name"
+msgstr "naam"
+
+#: models.py:61
+msgid "categories"
+msgstr "categories"
+
+#: models.py:76
+msgid "by template"
+msgstr "door template"
+
+#: models.py:77
+msgid "by code"
+msgstr "door code"
+
+#: models.py:80
+msgid "creation_method"
+msgstr "creation_method"
+
+#: models.py:90
+msgid "position"
+msgstr "positie"
+
+#: models.py:94
+msgid "static code"
+msgstr "statische code"
+
+#: models.py:98
+msgid "To render the alias in templates."
+msgstr "Om de alias in templates te renderen."
+
+#: models.py:103 models.py:390
+msgid "alias"
+msgstr "alias"
+
+#: models.py:104
+msgid "aliases"
+msgstr "aliases"
+
+#: models.py:281
+msgid "alias content"
+msgstr "alias content"
+
+#: models.py:282
+msgid "alias contents"
+msgstr "alias content"
+
+#: models.py:395
+msgid "template"
+msgstr "template"
+
+#: models.py:402
+msgid "alias plugin model"
+msgstr "alias plugin model"
+
+#: models.py:403
+msgid "alias plugin models"
+msgstr "alias plugin modellen"
+
+#: templates/admin/djangocms_alias/alias/change_form.html:8
+msgid "Save"
+msgstr "Opslaan"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:9
+#, python-format
+msgid ""
+"You don't have permissions to delete %(object_name)s \"%(escaped_object)s\"."
+" Please request your site admin to add permissions to delete alias, or "
+"delete alias from all places that it being used."
+msgstr ""
+"Je hebt geen rechten om %(object_name)s\"%(escaped_object)s\" te "
+"verwijderen. Contacteer je website admin om je meer rechten toe te kennen."
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:11
+#, python-format
+msgid ""
+"Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"?"
+msgstr ""
+"Ben je er zeker van om %(object_name)s \"%(escaped_object)s\" te "
+"verwijderen?"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:18
+msgid "This alias is used by following objects:"
+msgstr "Deze alias wordt gebruikt door de volgende objecten:"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:28
+msgid "This alias wasn't used by any object."
+msgstr "Deze alias wordt niet gebruikt door een object;"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:35
+#: templates/djangocms_alias/detach_alias.html:16
+msgid "Yes, I'm sure"
+msgstr "Ja, ik ben zeker"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:37
+#: templates/djangocms_alias/detach_alias.html:17
+msgid "No, take me back"
+msgstr "Nee, breng me terug"
+
+#: templates/djangocms_alias/add_alias.html:5
+msgid "Add alias"
+msgstr "Alias aanmaken"
+
+#: templates/djangocms_alias/add_alias.html:14
+#, python-format
+msgid ""
+"Are you sure you want to add alias <a "
+"href=\"%(alias.get_absolute_url)s\">%(alias_name)s</a>?"
+msgstr ""
+"Ben je zeker van om alias <a "
+"href=\"%(alias.get_absolute_url)s\">%(alias_name)s</a> toe te voegen?"
+
+#: templates/djangocms_alias/add_alias.html:28
+msgid "Add"
+msgstr "Aanmaken"
+
+#: templates/djangocms_alias/alias_usage.html:16
+msgid "Home"
+msgstr "Home"
+
+#: templates/djangocms_alias/alias_usage.html:20
+msgid "Usage of alias"
+msgstr "Alias verbruik"
+
+#: templates/djangocms_alias/alias_usage.html:26
+msgid "Back"
+msgstr "Terug"
+
+#: templates/djangocms_alias/alias_usage.html:31
+msgid "Type"
+msgstr "Type"
+
+#: templates/djangocms_alias/create_alias.html:5
+msgid "Create alias"
+msgstr "Alias aanmaken"
+
+#: templates/djangocms_alias/create_alias.html:8
+msgid "Please correct the error below."
+msgid_plural "Please correct the errors below."
+msgstr[0] "Corrigeer de onderstaande error."
+msgstr[1] "Corrigeer de onderstaande errors."
+
+#: templates/djangocms_alias/detach_alias.html:8
+#, python-format
+msgid ""
+"Are you sure you want to detach the %(object_name)s \"%(escaped_object)s\"?"
+msgstr ""
+"Ben je er zeker van om %(object_name)s \"%(escaped_object)s\" te detacheren?"
+
+#: views.py:297
+msgid "Objects using alias: {}"
+msgstr "Objecten in gebruik deze alias: {}"

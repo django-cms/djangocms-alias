@@ -115,7 +115,6 @@ if djangocms_versioning_enabled:
     alias_admin_list_display.insert(-1, "get_author")
     alias_admin_list_display.insert(-1, "get_modified_date")
     alias_admin_list_display.insert(-1, "state_indicator")
-    alias_admin_list_display.insert(-1, "get_versioning_state")
 
 
 @admin.register(Category)

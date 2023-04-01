@@ -133,11 +133,11 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertIn('Add Translation', language_menu_dict.keys())
         self.assertIn('Delete Translation', language_menu_dict.keys())
         self.assertEqual(
-            set(['Deutsche...', 'Française...', 'Italiano...']),
+            {'Deutsche...', 'Française...', 'Italiano...'},
             set(language_menu_dict['Add Translation']),
         )
         self.assertEqual(
-            set(['English...']),
+            {'English...'},
             set(language_menu_dict['Delete Translation']),
         )
 
@@ -165,15 +165,15 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             for key, menu in language_menu.menus.items()
         }
         self.assertEqual(
-            set(['Deutsche...', 'Italiano...']),
+            {'Deutsche...', 'Italiano...'},
             set(language_menu_dict['Add Translation']),
         )
         self.assertEqual(
-            set(['Française...', 'English...']),
+            {'Française...', 'English...'},
             set(language_menu_dict['Delete Translation']),
         )
         self.assertEqual(
-            set(['from Française']),
+            {'from Française'},
             set(language_menu_dict['Copy all plugins']),
         )
         language_menu_first_items = {
@@ -193,7 +193,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             language_menu_first_items['Add Translation'].url,
         )
         self.assertIn(
-            'alias={}'.format(alias.pk),
+            f'alias={alias.pk}',
             language_menu_first_items['Add Translation'].url,
         )
         self.assertEqual(

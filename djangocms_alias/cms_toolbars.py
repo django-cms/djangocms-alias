@@ -218,7 +218,7 @@ class AliasToolbar(CMSToolbar):
 
             if add:
                 add_plugins_menu = language_menu.get_or_create_menu(
-                    '{0}-add'.format(LANGUAGE_MENU_IDENTIFIER),
+                    f'{LANGUAGE_MENU_IDENTIFIER}-add',
                     _('Add Translation'),
                 )
                 add_url = admin_reverse('djangocms_alias_aliascontent_add')
@@ -229,7 +229,7 @@ class AliasToolbar(CMSToolbar):
 
             if remove:
                 remove_plugins_menu = language_menu.get_or_create_menu(
-                    '{0}-del'.format(LANGUAGE_MENU_IDENTIFIER),
+                    f'{LANGUAGE_MENU_IDENTIFIER}-del',
                     _('Delete Translation'),
                 )
                 disabled = len(remove) == 1
@@ -247,7 +247,7 @@ class AliasToolbar(CMSToolbar):
 
             if copy:
                 copy_plugins_menu = language_menu.get_or_create_menu(
-                    '{0}-copy'.format(LANGUAGE_MENU_IDENTIFIER),
+                    f'{LANGUAGE_MENU_IDENTIFIER}-copy',
                     _('Copy all plugins')
                 )
                 title = _('from %s')

@@ -213,13 +213,6 @@ class AliasContentAdmin(admin.ModelAdmin):
     actions = None
     change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"
 
-    class Media:
-        css = {
-            "all": (
-                static_with_version("cms/css/cms.icons.css"),
-            )
-        }
-
     def changelist_view(self, request: HttpRequest, extra_context: dict = None) -> HttpResponse:
         """Needed for the Alias Content Admin breadcrumbs"""
         return HttpResponseRedirect(admin_reverse(
@@ -237,4 +230,5 @@ class AliasContentAdmin(admin.ModelAdmin):
 
     def has_module_permission(self, request: HttpRequest) -> bool:
         """Hides admin class in admin site overview"""
+
         return False

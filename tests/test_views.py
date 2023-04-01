@@ -746,7 +746,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
 
         self.assertContains(response, 'type="hidden" name="language" value="fr"')
-        self.assertContains(response, 'type="hidden" name="alias" value="{}"'.format(alias.pk))
+        self.assertContains(response, f'type="hidden" name="alias" value="{alias.pk}"')
 
     @skip(
         "It is not currently possible to add an alias from the django admin changelist issue "
@@ -884,7 +884,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
         self.assertContains(
             response,
-            'Are you sure you want to delete the alias "{}"?'.format(alias.name),  # noqa: E501
+            f'Are you sure you want to delete the alias "{alias.name}"?',  # noqa: E501
         )
 
     def test_delete_alias_view_get_using_objects(self):
@@ -1257,7 +1257,7 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
 
         alias = Alias.objects.last()
         # AliasContent not published
-        self.assertEqual(alias.name, '{} (Not published)'.format(name))
+        self.assertEqual(alias.name, f'{name} (Not published)')
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
     def test_create_alias_view_creating_version(self):

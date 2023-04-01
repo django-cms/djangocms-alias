@@ -36,7 +36,7 @@ class Alias(CMSPluginBase):
             and instance.is_recursive()
         ):
             return 'djangocms_alias/alias_recursive.html'
-        return 'djangocms_alias/{}/alias.html'.format(instance.template)
+        return f'djangocms_alias/{instance.template}/alias.html'
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):

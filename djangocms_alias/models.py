@@ -134,7 +134,7 @@ class Alias(models.Model):
             if obj_class_name.endswith('Content'):
                 attr_name = obj_class_name.replace('Content', '').lower()
                 attr_related_model = obj._meta.get_field(attr_name).related_model
-                id_attr = getattr(obj, '{}_id'.format(attr_name))
+                id_attr = getattr(obj, f'{attr_name}_id')
                 if id_attr:
                     object_ids[attr_related_model].update([id_attr])
                 else:
@@ -150,13 +150,13 @@ class Alias(models.Model):
 
     def get_name(self, language=None):
         content = self.get_content(language, show_draft_content=True)
-        name = getattr(content, 'name', 'Alias {} (No content)'.format(self.pk))
+        name = getattr(content, 'name', f'Alias {self.pk} (No content)')
         if is_versioning_enabled() and content:
             from djangocms_versioning.constants import DRAFT
             version = content.versions.first()
 
             if version.state == DRAFT:
-                return '{} (Not published)'.format(name)
+                return f'{name} (Not published)'
 
         return name
 
@@ -284,7 +284,7 @@ class AliasContent(models.Model):
         verbose_name_plural = _('alias contents')
 
     def __str__(self):
-        return '{} ({})'.format(self.name, self.language)
+        return f'{self.name} ({self.language})'
 
     @cached_property
     def placeholder(self):

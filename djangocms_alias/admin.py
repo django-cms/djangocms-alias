@@ -77,12 +77,18 @@ if djangocms_versioning_enabled:
             )
             return qs
 
+        @admin.display(
+            description=_("State"),
+            ordering="content_state",
+        )
         def get_versioning_state(self, obj: models.Model) -> typing.Union[str, None]:
             return dict(VERSION_STATES).get(obj.content_state)
 
-        get_versioning_state.admin_order_field = "content_state"
-        get_versioning_state.short_description = _("State")
 
+        @admin.display(
+            description=_("Author"),
+            ordering="content_created_by",
+        )
         def get_author(self, obj) -> str:
             """
             Return the author who created a version
@@ -92,9 +98,11 @@ if djangocms_versioning_enabled:
             return getattr(obj, "content_created_by", None)
 
         # This needs to target the annotation, or ordering will be alphabetically, with uppercase then lowercase
-        get_author.admin_order_field = "content_created_by"
-        get_author.short_description = _("Author")
 
+        @admin.display(
+            description=_("Modified"),
+            ordering="content_modified",
+        )
         def get_modified_date(self, obj):
             """
             Get the last modified date of a version
@@ -103,8 +111,6 @@ if djangocms_versioning_enabled:
             """
             return getattr(obj, "content_modified", None)
 
-        get_modified_date.admin_order_field = "content_modified"
-        get_modified_date.short_description = _("Modified")
 
     alias_admin_classes.insert(0, ExtendedGrouperVersioningMixin)
     alias_admin_classes.insert(0, StateIndicatorMixin)

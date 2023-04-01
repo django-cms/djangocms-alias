@@ -11,6 +11,7 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from classytags.arguments import Argument, MultiValueArgument
 from classytags.core import Tag
+from django.utils.translation import get_language
 
 from ..constants import (
     DEFAULT_STATIC_ALIAS_CATEGORY_NAME,
@@ -93,6 +94,10 @@ class StaticAlias(Tag):
                 language = None
         else:
             language = get_language_from_request(request)
+        if language is None:
+            # Might be on non-cms pages
+            language = get_language()
+
         # Try and find an Alias to render
         alias = Alias.objects.filter(**alias_filter_kwargs).first()
         # If there is no alias found we need to create one

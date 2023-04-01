@@ -9,6 +9,8 @@ Unreleased
 * Python 3.7 support removed
 * Changed test setup to run tox from github actions for consistency in testing
 * Use django CMS 4.1 GrouperModelAdmin utility (breaking change wrt. django CMS 4.0)
+* Admin menu entry show alias change list in the language of the currently shown object
+* Automatically create static aliases in the language needed (fixing #162)
 
 1.11.0 (2022-10-14)
 ===================

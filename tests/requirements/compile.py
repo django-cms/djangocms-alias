@@ -135,7 +135,7 @@ if __name__ == "__main__":
             "-P",
             "Django>=4.0,<4.1",
             # "-P",
-            #"django-cms==4.1rc1",
+            # "django-cms==4.1rc1",
             "-o",
             "py39-dj40-cms41-versioning.txt",
         ],

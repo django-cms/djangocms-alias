@@ -5,7 +5,7 @@ from django import template
 from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_toolbar_from_request
 from cms.utils import get_current_site, get_language_from_request
-from cms.utils.i18n import get_default_language_for_site
+from cms.utils.i18n import get_language_list
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
@@ -54,7 +54,6 @@ def render_alias(context, instance, editable=False):
     return ''
 
 
-@register.tag
 class StaticAlias(Tag):
     """
     This template node is used to render Alias contents and is designed to be a
@@ -87,16 +86,22 @@ class StaticAlias(Tag):
         else:
             alias_filter_kwargs['site_id__isnull'] = True
 
+        if hasattr(request, "toolbar"):
+            # Try getting language from the toolbar first (end and view endpoints)
+            language = getattr(request.toolbar.get_object(), "language", None)
+            if language not in get_language_list(current_site):
+                language = None
+        else:
+            language = get_language_from_request(request)
         # Try and find an Alias to render
         alias = Alias.objects.filter(**alias_filter_kwargs).first()
         # If there is no alias found we need to create one
         if not alias:
 
-            # If versioning is enabled we can only create the records with a logged in user / staff member
+            # If versioning is enabled we can only create the records with a logged-in user / staff member
             if is_versioning_enabled() and not request.user.is_authenticated:
                 return None
 
-            language = get_default_language_for_site(current_site)
             # Parlers get_or_create doesn't work well with translations, so we must perform our own get or create
             default_category = Category.objects.filter(translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME).first()
             if not default_category:
@@ -111,6 +116,13 @@ class StaticAlias(Tag):
                 alias_creation_kwargs['site'] = current_site
 
             alias = Alias.objects.create(category=default_category, **alias_creation_kwargs)
+
+        if not AliasContent._default_manager.filter(alias=alias, language=language).exists():
+            # Create a first content object if none exists in the given language.
+            # If versioning is enabled we can only create the records with a logged-in user / staff member
+            if is_versioning_enabled() and not request.user.is_authenticated:
+                return None
+
             alias_content = AliasContent.objects.create(
                 alias=alias,
                 name=static_code,
@@ -121,6 +133,7 @@ class StaticAlias(Tag):
                 from djangocms_versioning.models import Version
 
                 Version.objects.create(content=alias_content, created_by=request.user)
+            alias._content_cache[language] = alias_content
 
         return alias
 
@@ -158,3 +171,6 @@ class StaticAlias(Tag):
             )
             return content
         return ''
+
+
+register.tag(StaticAlias.name, StaticAlias)

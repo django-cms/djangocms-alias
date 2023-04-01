@@ -3,7 +3,7 @@ from unittest import skipUnless
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
 
-from cms.api import add_plugin, create_page
+from cms.api import add_plugin, create_page, create_title
 from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
 
 from djangocms_alias.cms_plugins import Alias
@@ -302,3 +302,41 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
         self.assertContains(edit_response, 'Updated Draft content for: template_example_global_alias_code')
         self.assertContains(preview_response, 'Updated Draft content for: template_example_global_alias_code')
+
+    def test_static_alias_creates_content_for_missing_languages(self):
+        """
+        If a static alias is used by a logged-in user a first (empty) alias content object is created
+        if no content objects for the language exist
+        """
+
+        page = create_page(
+            title="Static Code Test",
+            language='en',
+            template='static_alias.html',
+            limit_visibility_in_menu=None,
+            created_by=self.superuser
+        )
+        create_title(
+            title="Statischer Code-Test",
+            language="de",
+            page=page,
+            template='static_alias.html',
+            created_by=self.superuser
+        )
+        self._publish(page, "en")
+        self._publish(page, "de")
+        if hasattr(page, 'get_title_obj'):
+            def page_edit_url(lang):
+                return get_object_edit_url(page.get_title_obj(lang))
+        else:
+            def page_edit_url(lang):
+                return get_object_edit_url(page.get_content_obj(lang))
+
+        with self.login_user_context(self.superuser):
+            self.client.get(page_edit_url("en"))  # supposed to create the alias and alias content for en
+            self.client.get(page_edit_url("de"))  # supposed to create the alias content for de
+
+        alias = AliasModel.objects.get(static_code="template_example_global_alias_code")
+
+        self.assertIsNotNone(alias.get_content("en", show_draft_content=True))
+        self.assertIsNotNone(alias.get_content("de", show_draft_content=True))

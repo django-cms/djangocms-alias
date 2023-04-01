@@ -60,19 +60,19 @@ class LanguageFiltersTestCase(BaseAliasPluginTestCase):
 
         self.assertEqual(
             set(response_default.context["cl"].queryset),
-            set([expected_en_content])
+            {expected_en_content}
         )
         self.assertEqual(
             set(response_en.context["cl"].queryset),
-            set([expected_en_content])
+            {expected_en_content}
         )
         self.assertEqual(
             set(response_de.context["cl"].queryset),
-            set([expected_de_content])
+            {expected_de_content}
         )
         self.assertEqual(
             set(response_fr.context["cl"].queryset),
-            set([])
+            set()
         )
 
 
@@ -145,31 +145,31 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
         # By default all alias are shown
         self.assertEqual(
             set(response_default.context["cl"].queryset),
-            set([
+            {
                 current_site_alias_content,
                 another_site_alias_content,
                 no_site_alias_content,
-            ])
+            }
         )
         # Only alias attached to the current site are shown when filtered by the current site
         self.assertEqual(
             set(response_current_site.context["cl"].queryset),
-            set([current_site_alias_content])
+            {current_site_alias_content}
         )
         # Only alias attached to the current site are shown when filtered by another site
         self.assertEqual(
             set(response_other_site.context["cl"].queryset),
-            set([another_site_alias_content])
+            {another_site_alias_content}
         )
         # Only alias attached to the current site are shown when filtered by no site
         self.assertEqual(
             set(response_no_site.context["cl"].queryset),
-            set([no_site_alias_content])
+            {no_site_alias_content}
         )
         # No are shown when filtered by an empty site
         self.assertEqual(
             set(response_empty_site.context["cl"].queryset),
-            set([])
+            set()
         )
 
 
@@ -216,9 +216,9 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
             # filter by unpublished show
 
         # show all alias contents  excluding unpublished versions
-        self.assertEqual(set(qs_default), set([expected_en_content]))
+        self.assertEqual(set(qs_default), {expected_en_content})
         # show all aliase contents including unpublished versions
-        self.assertEqual(set(qs_unpublished), set([expected_unpublished]))
+        self.assertEqual(set(qs_unpublished), {expected_unpublished})
 
 
 class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
@@ -261,20 +261,20 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         # By default all alias contents are shown
         self.assertEqual(
             set(response_default.context["cl"].queryset),
-            set([
+            {
                 expected_category_one_content,
                 expected_category_two_content,
-            ])
+            }
         )
         # show alias contents filter by category one
         self.assertEqual(
             set(category_one_filter_response.context["cl"].queryset),
-            set([expected_category_one_content])
+            {expected_category_one_content}
         )
         # show alias contents filter by category two
         self.assertEqual(
             set(category_two_filter_response.context["cl"].queryset),
-            set([expected_category_two_content])
+            {expected_category_two_content}
         )
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant when versioning enabled')
@@ -319,20 +319,20 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         # By default all alias contents are shown
         self.assertEqual(
             set(response_default.context["cl"].queryset),
-            set([
+            {
                 expected_category_one_content,
                 expected_category_two_content,
-            ])
+            }
         )
         # show alias contents filter by category one
         self.assertEqual(
             set(category_one_filter_response.context["cl"].queryset),
-            set([expected_category_one_content])
+            {expected_category_one_content}
         )
         # show alias contents filter by category two
         self.assertEqual(
             set(category_two_filter_response.context["cl"].queryset),
-            set([expected_category_two_content])
+            {expected_category_two_content}
         )
 
     def test_category_filter_lookups_ordered_alphabetical(self):

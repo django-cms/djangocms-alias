@@ -4,7 +4,7 @@ from copy import copy
 from django.urls import NoReverseMatch
 from django.utils.encoding import force_str
 from django.utils.http import urlencode
-from django.utils.translation import gettext, gettext_lazy as _, get_language
+from django.utils.translation import get_language, gettext, gettext_lazy as _
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,

@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 
 from cms.admin.utils import GrouperModelAdmin
 from cms.utils.permissions import get_model_permission_codename
-from cms.utils.urlutils import admin_reverse, static_with_version
+from cms.utils.urlutils import admin_reverse
 
 from djangocms_versioning.conf import USERNAME_FIELD
 from parler.admin import TranslatableAdmin
@@ -84,7 +84,6 @@ if djangocms_versioning_enabled:
         def get_versioning_state(self, obj: models.Model) -> typing.Union[str, None]:
             return dict(VERSION_STATES).get(obj.content_state)
 
-
         @admin.display(
             description=_("Author"),
             ordering="content_created_by",
@@ -110,7 +109,6 @@ if djangocms_versioning_enabled:
             :return: Modified Date
             """
             return getattr(obj, "content_modified", None)
-
 
     alias_admin_classes.insert(0, ExtendedGrouperVersioningMixin)
     alias_admin_classes.insert(0, StateIndicatorMixin)

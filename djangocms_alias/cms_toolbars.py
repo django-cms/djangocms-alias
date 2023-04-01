@@ -4,7 +4,7 @@ from copy import copy
 from django.urls import NoReverseMatch
 from django.utils.encoding import force_str
 from django.utils.http import urlencode
-from django.utils.translation import get_language, gettext, gettext_lazy as _
+from django.utils.translation import get_language_from_request, gettext, gettext_lazy as _
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
@@ -66,7 +66,7 @@ class AliasToolbar(CMSToolbar):
 
         url = admin_reverse(LIST_ALIAS_URL_NAME)
         obj = self.toolbar.get_object()
-        language = obj.language if hasattr(obj, "language") else get_language()
+        language = obj.language if hasattr(obj, "language") else get_language_from_request(self.request)
         url += f'?{urlencode({"language": language})}'
 
         admin_menu.add_sideframe_item(

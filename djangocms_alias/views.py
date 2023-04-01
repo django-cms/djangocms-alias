@@ -76,7 +76,7 @@ def delete_alias_view(request, pk, *args, **kwargs):
         model=AliasModel,
         admin_site=admin.site,
     )
-    response = alias_admin.delete_view(request, pk)
+    response = alias_admin.delete_view(request, str(pk))
     if request.POST and response.status_code in [200, 302]:
         return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
     return response
@@ -294,7 +294,7 @@ def alias_usage_view(request, pk):
 
     alias = get_object_or_404(AliasModel.objects.all(), pk=pk)
     opts = Alias.model._meta
-    title = _('Objects using alias: {}'.format(alias))
+    title = _(f'Objects using alias: {alias}')
     context = {
         'has_change_permission': True,
         'opts': opts,

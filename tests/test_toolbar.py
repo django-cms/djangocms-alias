@@ -419,7 +419,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         site_aliases_url = admin_menu.items[3].url
         admin_changelist_aliases_url = reverse("admin:{}_alias_changelist".format(
             AliasContent._meta.app_label)
-        )
+        ) + "?language=en"
 
         with self.login_user_context(self.superuser):
             response = self.client.get(

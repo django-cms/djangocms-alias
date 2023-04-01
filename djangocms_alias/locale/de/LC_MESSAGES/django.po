@@ -23,15 +23,15 @@ msgstr ""
 
 #: admin.py:85
 msgid "Author"
-msgstr ""
+msgstr "Autor"
 
 #: admin.py:96
 msgid "Modified"
-msgstr ""
+msgstr "Geändert"
 
 #: admin.py:130
 msgid "<i>Missing language</i>"
-msgstr ""
+msgstr "<i>Fehlende Sprache</i>"
 
 #: admin.py:190 cms_toolbars.py:93
 #: templates/djangocms_alias/alias_usage.html:46
@@ -39,8 +39,6 @@ msgid "View usage"
 msgstr "Verwendung anzeigen"
 
 #: admin.py:194
-#, fuzzy
-#| msgid "Delete alias"
 msgid "Delete Alias"
 msgstr "Alias löschen"
 

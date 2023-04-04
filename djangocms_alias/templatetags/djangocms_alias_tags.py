@@ -90,7 +90,7 @@ class StaticAlias(Tag):
             # Try getting language from the toolbar first (end and view endpoints)
             language = getattr(request.toolbar.get_object(), "language", None)
             if language not in get_language_list(current_site):
-                language = None
+                language = get_language_from_request(request)
         else:
             language = get_language_from_request(request)
         # Try and find an Alias to render

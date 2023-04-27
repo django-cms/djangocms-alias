@@ -6,7 +6,7 @@ from django.utils.translation import get_language
 from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_toolbar_from_request
 from cms.utils import get_current_site, get_language_from_request
-from cms.utils.i18n import get_language_list
+from cms.utils.i18n import get_language_list, get_default_language
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 
@@ -98,6 +98,8 @@ class StaticAlias(Tag):
             # Might be on non-cms pages
             language = get_language()
 
+            if language is None:
+                language = get_default_language()
         # Try and find an Alias to render
         alias = Alias.objects.filter(**alias_filter_kwargs).first()
         # If there is no alias found we need to create one
@@ -128,7 +130,8 @@ class StaticAlias(Tag):
             if is_versioning_enabled() and not request.user.is_authenticated:
                 return None
 
-            alias_content = AliasContent.objects.create(
+            # Use base manager since we create version objects ourselves
+            alias_content = AliasContent._base_manager.create(
                 alias=alias,
                 name=static_code,
                 language=language,

@@ -48,7 +48,10 @@ alias_admin_list_display = ['content__name', 'category', 'admin_list_actions']
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
-    from djangocms_versioning.admin import StateIndicatorMixin, ExtendedGrouperVersionAdminMixin
+    from djangocms_versioning.admin import (
+        ExtendedGrouperVersionAdminMixin,
+        StateIndicatorMixin,
+    )
     from djangocms_versioning.models import Version
 
     alias_admin_classes.insert(0, ExtendedGrouperVersionAdminMixin)

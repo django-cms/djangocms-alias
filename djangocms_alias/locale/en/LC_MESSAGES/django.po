@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-29 21:21+0200\n"
+"POT-Creation-Date: 2023-04-27 19:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,23 +19,15 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: admin.py:85
-msgid "Author"
-msgstr ""
-
-#: admin.py:96
-msgid "Modified"
-msgstr ""
-
-#: admin.py:130
 msgid "<i>Missing language</i>"
 msgstr ""
 
-#: admin.py:190 cms_toolbars.py:93
+#: admin.py:143 cms_toolbars.py:104
 #: templates/djangocms_alias/alias_usage.html:46
 msgid "View usage"
 msgstr ""
 
-#: admin.py:194
+#: admin.py:147
 msgid "Delete Alias"
 msgstr ""
 
@@ -43,7 +35,7 @@ msgstr ""
 msgid "django CMS Alias"
 msgstr ""
 
-#: cms_plugins.py:29 cms_toolbars.py:46 forms.py:298 views.py:46 views.py:304
+#: cms_plugins.py:29 cms_toolbars.py:52 forms.py:298 views.py:46 views.py:304
 msgid "Alias"
 msgstr ""
 
@@ -59,44 +51,44 @@ msgstr ""
 msgid "Create Alias"
 msgstr ""
 
-#: cms_toolbars.py:47 cms_toolbars.py:69 templates/djangocms_alias/base.html:4
+#: cms_toolbars.py:53 cms_toolbars.py:80 templates/djangocms_alias/base.html:4
 msgid "Aliases"
 msgstr ""
 
-#: cms_toolbars.py:85
+#: cms_toolbars.py:96
 msgid "Change alias settings"
 msgstr ""
 
-#: cms_toolbars.py:103
+#: cms_toolbars.py:114
 msgid "Delete alias"
 msgstr ""
 
-#: cms_toolbars.py:155 templates/djangocms_alias/create_alias.html:31
+#: cms_toolbars.py:166 templates/djangocms_alias/create_alias.html:31
 msgid "Create"
 msgstr ""
 
-#: cms_toolbars.py:169 internal_search.py:31
+#: cms_toolbars.py:180 internal_search.py:31
 msgid "Language"
 msgstr ""
 
-#: cms_toolbars.py:222
+#: cms_toolbars.py:233
 msgid "Add Translation"
 msgstr ""
 
-#: cms_toolbars.py:233
+#: cms_toolbars.py:244
 msgid "Delete Translation"
 msgstr ""
 
-#: cms_toolbars.py:251
+#: cms_toolbars.py:262
 msgid "Copy all plugins"
 msgstr ""
 
-#: cms_toolbars.py:253
+#: cms_toolbars.py:264
 #, python-format
 msgid "from %s"
 msgstr ""
 
-#: cms_toolbars.py:254
+#: cms_toolbars.py:265
 #, python-format
 msgid "Are you sure you want to copy all plugins from %s?"
 msgstr ""
@@ -131,18 +123,6 @@ msgstr ""
 
 #: filters.py:58 forms.py:287 internal_search.py:24
 msgid "Category"
-msgstr ""
-
-#: filters.py:96
-msgid "Unpublished"
-msgstr ""
-
-#: filters.py:100
-msgid "Show"
-msgstr ""
-
-#: filters.py:112
-msgid "Hide"
 msgstr ""
 
 #: forms.py:80
@@ -345,5 +325,6 @@ msgid ""
 msgstr ""
 
 #: views.py:297
-msgid "Objects using alias: {}"
+#, python-brace-format
+msgid "Objects using alias: {alias}"
 msgstr ""

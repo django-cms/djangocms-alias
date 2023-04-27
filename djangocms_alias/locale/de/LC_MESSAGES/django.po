@@ -2,43 +2,35 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 # Translators:
 # Fabian Braun <fsbraun@gmx.de>, 2023
-#
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-29 21:21+0200\n"
+"POT-Creation-Date: 2023-04-27 19:05+0200\n"
 "PO-Revision-Date: 2023-01-10 21:21+0000\n"
 "Last-Translator: Fabian Braun <fsbraun@gmx.de>, 2023\n"
-"Language-Team: German (https://www.transifex.com/divio/teams/58664/de/)\n"
-"Language: de\n"
+"Language-Team: German (https://app.transifex.com/divio/teams/58664/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: admin.py:85
-msgid "Author"
-msgstr "Autor"
-
-#: admin.py:96
-msgid "Modified"
-msgstr "Geändert"
-
-#: admin.py:130
 msgid "<i>Missing language</i>"
 msgstr "<i>Fehlende Sprache</i>"
 
-#: admin.py:190 cms_toolbars.py:93
+#: admin.py:143 cms_toolbars.py:104
 #: templates/djangocms_alias/alias_usage.html:46
 msgid "View usage"
 msgstr "Verwendung anzeigen"
 
-#: admin.py:194
+#: admin.py:147
 msgid "Delete Alias"
 msgstr "Alias löschen"
 
@@ -46,7 +38,7 @@ msgstr "Alias löschen"
 msgid "django CMS Alias"
 msgstr "django CMS Alias"
 
-#: cms_plugins.py:29 cms_toolbars.py:46 forms.py:298 views.py:46 views.py:304
+#: cms_plugins.py:29 cms_toolbars.py:52 forms.py:298 views.py:46 views.py:304
 msgid "Alias"
 msgstr "Alias"
 
@@ -62,44 +54,44 @@ msgstr "Alias abtrennen"
 msgid "Create Alias"
 msgstr "Alias erstellen"
 
-#: cms_toolbars.py:47 cms_toolbars.py:69 templates/djangocms_alias/base.html:4
+#: cms_toolbars.py:53 cms_toolbars.py:80 templates/djangocms_alias/base.html:4
 msgid "Aliases"
 msgstr "Aliasse"
 
-#: cms_toolbars.py:85
+#: cms_toolbars.py:96
 msgid "Change alias settings"
 msgstr "Alias-Einstellungen ändern"
 
-#: cms_toolbars.py:103
+#: cms_toolbars.py:114
 msgid "Delete alias"
 msgstr "Alias löschen"
 
-#: cms_toolbars.py:155 templates/djangocms_alias/create_alias.html:31
+#: cms_toolbars.py:166 templates/djangocms_alias/create_alias.html:31
 msgid "Create"
 msgstr "Erstellen"
 
-#: cms_toolbars.py:169 internal_search.py:31
+#: cms_toolbars.py:180 internal_search.py:31
 msgid "Language"
 msgstr "Sprache"
 
-#: cms_toolbars.py:222
+#: cms_toolbars.py:233
 msgid "Add Translation"
 msgstr "Übersetzung hinzufügen"
 
-#: cms_toolbars.py:233
+#: cms_toolbars.py:244
 msgid "Delete Translation"
 msgstr "Übersetzung löschen"
 
-#: cms_toolbars.py:251
+#: cms_toolbars.py:262
 msgid "Copy all plugins"
 msgstr "Alle Plugins kopieren"
 
-#: cms_toolbars.py:253
+#: cms_toolbars.py:264
 #, python-format
 msgid "from %s"
 msgstr "von %s"
 
-#: cms_toolbars.py:254
+#: cms_toolbars.py:265
 #, python-format
 msgid "Are you sure you want to copy all plugins from %s?"
 msgstr "Sind Sie sicher, dass Sie alle Plugins aus %s kopieren wollen?"
@@ -135,18 +127,6 @@ msgstr "Kein Site"
 #: filters.py:58 forms.py:287 internal_search.py:24
 msgid "Category"
 msgstr "Kategorie"
-
-#: filters.py:96
-msgid "Unpublished"
-msgstr "Nicht veröffentlicht"
-
-#: filters.py:100
-msgid "Show"
-msgstr "Zeigen"
-
-#: filters.py:112
-msgid "Hide"
-msgstr "Verstecken"
 
 #: forms.py:80
 msgid "A plugin or placeholder is required to create an alias."
@@ -274,9 +254,9 @@ msgstr "Speichern"
 #: templates/admin/djangocms_alias/alias/delete_confirmation.html:15
 #, python-format
 msgid ""
-"You don't have permissions to delete %(object_name)s \"%(escaped_object)s\". "
-"Please request your site admin to add permissions to delete alias, or delete "
-"alias from all places that it being used."
+"You don't have permissions to delete %(object_name)s \"%(escaped_object)s\"."
+" Please request your site admin to add permissions to delete alias, or "
+"delete alias from all places that it being used."
 msgstr ""
 "Sie haben keine Berechtigung, %(object_name)s \"%(escaped_object)s\" zu "
 "löschen. Bitte fragen Sie Ihren Administrator, Ihnen die Rechte zum Löschen "
@@ -361,11 +341,6 @@ msgstr ""
 "wollen? "
 
 #: views.py:297
-msgid "Objects using alias: {}"
-msgstr "Objekte, die Alias nutzen: {}"
-
-#~ msgid "Rename alias"
-#~ msgstr "Alias umbenennen"
-
-#~ msgid "Current"
-#~ msgstr "Aktuell"
+#, python-brace-format
+msgid "Objects using alias: {alias}"
+msgstr "Objekte, die Alias „{alias}“ nutzen"

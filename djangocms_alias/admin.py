@@ -48,69 +48,10 @@ alias_admin_list_display = ['content__name', 'category', 'admin_list_actions']
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
-    from django.db.models import OuterRef, Subquery
-    from django.db.models.functions import Cast
-
-    from djangocms_versioning import versionables
-    from djangocms_versioning.admin import StateIndicatorMixin
-    from djangocms_versioning.constants import VERSION_STATES
+    from djangocms_versioning.admin import StateIndicatorMixin, ExtendedGrouperVersionAdminMixin
     from djangocms_versioning.models import Version
 
-    class ExtendedGrouperVersioningMixin:
-        """This needs to move to djangocms-versioning."""
-        def get_queryset(self, request: HttpRequest) -> models.QuerySet:
-            alias_content_types = versionables.for_grouper(self.model).content_types
-            qs = super().get_queryset(request)
-            versions = Version.objects.filter(object_id=OuterRef("pk"), content_type__in=alias_content_types)
-            contents = self.content_model.admin_manager.latest_content(
-                **{self.grouper_field_name: OuterRef("pk"), **self.current_content_filters}
-            ).annotate(
-                content_created_by=Subquery(versions.values(f"created_by__{USERNAME_FIELD}")[:1]),
-                content_state=Subquery(versions.values("state")),
-                content_modified=Subquery(versions.values("modified")[:1]),
-            )
-            qs = qs.annotate(
-                content_created_by=Subquery(contents.values("content_created_by")[:1]),
-                content_state=Subquery(contents.values("content_state")),
-                # cast is necessary for mysql
-                content_modified=Cast(Subquery(contents.values("content_modified")[:1]), models.DateTimeField()),
-            )
-            return qs
-
-        @admin.display(
-            description=_("State"),
-            ordering="content_state",
-        )
-        def get_versioning_state(self, obj: models.Model) -> typing.Union[str, None]:
-            return dict(VERSION_STATES).get(obj.content_state)
-
-        @admin.display(
-            description=_("Author"),
-            ordering="content_created_by",
-        )
-        def get_author(self, obj) -> str:
-            """
-            Return the author who created a version
-            :param obj: Versioned content model Instance
-            :return: Author
-            """
-            return getattr(obj, "content_created_by", None)
-
-        # This needs to target the annotation, or ordering will be alphabetically, with uppercase then lowercase
-
-        @admin.display(
-            description=_("Modified"),
-            ordering="content_modified",
-        )
-        def get_modified_date(self, obj):
-            """
-            Get the last modified date of a version
-            :param obj: Versioned content model Instance
-            :return: Modified Date
-            """
-            return getattr(obj, "content_modified", None)
-
-    alias_admin_classes.insert(0, ExtendedGrouperVersioningMixin)
+    alias_admin_classes.insert(0, ExtendedGrouperVersionAdminMixin)
     alias_admin_classes.insert(0, StateIndicatorMixin)
     alias_admin_list_display.insert(-1, "get_author")
     alias_admin_list_display.insert(-1, "get_modified_date")

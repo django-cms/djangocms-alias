@@ -7,6 +7,64 @@ import sys
 from pathlib import Path
 
 
+COMPILE_SETTINGS = {
+    "py39-dj32-cms41-default.txt": [],
+    "py39-dj32-cms41-versioning.txt": [],
+    "py310-dj32-cms41-default.txt": [],
+    "py310-dj32-cms41-versioning.txt": [],
+    "py39-dj40-cms41-default.txt": [],
+    "py39-dj40-cms41-versioning.txt": [],
+    "py310-dj40-cms41-default.txt": [],
+    "py310-dj40-cms41-versioning.txt": [],
+    "py311-dj40-cms41-default.txt": [],
+    "py311-dj40-cms41-versioning.txt": [],
+    "py39-dj41-cms41-default.txt": [],
+    "py39-dj41-cms41-versioning.txt": [],
+    "py310-dj41-cms41-default.txt": [],
+    "py310-dj41-cms41-versioning.txt": [],
+    "py311-dj41-cms41-default.txt": [],
+    "py311-dj41-cms41-versioning.txt": [],
+    "py39-dj42-cms41-default.txt": [],
+    "py39-dj42-cms41-versioning.txt": [],
+    "py310-dj42-cms41-default.txt": [],
+    "py310-dj42-cms41-versioning.txt": [],
+    "py311-dj42-cms41-default.txt": [],
+    "py311-dj42-cms41-versioning.txt": [],
+    "py311-djmain-cms41-default.txt": [],
+    "py311-djmain-cms41-versioning.txt": [],
+}
+
+django_dict = {
+    "djmain": "https://github.com/django/django/tarball/main#egg=Django",
+    "dj32": "Django>=3.2,<4",
+    "dj40": "Django>=4.0,<4.1",
+    "dj41": "Django>=4.1,<4.2",
+    "dj42": "Django>=4.2,<5",
+}
+
+cms_dict = {
+    "cms40": "https://github.com/django-cms/django-cms/tarball/release/4.0.1.x#egg=django-cms",
+    "cms41": "django-cms>=4.1.0rc2,<4.2",
+}
+
+
+def get_args(key, value, common_args):
+    py_ver, dj_ver, cms_ver, mode = key.split("-")
+    assert py_ver[:2] == "py"
+    assert mode.endswith(".txt")
+    return [
+        f"python{py_ver[2]}.{py_ver[3:]}",
+        *common_args,
+        "-P",
+        django_dict[dj_ver],
+        "-P",
+        cms_dict[cms_ver],
+        *value,
+        "-o",
+        key
+    ]
+
+
 def run(*args, **kwargs):
     try:
         print(" ".join(args[0]))
@@ -23,206 +81,13 @@ if __name__ == "__main__":
         "-m",
         "piptools",
         "compile",
-        # "--generate-hashes",  # Disabled since references to git branches change hash regularly.
+        "--generate-hashes",
         "--allow-unsafe",
     ] + sys.argv[1:]
-    run(
-        [
-            "python3.8",
-            *common_args,
-            "-P",
-            "Django>=3.2,<3.3",
-            "-P",
-            "django-treebeard==4.5.1",
-            "-P",
-            "django-classy-tags<4.0",
-            "-o",
-            "py38-dj32-cms40-default.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.8",
-            *common_args,
-            "-P",
-            "Django>=3.2,<3.3",
-            "-P",
-            "django-treebeard==4.5.1",
-            "-P",
-            "django-classy-tags<4.0",
-            "-o",
-            "py38-dj32-cms40-versioning.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.8",
-            *common_args,
-            "-P",
-            "Django>=3.2,<3.3",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py38-dj32-cms41-default.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.8",
-            *common_args,
-            "-P",
-            "Django>=3.2,<3.3",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py38-dj32-cms41-versioning.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.9",
-            *common_args,
-            "-P",
-            "Django>=3.2,<3.3",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py39-dj32-cms41-default.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.9",
-            *common_args,
-            "-P",
-            "Django>=3.2,<3.3",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py39-dj32-cms41-versioning.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.9",
-            *common_args,
-            "-P",
-            "Django>=4.0,<4.1",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py39-dj40-cms41-default.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.9",
-            *common_args,
-            "-P",
-            "Django>=4.0,<4.1",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py39-dj40-cms41-versioning.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.10",
-            *common_args,
-            "-P",
-            "Django>=3.2,<3.3",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py310-dj32-cms41-default.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.10",
-            *common_args,
-            "-P",
-            "Django>=3.2,<3.3",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py310-dj32-cms41-versioning.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.10",
-            *common_args,
-            "-P",
-            "Django>=4.0,<4.1",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py310-dj40-cms41-default.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.10",
-            *common_args,
-            "-P",
-            "Django>=4.0,<4.1",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py310-dj40-cms41-versioning.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.11",
-            *common_args,
-            "-P",
-            "Django>=4.1,<4.2",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py311-dj41-cms41-default.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
-    run(
-        [
-            "python3.11",
-            *common_args,
-            "-P",
-            "Django>=4.1,<4.2",
-            # "-P",
-            # "django-cms==4.1rc1",
-            "-o",
-            "py311-dj41-cms41-versioning.txt",
-        ],
-        check=True,
-        capture_output=True,
-    )
+
+    for key, value in COMPILE_SETTINGS.items():
+        run(
+            get_args(key, value, common_args),
+            check=True,
+            capture_output=True,
+        )

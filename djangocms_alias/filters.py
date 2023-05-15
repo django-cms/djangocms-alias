@@ -85,37 +85,3 @@ class CategoryFilter(admin.SimpleListFilter):
                 ),
                 "display": title,
             }
-
-
-if djangocms_versioning_enabled:
-    from djangocms_versioning.constants import UNPUBLISHED
-
-    from .constants import UNPUBLISHED_FILTER_URL_PARAM
-
-    class UnpublishedFilter(admin.SimpleListFilter):
-        title = _("Unpublished")
-        parameter_name = UNPUBLISHED_FILTER_URL_PARAM
-
-        def lookups(self, request, model_admin):
-            return (("1", _("Show")),)
-
-        def queryset(self, request, queryset):
-            show = self.value()
-            if show == "1":
-                return queryset.filter(contents__versions__state=UNPUBLISHED)
-            return queryset.exclude(contents__versions__state=UNPUBLISHED)
-
-        def choices(self, changelist):
-            yield {
-                "selected": self.value() is None,
-                "query_string": changelist.get_query_string(remove=[self.parameter_name]),
-                "display": _("Hide"),
-            }
-            for lookup, title in self.lookup_choices:
-                yield {
-                    "selected": self.value() == str(lookup),
-                    "query_string": changelist.get_query_string(
-                        {self.parameter_name: lookup}
-                    ),
-                    "display": title,
-                }

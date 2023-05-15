@@ -21,6 +21,7 @@ from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 from cms.utils.i18n import (
     force_language,
+    get_default_language,
     get_language_dict,
     get_language_tuple,
 )
@@ -71,6 +72,8 @@ class AliasToolbar(CMSToolbar):
         url = admin_reverse(LIST_ALIAS_URL_NAME)
         obj = self.toolbar.get_object()
         language = obj.language if hasattr(obj, "language") else get_language_from_request(self.request)
+        if language is None:
+            language = get_default_language()
         url += f'?{urlencode({"language": language})}'
 
         admin_menu.add_sideframe_item(

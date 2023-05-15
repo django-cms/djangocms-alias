@@ -1,5 +1,3 @@
-import typing
-
 from django import forms
 from django.contrib import admin
 from django.http import (
@@ -46,7 +44,10 @@ alias_admin_list_display = ['content__name', 'category', 'admin_list_actions']
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
-    from djangocms_versioning.admin import StateIndicatorMixin, ExtendedGrouperVersionAdminMixin
+    from djangocms_versioning.admin import (
+        ExtendedGrouperVersionAdminMixin,
+        StateIndicatorMixin,
+    )
     from djangocms_versioning.models import Version
 
     alias_admin_classes.insert(0, ExtendedGrouperVersionAdminMixin)
@@ -93,8 +94,6 @@ class AliasAdmin(*alias_admin_classes):
     def can_change_content(self, request: HttpRequest, content_obj: AliasContent) -> bool:
         """Returns True if user can change content_obj"""
         if content_obj and is_versioning_enabled():
-            from djangocms_versioning.models import Version
-
             version = Version.objects.get_for_content(content_obj)
             return version.check_modify.as_bool(request.user)
         return True

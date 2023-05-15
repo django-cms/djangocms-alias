@@ -7,8 +7,9 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import (
+    get_language,
     get_language_from_request,
-    gettext_lazy as _, get_language,
+    gettext_lazy as _,
 )
 from django.views.generic import ListView
 

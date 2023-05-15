@@ -310,7 +310,7 @@ class AliasPluginForm(forms.ModelForm):
 
     def _set_category_widget_value(self):
         """
-        When the user loads the form the site and category should be pre selected
+        When the user loads the form the site and category should be pre-selected
         """
         # If the form is changing an existing Alias
         # Be sure to show the values for an Alias

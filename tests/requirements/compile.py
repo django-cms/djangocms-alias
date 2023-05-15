@@ -8,30 +8,18 @@ from pathlib import Path
 
 
 COMPILE_SETTINGS = {
-    "py39-dj32-cms41-default.txt": [],
-    "py39-dj32-cms41-versioning.txt": [],
-    "py310-dj32-cms41-default.txt": [],
-    "py310-dj32-cms41-versioning.txt": [],
-    "py39-dj40-cms41-default.txt": [],
-    "py39-dj40-cms41-versioning.txt": [],
-    "py310-dj40-cms41-default.txt": [],
-    "py310-dj40-cms41-versioning.txt": [],
-    "py311-dj40-cms41-default.txt": [],
-    "py311-dj40-cms41-versioning.txt": [],
-    "py39-dj41-cms41-default.txt": [],
-    "py39-dj41-cms41-versioning.txt": [],
-    "py310-dj41-cms41-default.txt": [],
-    "py310-dj41-cms41-versioning.txt": [],
-    "py311-dj41-cms41-default.txt": [],
-    "py311-dj41-cms41-versioning.txt": [],
-    "py39-dj42-cms41-default.txt": [],
-    "py39-dj42-cms41-versioning.txt": [],
-    "py310-dj42-cms41-default.txt": [],
-    "py310-dj42-cms41-versioning.txt": [],
-    "py311-dj42-cms41-default.txt": [],
-    "py311-dj42-cms41-versioning.txt": [],
-    "py311-djmain-cms41-default.txt": [],
-    "py311-djmain-cms41-versioning.txt": [],
+    "py39-dj32-cms41": [],
+    "py310-dj32-cms41": [],
+    "py39-dj40-cms41": [],
+    "py310-dj40-cms41": [],
+    "py311-dj40-cms41": [],
+    "py39-dj41-cms41": [],
+    "py310-dj41-cms41": [],
+    "py311-dj41-cms41": [],
+    "py39-dj42-cms41": [],
+    "py310-dj42-cms41": [],
+    "py311-dj42-cms41": [],
+    "py311-djmain-cms41": [],
 }
 
 django_dict = {
@@ -87,7 +75,12 @@ if __name__ == "__main__":
 
     for key, value in COMPILE_SETTINGS.items():
         run(
-            get_args(key, value, common_args),
+            get_args(key + "-default.txt", value, common_args),
+            check=True,
+            capture_output=True,
+        )
+        run(
+            get_args(key + "-versioning.txt", value, common_args),
             check=True,
             capture_output=True,
         )

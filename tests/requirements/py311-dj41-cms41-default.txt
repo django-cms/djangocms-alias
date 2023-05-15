@@ -72,9 +72,9 @@ dj-database-url==2.0.0 \
     --hash=sha256:9c9e5f7224f62635a787e9cc3c6762c9be2b19541a21e3c08fa573bd01609b4b \
     --hash=sha256:a35a9f0f43775ca6f90d819dc456233ef7bcc76b47377d5d908b75c7eb320624
     # via django-app-helper
-django==4.1.8 \
-    --hash=sha256:43253f4b4a2c3a1694cd52d3517847271934c84dbd060ca0e82a9f90e569dab3 \
-    --hash=sha256:dba9dd0bf8b748aa9c98d6c679f8b1c0bfa43124844bea9425ad9ba0cd5e65c3
+django==4.1.9 \
+    --hash=sha256:adae3a952fd86800094ae6f64aa558572e8b4ba8dfe21f0ed8175147e75a72a1 \
+    --hash=sha256:e9f074a84930662104871bfcea55c3c180c50a0a47739db82435deae6cbaf032
     # via
     #   dj-database-url
     #   django-classy-tags
@@ -129,8 +129,8 @@ djangocms-admin-style==3.2.4 \
     --hash=sha256:0d981ccedf4252113acfd812a48d3284eb38d6b610d83c92e85f6bb681bd8bca \
     --hash=sha256:f540d32026108c22f4b9f69347780fe04c63b9d699902f41d763f44780bb9cbb
     # via django-cms
-djangocms-versioning @ https://github.com/fsbraun/djangocms-versioning/tarball/fix/rc2_compat \
-    --hash=sha256:134f94d895db969cee027023b94a32eab77b41d73a8ec371a22c6fe64d932c2e
+djangocms-versioning @ https://github.com/django-cms/djangocms-versioning/tarball/master \
+    --hash=sha256:5e4069ae6b044127b74dd3ef70f05516e1d9f891d3af48735d54e367ff2de276
     # via -r requirements.in
 docopt==0.6.2 \
     --hash=sha256:49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491

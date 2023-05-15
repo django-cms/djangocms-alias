@@ -278,7 +278,7 @@ class AliasSelect2View(ListView):
         if category:
             q &= Q(category=category)
         if site:
-            q &= Q(site=site) | Q(site=None)
+            q &= Q(site=site)
         if pk:
             q &= Q(pk=pk)
 

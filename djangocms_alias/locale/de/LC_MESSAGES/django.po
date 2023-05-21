@@ -48,7 +48,7 @@ msgstr "Verlinkung bearbeiten"
 
 #: cms_plugins.py:66
 msgid "Detach Alias"
-msgstr "Alias abtrennen"
+msgstr "Verlinkung trennen"
 
 #: cms_plugins.py:81 cms_plugins.py:98
 msgid "Create Alias"

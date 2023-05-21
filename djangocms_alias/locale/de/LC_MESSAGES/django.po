@@ -40,7 +40,7 @@ msgstr "django CMS Alias"
 
 #: cms_plugins.py:29 cms_toolbars.py:52 forms.py:298 views.py:46 views.py:304
 msgid "Alias"
-msgstr "Verlinkung"
+msgstr "Alias"
 
 #: cms_plugins.py:52
 msgid "Edit Alias"
@@ -48,7 +48,7 @@ msgstr "Verlinkung bearbeiten"
 
 #: cms_plugins.py:66
 msgid "Detach Alias"
-msgstr "Verlinkung trennen"
+msgstr "Alias trennen"
 
 #: cms_plugins.py:81 cms_plugins.py:98
 msgid "Create Alias"

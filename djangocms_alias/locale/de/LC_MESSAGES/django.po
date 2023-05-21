@@ -52,11 +52,11 @@ msgstr "Verlinkung trennen"
 
 #: cms_plugins.py:81 cms_plugins.py:98
 msgid "Create Alias"
-msgstr "Alias erstellen"
+msgstr "Verlinkung erstellen"
 
 #: cms_toolbars.py:53 cms_toolbars.py:80 templates/djangocms_alias/base.html:4
 msgid "Aliases"
-msgstr "Aliasse"
+msgstr "Verlinkungen"
 
 #: cms_toolbars.py:96
 msgid "Change alias settings"

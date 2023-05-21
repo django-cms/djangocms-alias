@@ -44,7 +44,7 @@ msgstr "Verlinkung"
 
 #: cms_plugins.py:52
 msgid "Edit Alias"
-msgstr "Alias editieren"
+msgstr "Verlinkung bearbeiten"
 
 #: cms_plugins.py:66
 msgid "Detach Alias"

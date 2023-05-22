@@ -4,8 +4,8 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# Stefan van den Eertwegh <stefan@corebyte.nl>, 2023
 # Fabian Braun <fsbraun@gmx.de>, 2023
+# Stefan van den Eertwegh <stefan@corebyte.nl>, 2023
 # 
 #, fuzzy
 msgid ""
@@ -14,7 +14,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-04-27 19:05+0200\n"
 "PO-Revision-Date: 2023-01-10 21:21+0000\n"
-"Last-Translator: Fabian Braun <fsbraun@gmx.de>, 2023\n"
+"Last-Translator: Stefan van den Eertwegh <stefan@corebyte.nl>, 2023\n"
 "Language-Team: Dutch (https://app.transifex.com/divio/teams/58664/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,7 +24,7 @@ msgstr ""
 
 #: admin.py:85
 msgid "<i>Missing language</i>"
-msgstr ""
+msgstr "<i>Ontbrekende taal </i>"
 
 #: admin.py:143 cms_toolbars.py:104
 #: templates/djangocms_alias/alias_usage.html:46
@@ -33,7 +33,7 @@ msgstr "Bekijk gebruik"
 
 #: admin.py:147
 msgid "Delete Alias"
-msgstr ""
+msgstr "Verwijder Alias"
 
 #: apps.py:7
 msgid "django CMS Alias"
@@ -340,4 +340,4 @@ msgstr ""
 #: views.py:297
 #, python-brace-format
 msgid "Objects using alias: {alias}"
-msgstr ""
+msgstr "Alias gebruikte objecten: {alias}"

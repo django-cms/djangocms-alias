@@ -419,12 +419,12 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
         site1_alias = self._create_alias(plugins=[site1_plugin], site=site1, name='site1_alias', category=self.category)
         site2_alias = self._create_alias(plugins=[site2_plugin], site=site2, name='site2_alias', category=self.category)
-        aliascontent_list_url = admin_reverse(LIST_ALIAS_URL_NAME)
+        alias_list_url = admin_reverse(LIST_ALIAS_URL_NAME)
 
         # when no filter used both objects are displayed
         with self.login_user_context(self.superuser):
             with force_language('en'):
-                list_response = self.client.get(aliascontent_list_url)
+                list_response = self.client.get(alias_list_url)
 
         self.assertContains(list_response, site1_alias.name)
         self.assertContains(list_response, site2_alias.name)
@@ -432,7 +432,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         # when no filtering by site 1 only first object displayed
         with self.login_user_context(self.superuser):
             with force_language('en'):
-                site1_aliases_filter_url = f"{aliascontent_list_url}?site={site1_alias.site.id}"
+                site1_aliases_filter_url = f"{alias_list_url}?site={site1_alias.site.id}"
                 list_response = self.client.get(site1_aliases_filter_url)
 
         self.assertContains(list_response, site1_alias.name)
@@ -441,7 +441,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         # when no filtering by site 2 only first object displayed
         with self.login_user_context(self.superuser):
             with force_language('en'):
-                site2_aliases_filter_url = f"{aliascontent_list_url}?site={site2_alias.site.id}"
+                site2_aliases_filter_url = f"{alias_list_url}?site={site2_alias.site.id}"
                 list_response = self.client.get(site2_aliases_filter_url)
 
         self.assertNotContains(list_response, site1_alias.name)
@@ -641,7 +641,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         site = get_current_site()
         alias1 = self._create_alias(site=site)
         alias2 = self._create_alias(site=site, position=1)
-        self._create_alias(position=2)
+        alias3 = self._create_alias(position=2)
 
         with self.login_user_context(self.superuser):
             response = self.client.get(
@@ -654,7 +654,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             [a['id'] for a in response.json()['results']],
-            [alias1.pk, alias2.pk],
+            [alias1.pk, alias2.pk, alias3.pk],
         )
 
     def test_select2_view_site_and_category(self):
@@ -1121,11 +1121,12 @@ class AliasCategorySelect2ViewTestCase(BaseAliasPluginTestCase):
         are returned
         """
         site = get_current_site()
+        second_site = Site.objects.create(domain="other-site.org", name="other site")
         category_1 = Category.objects.create(name='Category 1')
         category_2 = Category.objects.create(name='Category 2')
         category_3 = Category.objects.create(name='Category 3')
         self._create_alias(category=category_1, site=site)
-        self._create_alias(category=category_2)
+        self._create_alias(category=category_2, site=second_site)
         self._create_alias(category=category_3)
 
         with self.login_user_context(self.superuser):
@@ -1136,7 +1137,7 @@ class AliasCategorySelect2ViewTestCase(BaseAliasPluginTestCase):
                 data={'site': site.pk},
             )
 
-        expected_result = [category_1.pk]
+        expected_result = [category_1.pk, category_3.pk]
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual([a['id'] for a in response.json()['results']], expected_result)

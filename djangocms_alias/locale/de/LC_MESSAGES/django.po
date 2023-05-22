@@ -32,7 +32,7 @@ msgstr "Verwendung anzeigen"
 
 #: admin.py:147
 msgid "Delete Alias"
-msgstr "Alias löschen"
+msgstr "Verlinkung löschen"
 
 #: apps.py:7
 msgid "django CMS Alias"
@@ -44,11 +44,11 @@ msgstr "Alias"
 
 #: cms_plugins.py:52
 msgid "Edit Alias"
-msgstr "Alias editieren"
+msgstr "Alias bearbeiten"
 
 #: cms_plugins.py:66
 msgid "Detach Alias"
-msgstr "Alias abtrennen"
+msgstr "Alias trennen"
 
 #: cms_plugins.py:81 cms_plugins.py:98
 msgid "Create Alias"

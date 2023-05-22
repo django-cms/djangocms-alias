@@ -226,7 +226,7 @@ class CategorySelect2View(ListView):
         if term:
             q &= Q(translations__name__icontains=term)
         if site:
-            q &= Q(aliases__site=site)
+            q &= Q(aliases__site=site) | Q(aliases__site=None)
         if pk:
             q &= Q(pk=pk)
 
@@ -278,11 +278,11 @@ class AliasSelect2View(ListView):
         if category:
             q &= Q(category=category)
         if site:
-            q &= Q(site=site)
+            q &= Q(site=site) | Q(site=None)
         if pk:
             q &= Q(pk=pk)
 
-        return queryset.filter(q)
+        return queryset.filter(q).distinct()
 
     def get_paginate_by(self, queryset):
         return self.request.GET.get('limit', 30)

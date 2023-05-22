@@ -406,7 +406,7 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             response = self.client.get(
-                self.get_list_aliascontent_endpoint(),
+                self.get_list_alias_endpoint(),
             )
 
         self.assertEqual(response.status_code, 200)

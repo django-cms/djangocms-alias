@@ -7,8 +7,6 @@ concurrency:
 on:
   pull_request:
   push:
-    branches:
-    - master
 
 jobs:
   unit-tests:
@@ -18,8 +16,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - 3.7
-          - 3.8
           - 3.9
           - '3.10'
           - '3.11'

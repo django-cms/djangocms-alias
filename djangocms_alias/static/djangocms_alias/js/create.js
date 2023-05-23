@@ -35,16 +35,14 @@ $(function() {
                 data: {
                     pk: categoryId
                 }
-            })
-            .done(function(data) {
+            }).done(function(data) {
                 var text = categoryId;
 
                 if (data.results.length) {
                     text = data.results[0].text;
                 }
                 callback({ id: categoryId, text: text });
-            })
-            .fail(function() {
+            }).fail(function() {
                 callback({ id: categoryId, text: categoryId });
             });
         }

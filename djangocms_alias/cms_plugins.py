@@ -52,7 +52,7 @@ class Alias(CMSPluginBase):
                     _('Edit Alias'),
                     edit_endpoint,
                     action='sideframe',
-                    attributes={'icon': 'alias'},
+                    attributes={'cms-icon': 'alias'},
                 ),
             ]
 
@@ -66,7 +66,7 @@ class Alias(CMSPluginBase):
                         _('Detach Alias'),
                         detach_endpoint,
                         action='modal',
-                        attributes={'icon': 'alias'},
+                        attributes={'cms-icon': 'alias'},
                     )
                 )
             return plugin_menu_items
@@ -81,7 +81,7 @@ class Alias(CMSPluginBase):
                 _('Create Alias'),
                 endpoint,
                 action='modal',
-                attributes={'icon': 'alias'},
+                attributes={'cms-icon': 'alias'},
             ),
         ]
 
@@ -98,7 +98,7 @@ class Alias(CMSPluginBase):
                 _('Create Alias'),
                 endpoint,
                 action='modal',
-                attributes={'icon': 'alias'},
+                attributes={'cms-icon': 'alias'},
             ),
         ]
         return menu_items

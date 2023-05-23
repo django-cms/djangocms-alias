@@ -341,7 +341,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
 
     def test_change_alias_plugin_form_initial_site(self):
         """
-        By default the initial values should be set
+        By default, the initial values should be set
         that are taken from the alias object currently selected
         """
         current_site = get_current_site()
@@ -356,7 +356,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         )
         form = AliasPluginForm(instance=alias_plugin)
 
-        self.assertEqual(form.fields['site'].initial, alias.site)
-        self.assertNotEqual(form.fields['site'].initial, current_site)
+        self.assertNotEqual(form.fields['site'].initial, alias.site)
+        self.assertEqual(form.fields['site'].initial, current_site)
         self.assertEqual(form.fields['category'].initial, alias.category)
         self.assertNotEqual(form.fields['category'].initial, None)

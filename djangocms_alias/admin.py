@@ -1,17 +1,29 @@
+from django import forms
 from django.contrib import admin
-from django.db.models.functions import Lower
-from django.template.loader import render_to_string
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+)
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
+from cms.admin.utils import GrouperModelAdmin
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse
 
 from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
-from .constants import USAGE_ALIAS_URL_NAME
-from .filters import CategoryFilter, LanguageFilter, SiteFilter
-from .forms import AliasContentForm
+from .constants import (
+    CHANGE_ALIAS_URL_NAME,
+    DELETE_ALIAS_URL_NAME,
+    LIST_ALIAS_URL_NAME,
+    USAGE_ALIAS_URL_NAME,
+)
+from .filters import CategoryFilter, SiteFilter
+from .forms import AliasGrouperAdminForm
 from .models import Alias, AliasContent, Category
 from .urls import urlpatterns
 from .utils import (
@@ -27,18 +39,22 @@ __all__ = [
     'AliasContentAdmin',
 ]
 
-alias_content_admin_classes = [admin.ModelAdmin]
-alias_content_admin_list_display = ('name', 'get_category',)
-alias_content_admin_list_filter = (SiteFilter, CategoryFilter, LanguageFilter,)
+alias_admin_classes = [GrouperModelAdmin]
+alias_admin_list_display = ['content__name', 'category', 'admin_list_actions']
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
-    from djangocms_versioning.admin import ExtendedVersionAdminMixin
+    from djangocms_versioning.admin import (
+        ExtendedGrouperVersionAdminMixin,
+        StateIndicatorMixin,
+    )
+    from djangocms_versioning.models import Version
 
-    from .filters import UnpublishedFilter
-    alias_content_admin_classes.insert(0, ExtendedVersionAdminMixin)
-    alias_content_admin_list_display = ('name', 'get_category',)
-    alias_content_admin_list_filter = (SiteFilter, CategoryFilter, LanguageFilter, UnpublishedFilter)
+    alias_admin_classes.insert(0, ExtendedGrouperVersionAdminMixin)
+    alias_admin_classes.insert(0, StateIndicatorMixin)
+    alias_admin_list_display.insert(-1, "get_author")
+    alias_admin_list_display.insert(-1, "get_modified_date")
+    alias_admin_list_display.insert(-1, "state_indicator")
 
 
 @admin.register(Category)
@@ -49,7 +65,7 @@ class CategoryAdmin(TranslatableAdmin):
         change = not obj._state.adding
         super().save_model(request, obj, form, change)
         if change:
-            # Dont emit delete content because there is on_delete=PROTECT for
+            # Don't emit delete content because there is on_delete=PROTECT for
             # category FK on alias
             emit_content_change(
                 AliasContent._base_manager.filter(alias__in=obj.aliases.all()),
@@ -58,19 +74,31 @@ class CategoryAdmin(TranslatableAdmin):
 
 
 @admin.register(Alias)
-class AliasAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category']
-    list_filter = ['site', 'category']
-    fields = ('category', 'site')
+class AliasAdmin(*alias_admin_classes):
+    list_display = alias_admin_list_display
+    list_display_links = None
+    list_filter = (SiteFilter, CategoryFilter,)
+    fields = ('content__name', 'category', 'site', 'content__language')
     readonly_fields = ('static_code', )
+    form = AliasGrouperAdminForm
+    extra_grouping_fields = ("language",)
+    EMPTY_CONTENT_VALUE = mark_safe(_("<i>Missing language</i>"))
 
-    def get_urls(self):
+    def get_urls(self) -> list:
         return urlpatterns + super().get_urls()
 
-    def has_add_permission(self, request):
-        return False
+    def get_actions_list(self) -> list:
+        """Add alias usage list actions"""
+        return super().get_actions_list() + [self._get_alias_usage_link]
 
-    def has_delete_permission(self, request, obj=None):
+    def can_change_content(self, request: HttpRequest, content_obj: AliasContent) -> bool:
+        """Returns True if user can change content_obj"""
+        if content_obj and is_versioning_enabled():
+            version = Version.objects.get_for_content(content_obj)
+            return version.check_modify.as_bool(request.user)
+        return True
+
+    def has_delete_permission(self, request: HttpRequest, obj: Alias = None) -> bool:
         # Alias can be deleted by users who can add aliases,
         # if that alias is not referenced anywhere.
         if obj:
@@ -81,142 +109,67 @@ class AliasAdmin(admin.ModelAdmin):
             return request.user.is_superuser
         return False
 
-    def get_deleted_objects(self, objs, request):
+    def save_model(self, request: HttpRequest, obj: Alias, form: forms.Form, change: bool) -> None:
+        super().save_model(request, obj, form, change)
+
+        # Only emit content changes if Versioning is not installed because
+        # Versioning emits its own signals for changes
+        if not is_versioning_enabled():
+            emit_content_change(
+                AliasContent._base_manager.filter(alias=obj),
+                sender=self.model,
+            )
+
+    def get_deleted_objects(self, objs, request: HttpRequest) -> tuple:
         deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         # This is bad and I should feel bad.
         if 'placeholder' in perms_needed:
             perms_needed.remove('placeholder')
         return deleted_objects, model_count, perms_needed, protected
 
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        emit_content_change(
-            AliasContent._base_manager.filter(alias=obj),
-            sender=self.model,
-        )
-
-    def delete_model(self, request, obj):
+    def delete_model(self, request: HttpRequest, obj: Alias):
         super().delete_model(request, obj)
-        emit_content_delete(
-            AliasContent._base_manager.filter(alias=obj),
-            sender=self.model,
-        )
 
-    def has_module_permission(self, request):
-        return False
+        # Only emit content changes if Versioning is not installed because
+        # Versioning emits it' own signals for changes
+        if not is_versioning_enabled():
+            emit_content_delete(
+                AliasContent._base_manager.filter(alias=obj),
+                sender=self.model,
+            )
+
+    def _get_alias_usage_link(self, obj: Alias, request: HttpRequest, disabled: bool = False) -> str:
+        url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.pk])
+        return self.admin_action_button(url, "info", _("View usage"), disabled=disabled)
+
+    def _get_alias_delete_link(self, obj: Alias, request: HttpRequest) -> str:
+        url = admin_reverse(DELETE_ALIAS_URL_NAME, args=[obj.pk])
+        return self.admin_action_button(url, "bin", _("Delete Alias"),
+                                        disabled=not self.has_delete_permission(request, obj))
 
 
 @admin.register(AliasContent)
-class AliasContentAdmin(*alias_content_admin_classes):
-    form = AliasContentForm
-    list_filter = alias_content_admin_list_filter
-    list_display = alias_content_admin_list_display
+class AliasContentAdmin(admin.ModelAdmin):
     # Disable dropdown actions
     actions = None
     change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"
 
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        # Force the category set to Lower, to be able to sort the category in ascending/descending order
-        queryset = queryset.annotate(alias_category_translations_ordered=Lower("alias__category__translations__name"))
-        return queryset
+    def changelist_view(self, request: HttpRequest, extra_context: dict = None) -> HttpResponse:
+        """Needed for the Alias Content Admin breadcrumbs"""
+        return HttpResponseRedirect(admin_reverse(
+            LIST_ALIAS_URL_NAME,
+        ))
 
-    # Add Alias category in the admin manager list and order field
-    @admin.display(
-        description=_('category'),
-        ordering="alias_category_translations_ordered",
-    )
-    def get_category(self, obj):
-        return obj.alias.category
+    def change_view(self, request: HttpRequest, object_id: int, form_url: str = '', extra_context: dict = None) -> HttpResponse:
+        """Needed for the Alias Content Admin breadcrumbs"""
+        obj = self.model.admin_manager.filter(pk=object_id).first()
+        if not obj:
+            raise Http404()
+        return HttpResponseRedirect(admin_reverse(
+            CHANGE_ALIAS_URL_NAME, args=(obj.alias_id,)
+        ) + f"?language={obj.language}")
 
-    def has_add_permission(self, request, obj=None):
-        # FIXME: It is not currently possible to add an alias from the django admin changelist issue #97
-        # https://github.com/django-cms/djangocms-alias/issues/97
+    def has_module_permission(self, request: HttpRequest) -> bool:
+        """Hides admin class in admin site overview"""
+
         return False
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-
-        # Only emit content changes if Versioning is not installed because
-        # Versioning emits it's own signals for changes
-        if not is_versioning_enabled():
-            emit_content_change([obj], sender=self.model)
-
-    def delete_model(self, request, obj):
-        super().delete_model(request, obj)
-
-        # Only emit content changes if Versioning is not installed because
-        # Versioning emits it's own signals for changes
-        if not is_versioning_enabled():
-            emit_content_delete([obj], sender=self.model)
-
-    def get_list_actions(self):
-        """
-        Collect rendered actions from implemented methods and return as list
-        """
-        return [
-            self._get_preview_link,
-            self._get_edit_link,
-            self._get_manage_versions_link,
-            self._get_change_alias_settings_link,
-            self._get_rename_alias_link,
-            self._get_alias_usage_link,
-        ]
-
-    def get_list_display_links(self, request, list_display):
-        """
-        Remove the linked text when versioning is enabled, because versioning adds actions
-        """
-        if is_versioning_enabled():
-            self.list_display_links = None
-        return super().get_list_display_links(request, list_display)
-
-    def _get_rename_alias_link(self, obj, request, disabled=False):
-        url = admin_reverse('{}_{}_change'.format(
-            obj._meta.app_label, obj._meta.model_name), args=(obj.pk,)
-        )
-        return render_to_string(
-            "admin/djangocms_alias/icons/rename_alias.html",
-            {"url": url, "disabled": disabled},
-        )
-
-    def _get_alias_usage_link(self, obj, request, disabled=False):
-        url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.alias.pk])
-        return render_to_string(
-            "admin/djangocms_alias/icons/view_usage.html",
-            {"url": url, "disabled": disabled},
-        )
-
-    def _get_change_alias_settings_link(self, obj, request, disabled=False):
-        url = admin_reverse('{}_{}_change'.format(
-            obj._meta.app_label, obj.alias._meta.model_name), args=(obj.alias.pk,)
-        )
-        return render_to_string(
-            "admin/djangocms_alias/icons/change_alias_settings.html",
-            {"url": url, "disabled": disabled},
-        )
-
-    def _get_preview_link(self, obj, request, disabled=False):
-        """
-        Return a user friendly button for previewing the content model
-        :param obj: Instance of versioned content model
-        :param request: The request to admin menu
-        :param disabled: Should the link be marked disabled?
-        :return: Preview icon template
-        """
-        preview_url = obj.get_absolute_url()
-        if not preview_url:
-            disabled = True
-
-        return render_to_string(
-            "djangocms_versioning/admin/icons/preview.html",
-            {"url": preview_url, "disabled": disabled, "keepsideframe": False},
-        )
-
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        extra_context = extra_context or {}
-        # Provide additional context to the changeform
-        extra_context['is_versioning_enabled'] = is_versioning_enabled()
-        return super().change_view(
-            request, object_id, form_url, extra_context=extra_context,
-        )

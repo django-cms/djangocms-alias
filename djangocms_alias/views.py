@@ -7,6 +7,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import (
+    get_language,
     get_language_from_request,
     gettext_lazy as _,
 )
@@ -14,7 +15,6 @@ from django.views.generic import ListView
 
 from cms.models import Page
 from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
-from cms.utils.i18n import get_current_language
 
 from .cms_plugins import Alias
 from .forms import BaseCreateAliasForm, CreateAliasForm
@@ -211,7 +211,7 @@ class CategorySelect2View(ListView):
         """
         term = self.request.GET.get('term')
         site = self.request.GET.get('site')
-        queryset = super().get_queryset().distinct()
+        queryset = super().get_queryset()
         # Only get categories that have aliases attached
         queryset = queryset.filter(
             aliases__isnull=False
@@ -226,11 +226,11 @@ class CategorySelect2View(ListView):
         if term:
             q &= Q(translations__name__icontains=term)
         if site:
-            q &= Q(aliases__site=site)
+            q &= Q(aliases__site=site) | Q(aliases__site=None)
         if pk:
             q &= Q(pk=pk)
 
-        return queryset.filter(q)
+        return queryset.translated(get_language()).filter(q).distinct()
 
     def get_paginate_by(self, queryset):
         return self.request.GET.get('limit', 30)
@@ -264,7 +264,7 @@ class AliasSelect2View(ListView):
         site = self.request.GET.get('site')
         # Showing published and unpublished aliases
         queryset = super().get_queryset().filter(
-            contents__language=get_current_language(),
+            contents__language=get_language(),
         ).distinct()
 
         try:
@@ -278,11 +278,11 @@ class AliasSelect2View(ListView):
         if category:
             q &= Q(category=category)
         if site:
-            q &= Q(site=site)
+            q &= Q(site=site) | Q(site=None)
         if pk:
             q &= Q(pk=pk)
 
-        return queryset.filter(q)
+        return queryset.filter(q).distinct()
 
     def get_paginate_by(self, queryset):
         return self.request.GET.get('limit', 30)

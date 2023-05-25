@@ -243,10 +243,36 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         if is_versioning_enabled():
             expected_result = ['English']
 
-        # Dont change default language switcher that is used for Pages
+        # Don't change default language switcher that is used for Pages
         self.assertEqual(
             [item.name for item in language_menu.items], expected_result
         )
+
+    def test_page_toolbar_wo_language_menu(self):
+        from django.utils.translation import gettext as _
+
+        alias = self._create_alias([self.plugin])
+        alias_content = alias.contents.create(name='test alias 2', language='fr')
+        # Get request
+        request = self.get_alias_request(
+            alias=alias,
+            lang_code="fr",
+            path=get_object_edit_url(alias_content),
+            user=self.get_superuser(),
+        )
+        # Remove language menu from request's toolbar
+        del request.toolbar.menus[LANGUAGE_MENU_IDENTIFIER]
+
+        # find VersioningPageToolbar
+        for cls, toolbar in request.toolbar.toolbars.items():
+            if cls == "djangocms_alias.cms_toolbars.AliasToolbar":
+                # and call override_language_menu
+                toolbar.override_language_switcher()
+                break
+        else:
+            self.fail("No AliasToolbar in alias request")
+        language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER, _("Language"))
+        self.assertIsNone(language_menu)
 
     def test_change_alias_settings_button_is_visible_on_alias_edit_view(self):
         button_label = 'Change alias settings...'

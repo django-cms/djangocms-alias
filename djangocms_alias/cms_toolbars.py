@@ -3,7 +3,12 @@ from copy import copy
 
 from django.urls import NoReverseMatch
 from django.utils.encoding import force_str
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.http import urlencode
+from django.utils.translation import (
+    get_language_from_request,
+    gettext,
+    gettext_lazy as _,
+)
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
@@ -16,6 +21,7 @@ from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 from cms.utils.i18n import (
     force_language,
+    get_default_language,
     get_language_dict,
     get_language_tuple,
 )
@@ -24,7 +30,7 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 
 from .constants import (
     DELETE_ALIAS_URL_NAME,
-    LIST_ALIASCONTENT_URL_NAME,
+    LIST_ALIAS_URL_NAME,
     USAGE_ALIAS_URL_NAME,
 )
 from .models import Alias, AliasContent
@@ -63,7 +69,12 @@ class AliasToolbar(CMSToolbar):
             return
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
 
-        url = admin_reverse(LIST_ALIASCONTENT_URL_NAME)
+        url = admin_reverse(LIST_ALIAS_URL_NAME)
+        obj = self.toolbar.get_object()
+        language = obj.language if hasattr(obj, "language") else get_language_from_request(self.request)
+        if language is None:
+            language = get_default_language()
+        url += f'?{urlencode({"language": language})}'
 
         admin_menu.add_sideframe_item(
             _("Aliases"),
@@ -81,22 +92,13 @@ class AliasToolbar(CMSToolbar):
         can_change = self.request.user.has_perm(
             get_model_permission_codename(Alias, 'change'),
         )
-        disabled = not can_change or not self.toolbar.edit_mode_active
         alias_menu.add_modal_item(
             _('Change alias settings'),
             url=admin_reverse(
                 'djangocms_alias_alias_change',
                 args=[self.toolbar.obj.alias_id],
             ),
-            disabled=disabled,
-        )
-        alias_menu.add_modal_item(
-            _('Rename alias'),
-            url=admin_reverse(
-                'djangocms_alias_aliascontent_change',
-                args=[self.toolbar.obj.pk],
-            ),
-            disabled=disabled,
+            disabled=not can_change,
         )
         alias_menu.add_modal_item(
             _('View usage'),
@@ -115,9 +117,9 @@ class AliasToolbar(CMSToolbar):
                     args=(self.toolbar.obj.alias_id, ),
                 ),
                 on_close=admin_reverse(
-                    LIST_ALIASCONTENT_URL_NAME,
+                    LIST_ALIAS_URL_NAME,
                 ),
-                disabled=disabled,
+                disabled=not can_change,
             )
 
     @classmethod
@@ -176,6 +178,8 @@ class AliasToolbar(CMSToolbar):
 
     def override_language_switcher(self):
         language_menu = self.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER, _('Language'))
+        if not language_menu:
+            return
         # Remove all existing language links
         # remove_item uses `items` attribute so we have to copy object
         for _item in copy(language_menu.items):

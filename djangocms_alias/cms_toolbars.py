@@ -178,6 +178,8 @@ class AliasToolbar(CMSToolbar):
 
     def override_language_switcher(self):
         language_menu = self.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER, _('Language'))
+        if not language_menu:
+            return
         # Remove all existing language links
         # remove_item uses `items` attribute so we have to copy object
         for _item in copy(language_menu.items):

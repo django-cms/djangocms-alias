@@ -248,7 +248,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             [item.name for item in language_menu.items], expected_result
         )
 
-    def test_page_toolbar_wo_language_menu(self):
+    def test_page_toolbar_no_language_menu(self):
         from django.utils.translation import gettext as _
 
         alias = self._create_alias([self.plugin])

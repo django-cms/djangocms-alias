@@ -1400,12 +1400,8 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         When visiting a published page with a draft alias the alias
         is not visible
         """
-        from djangocms_versioning.helpers import remove_published_where
-
         unpublished_alias = self._create_alias(published=False)
-        content = remove_published_where(
-            unpublished_alias.contents.filter(language=self.language)
-        ).first()
+        content = unpublished_alias.contents(manager="admin_manager").filter(language=self.language).first()
         alias_placeholder = content.placeholder
 
         body = 'unpublished alias'

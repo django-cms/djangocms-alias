@@ -2,8 +2,8 @@
 Changelog
 =========
 
-Unreleased
-==========
+2.0.0rc1
+========
 * Django 4.0 and 4.1 support added
 * Django 2.2 support removed
 * Python 3.7 support removed

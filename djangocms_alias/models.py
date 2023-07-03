@@ -178,20 +178,15 @@ class Alias(models.Model):
         try:
             return self._content_cache[language]
         except KeyError:
-            qs = self.contents.select_related(
+            if show_draft_content and is_versioning_enabled():
+                qs = self.contents(manager="admin_manager").latest_content()
+            else:
+                qs = self.contents.all()
+            qs = qs.select_related(
                 'alias__category',
             ).prefetch_related(
                 'placeholders'
             ).filter(language=language)
-
-            if show_draft_content and is_versioning_enabled():
-                from djangocms_versioning.constants import DRAFT, PUBLISHED
-                from djangocms_versioning.helpers import remove_published_where
-
-                # Ensure that we are getting the latest valid content, the top most version can become
-                # archived with a previous version re-published
-                qs = remove_published_where(qs)
-                qs = qs.filter(Q(versions__state=DRAFT) | Q(versions__state=PUBLISHED)).order_by('-versions__created')
 
             self._content_cache[language] = qs.first()
             return self._content_cache[language]

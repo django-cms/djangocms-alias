@@ -2,9 +2,9 @@
 Changelog
 =========
 
-Unreleased
-==========
-* Django 4.0 and 4.1 support added
+2.0.0rc1
+========
+* Django 4.0, 4.1, and 4.2 support added
 * Django 2.2 support removed
 * Python 3.7 support removed
 * Changed test setup to run tox from github actions for consistency in testing

@@ -1,5 +1,11 @@
 {% extends "admin/delete_confirmation.html" %}
-{% load i18n admin_urls cms_tags djangocms_alias_tags %}
+{% load i18n static admin_urls cms_tags djangocms_alias_tags %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ media }}
+    <script src="{% static 'admin/js/cancel.js' %}" async></script>
+{% endblock %}
 
 {% block breadcrumbs %}{% endblock %}
 

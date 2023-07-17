@@ -72,7 +72,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         alias = self._create_alias([self.plugin])
         for endpoint in [
             self.get_category_list_endpoint(),
-            self.get_list_aliascontent_endpoint(),
+            self.get_list_alias_endpoint(),
             self.page.get_absolute_url(language=self.language),
         ]:
             request = self.get_page_request(page=None, path=endpoint, user=self.superuser)
@@ -243,10 +243,36 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         if is_versioning_enabled():
             expected_result = ['English']
 
-        # Dont change default language switcher that is used for Pages
+        # Don't change default language switcher that is used for Pages
         self.assertEqual(
             [item.name for item in language_menu.items], expected_result
         )
+
+    def test_page_toolbar_no_language_menu(self):
+        from django.utils.translation import gettext as _
+
+        alias = self._create_alias([self.plugin])
+        alias_content = alias.contents.create(name='test alias 2', language='fr')
+        # Get request
+        request = self.get_alias_request(
+            alias=alias,
+            lang_code="fr",
+            path=get_object_edit_url(alias_content),
+            user=self.get_superuser(),
+        )
+        # Remove language menu from request's toolbar
+        del request.toolbar.menus[LANGUAGE_MENU_IDENTIFIER]
+
+        # find VersioningPageToolbar
+        for cls, toolbar in request.toolbar.toolbars.items():
+            if cls == "djangocms_alias.cms_toolbars.AliasToolbar":
+                # and call override_language_menu
+                toolbar.override_language_switcher()
+                break
+        else:
+            self.fail("No AliasToolbar in alias request")
+        language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER, _("Language"))
+        self.assertIsNone(language_menu)
 
     def test_change_alias_settings_button_is_visible_on_alias_edit_view(self):
         button_label = 'Change alias settings...'
@@ -329,7 +355,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertEqual(button.url, self.get_delete_alias_endpoint(alias.pk))
         self.assertEqual(
             button.on_close,
-            self.get_list_aliascontent_endpoint(),
+            self.get_list_alias_endpoint(),
         )
 
     @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
@@ -351,26 +377,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         # No button should be found for delete
         self.assertIsNone(search_result)
 
-    def test_rename_alias_show_on_edit_alias_view(self):
-        alias = self._create_alias()
-        request = self.get_alias_request(
-            alias=alias,
-            user=self.superuser,
-            edit=True,
-        )
-        button_label = 'Rename alias...'
-        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
-        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
-        self.assertIsNotNone(search_result)
-        button = search_result.item
-        self.assertEqual(button.name, button_label)
-        self.assertEqual(button.url, admin_reverse(
-            'djangocms_alias_aliascontent_change',
-            args=[alias.get_content().pk],
-        ))
-        self.assertEqual(button.on_close, 'REFRESH_PAGE')
-
-    def test_disable_buttons_when_in_preview_mode(self):
+    def test_do_not_disable_buttons_when_in_preview_mode(self):
         alias = self._create_alias()
         request = self.get_alias_request(
             alias=alias,
@@ -384,7 +391,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             if result.item.name == 'View usage...':
                 self.assertEqual(result.item.disabled, False)
             else:
-                self.assertEqual(result.item.disabled, True)
+                self.assertEqual(result.item.disabled, False)
 
     def test_disable_buttons_when_not_have_perms(self):
         alias = self._create_alias()
@@ -430,15 +437,15 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
 
         self.assertEqual(response.status_code, 200)
         # Rendered content should contain admin changelist header
-        self.assertIn("Select alias content to change | Django site admin", content)
+        self.assertIn("Select alias to change | Django site admin", content)
 
     def test_site_dropdown_url_renders_admin_changelist_url(self):
         request = self.get_page_request(self.page, user=self.superuser)
         admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
         site_aliases_url = admin_menu.items[3].url
-        admin_changelist_aliases_url = reverse("admin:{}_aliascontent_changelist".format(
+        admin_changelist_aliases_url = reverse("admin:{}_alias_changelist".format(
             AliasContent._meta.app_label)
-        )
+        ) + "?language=en"
 
         with self.login_user_context(self.superuser):
             response = self.client.get(

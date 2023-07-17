@@ -7,13 +7,13 @@ from django.db import models, transaction
 from django.db.models import F, Q
 from django.utils.encoding import force_str
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _
 
 from cms.api import add_plugin
 from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderRelationField
+from cms.models.managers import WithUserMixin
 from cms.toolbar.utils import get_object_preview_url
-from cms.utils.i18n import get_current_language
 from cms.utils.plugins import copy_plugins_to_placeholder
 from cms.utils.urlutils import admin_reverse
 
@@ -173,25 +173,20 @@ class Alias(models.Model):
 
     def get_content(self, language=None, show_draft_content=False):
         if not language:
-            language = get_current_language()
+            language = get_language()
 
         try:
             return self._content_cache[language]
         except KeyError:
-            qs = self.contents.select_related(
+            if show_draft_content and is_versioning_enabled():
+                qs = self.contents(manager="admin_manager").latest_content()
+            else:
+                qs = self.contents.all()
+            qs = qs.select_related(
                 'alias__category',
             ).prefetch_related(
                 'placeholders'
             ).filter(language=language)
-
-            if show_draft_content and is_versioning_enabled():
-                from djangocms_versioning.constants import DRAFT, PUBLISHED
-                from djangocms_versioning.helpers import remove_published_where
-
-                # Ensure that we are getting the latest valid content, the top most version can become
-                # archived with a previous version re-published
-                qs = remove_published_where(qs)
-                qs = qs.filter(Q(versions__state=DRAFT) | Q(versions__state=PUBLISHED)).order_by('-versions__created')
 
             self._content_cache[language] = qs.first()
             return self._content_cache[language]
@@ -202,7 +197,7 @@ class Alias(models.Model):
 
     def get_plugins(self, language=None):
         if not language:
-            language = get_current_language()
+            language = get_language()
         try:
             return self._plugins_cache[language]
         except KeyError:
@@ -213,12 +208,7 @@ class Alias(models.Model):
 
     def get_languages(self):
         if not self._content_languages_cache:
-            queryset = self.contents.all()
-
-            if is_versioning_enabled():
-                from djangocms_versioning.helpers import remove_published_where
-                queryset = remove_published_where(queryset)
-
+            queryset = self.contents(manager="admin_manager").current_content()
             self._content_languages_cache = queryset.values_list('language', flat=True)
         return self._content_languages_cache
 
@@ -259,6 +249,11 @@ class Alias(models.Model):
         self.category.aliases.filter(*filters).update(position=op(F('position'), 1))  # noqa: E501
 
 
+class AliasContentManager(WithUserMixin, models.Manager):
+    """Adds with_user syntax to AliasContent w/o using versioning"""
+    pass
+
+
 class AliasContent(models.Model):
     alias = models.ForeignKey(
         Alias,
@@ -274,8 +269,10 @@ class AliasContent(models.Model):
     language = models.CharField(
         max_length=10,
         choices=settings.LANGUAGES,
-        default=get_current_language,
+        default=get_language,
     )
+
+    objects = AliasContentManager()
 
     class Meta:
         verbose_name = _('alias content')

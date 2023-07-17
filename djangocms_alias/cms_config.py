@@ -13,12 +13,7 @@ try:
 except (ImportError, LookupError):
     AliasContentConfig = None
 
-try:
-    from djangocms_versioning.constants import DRAFT  # NOQA
-
-    djangocms_versioning_installed = True
-except ImportError:
-    djangocms_versioning_installed = False
+djangocms_versioning_installed = apps.is_installed("djangocms_versioning")
 
 
 class AliasCMSConfig(CMSAppConfig):
@@ -29,9 +24,9 @@ class AliasCMSConfig(CMSAppConfig):
     djangocms_moderation_enabled = getattr(
         settings, 'MODERATING_ALIAS_MODELS_ENABLED', True)
     djangocms_versioning_enabled = getattr(
-        settings, 'VERSIONING_ALIAS_MODELS_ENABLED', True)
+        settings, 'VERSIONING_ALIAS_MODELS_ENABLED', True) and djangocms_versioning_installed
 
-    if djangocms_versioning_enabled and djangocms_versioning_installed:
+    if djangocms_versioning_enabled:
 
         from cms.utils.i18n import get_language_tuple
 

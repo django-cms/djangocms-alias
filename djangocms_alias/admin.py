@@ -39,7 +39,7 @@ __all__ = [
     'AliasContentAdmin',
 ]
 
-alias_admin_classes = [GrouperModelAdmin]
+alias_admin_classes = [ExtendedGrouperVersionAdminMixin, GrouperModelAdmin]
 alias_admin_list_display = ['content__name', 'category', 'admin_list_actions']
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
@@ -50,7 +50,6 @@ if djangocms_versioning_enabled:
     )
     from djangocms_versioning.models import Version
 
-    alias_admin_classes.insert(0, ExtendedGrouperVersionAdminMixin)
     alias_admin_classes.insert(0, StateIndicatorMixin)
     alias_admin_list_display.insert(-1, "get_author")
     alias_admin_list_display.insert(-1, "get_modified_date")
@@ -171,5 +170,4 @@ class AliasContentAdmin(admin.ModelAdmin):
 
     def has_module_permission(self, request: HttpRequest) -> bool:
         """Hides admin class in admin site overview"""
-
         return False

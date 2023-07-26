@@ -7,7 +7,7 @@ import django.utils.translation
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('djangocms_alias', '0002_auto_20200723_1424'),
+        ('djangocms_alias', '0003_auto_20230725_1547'),
     ]
 
     operations = [

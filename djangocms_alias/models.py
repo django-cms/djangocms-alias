@@ -280,7 +280,7 @@ class AliasContent(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._meta.get_field('language').choices = settings.LANGUAGES
-     
+
     def __str__(self):
         return f'{self.name} ({self.language})'
 

@@ -52,8 +52,8 @@ class Category(TranslatableModel):
         name=models.CharField(
             verbose_name=_('name'),
             max_length=120,
-            unique=True,
         ),
+        meta={'unique_together': [('name', 'language_code')]},
     )
 
     class Meta:

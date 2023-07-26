@@ -2,6 +2,7 @@ from distutils.version import LooseVersion
 
 from django import get_version
 from django.contrib.sites.models import Site
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 
 from cms.api import add_plugin, create_title
@@ -420,3 +421,32 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
 
         self.assertEqual(category.get_absolute_url(), expected)
+
+    def test_category_name_same_across_languages(self):
+        """
+        Category name may be the same across languages
+        """
+        category = Category.objects.create(name='Samename A')
+        category.set_current_language('de')
+        category.name = "Samename A"
+        try:
+            category.validate_unique()
+        except ValidationError:
+            self.fail("Same Category name should be allowed across two languages.")
+
+        category.set_current_language('en')
+        self.assertEqual(category.name, 'Samename A')
+        category.set_current_language('de')
+        self.assertEqual(category.name, 'Samename A')
+
+    def test_category_name_unique_for_language(self):
+        """
+        Category name can't be the same in one language for two different categories
+        """
+        with self.login_user_context(self.superuser):
+            Category.objects.create(name='Samename B')
+            c = Category(name='Samename B')
+            self.assertRaises(ValidationError, c.validate_unique)
+
+            
+

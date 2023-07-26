@@ -447,6 +447,3 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             Category.objects.create(name='Samename B')
             c = Category(name='Samename B')
             self.assertRaises(ValidationError, c.validate_unique)
-
-            
-

@@ -69,7 +69,7 @@ class StaticAlias(Tag):
     """
     name = 'static_alias'
     options = PlaceholderOptions(
-        Argument('static_code', resolve=False),
+        Argument('static_code', resolve=True),
         MultiValueArgument('extra_bits', required=False, resolve=False),
         blocks=[
             ('endstatic_alias', 'nodelist'),

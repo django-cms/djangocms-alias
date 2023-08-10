@@ -340,3 +340,22 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
         self.assertIsNotNone(alias.get_content("en", show_draft_content=True))
         self.assertIsNotNone(alias.get_content("de", show_draft_content=True))
+
+    def test_alias_rendered_when_identifier_is_variable(self):
+        alias_template = """{% load djangocms_alias_tags %}{% static_alias foo_variable %}"""  # noqa: E501
+
+        alias = self._create_alias(static_code="some_unique_id")
+        add_plugin(
+            alias.get_placeholder(self.language),
+            'TextPlugin',
+            language=self.language,
+            body='Content Alias 1234',
+        )
+
+        output = self.render_template_obj(
+            alias_template,
+            {'foo_variable': "some_unique_id"},
+            self.get_request('/'),
+        )
+
+        self.assertEqual(output, "Content Alias 1234")

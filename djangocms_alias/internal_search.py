@@ -1,7 +1,7 @@
 from django.template import RequestContext
 from django.utils.translation import gettext_lazy as _
 
-from cms.toolbar.utils import get_toolbar_from_request, get_object_preview_url
+from cms.toolbar.utils import get_object_preview_url, get_toolbar_from_request
 
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.helpers import get_request, get_version_object

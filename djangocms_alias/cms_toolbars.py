@@ -1,7 +1,6 @@
 import itertools
 from copy import copy
 
-from cms.toolbar.utils import get_object_edit_url
 from django.urls import NoReverseMatch
 from django.utils.encoding import force_str
 from django.utils.http import urlencode
@@ -18,6 +17,7 @@ from cms.cms_toolbars import (
     SHORTCUTS_BREAK,
 )
 from cms.toolbar.items import Break, ButtonList
+from cms.toolbar.utils import get_object_edit_url
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 from cms.utils.i18n import (

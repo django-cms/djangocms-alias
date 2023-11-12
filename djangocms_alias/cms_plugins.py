@@ -1,6 +1,5 @@
 from copy import copy
 
-from cms.toolbar.utils import get_object_edit_url
 from django.utils.translation import (
     get_language_from_request,
     gettext_lazy as _,
@@ -8,6 +7,7 @@ from django.utils.translation import (
 
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
+from cms.toolbar.utils import get_object_edit_url
 from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,

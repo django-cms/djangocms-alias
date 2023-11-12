@@ -1,7 +1,6 @@
 import re
 from unittest import skip, skipIf, skipUnless
 
-from cms.toolbar.utils import get_object_edit_url
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
@@ -9,6 +8,7 @@ from django.test.utils import override_settings
 
 from cms.api import add_plugin
 from cms.models import Placeholder
+from cms.toolbar.utils import get_object_edit_url
 from cms.utils import get_current_site
 from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins

@@ -26,7 +26,7 @@
       {% for item in object.objects_using %}
       <li>
           {{ item|verbose_name|capfirst|escape }}:
-          <a href="{{ item.get_absolute_url }}">{{ item }}</a>
+          {% if item.get_absolute_url %}<a href="{{ item.get_absolute_url }}">{{ item }}</a>{% else %}{{ item }}{% endif %}
       </li>
       {% endfor %}
   </ul>

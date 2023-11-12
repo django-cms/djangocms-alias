@@ -419,4 +419,4 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             f"admin:{app_label}_category_change", args=[category.pk]
         )
 
-        self.assertEqual(category.get_absolute_url(), expected)
+        self.assertEqual(category.get_edit_url(), expected)

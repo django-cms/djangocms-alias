@@ -13,7 +13,6 @@ from cms.api import add_plugin
 from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderRelationField
 from cms.models.managers import WithUserMixin
-from cms.toolbar.utils import get_object_preview_url
 from cms.utils.plugins import copy_plugins_to_placeholder
 from cms.utils.urlutils import admin_reverse
 
@@ -64,7 +63,7 @@ class Category(TranslatableModel):
         # Be sure to be able to see the category name even if it's not in the current language
         return self.safe_translation_getter("name", any_language=True)
 
-    def get_absolute_url(self):
+    def get_edit_url(self):
         """Builds the url to the admin category change view"""
         return admin_reverse(CHANGE_CATEGORY_URL_NAME, args=[self.pk])
 
@@ -159,17 +158,6 @@ class Alias(models.Model):
                 return f'{name} (Not published)'
 
         return name
-
-    def get_absolute_url(self, language=None):
-        if is_versioning_enabled():
-            from djangocms_versioning.helpers import (
-                version_list_url_for_grouper,
-            )
-
-            return version_list_url_for_grouper(self)
-        content = self.get_content(language=language)
-        if content:
-            return content.get_absolute_url()
 
     def get_content(self, language=None, show_draft_content=False):
         if not language:
@@ -292,9 +280,6 @@ class AliasContent(models.Model):
 
     def get_placeholders(self):
         return [self.placeholder]
-
-    def get_absolute_url(self):
-        return get_object_preview_url(self)
 
     def get_template(self):
         return 'djangocms_alias/alias_content.html'

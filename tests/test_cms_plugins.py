@@ -3,6 +3,7 @@ from unittest import skipUnless
 from urllib.parse import urlparse
 
 from cms.api import add_plugin, create_title
+from cms.toolbar.utils import get_object_edit_url
 from cms.utils import get_current_site
 from cms.utils.plugins import downcast_plugins
 from cms.utils.urlutils import admin_reverse
@@ -51,8 +52,8 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.assertEqual(len(extra_items), 2)
         first, second = extra_items
         self.assertEqual(first.name, 'Edit Alias')
-        self.assertEqual(first.url, alias.get_absolute_url())
-        self.assertEqual(first.action, 'sideframe')
+        self.assertEqual(first.url, get_object_edit_url(alias.get_content()))
+        self.assertEqual(first.action, '')
 
         self.assertEqual(second.name, 'Detach Alias')
         self.assertEqual(second.action, 'modal')
@@ -96,7 +97,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         first = extra_items[0]
         # We cannot detach alias on undraft page
         self.assertEqual(first.name, 'Edit Alias')
-        self.assertEqual(first.url, alias.get_absolute_url())
+        self.assertEqual(first.url, get_object_edit_url(alias.get_content()))
 
     def test_rendering_plugin_on_page(self):
         alias = self._create_alias(published=True)

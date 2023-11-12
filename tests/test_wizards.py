@@ -1,3 +1,4 @@
+from cms.toolbar.utils import get_object_edit_url
 from django.contrib.sites.models import Site
 from django.utils import translation
 
@@ -65,7 +66,8 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(form.fields['site'].initial, get_current_site())
 
         with self.login_user_context(self.superuser):
-            response = self.client.get(alias.get_absolute_url())
+            url = get_object_edit_url(alias.get_content(show_draft_content=True))
+            response = self.client.get(url)
         self.assertContains(response, data['name'])
 
         if is_versioning_enabled():
@@ -137,5 +139,5 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         category = form.save()
 
         with self.login_user_context(self.superuser):
-            response = self.client.get(category.get_absolute_url())
+            response = self.client.get(category.get_edit_url())
         self.assertContains(response, data['name'])

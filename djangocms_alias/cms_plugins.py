@@ -42,7 +42,7 @@ class Alias(CMSPluginBase):
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):
         if plugin.plugin_type == cls.__name__:
-            alias_content =  plugin.alias.get_content()
+            alias_content = plugin.alias.get_content()
             detach_endpoint = admin_reverse(
                 DETACH_ALIAS_PLUGIN_URL_NAME,
                 args=[plugin.pk],
@@ -50,14 +50,14 @@ class Alias(CMSPluginBase):
 
             plugin_menu_items = []
             if alias_content:
-                 plugin_menu_items.append(
+                plugin_menu_items.append(
                     PluginMenuItem(
                         _('Edit Alias'),
                         get_object_edit_url(alias_content),
                         action='',
                         attributes={'cms-icon': 'alias'},
                     ),
-                 )
+                )
 
             if cls.can_detach(
                 request.user,

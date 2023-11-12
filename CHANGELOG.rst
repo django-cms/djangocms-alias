@@ -2,6 +2,11 @@
 Changelog
 =========
 
+2.0.0rc2
+========
+* fix: Migration dependency on latest django-cms migration.
+* fix: Allow using a variable as the identifier in static_alias template tag
+
 2.0.0rc1
 ========
 * Django 4.0, 4.1, and 4.2 support added

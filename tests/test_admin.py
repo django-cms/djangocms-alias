@@ -1,6 +1,6 @@
 from unittest import skipUnless
 
-from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
+from cms.toolbar.utils import get_object_preview_url
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 from django.utils.formats import localize

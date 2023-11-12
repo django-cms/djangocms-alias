@@ -139,5 +139,5 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         category = form.save()
 
         with self.login_user_context(self.superuser):
-            response = self.client.get(category.get_edit_url())
+            response = self.client.get(category.get_admin_change_url())
         self.assertContains(response, data['name'])

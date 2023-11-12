@@ -63,7 +63,7 @@ class Category(TranslatableModel):
         # Be sure to be able to see the category name even if it's not in the current language
         return self.safe_translation_getter("name", any_language=True)
 
-    def get_edit_url(self):
+    def get_admin_change_url(self):
         """Builds the url to the admin category change view"""
         return admin_reverse(CHANGE_CATEGORY_URL_NAME, args=[self.pk])
 

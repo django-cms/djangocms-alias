@@ -8,7 +8,7 @@ from django.test.utils import override_settings
 
 from cms.api import add_plugin
 from cms.models import Placeholder
-from cms.toolbar.utils import get_object_edit_url
+from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
 from cms.utils import get_current_site
 from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
@@ -845,13 +845,13 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 str(self.page),
             ),
         )
-        # self.assertRegex(
-        #     str(response.content),
-        #     r'href="{}"[\w+]?>{}<\/a>'.format(
-        #         re.escape(get_object_edit_url(root_alias.get_content())),
-        #         str(alias),
-        #     ),
-        # )
+        self.assertRegex(
+            str(response.content),
+            r'href="{}"[\w+]?>{}<\/a>'.format(
+                re.escape(get_object_preview_url(root_alias.get_content())),
+                str(alias),
+            ),
+        )
         self.assertRegex(
             str(response.content),
             r'href="{}"[\w+]?>{}<\/a>'.format(

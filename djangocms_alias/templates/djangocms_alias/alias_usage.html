@@ -39,7 +39,11 @@
                 {% with item|verbose_name as object_type %}
                 <td>{{ object_type|capfirst|escape }}</td>
                 <td>
-                  <a target="_top" onclick="closeSideframe()" href="{{ item.get_absolute_url }}">{{ item }}</a>
+                  {% if item|admin_view_url %}
+                    <a target="_top" onclick="closeSideframe()" href="{{ item|admin_view_url }}">{{ item }}</a>
+                  {% else %}
+                    {{ item }}
+                  {% endif %}
                 </td>
                 <td>
                     {% if object_type == 'alias' %}

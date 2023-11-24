@@ -193,6 +193,7 @@ class StaticAlias(Tag):
                 placeholder=placeholder,
                 context=context,
                 nodelist=nodelist,
+                use_cache=True,
             )
             return content
         return ''

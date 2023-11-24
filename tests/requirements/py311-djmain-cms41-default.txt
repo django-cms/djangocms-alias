@@ -31,7 +31,7 @@ django-classy-tags==4.0.0
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-git @ https://github.com/django-cms/django-cms@develop-4#egg=django-cms
+django-cms @ https://github.com/django-cms/django-cms/tarball/develop-4
     # via
     #   -r requirements.in
     #   djangocms-versioning

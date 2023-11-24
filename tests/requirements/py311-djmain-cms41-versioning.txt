@@ -4,7 +4,7 @@
 #
 #    requirements/compile.py
 #
-asgiref==3.6.0
+asgiref==3.7.2
     # via django
 beautifulsoup4==4.12.2
     # via bs4
@@ -31,7 +31,7 @@ django-classy-tags==4.0.0
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-django-cms==4.1.0rc3
+git @ https://github.com/django-cms/django-cms@develop-4#egg=django-cms
     # via
     #   -r requirements.in
     #   djangocms-versioning

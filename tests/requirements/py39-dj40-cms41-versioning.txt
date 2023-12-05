@@ -31,7 +31,7 @@ django-classy-tags==4.0.0
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-django-cms==4.1.0rc3
+django-cms==4.1.0rc4
     # via
     #   -r requirements.in
     #   djangocms-versioning

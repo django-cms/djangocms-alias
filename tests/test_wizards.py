@@ -1,7 +1,7 @@
-from cms.toolbar.utils import get_object_edit_url
 from django.contrib.sites.models import Site
 from django.utils import translation
 
+from cms.toolbar.utils import get_object_edit_url
 from cms.utils import get_current_site
 from cms.wizards.forms import WizardStep2BaseForm, step2_form_factory
 from cms.wizards.helpers import get_entries as get_wizard_entires

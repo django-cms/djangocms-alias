@@ -124,7 +124,7 @@ class StaticAlias(Tag):
 
             alias = Alias.objects.create(category=default_category, **alias_creation_kwargs)
 
-        if not AliasContent._default_manager.filter(alias=alias, language=language).exists():
+        if not AliasContent._base_manager.filter(alias=alias, language=language).exists():
             # Create a first content object if none exists in the given language.
             # If versioning is enabled we can only create the records with a logged-in user / staff member
             if is_versioning_enabled() and not request.user.is_authenticated:

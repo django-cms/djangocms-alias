@@ -21,7 +21,7 @@ jobs:
           - '3.11'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: unit-tests
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v4
         with:
@@ -75,3 +75,34 @@ jobs:
         with:
           name: html-report
           path: htmlcov
+
+  unit-tests-django-main:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11']
+        requirements-file: [
+          'py311-djmain-cms41-default.txt',
+          'py311-djmain-cms41-versioning.txt',
+        ]
+        os: [
+          ubuntu-20.04,
+        ]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r tests/requirements/${{ matrix.requirements-file }}
+        python setup.py install
+
+    - name: Run coverage
+      run: coverage run setup.py test
+      continue-on-error: true

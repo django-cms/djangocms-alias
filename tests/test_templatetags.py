@@ -334,12 +334,15 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             self.client.get(page_edit_url("en"))  # supposed to create the alias and alias content for en
+            self.client.get(page_edit_url("en"))  # supposed to create no additional object
             self.client.get(page_edit_url("de"))  # supposed to create the alias content for de
 
         alias = AliasModel.objects.get(static_code="template_example_global_alias_code")
 
         self.assertIsNotNone(alias.get_content("en", show_draft_content=True))
         self.assertIsNotNone(alias.get_content("de", show_draft_content=True))
+        # Ensure that exactly two content objects have been created
+        self.assertEqual(alias.contents(manager="admin_manager").count(), 2)
 
     def test_alias_rendered_when_identifier_is_variable(self):
         alias_template = """{% load djangocms_alias_tags %}{% static_alias foo_variable %}"""  # noqa: E501

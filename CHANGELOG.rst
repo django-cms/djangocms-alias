@@ -2,20 +2,21 @@
 Changelog
 =========
 
-2.0.0rc2
-========
+2.0.0rc3 (2023-12-12)
+=====================
+* fix: avoid generating migrations based on settings.LANGUAGE by @vasekch in https://github.com/django-cms/djangocms-alias/pull/186
+* fix: Enable caching for `static_alias` template tag by @vasekch in https://github.com/django-cms/djangocms-alias/pull/200
+* fix: `static_alias` unnecessarily creates new content objects when used with versioning by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/202
+* feat: Django 5.0 support, fixed test suite by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/203
 * fix: Migration dependency on latest django-cms migration.
 * fix: Allow using a variable as the identifier in static_alias template tag
-
-2.0.0rc1
-========
-* Django 4.0, 4.1, and 4.2 support added
-* Django 2.2 support removed
-* Python 3.7 support removed
-* Changed test setup to run tox from github actions for consistency in testing
-* Use django CMS 4.1 GrouperModelAdmin utility (breaking change wrt. django CMS 4.0)
-* Admin menu entry show alias change list in the language of the currently shown object
-* Automatically create static aliases in the language needed (fixing #162)
+* fest: Django 4.0, 4.1, and 4.2 support added
+* fest: Django 2.2 support removed
+* fest: Python 3.7 support removed
+* ci: Changed test setup to run tox from github actions for consistency in testing
+* feat: Use django CMS 4.1 GrouperModelAdmin utility (breaking change wrt. django CMS 4.0)
+* fix: Admin menu entry show alias change list in the language of the currently shown object
+* fix: Automatically create static aliases in the language needed (fixing #162)
 
 1.11.0 (2022-10-14)
 ===================

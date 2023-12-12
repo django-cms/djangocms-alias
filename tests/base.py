@@ -2,7 +2,6 @@ from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
 from django.http import QueryDict
 from django.test.client import RequestFactory
-from django.urls import resolve
 
 from cms.api import add_plugin, create_page, create_page_content
 from cms.middleware.toolbar import ToolbarMiddleware
@@ -184,7 +183,6 @@ class BaseAliasPluginTestCase(CMSTestCase):
             if obj:
                 request.toolbar.set_object(obj)
             request.toolbar.populate()
-            request.resolver_match = resolve(request.path)
             request.toolbar.post_template_populate()
         return request
 
@@ -193,8 +191,6 @@ class BaseAliasPluginTestCase(CMSTestCase):
         user.user_permissions.add(Permission.objects.get(codename='add_text'))
         user.user_permissions.add(Permission.objects.get(codename='delete_text'))
         user.user_permissions.add(Permission.objects.get(codename='change_text'))
-        # Page permissions
-        user.user_permissions.add(Permission.objects.get(codename='publish_page'))
         user.user_permissions.add(Permission.objects.get(codename='add_page'))
         user.user_permissions.add(Permission.objects.get(codename='change_page'))
         user.user_permissions.add(Permission.objects.get(codename='delete_page'))

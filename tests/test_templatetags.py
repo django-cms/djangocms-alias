@@ -3,7 +3,7 @@ from unittest import skipUnless
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
 
-from cms.api import add_plugin, create_page, create_title
+from cms.api import add_plugin, create_page, create_page_content
 from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
 
 from djangocms_alias.cms_plugins import Alias
@@ -297,8 +297,8 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
         # The edit and preview url should show the draft contents
         with self.login_user_context(self.superuser):
-            edit_response = self.client.get(page_edit_url)
-            preview_response = self.client.get(page_preview_url)
+            edit_response = self.client.get(page_edit_url, follow=True)
+            preview_response = self.client.get(page_preview_url, follow=True)
 
         self.assertContains(edit_response, 'Updated Draft content for: template_example_global_alias_code')
         self.assertContains(preview_response, 'Updated Draft content for: template_example_global_alias_code')
@@ -316,7 +316,7 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
             limit_visibility_in_menu=None,
             created_by=self.superuser
         )
-        create_title(
+        create_page_content(
             title="Statischer Code-Test",
             language="de",
             page=page,
@@ -330,13 +330,36 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
                 return get_object_edit_url(page.get_title_obj(lang))
         else:
             def page_edit_url(lang):
-                return get_object_edit_url(page.get_content_obj(lang))
+                return get_object_edit_url(page.get_content_obj(lang), language=lang)
 
         with self.login_user_context(self.superuser):
-            self.client.get(page_edit_url("en"))  # supposed to create the alias and alias content for en
-            self.client.get(page_edit_url("de"))  # supposed to create the alias content for de
+            self.client.get(page_edit_url("en"), follow=True)  # supposed to create the alias and alias content for en
+            self.client.get(page_edit_url("en"), follow=True)  # supposed to create no additional object
+            self.client.get(page_edit_url("de"), follow=True)  # supposed to create the alias content for de
 
-        alias = AliasModel.objects.get(static_code="template_example_global_alias_code")
+        alias = AliasModel.objects.filter(static_code="template_example_global_alias_code").first()
 
+        self.assertIsNotNone(alias, "Alias not created")
         self.assertIsNotNone(alias.get_content("en", show_draft_content=True))
         self.assertIsNotNone(alias.get_content("de", show_draft_content=True))
+        # Ensure that exactly two content objects have been created
+        self.assertEqual(alias.contents(manager="admin_manager").count(), 2)
+
+    def test_alias_rendered_when_identifier_is_variable(self):
+        alias_template = """{% load djangocms_alias_tags %}{% static_alias foo_variable %}"""  # noqa: E501
+
+        alias = self._create_alias(static_code="some_unique_id")
+        add_plugin(
+            alias.get_placeholder(self.language),
+            'TextPlugin',
+            language=self.language,
+            body='Content Alias 1234',
+        )
+
+        output = self.render_template_obj(
+            alias_template,
+            {'foo_variable': "some_unique_id"},
+            self.get_request('/'),
+        )
+
+        self.assertEqual(output, "Content Alias 1234")

@@ -14,7 +14,7 @@ coverage==7.3.2
     # via -r requirements.in
 dj-database-url==2.1.0
     # via django-app-helper
-django==4.1.13
+django @ https://github.com/django/django/tarball/main
     # via
     #   dj-database-url
     #   django-classy-tags
@@ -32,7 +32,7 @@ django-classy-tags==4.1.0
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-django-cms==4.1.0rc5
+django-cms @ https://github.com/django-cms/django-cms/tarball/release/4.1.x
     # via djangocms-versioning
 django-formtools==2.4.1
     # via django-cms

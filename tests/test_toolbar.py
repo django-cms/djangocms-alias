@@ -58,7 +58,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         except AttributeError:
             page_url = get_object_edit_url(self.page.get_content_obj(self.language))
         with self.login_user_context(user):
-            response = self.client.get(page_url)
+            response = self.client.get(page_url, follow=True)
         self.assertContains(response, '<span>Aliases')
 
     def test_aliases_link_placement(self):

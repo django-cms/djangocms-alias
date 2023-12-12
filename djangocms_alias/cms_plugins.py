@@ -140,24 +140,26 @@ class Alias(CMSPluginBase):
 
     @classmethod
     def detach_alias_plugin(cls, plugin, language):
-        source_placeholder = plugin.alias.get_placeholder(language)
+        source_placeholder = plugin.alias.get_placeholder(language, show_draft_content=True)  # We're in edit mode
         target_placeholder = plugin.placeholder
-        source_plugins = plugin.alias.get_plugins(language)
 
         # Deleting uses a copy of a plugin to preserve pk on existing
         # ``plugin`` object. This is done due to
         # plugin.get_plugin_toolbar_info requiring a PK in a passed
         # instance.
-        source_placeholder.delete_plugin(copy(plugin))
+        target_placeholder.delete_plugin(copy(plugin))
         target_placeholder._shift_plugin_positions(
             language,
             plugin.position,
             offset=target_placeholder.get_last_plugin_position(language),
         )
-        copied_plugins = copy_plugins_to_placeholder(
-            source_plugins,
-            placeholder=target_placeholder,
-            language=language,
-            start_positions={language: plugin.position},
-        )
-        return copied_plugins
+        if source_placeholder:
+            source_plugins = source_placeholder.get_plugins_list()
+            copied_plugins = copy_plugins_to_placeholder(
+                source_plugins,
+                placeholder=target_placeholder,
+                language=language,
+                start_positions={language: plugin.position},
+            )
+            return copied_plugins
+        return []

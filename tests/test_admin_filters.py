@@ -253,7 +253,7 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         )
 
         version_admin = admin.site._registry[AliasModel]
-        category_filter = CategoryFilter(None, {"category": ""}, AliasModel, version_admin)
+        category_filter = CategoryFilter(None, {"category": [""]}, AliasModel, version_admin)
         # Get the first choice in the filter lookup object
         first_lookup_value = category_filter.lookup_choices[0][1]
         # Lookup value should match the category name linked to alias content
@@ -286,7 +286,7 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         category_two = Category.objects.create(name='a - category')
 
         version_admin = admin.site._registry[AliasModel]
-        category_filter = CategoryFilter(None, {"category": ""}, AliasModel, version_admin)
+        category_filter = CategoryFilter(None, {"category": [""]}, AliasModel, version_admin)
 
         # Get the first choice in the filter lookup object
         first_lookup_value = category_filter.lookup_choices[0][1]

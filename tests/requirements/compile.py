@@ -19,8 +19,10 @@ COMPILE_SETTINGS = {
     "py39-dj42-cms41": [],
     "py310-dj42-cms41": [],
     "py311-dj42-cms41": [],
+    "py312-dj42-cms41": [],
     "py310-dj50-cms41": [],
     "py311-dj50-cms41": [],
+    "py312-dj50-cms41": [],
     "py311-djmain-cms4dev": [],
 }
 

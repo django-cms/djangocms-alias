@@ -184,7 +184,6 @@ class BaseAliasPluginTestCase(CMSTestCase):
             if obj:
                 request.toolbar.set_object(obj)
             request.toolbar.populate()
-            request.resolver_match = resolve(request.path)
             request.toolbar.post_template_populate()
         return request
 
@@ -193,8 +192,6 @@ class BaseAliasPluginTestCase(CMSTestCase):
         user.user_permissions.add(Permission.objects.get(codename='add_text'))
         user.user_permissions.add(Permission.objects.get(codename='delete_text'))
         user.user_permissions.add(Permission.objects.get(codename='change_text'))
-        # Page permissions
-        user.user_permissions.add(Permission.objects.get(codename='publish_page'))
         user.user_permissions.add(Permission.objects.get(codename='add_page'))
         user.user_permissions.add(Permission.objects.get(codename='change_page'))
         user.user_permissions.add(Permission.objects.get(codename='delete_page'))

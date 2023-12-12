@@ -332,7 +332,6 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
             def page_edit_url(lang):
                 return get_object_edit_url(page.get_content_obj(lang), language=lang)
 
-
         with self.login_user_context(self.superuser):
             self.client.get(page_edit_url("en"), follow=True)  # supposed to create the alias and alias content for en
             self.client.get(page_edit_url("en"), follow=True)  # supposed to create no additional object

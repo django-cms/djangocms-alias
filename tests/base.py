@@ -2,7 +2,6 @@ from django.contrib.auth import get_permission_codename
 from django.contrib.auth.models import Permission
 from django.http import QueryDict
 from django.test.client import RequestFactory
-from django.urls import resolve
 
 from cms.api import add_plugin, create_page, create_page_content
 from cms.middleware.toolbar import ToolbarMiddleware

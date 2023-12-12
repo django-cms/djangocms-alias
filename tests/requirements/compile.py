@@ -80,7 +80,7 @@ if __name__ == "__main__":
     ] + sys.argv[1:]
 
     print("Upgrading pip-tools")
-    for py_ver in set(key.split("-")[0] for key in COMPILE_SETTINGS.keys()):
+    for py_ver in {key.split("-")[0] for key in COMPILE_SETTINGS.keys()}:
         args = [f"python{py_ver[2]}.{py_ver[3:]}", "-m", "pip", "install", "--upgrade", "pip-tools"]
         subprocess.run(args, capture_output=True)
 

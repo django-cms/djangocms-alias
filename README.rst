@@ -78,3 +78,7 @@ Alternatively, aliases can be used with the Alias plugin. It allows to select wh
 
 .. |djangocms4| image:: https://img.shields.io/badge/django%20CMS-4-blue.svg
    :target: https://www.django-cms.org/
+
+Side notes
+============
+For the plugin to work out of the box ``{% block content %}`` is expected to exist in your main ``base.html`` file.

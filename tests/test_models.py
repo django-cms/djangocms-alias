@@ -16,13 +16,12 @@ from .base import BaseAliasPluginTestCase
 
 
 DJANGO_VERSION = get_version()
-DJANGO_4_0 = LooseVersion(DJANGO_VERSION) < LooseVersion('4.1')
+DJANGO_4_0 = LooseVersion(DJANGO_VERSION) < LooseVersion("4.1")
 
 
 class AliasModelsTestCase(BaseAliasPluginTestCase):
-
     def _get_aliases_positions(self, category):
-        return dict(category.aliases.values_list('position', 'pk'))
+        return dict(category.aliases.values_list("position", "pk"))
 
     def test_alias_placeholder_slot_save_again(self):
         alias = self._create_alias(self.placeholder.get_plugins())
@@ -34,9 +33,9 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
     def test_alias_placeholder_name(self):
         alias = self._create_alias(
             self.placeholder.get_plugins(),
-            name='test alias 2',
+            name="test alias 2",
         )
-        self.assertEqual(str(alias), 'test alias 2')
+        self.assertEqual(str(alias), "test alias 2")
 
     def test_alias_is_not_recursive(self):
         alias = self._create_alias(
@@ -71,16 +70,16 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             Alias,
             language=self.language,
             alias=alias,
-            template='custom_alias_template'
+            template="custom_alias_template",
         )
         self.assertTrue(recursive_alias_plugin.is_recursive())
 
     def test_increment_position_for_newly_created_instances(self):
         category1 = Category.objects.create(
-            name='Cat 1',
+            name="Cat 1",
         )
         category2 = Category.objects.create(
-            name='Cat 2',
+            name="Cat 2",
         )
         alias1cat1 = AliasModel.objects.create(category=category1)
         alias1cat2 = AliasModel.objects.create(category=category2)
@@ -132,10 +131,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
 
     def test_set_position_dont_change_position_in_other_categories(self):
         category1 = Category.objects.create(
-            name='Cat 1',
+            name="Cat 1",
         )
         category2 = Category.objects.create(
-            name='Cat 2',
+            name="Cat 2",
         )
         alias1cat1 = AliasModel.objects.create(category=category1)  # 0
         alias2cat1 = AliasModel.objects.create(category=category1)  # 1
@@ -201,12 +200,12 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         )
 
     def test_pages_using_alias(self):
-        site1 = Site.objects.create(domain='site1.com', name='1')
-        site2 = Site.objects.create(domain='site2.com', name='2')
-        alias = self._create_alias(name='alias')
+        site1 = Site.objects.create(domain="site1.com", name="1")
+        site2 = Site.objects.create(domain="site2.com", name="2")
+        alias = self._create_alias(name="alias")
 
         site1_page = self._create_page(
-            title='Site1',
+            title="Site1",
             language=self.language,
             site=site1,
         )
@@ -214,7 +213,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         # Should show on the list
 
         nested_page1 = self._create_page(
-            title='Site1 nested page 1',
+            title="Site1 nested page 1",
             language=self.language,
             site=site1,
             parent=site1_page,
@@ -224,7 +223,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         # Should show on the list only once
 
         nested_page2 = self._create_page(
-            title='Site1 nested page 2',
+            title="Site1 nested page 2",
             language=self.language,
             site=site1,
             parent=site1_page,
@@ -233,14 +232,14 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         # Should show on the list
 
         nested_page3 = self._create_page(
-            title='Site1 nested page 3',
+            title="Site1 nested page 3",
             language=self.language,
             site=site1,
             parent=site1_page,
         )  # Not show on the list
 
         deep_nested_page4 = self._create_page(
-            title='Site1 deep nested page 4',
+            title="Site1 deep nested page 4",
             language=self.language,
             site=site1,
             parent=nested_page3,
@@ -249,19 +248,19 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         # Should show on the list
 
         site2_page = self._create_page(
-            title='Site2',
-            language='de',
+            title="Site2",
+            language="de",
             site=site2,
         )
-        self.add_alias_plugin_to_page(site2_page, alias, 'de')
+        self.add_alias_plugin_to_page(site2_page, alias, "de")
 
         if is_versioning_enabled():
-            create_title('en', 'Site2 EN', site2_page, created_by=self.superuser)
-            self._publish(site2_page, 'en')
+            create_title("en", "Site2 EN", site2_page, created_by=self.superuser)
+            self._publish(site2_page, "en")
         else:
-            create_title('en', 'Site2 EN', site2_page)
+            create_title("en", "Site2 EN", site2_page)
 
-        self.add_alias_plugin_to_page(site2_page, alias, 'en')
+        self.add_alias_plugin_to_page(site2_page, alias, "en")
         # Should show on the list only once
 
         with self.assertNumQueries(3):
@@ -275,72 +274,72 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
                 nested_page2.pk,
                 deep_nested_page4.pk,
                 site2_page.pk,
-            ]
+            ],
         )
 
     def test_aliases_using_alias(self):
-        root_alias = self._create_alias(name='root alias')
+        root_alias = self._create_alias(name="root alias")
         if not is_versioning_enabled():
             # TODO: fix it after versioning will have multilanguage support
             AliasContent.objects.create(
-                name='root alias de',
+                name="root alias de",
                 alias=root_alias,
-                language='de',
+                language="de",
             )
             AliasContent.objects.create(
-                name='root alias it',
+                name="root alias it",
                 alias=root_alias,
-                language='it',
+                language="it",
             )
-        root_alias2 = self._create_alias(name='root alias 2')
+        root_alias2 = self._create_alias(name="root alias 2")
 
-        alias1 = self._create_alias(name='alias 1')
-        alias2 = self._create_alias(name='alias 2')
-        alias3 = self._create_alias(name='alias 3')
-        alias4 = self._create_alias(name='alias 4')
+        alias1 = self._create_alias(name="alias 1")
+        alias2 = self._create_alias(name="alias 2")
+        alias3 = self._create_alias(name="alias 3")
+        alias4 = self._create_alias(name="alias 4")
 
         add_plugin(
             root_alias.get_placeholder(self.language),
-            'Alias',
+            "Alias",
             language=self.language,
             alias=alias1,
         )
         if not is_versioning_enabled():
             # TODO: fix it after versioning will have multilanguage support
             add_plugin(
-                root_alias.get_placeholder('de'),
-                'Alias',
-                language='de',
+                root_alias.get_placeholder("de"),
+                "Alias",
+                language="de",
                 alias=alias1,
             )
             add_plugin(
-                root_alias.get_placeholder('it'),
-                'Alias',
-                language='it',
+                root_alias.get_placeholder("it"),
+                "Alias",
+                language="it",
                 alias=alias1,
             )
         # Alias1 should show only once
         add_plugin(
             root_alias.get_placeholder(self.language),
-            'Alias',
+            "Alias",
             language=self.language,
             alias=alias2,
         )
         add_plugin(
             root_alias2.get_placeholder(self.language),
-            'Alias',
+            "Alias",
             language=self.language,
             alias=alias2,
         )
         add_plugin(
             alias2.get_placeholder(self.language),
-            'Alias',
+            "Alias",
             language=self.language,
             alias=alias3,
         )
         add_plugin(
             alias3.get_placeholder(self.language),
-            'Alias',
+            "Alias",
             language=self.language,
             alias=alias4,
         )
@@ -375,14 +374,14 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
 
     def test_pages_and_aliases_using_objects(self):
         alias = self._create_alias()
-        root_alias = self._create_alias(name='root alias')
+        root_alias = self._create_alias(name="root alias")
         add_plugin(
             root_alias.get_placeholder(self.language),
-            'Alias',
+            "Alias",
             language=self.language,
             alias=alias,
         )
-        self.add_alias_plugin_to_page(self.page, alias, 'en')
+        self.add_alias_plugin_to_page(self.page, alias, "en")
         with self.assertNumQueries(5):
             objects = alias.objects_using
         self.assertEqual(
@@ -416,9 +415,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         category = Category.objects.create(name="Test Category")
 
         app_label = category._meta.app_label
-        expected = reverse(
-            f"admin:{app_label}_category_change", args=[category.pk]
-        )
+        expected = reverse(f"admin:{app_label}_category_change", args=[category.pk])
 
         self.assertEqual(category.get_absolute_url(), expected)
 
@@ -426,24 +423,24 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         """
         Category name may be the same across languages
         """
-        category = Category.objects.create(name='Samename A')
-        category.set_current_language('de')
+        category = Category.objects.create(name="Samename A")
+        category.set_current_language("de")
         category.name = "Samename A"
         try:
             category.validate_unique()
         except ValidationError:
             self.fail("Same Category name should be allowed across two languages.")
 
-        category.set_current_language('en')
-        self.assertEqual(category.name, 'Samename A')
-        category.set_current_language('de')
-        self.assertEqual(category.name, 'Samename A')
+        category.set_current_language("en")
+        self.assertEqual(category.name, "Samename A")
+        category.set_current_language("de")
+        self.assertEqual(category.name, "Samename A")
 
     def test_category_name_unique_for_language(self):
         """
         Category name can't be the same in one language for two different categories
         """
         with self.login_user_context(self.superuser):
-            Category.objects.create(name='Samename B')
-            c = Category(name='Samename B')
+            Category.objects.create(name="Samename B")
+            c = Category(name="Samename B")
             self.assertRaises(ValidationError, c.validate_unique)

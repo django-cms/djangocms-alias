@@ -38,7 +38,7 @@ django_dict = {
 cms_dict = {
     "cms40": "https://github.com/django-cms/django-cms/tarball/release/4.0.1.x#egg=django-cms",
     "cms41": "django-cms>=4.1.0rc2,<4.2",
-    "cms4dev": "https://github.com/django-cms/django-cms/tarball/release/4.1.x#egg=django-cms"
+    "cms4dev": "https://github.com/django-cms/django-cms/tarball/release/4.1.x#egg=django-cms",
 }
 
 
@@ -55,7 +55,7 @@ def get_args(key, value, common_args):
         cms_dict[cms_ver],
         *value,
         "-o",
-        key
+        key,
     ]
 
 
@@ -81,7 +81,14 @@ if __name__ == "__main__":
 
     print("Upgrading pip-tools")
     for py_ver in {key.split("-")[0] for key in COMPILE_SETTINGS.keys()}:
-        args = [f"python{py_ver[2]}.{py_ver[3:]}", "-m", "pip", "install", "--upgrade", "pip-tools"]
+        args = [
+            f"python{py_ver[2]}.{py_ver[3:]}",
+            "-m",
+            "pip",
+            "install",
+            "--upgrade",
+            "pip-tools",
+        ]
         subprocess.run(args, capture_output=True)
 
     print("Creating requirement files")

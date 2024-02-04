@@ -61,9 +61,13 @@ class CategoryFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         # Only offer categories available
         qs = model_admin.get_queryset(request)
-        cat_id = qs.values_list('category', flat=True)
+        cat_id = qs.values_list("category", flat=True)
         # Ensure the category is ordered by the name alphabetically by default
-        cat = Category.objects.filter(pk__in=cat_id).translated(get_language()).order_by('translations__name')
+        cat = (
+            Category.objects.filter(pk__in=cat_id)
+            .translated(get_language())
+            .order_by("translations__name")
+        )
         for obj in cat:
             yield str(obj.pk), smart_str(obj)
 

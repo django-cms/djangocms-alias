@@ -20,13 +20,13 @@ from .models import Alias as AliasModel, AliasContent, AliasPlugin
 
 
 __all__ = [
-    'Alias',
+    "Alias",
 ]
 
 
 @plugin_pool.register_plugin
 class Alias(CMSPluginBase):
-    name = _('Alias')
+    name = _("Alias")
     model = AliasPlugin
     form = AliasPluginForm
 
@@ -35,8 +35,8 @@ class Alias(CMSPluginBase):
             isinstance(instance.placeholder.source, AliasContent)
             and instance.is_recursive()
         ):
-            return 'djangocms_alias/alias_recursive.html'
-        return f'djangocms_alias/{instance.template}/alias.html'
+            return "djangocms_alias/alias_recursive.html"
+        return f"djangocms_alias/{instance.template}/alias.html"
 
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):
@@ -49,10 +49,10 @@ class Alias(CMSPluginBase):
 
             plugin_menu_items = [
                 PluginMenuItem(
-                    _('Edit Alias'),
+                    _("Edit Alias"),
                     edit_endpoint,
-                    action='sideframe',
-                    attributes={'cms-icon': 'alias'},
+                    action="sideframe",
+                    attributes={"cms-icon": "alias"},
                 ),
             ]
 
@@ -63,42 +63,42 @@ class Alias(CMSPluginBase):
             ):
                 plugin_menu_items.append(
                     PluginMenuItem(
-                        _('Detach Alias'),
+                        _("Detach Alias"),
                         detach_endpoint,
-                        action='modal',
-                        attributes={'cms-icon': 'alias'},
+                        action="modal",
+                        attributes={"cms-icon": "alias"},
                     )
                 )
             return plugin_menu_items
 
         data = {
-            'plugin': plugin.pk,
-            'language': get_language_from_request(request, check_path=True),
+            "plugin": plugin.pk,
+            "language": get_language_from_request(request, check_path=True),
         }
         endpoint = add_url_parameters(admin_reverse(CREATE_ALIAS_URL_NAME), **data)
         return [
             PluginMenuItem(
-                _('Create Alias'),
+                _("Create Alias"),
                 endpoint,
-                action='modal',
-                attributes={'cms-icon': 'alias'},
+                action="modal",
+                attributes={"cms-icon": "alias"},
             ),
         ]
 
     @classmethod
     def get_extra_placeholder_menu_items(cls, request, placeholder):
         data = {
-            'placeholder': placeholder.pk,
-            'language': get_language_from_request(request, check_path=True),
+            "placeholder": placeholder.pk,
+            "language": get_language_from_request(request, check_path=True),
         }
         endpoint = add_url_parameters(admin_reverse(CREATE_ALIAS_URL_NAME), **data)
 
         menu_items = [
             PluginMenuItem(
-                _('Create Alias'),
+                _("Create Alias"),
                 endpoint,
-                action='modal',
-                attributes={'cms-icon': 'alias'},
+                action="modal",
+                attributes={"cms-icon": "alias"},
             ),
         ]
         return menu_items
@@ -106,7 +106,7 @@ class Alias(CMSPluginBase):
     @classmethod
     def can_create_alias(cls, user, plugins=None, replace=False):
         if not user.has_perm(
-            get_model_permission_codename(AliasModel, 'add'),
+            get_model_permission_codename(AliasModel, "add"),
         ):
             return False
 
@@ -114,9 +114,8 @@ class Alias(CMSPluginBase):
             return True
         elif replace:
             target_placeholder = plugins[0].placeholder
-            if (
-                not target_placeholder.check_source(user)
-                or not has_plugin_permission(user, Alias.__name__, 'add')
+            if not target_placeholder.check_source(user) or not has_plugin_permission(
+                user, Alias.__name__, "add"
             ):
                 return False
 
@@ -124,8 +123,9 @@ class Alias(CMSPluginBase):
             has_plugin_permission(
                 user,
                 plugin.plugin_type,
-                'add',
-            ) for plugin in plugins
+                "add",
+            )
+            for plugin in plugins
         )
 
     @classmethod
@@ -134,13 +134,16 @@ class Alias(CMSPluginBase):
             has_plugin_permission(
                 user,
                 plugin.plugin_type,
-                'add',
-            ) for plugin in plugins
+                "add",
+            )
+            for plugin in plugins
         ) and target_placeholder.check_source(user)
 
     @classmethod
     def detach_alias_plugin(cls, plugin, language):
-        source_placeholder = plugin.alias.get_placeholder(language, show_draft_content=True)  # We're in edit mode
+        source_placeholder = plugin.alias.get_placeholder(
+            language, show_draft_content=True
+        )  # We're in edit mode
         target_placeholder = plugin.placeholder
 
         # Deleting uses a copy of a plugin to preserve pk on existing

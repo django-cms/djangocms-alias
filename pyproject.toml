@@ -1,0 +1,23 @@
+[tool.ruff.lint]
+select=[
+  "E",  # pycodestyle errors
+  "W",  # pycodestyle warnings
+  "F",  # pyflakes
+  "I",  # isort
+  "C",  # flake8-comprehensions
+  "B",  # flake8-bugbear
+  "PLE", # pylint error
+  "PLR", # pylint refactor
+  "PLW", # pylint warning
+  "UP", # pyupgrade
+]
+
+extend-ignore = [
+    "PLR0915",
+    "C901",
+    "PLR0913",
+    "PLW1510",
+    "I001" ,
+    "PLR0912" ,
+    "E501"
+]

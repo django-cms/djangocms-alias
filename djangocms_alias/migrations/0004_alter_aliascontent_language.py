@@ -5,15 +5,16 @@ import django.utils.translation
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('djangocms_alias', '0003_auto_20230725_1547'),
+        ("djangocms_alias", "0003_auto_20230725_1547"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='aliascontent',
-            name='language',
-            field=models.CharField(default=django.utils.translation.get_language, max_length=10),
+            model_name="aliascontent",
+            name="language",
+            field=models.CharField(
+                default=django.utils.translation.get_language, max_length=10
+            ),
         ),
     ]

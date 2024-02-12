@@ -193,7 +193,9 @@ class AliasContentAdmin(admin.ModelAdmin):
 
     def delete_model(self, request: HttpRequest, obj: AliasContent):
         if obj.alias._default_manager.filter(language=obj.language).count() == 1:
-            message = _("Alias content for language {} deleted. A new empty alias content will be created if needed.").format(obj.language)
+            message = _(
+                "Alias content for language {} deleted. A new empty alias content will be created if needed."
+            ).format(obj.language)
             self.message_user(request, message, level=messages.WARNING)
 
         return super().delete_model(

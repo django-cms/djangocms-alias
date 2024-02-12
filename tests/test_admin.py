@@ -451,9 +451,15 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             self.assertNotContains(response, "Published")
             self.assertNotContains(response, "Draft")
 
-        aliascontent1_url = get_object_preview_url(alias1.get_content(show_draft_content=True))
-        aliascontent2_url = get_object_preview_url(alias2.get_content(show_draft_content=True))
-        aliascontent3_url = get_object_preview_url(alias3.get_content(show_draft_content=True))
+        aliascontent1_url = get_object_preview_url(
+            alias1.get_content(show_draft_content=True)
+        )
+        aliascontent2_url = get_object_preview_url(
+            alias2.get_content(show_draft_content=True)
+        )
+        aliascontent3_url = get_object_preview_url(
+            alias3.get_content(show_draft_content=True)
+        )
 
         # when versioning is not enabled, the django admin change form
         # is used which used links to the aliascontent_change view

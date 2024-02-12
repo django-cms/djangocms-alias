@@ -158,9 +158,9 @@ class CreateAliasForm(BaseCreateAliasForm):
             name=self.cleaned_data.get("name"),
             language=self.cleaned_data.get("language"),
         )
-        if self.cleaned_data.get('replace'):
-            placeholder = self.cleaned_data.get('placeholder')
-            plugin = self.cleaned_data.get('plugin')
+        if self.cleaned_data.get("replace"):
+            placeholder = self.cleaned_data.get("placeholder")
+            plugin = self.cleaned_data.get("plugin")
             source_plugins = None
         else:
             placeholder, plugin = None, None

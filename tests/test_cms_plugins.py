@@ -54,9 +54,9 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
 
         self.assertEqual(len(extra_items), 2)
         first, second = extra_items
-        self.assertEqual(first.name, 'Edit Alias')
+        self.assertEqual(first.name, "Edit Alias")
         self.assertEqual(first.url, get_object_edit_url(alias.get_content()))
-        self.assertEqual(first.action, '')
+        self.assertEqual(first.action, "")
 
         self.assertEqual(second.name, "Detach Alias")
         self.assertEqual(second.action, "modal")
@@ -99,7 +99,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.assertEqual(len(extra_items), 1)
         first = extra_items[0]
         # We cannot detach alias on undraft page
-        self.assertEqual(first.name, 'Edit Alias')
+        self.assertEqual(first.name, "Edit Alias")
         self.assertEqual(first.url, get_object_edit_url(alias.get_content()))
 
     def test_rendering_plugin_on_page(self):

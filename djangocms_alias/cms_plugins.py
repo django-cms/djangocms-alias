@@ -52,10 +52,10 @@ class Alias(CMSPluginBase):
             if alias_content:
                 plugin_menu_items.append(
                     PluginMenuItem(
-                        _('Edit Alias'),
+                        _("Edit Alias"),
                         get_object_edit_url(alias_content),
-                        action='',
-                        attributes={'cms-icon': 'alias'},
+                        action="",
+                        attributes={"cms-icon": "alias"},
                     ),
                 )
 

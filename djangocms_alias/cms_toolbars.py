@@ -194,7 +194,9 @@ class AliasToolbar(CMSToolbar):
             )
             if alias_content:
                 url = get_object_edit_url(alias_content, language=code)
-                language_menu.add_link_item(name, url=url, active=self.current_lang == code)
+                language_menu.add_link_item(
+                    name, url=url, active=self.current_lang == code
+                )
 
     def change_language_menu(self):
         if self.toolbar.edit_mode_active and isinstance(self.toolbar.obj, AliasContent):

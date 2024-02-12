@@ -1,14 +1,14 @@
 from unittest import skipUnless
 
+from cms.api import add_plugin, create_page, create_page_content
+from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
 
-from cms.api import add_plugin, create_page, create_page_content
-from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
-
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME
-from djangocms_alias.models import Alias as AliasModel, Category
+from djangocms_alias.models import Alias as AliasModel
+from djangocms_alias.models import Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase

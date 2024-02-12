@@ -1,17 +1,15 @@
 from collections import ChainMap
 
-from django import template
-from django.utils.translation import get_language
-
+from classytags.arguments import Argument, MultiValueArgument
+from classytags.core import Tag
 from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_toolbar_from_request
 from cms.utils import get_current_site, get_language_from_request
 from cms.utils.i18n import get_default_language, get_language_list
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
-
-from classytags.arguments import Argument, MultiValueArgument
-from classytags.core import Tag
+from django import template
+from django.utils.translation import get_language
 
 from ..constants import (
     DEFAULT_STATIC_ALIAS_CATEGORY_NAME,
@@ -19,7 +17,6 @@ from ..constants import (
 )
 from ..models import Alias, AliasContent, Category
 from ..utils import is_versioning_enabled
-
 
 register = template.Library()
 

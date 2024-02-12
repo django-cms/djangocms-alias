@@ -1,14 +1,6 @@
 import operator
 from collections import defaultdict
 
-from django.conf import settings
-from django.contrib.sites.models import Site
-from django.db import models, transaction
-from django.db.models import F, Q
-from django.utils.encoding import force_str
-from django.utils.functional import cached_property
-from django.utils.translation import get_language, gettext_lazy as _
-
 from cms.api import add_plugin
 from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderRelationField
@@ -16,12 +8,18 @@ from cms.models.managers import WithUserMixin
 from cms.toolbar.utils import get_object_preview_url
 from cms.utils.plugins import copy_plugins_to_placeholder
 from cms.utils.urlutils import admin_reverse
-
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.db import models, transaction
+from django.db.models import F, Q
+from django.utils.encoding import force_str
+from django.utils.functional import cached_property
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
 
 from .constants import CHANGE_CATEGORY_URL_NAME
 from .utils import is_versioning_enabled
-
 
 __all__ = [
     "Category",

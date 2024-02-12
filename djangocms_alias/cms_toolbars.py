@@ -1,15 +1,6 @@
 import itertools
 from copy import copy
 
-from django.urls import NoReverseMatch
-from django.utils.encoding import force_str
-from django.utils.http import urlencode
-from django.utils.translation import (
-    get_language_from_request,
-    gettext,
-    gettext_lazy as _,
-)
-
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
     ADMINISTRATION_BREAK,
@@ -27,6 +18,16 @@ from cms.utils.i18n import (
 )
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
+from django.urls import NoReverseMatch
+from django.utils.encoding import force_str
+from django.utils.http import urlencode
+from django.utils.translation import (
+    get_language_from_request,
+    gettext,
+)
+from django.utils.translation import (
+    gettext_lazy as _,
+)
 
 from .constants import (
     DELETE_ALIAS_URL_NAME,
@@ -35,7 +36,6 @@ from .constants import (
 )
 from .models import Alias, AliasContent
 from .utils import is_versioning_enabled
-
 
 __all__ = [
     "AliasToolbar",

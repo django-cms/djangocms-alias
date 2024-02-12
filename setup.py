@@ -2,7 +2,6 @@ from setuptools import find_packages, setup
 
 import djangocms_alias
 
-
 CLASSIFIERS = [
     "Environment :: Web Environment",
     "Framework :: Django",

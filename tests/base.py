@@ -1,8 +1,3 @@
-from django.contrib.auth import get_permission_codename
-from django.contrib.auth.models import Permission
-from django.http import QueryDict
-from django.test.client import RequestFactory
-
 from cms.api import add_plugin, create_page, create_page_content
 from cms.middleware.toolbar import ToolbarMiddleware
 from cms.test_utils.testcases import CMSTestCase
@@ -13,6 +8,10 @@ from cms.toolbar.utils import (
 )
 from cms.utils.conf import get_cms_setting
 from cms.utils.urlutils import admin_reverse
+from django.contrib.auth import get_permission_codename
+from django.contrib.auth.models import Permission
+from django.http import QueryDict
+from django.test.client import RequestFactory
 
 from djangocms_alias.constants import (
     CATEGORY_LIST_URL_NAME,
@@ -21,7 +20,8 @@ from djangocms_alias.constants import (
     DETACH_ALIAS_PLUGIN_URL_NAME,
     LIST_ALIAS_URL_NAME,
 )
-from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
+from djangocms_alias.models import Alias as AliasModel
+from djangocms_alias.models import AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
 

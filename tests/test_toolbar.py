@@ -2,9 +2,6 @@ import itertools
 from collections import ChainMap
 from unittest import skipUnless
 
-from django.contrib.auth.models import Permission
-from django.urls import reverse
-
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
     ADMINISTRATION_BREAK,
@@ -14,6 +11,8 @@ from cms.toolbar.items import Break, ButtonList, ModalItem
 from cms.toolbar.utils import get_object_edit_url
 from cms.utils.i18n import force_language
 from cms.utils.urlutils import admin_reverse
+from django.contrib.auth.models import Permission
+from django.urls import reverse
 
 from djangocms_alias.cms_toolbars import ALIAS_MENU_IDENTIFIER
 from djangocms_alias.constants import USAGE_ALIAS_URL_NAME

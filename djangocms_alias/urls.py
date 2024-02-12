@@ -1,6 +1,5 @@
 from django.urls import path
 
-
 from . import constants, views  # isort:skip
 
 

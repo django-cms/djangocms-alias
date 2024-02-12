@@ -1,19 +1,18 @@
 from distutils.version import LooseVersion
 
+from cms.api import add_plugin, create_title
+from cms.models import Placeholder
 from django import get_version
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 
-from cms.api import add_plugin, create_title
-from cms.models import Placeholder
-
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
+from djangocms_alias.models import Alias as AliasModel
+from djangocms_alias.models import AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
-
 
 DJANGO_VERSION = get_version()
 DJANGO_4_0 = LooseVersion(DJANGO_VERSION) < LooseVersion("4.1")

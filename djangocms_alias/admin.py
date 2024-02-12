@@ -1,3 +1,6 @@
+from cms.admin.utils import GrouperModelAdmin
+from cms.utils.permissions import get_model_permission_codename
+from cms.utils.urlutils import admin_reverse
 from django import forms
 from django.contrib import admin
 from django.http import (
@@ -8,11 +11,6 @@ from django.http import (
 )
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-
-from cms.admin.utils import GrouperModelAdmin
-from cms.utils.permissions import get_model_permission_codename
-from cms.utils.urlutils import admin_reverse
-
 from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
@@ -31,7 +29,6 @@ from .utils import (
     emit_content_delete,
     is_versioning_enabled,
 )
-
 
 __all__ = [
     "AliasAdmin",

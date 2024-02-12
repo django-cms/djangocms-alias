@@ -1,11 +1,9 @@
+from cms.app_base import CMSAppConfig
 from django.apps import apps
 from django.conf import settings
 
-from cms.app_base import CMSAppConfig
-
 from .models import AliasContent, AliasPlugin, copy_alias_content
 from .rendering import render_alias_content
-
 
 try:
     apps.get_app_config("djangocms_internalsearch")
@@ -31,7 +29,6 @@ class AliasCMSConfig(CMSAppConfig):
 
     if djangocms_versioning_enabled:
         from cms.utils.i18n import get_language_tuple
-
         from djangocms_versioning.datastructures import VersionableItem
 
         versioning = [

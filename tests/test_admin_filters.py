@@ -1,16 +1,16 @@
 from unittest import skipUnless
 
+from cms.utils import get_current_site
 from django.contrib import admin
 from django.contrib.sites.models import Site
-
-from cms.utils import get_current_site
 
 from djangocms_alias.constants import (
     SITE_FILTER_NO_SITE_VALUE,
     SITE_FILTER_URL_PARAM,
 )
 from djangocms_alias.filters import CategoryFilter
-from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
+from djangocms_alias.models import Alias as AliasModel
+from djangocms_alias.models import AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase

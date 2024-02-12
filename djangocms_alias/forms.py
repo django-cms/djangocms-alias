@@ -1,3 +1,10 @@
+from cms.models import CMSPlugin, Placeholder
+from cms.utils import get_current_site
+from cms.utils.permissions import (
+    get_model_permission_codename,
+    has_plugin_permission,
+)
+from cms.utils.urlutils import admin_reverse
 from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import (
@@ -7,27 +14,19 @@ from django.contrib.admin.widgets import (
 from django.contrib.sites.models import Site
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
-
-from cms.models import CMSPlugin, Placeholder
-from cms.utils import get_current_site
-from cms.utils.permissions import (
-    get_model_permission_codename,
-    has_plugin_permission,
-)
-from cms.utils.urlutils import admin_reverse
-
 from parler.forms import TranslatableModelForm
 
 from .constants import CATEGORY_SELECT2_URL_NAME, SELECT2_ALIAS_URL_NAME
 from .models import (
     Alias,
-    Alias as AliasModel,
     AliasContent,
     AliasPlugin,
     Category,
 )
+from .models import (
+    Alias as AliasModel,
+)
 from .utils import emit_content_change, is_versioning_enabled
-
 
 __all__ = [
     "AliasPluginForm",

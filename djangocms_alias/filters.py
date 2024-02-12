@@ -1,8 +1,8 @@
+from cms.forms.utils import get_sites
 from django.contrib import admin
 from django.utils.encoding import smart_str
-from django.utils.translation import get_language, gettext_lazy as _
-
-from cms.forms.utils import get_sites
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
 
 from .cms_config import AliasCMSConfig
 from .constants import (
@@ -11,7 +11,6 @@ from .constants import (
     SITE_FILTER_URL_PARAM,
 )
 from .models import Category
-
 
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 

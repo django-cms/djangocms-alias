@@ -6,7 +6,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 COMPILE_SETTINGS = {
     "py39-dj32-cms41": [],
     "py310-dj32-cms41": [],

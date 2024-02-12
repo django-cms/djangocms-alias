@@ -1,12 +1,12 @@
-from django.utils.translation import gettext_lazy as _
-
 from cms.utils.permissions import get_model_permission_codename
 from cms.wizards.wizard_base import Wizard
 from cms.wizards.wizard_pool import wizard_pool
+from django.utils.translation import gettext_lazy as _
 
 from .cms_plugins import Alias
 from .forms import CreateAliasWizardForm, CreateCategoryWizardForm
-from .models import Alias as AliasModel, Category
+from .models import Alias as AliasModel
+from .models import Category
 
 
 class CreateAliasWizard(Wizard):

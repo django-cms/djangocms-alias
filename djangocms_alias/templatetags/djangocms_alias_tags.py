@@ -54,7 +54,7 @@ def verbose_name(obj):
 
 @register.simple_tag(takes_context=True)
 def render_alias(context, instance, editable=False):
-    request = context['request']
+    request = context["request"]
 
     toolbar = get_toolbar_from_request(request)
     renderer = toolbar.get_content_renderer()
@@ -68,8 +68,8 @@ def render_alias(context, instance, editable=False):
             context=context,
             editable=editable,
         )
-        return content or ''
-    return ''
+        return content or ""
+    return ""
 
 
 class StaticAlias(Tag):
@@ -84,25 +84,26 @@ class StaticAlias(Tag):
     static_code -- the unique identifier of the Alias
     site -- If site is supplied an Alias instance will be created per site.
     """
-    name = 'static_alias'
+
+    name = "static_alias"
     options = PlaceholderOptions(
-        Argument('static_code', resolve=True),
-        MultiValueArgument('extra_bits', required=False, resolve=False),
+        Argument("static_code", resolve=True),
+        MultiValueArgument("extra_bits", required=False, resolve=False),
         blocks=[
-            ('endstatic_alias', 'nodelist'),
+            ("endstatic_alias", "nodelist"),
         ],
     )
 
     def _get_alias(self, request, static_code, extra_bits):
         alias_filter_kwargs = {
-            'static_code': static_code,
+            "static_code": static_code,
         }
         # Site
         current_site = get_current_site()
-        if 'site' in extra_bits:
-            alias_filter_kwargs['site'] = current_site
+        if "site" in extra_bits:
+            alias_filter_kwargs["site"] = current_site
         else:
-            alias_filter_kwargs['site_id__isnull'] = True
+            alias_filter_kwargs["site_id__isnull"] = True
 
         if hasattr(request, "toolbar"):
             # Try getting language from the toolbar first (end and view endpoints)
@@ -121,27 +122,34 @@ class StaticAlias(Tag):
         alias = Alias.objects.filter(**alias_filter_kwargs).first()
         # If there is no alias found we need to create one
         if not alias:
-
             # If versioning is enabled we can only create the records with a logged-in user / staff member
             if is_versioning_enabled() and not request.user.is_authenticated:
                 return None
 
             # Parler's get_or_create doesn't work well with translations, so we must perform our own get or create
-            default_category = Category.objects.filter(translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME).first()
+            default_category = Category.objects.filter(
+                translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME
+            ).first()
             if not default_category:
-                default_category = Category.objects.create(name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
+                default_category = Category.objects.create(
+                    name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME
+                )
 
             alias_creation_kwargs = {
-                'static_code': static_code,
-                'creation_method': Alias.CREATION_BY_TEMPLATE
+                "static_code": static_code,
+                "creation_method": Alias.CREATION_BY_TEMPLATE,
             }
             # Site
-            if 'site' in extra_bits:
-                alias_creation_kwargs['site'] = current_site
+            if "site" in extra_bits:
+                alias_creation_kwargs["site"] = current_site
 
-            alias = Alias.objects.create(category=default_category, **alias_creation_kwargs)
+            alias = Alias.objects.create(
+                category=default_category, **alias_creation_kwargs
+            )
 
-        if not AliasContent._base_manager.filter(alias=alias, language=language).exists():
+        if not AliasContent._base_manager.filter(
+            alias=alias, language=language
+        ).exists():
             # Create a first content object if none exists in the given language.
             # If versioning is enabled we can only create the records with a logged-in user / staff member
             if is_versioning_enabled() and not request.user.is_authenticated:
@@ -163,13 +171,13 @@ class StaticAlias(Tag):
         return alias
 
     def render_tag(self, context, static_code, extra_bits, nodelist=None):
-        request = context.get('request')
+        request = context.get("request")
 
         if not static_code or not request:
             # an empty string was passed in or the variable is not available in the context
             if nodelist:
                 return nodelist.render(context)
-            return ''
+            return ""
 
         validate_placeholder_name(static_code)
 
@@ -178,7 +186,7 @@ class StaticAlias(Tag):
         alias = self._get_alias(request, static_code, extra_bits)
 
         if not alias:
-            return ''
+            return ""
 
         # Get draft contents in edit or preview mode?
         get_draft_content = False
@@ -186,7 +194,9 @@ class StaticAlias(Tag):
             get_draft_content = True
 
         language = get_language_from_request(request)
-        placeholder = alias.get_placeholder(language=language, show_draft_content=get_draft_content)
+        placeholder = alias.get_placeholder(
+            language=language, show_draft_content=get_draft_content
+        )
 
         if placeholder:
             content = renderer.render_placeholder(
@@ -196,7 +206,7 @@ class StaticAlias(Tag):
                 use_cache=True,
             )
             return content
-        return ''
+        return ""
 
 
 register.tag(StaticAlias.name, StaticAlias)

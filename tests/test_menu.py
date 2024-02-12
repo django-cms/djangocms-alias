@@ -6,7 +6,6 @@ from .base import BaseAliasPluginTestCase
 
 
 class AliasMenuTestCase(BaseAliasPluginTestCase):
-
     def test_alias_pages_have_no_menu_nodes(self):
         alias = self._create_alias()
         with self.login_user_context(self.superuser):

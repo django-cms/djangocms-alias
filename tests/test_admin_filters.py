@@ -98,11 +98,13 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
                 no_site_alias,
             },
         )
-        # Only alias attached to the current site are shown when filtered by the current site
+        # Only alias attached to the current site are shown
+        # when filtered by the current site
         self.assertEqual(
             set(response_current_site.context["cl"].queryset), {current_site_alias}
         )
-        # Only alias attached to the current site are shown when filtered by another site
+        # Only alias attached to the current site are shown
+        # when filtered by another site
         self.assertEqual(
             set(response_other_site.context["cl"].queryset), {another_site_alias}
         )
@@ -272,7 +274,8 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
 
     def test_category_filter_lookup_should_only_show_aliases_linked_to_content(self):
         """
-        Category not linked to content should not be listed in the category filter lookups
+        Category not linked to content
+        should not be listed in the category filter lookups
         """
         category_one = Category.objects.create(name="b - category")
         alias_one = AliasModel.objects.create(

@@ -102,11 +102,13 @@ class StaticAlias(Tag):
         alias = Alias.objects.filter(**alias_filter_kwargs).first()
         # If there is no alias found we need to create one
         if not alias:
-            # If versioning is enabled we can only create the records with a logged-in user / staff member
+            # If versioning is enabled we can only create the records
+            # with a logged-in user / staff member
             if is_versioning_enabled() and not request.user.is_authenticated:
                 return None
 
-            # Parler's get_or_create doesn't work well with translations, so we must perform our own get or create
+            # Parler's get_or_create doesn't work well with translations,
+            # so we must perform our own get or create
             default_category = Category.objects.filter(
                 translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME
             ).first()
@@ -131,7 +133,8 @@ class StaticAlias(Tag):
             alias=alias, language=language
         ).exists():
             # Create a first content object if none exists in the given language.
-            # If versioning is enabled we can only create the records with a logged-in user / staff member
+            # If versioning is enabled we can only create the records with
+            # a logged-in user / staff member
             if is_versioning_enabled() and not request.user.is_authenticated:
                 return None
 
@@ -154,7 +157,8 @@ class StaticAlias(Tag):
         request = context.get("request")
 
         if not static_code or not request:
-            # an empty string was passed in or the variable is not available in the context
+            # an empty string was passed in
+            # or the variable is not available in the context
             if nodelist:
                 return nodelist.render(context)
             return ""

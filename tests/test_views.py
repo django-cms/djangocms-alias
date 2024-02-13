@@ -760,7 +760,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
 
     @skip(
-        "It is not currently possible to add an alias from the django admin changelist issue "
+        "It is not currently possible to add an alias"
+        "from the django admin changelist issue "
         "#https://github.com/django-cms/djangocms-alias/issues/97#97"
     )
     def test_aliascontent_add_view(self):
@@ -784,7 +785,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(alias_content.name, "alias test de 1")
 
     @skip(
-        "It is not currently possible to add an alias from the django admin changelist issue "
+        "It is not currently possible to add an alias"
+        "from the django admin changelist issue "
         "#https://github.com/django-cms/djangocms-alias/issues/97#97"
     )
     def test_aliascontent_add_view_get(self):
@@ -804,7 +806,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, f'type="hidden" name="alias" value="{alias.pk}"')
 
     @skip(
-        "It is not currently possible to add an alias from the django admin changelist issue "
+        "It is not currently possible to add an alias"
+        "from the django admin changelist issue "
         "#https://github.com/django-cms/djangocms-alias/issues/97#97"
     )
     def test_aliascontent_add_view_invalid_data(self):
@@ -832,7 +835,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
 
     @skip(
-        "It is not currently possible to add an alias from the django admin changelist issue "
+        "It is not currently possible to add an alias"
+        "from the django admin changelist issue "
         "#https://github.com/django-cms/djangocms-alias/issues/97#97"
     )
     def test_aliascontent_add_view_valid_data(self):
@@ -975,7 +979,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, "This alias wasn't used by any object.")
 
     def test_delete_alias_view_post(self):
-        """Tests the admin delete view (as opposed to the djangocms_alias.views.delete_view)"""
+        """Tests the admin delete view
+        (as opposed to the djangocms_alias.views.delete_view)"""
         alias = self._create_alias([self.plugin])
         self.assertIn(alias, Alias.objects.all())
         with self.login_user_context(self.superuser):
@@ -1532,7 +1537,8 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         )
         alias_content_fr.populate(plugins=[fr_plugin])
 
-        # when versioning is enabled a Version must be created and published for each language
+        # when versioning is enabled a Version must be created
+        # and published for each language
         if is_versioning_enabled():
             from djangocms_versioning.models import Version
 
@@ -1548,7 +1554,8 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             with force_language("en"):
                 if is_versioning_enabled():
-                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
+                    # we need to call get_absolute_url
+                    # on the AliasContent object when versioning is enabled,
                     # otherwise we are taken to the version list url
                     detail_response = self.client.get(
                         alias.get_content(language="en").get_absolute_url()
@@ -1568,7 +1575,8 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             with force_language("de"):
                 if is_versioning_enabled():
-                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
+                    # we need to call get_absolute_url
+                    # on the AliasContent object when versioning is enabled,
                     # otherwise we are taken to the version list url
                     detail_response = self.client.get(
                         alias_content_de.get_absolute_url()
@@ -1588,7 +1596,8 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             with force_language("fr"):
                 if is_versioning_enabled():
-                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
+                    # we need to call get_absolute_url
+                    # on the AliasContent object when versioning is enabled,
                     # otherwise we are taken to the version list url
                     detail_response = self.client.get(
                         alias_content_fr.get_absolute_url()

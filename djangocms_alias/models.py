@@ -59,7 +59,8 @@ class Category(TranslatableModel):
         verbose_name_plural = _("categories")
 
     def __str__(self):
-        # Be sure to be able to see the category name even if it's not in the current language
+        # Be sure to be able to see the category name
+        # even if it's not in the current language
         return self.safe_translation_getter("name", any_language=True)
 
     def get_absolute_url(self):

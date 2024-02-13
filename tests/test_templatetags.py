@@ -133,10 +133,12 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
     def test_alias_auto_creation_in_template(self):
         """
         When a template discovers a static code that doesn't exist:
-            - A category is created if it doesn't exist
-            - An alias is created if one doesn't exist that matches the static_code
-            - The creation_method is recorded as created by a template
-            - If versioning is enabled the tag is only created for a user that is logged in
+        - A category is created if it doesn't exist
+        - An alias is created if one doesn't exist that matches the
+            static_code
+        - The creation_method is recorded as created by a template
+        - If versioning is enabled the tag is only created for a user
+            that is logged in
         """
         alias_template = """{% load djangocms_alias_tags %}{% static_alias "category_unique_code" %}"""  # noqa: E501
 
@@ -171,7 +173,8 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
     def test_alias_auto_creation_in_template_site_limited_alias(self):
         """
-        When a template discovers a static code for a site and with no site with the same static_code
+        When a template discovers a static code for a site
+        and with no site with the same static_code
         entries are created for both scenarios
         """
         unlimited_template = (
@@ -342,7 +345,8 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
     def test_static_alias_creates_content_for_missing_languages(self):
         """
-        If a static alias is used by a logged-in user a first (empty) alias content object is created
+        If a static alias is used by a logged-in user
+        a first (empty) alias content object is created
         if no content objects for the language exist
         """
 

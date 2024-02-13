@@ -93,7 +93,8 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             )
         )
         self.assertNotIn(
-            # It is not currently possible to add an alias from the django admin changelist issue #97
+            # It is not currently possible to add an alias
+            # from the django admin changelist issue #97
             # https://github.com/django-cms/djangocms-alias/issues/97
             add_alias_link,
             response_content_decoded,
@@ -253,7 +254,8 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
     @skipUnless(is_versioning_enabled(), "Test only relevant for versioning")
     def test_category_field_ordering_versioned(self):
         """
-        Related category can be ordered by name, both in ascending and descending order, with versioning
+        Related category can be ordered by name,
+        both in ascending and descending order, with versioning
         """
         # Create a number of categories, aliases, and alias content to order
         (
@@ -261,7 +263,8 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             first_alias,
             first_alias_content,
         ) = self._create_alias_and_categories("First Order Test Case")
-        # Previously lowercase and upper case would be sorted separately, test they are ordered together
+        # Previously lowercase and upper case
+        # would be sorted separately, test they are ordered together
         (
             first_category_lower,
             first_alias_lower,
@@ -272,7 +275,8 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             middle_alias,
             middle_alias_content,
         ) = self._create_alias_and_categories("Middle Order Test Case")
-        # Previously lowercase and upper case would be sorted separately, test they are ordered together
+        # Previously lowercase and upper case
+        # would be sorted separately, test they are ordered together
         (
             last_category_lower,
             last_alias_lower,
@@ -330,7 +334,8 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
     @skipUnless(not is_versioning_enabled(), "Test only relevant for versioning")
     def test_category_field_ordering_unversioned(self):
         """
-        Related category can be ordered by name, both in ascending and descending order, without versioning
+        Related category can be ordered by name,
+        both in ascending and descending order, without versioning
         """
         # Create a number of categories, aliases, and alias content to order
         (
@@ -338,7 +343,8 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             first_alias,
             first_alias_content,
         ) = self._create_alias_and_categories("First Order Test Case")
-        # Previously lowercase and upper case would be sorted separately, test they are ordered together
+        # Previously lowercase and upper case
+        # would be sorted separately, test they are ordered together
         (
             first_category_lower,
             first_alias_lower,
@@ -349,7 +355,8 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             middle_alias,
             middle_alias_content,
         ) = self._create_alias_and_categories("Middle Order Test Case")
-        # Previously lowercase and upper case would be sorted separately, test they are ordered together
+        # Previously lowercase and upper case
+        # would be sorted separately, test they are ordered together
         (
             last_category_lower,
             last_alias_lower,
@@ -584,8 +591,16 @@ class AliasesManagerTestCase(BaseAliasPluginTestCase):
 
         response = self.client.get(index_url)
 
-        unexpected_content = '<th scope="row"><a href="/en/admin/djangocms_alias/aliascontent/">Alias contents</a></th>'
-        expected_content = '<th scope="row"><a href="/en/admin/djangocms_alias/alias/">Aliases</a></th>'
+        unexpected_content = (
+            '<th scope="row">'
+            '<a href="/en/admin/djangocms_alias/aliascontent/">'
+            "Alias contents</a></th>"
+        )
+        expected_content = (
+            '<th scope="row">'
+            '<a href="/en/admin/djangocms_alias/alias/">'
+            "Aliases</a></th>"
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_content)

@@ -10,14 +10,14 @@ select=[
   "PLR", # pylint refactor
   "PLW", # pylint warning
   "UP", # pyupgrade
+
 ]
 
 extend-ignore = [
-    "PLR0915",
-    "C901",
-    "PLR0913",
-    "PLW1510",
-    "I001" ,
-    "PLR0912" ,
-    "E501"
+    "PLR0915",  # too many statement
+    "C901",     # complex-structure
+    "PLR0913",  # too many arguments
+    "PLW1510",  # subprocess-run-without-check
+    "PLR0912" , # too-many-branches
+
 ]

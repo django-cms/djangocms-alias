@@ -894,17 +894,11 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, "<td>Alias</td>")
         self.assertRegex(
             str(response.content),
-            r'href="{}"[\w+]?>{}<\/a>'.format(
-                re.escape(self.page.get_absolute_url(self.language)),
-                str(self.page),
-            ),
+            rf'href="{re.escape(self.page.get_absolute_url(self.language))}"[\w+]?>{str(self.page)}<\/a>',
         )
         self.assertRegex(
             str(response.content),
-            r'href="{}"[\w+]?>{}<\/a>'.format(
-                re.escape(root_alias.get_absolute_url()),
-                str(alias),
-            ),
+            rf'href="{re.escape(root_alias.get_absolute_url())}"[\w+]?>{str(alias)}<\/a>',
         )
         self.assertRegex(
             str(response.content),

@@ -70,10 +70,7 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             USAGE_ALIAS_URL_NAME, args=[expected_en_content.alias.pk]
         )
         change_category_and_site_url = admin_reverse(
-            "{}_{}_change".format(
-                expected_en_content._meta.app_label,
-                expected_en_content.alias._meta.model_name,
-            ),
+            f"{expected_en_content._meta.app_label}_{expected_en_content.alias._meta.model_name}_change",
             args=(expected_en_content.alias.pk,),
         )
 
@@ -87,10 +84,7 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
         )
         # check for add content admin link
         add_alias_link = admin_reverse(
-            "{}_{}_add".format(
-                expected_en_content._meta.app_label,
-                expected_en_content._meta.model_name,
-            )
+            f"{expected_en_content._meta.app_label}_{expected_en_content._meta.model_name}_add"
         )
         self.assertNotIn(
             # It is not currently possible to add an alias from the django admin changelist issue #97
@@ -178,10 +172,7 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             USAGE_ALIAS_URL_NAME, args=[expected_en_content.alias.pk]
         )
         settings_url = admin_reverse(
-            "{}_{}_change".format(
-                expected_en_content._meta.app_label,
-                expected_en_content.alias._meta.model_name,
-            ),
+            f"{expected_en_content._meta.app_label}_{expected_en_content.alias._meta.model_name}_change",
             args=(expected_en_content.alias.pk,),
         )
 
@@ -230,10 +221,7 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
         )
         # check for add content admin link
         add_aliascontent_url = admin_reverse(
-            "{}_{}_add".format(
-                expected_en_content._meta.app_label,
-                expected_en_content._meta.model_name,
-            )
+            f"{expected_en_content._meta.app_label}_{expected_en_content._meta.model_name}_add"
         )
         self.assertNotIn(
             add_aliascontent_url,

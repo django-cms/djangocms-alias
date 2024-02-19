@@ -104,9 +104,7 @@ class Alias(models.Model):
         verbose_name = _("alias")
         verbose_name_plural = _("aliases")
         ordering = ["position"]
-        unique_together = (
-            ("static_code", "site"),
-        )  # Only restrict instances that have a site specified
+        unique_together = (("static_code", "site"),)  # Only restrict instances that have a site specified
 
     def __init__(self, *args, **kwargs):
         self._plugins_cache = {}
@@ -130,9 +128,7 @@ class Alias(models.Model):
     def objects_using(self):
         objects = set()
         object_ids = defaultdict(set)
-        plugins = self.cms_plugins.select_related("placeholder").prefetch_related(
-            "placeholder__source"
-        )
+        plugins = self.cms_plugins.select_related("placeholder").prefetch_related("placeholder__source")
         for plugin in plugins:
             obj = plugin.placeholder.source
             obj_class_name = obj.__class__.__name__
@@ -147,11 +143,7 @@ class Alias(models.Model):
             else:
                 objects.update([obj])
         objects.update(
-            [
-                obj
-                for model_class, ids in object_ids.items()
-                for obj in model_class.objects.filter(pk__in=ids)
-            ]
+            [obj for model_class, ids in object_ids.items() for obj in model_class.objects.filter(pk__in=ids)]
         )
         return list(objects)
 
@@ -202,9 +194,7 @@ class Alias(models.Model):
             return self._content_cache[language]
 
     def get_placeholder(self, language=None, show_draft_content=False):
-        content = self.get_content(
-            language=language, show_draft_content=show_draft_content
-        )
+        content = self.get_content(language=language, show_draft_content=show_draft_content)
         return getattr(content, "placeholder", None)
 
     def get_plugins(self, language=None):
@@ -427,7 +417,5 @@ class AliasPlugin(CMSPlugin):
         plugins = AliasPlugin.objects.filter(
             placeholder_id=placeholder,
         )
-        plugins = plugins.filter(
-            Q(pk=self) | Q(alias__contents__placeholders=placeholder)
-        )
+        plugins = plugins.filter(Q(pk=self) | Q(alias__contents__placeholders=placeholder))
         return plugins.exists()

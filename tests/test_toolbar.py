@@ -24,9 +24,7 @@ from .base import BaseAliasPluginTestCase
 
 class AliasToolbarTestCase(BaseAliasPluginTestCase):
     def _get_wizard_create_button(self, request):
-        button_lists = [
-            result.item for result in request.toolbar.find_items(item_type=ButtonList)
-        ]
+        button_lists = [result.item for result in request.toolbar.find_items(item_type=ButtonList)]
         buttons = list(
             # flatten the list
             itertools.chain.from_iterable([item.buttons for item in button_lists])
@@ -43,9 +41,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
     def test_add_aliases_submenu_to_admin_menu(self):
         user = self.get_staff_user_with_std_permissions()
         user.user_permissions.add(
-            Permission.objects.get(
-                content_type__app_label="djangocms_alias", codename="change_category"
-            )
+            Permission.objects.get(content_type__app_label="djangocms_alias", codename="change_category")
         )
         try:
             page_url = get_object_edit_url(self.page.get_title_obj(self.language))
@@ -69,9 +65,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             self.get_list_alias_endpoint(),
             self.page.get_absolute_url(language=self.language),
         ]:
-            request = self.get_page_request(
-                page=None, path=endpoint, user=self.superuser
-            )
+            request = self.get_page_request(page=None, path=endpoint, user=self.superuser)
             alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
             self.assertEqual(alias_menu, None)
 
@@ -125,8 +119,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertEqual(language_menu.get_item_count(), 4)
 
         language_menu_dict = {
-            menu.name: [menu_item.name for menu_item in menu.items]
-            for key, menu in language_menu.menus.items()
+            menu.name: [menu_item.name for menu_item in menu.items] for key, menu in language_menu.menus.items()
         }
         self.assertIn("Add Translation", language_menu_dict.keys())
         self.assertIn("Delete Translation", language_menu_dict.keys())
@@ -147,9 +140,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             from djangocms_versioning.constants import PUBLISHED
             from djangocms_versioning.models import Version
 
-            Version.objects.create(
-                content=alias_content, created_by=self.superuser, state=PUBLISHED
-            )
+            Version.objects.create(content=alias_content, created_by=self.superuser, state=PUBLISHED)
 
         request = self.get_alias_request(
             alias=alias,
@@ -160,8 +151,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         self.assertEqual(language_menu.get_item_count(), 6)
 
         language_menu_dict = {
-            menu.name: [menu_item.name for menu_item in menu.items]
-            for key, menu in language_menu.menus.items()
+            menu.name: [menu_item.name for menu_item in menu.items] for key, menu in language_menu.menus.items()
         }
         self.assertEqual(
             {"Deutsche...", "Italiano..."},
@@ -178,8 +168,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         language_menu_first_items = {
             menu.name: next(
                 filter(
-                    lambda item: item.name
-                    in ["Française...", "Deutsche...", "from Française"],
+                    lambda item: item.name in ["Française...", "Deutsche...", "from Française"],
                     menu.items,
                 )
             )
@@ -219,9 +208,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             from djangocms_versioning.constants import DRAFT
             from djangocms_versioning.models import Version
 
-            Version.objects.create(
-                content=alias_content, created_by=self.superuser, state=DRAFT
-            )
+            Version.objects.create(content=alias_content, created_by=self.superuser, state=DRAFT)
 
         alias_content.populate(replaced_placeholder=self.placeholder)
         alias_content.alias.clear_cache()
@@ -273,9 +260,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
                 break
         else:
             self.fail("No AliasToolbar in alias request")
-        language_menu = request.toolbar.get_menu(
-            LANGUAGE_MENU_IDENTIFIER, _("Language")
-        )
+        language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER, _("Language"))
         self.assertIsNone(language_menu)
 
     def test_change_alias_settings_button_is_visible_on_alias_edit_view(self):
@@ -448,8 +433,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
         site_aliases_url = admin_menu.items[3].url
         admin_changelist_aliases_url = (
-            reverse(f"admin:{AliasContent._meta.app_label}_alias_changelist")
-            + "?language=en"
+            reverse(f"admin:{AliasContent._meta.app_label}_alias_changelist") + "?language=en"
         )
 
         with self.login_user_context(self.superuser):

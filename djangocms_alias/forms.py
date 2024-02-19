@@ -75,9 +75,7 @@ class BaseCreateAliasForm(forms.Form):
         placeholder = cleaned_data.get("placeholder")
 
         if not plugin and not placeholder:
-            raise forms.ValidationError(
-                _("A plugin or placeholder is required to create an alias.")
-            )
+            raise forms.ValidationError(_("A plugin or placeholder is required to create an alias."))
 
         if plugin and placeholder:
             raise forms.ValidationError(
@@ -125,9 +123,7 @@ class CreateAliasForm(BaseCreateAliasForm):
             language=cleaned_data.get("language"),
             alias__category=cleaned_data.get("category"),
         ).exists():
-            raise forms.ValidationError(
-                _("Alias with this Name and Category already exists.")
-            )
+            raise forms.ValidationError(_("Alias with this Name and Category already exists."))
 
         return cleaned_data
 
@@ -177,9 +173,7 @@ class CreateAliasForm(BaseCreateAliasForm):
 
 
 class CreateAliasWizardForm(forms.Form):
-    name = forms.CharField(
-        label=_("Name"), required=True, widget=AdminTextInputWidget()
-    )
+    name = forms.CharField(label=_("Name"), required=True, widget=AdminTextInputWidget())
     site = forms.ModelChoiceField(
         queryset=Site.objects.all(),
         required=False,
@@ -276,9 +270,7 @@ class AliasPluginForm(forms.ModelForm):
         queryset=Category.objects.all(),
         widget=CategorySelectWidget(
             attrs={
-                "data-placeholder": _(
-                    "Select category to restrict the list of aliases below"
-                ),  # noqa: E501
+                "data-placeholder": _("Select category to restrict the list of aliases below"),  # noqa: E501
             },
         ),
         empty_label="",
@@ -334,8 +326,6 @@ class AliasGrouperAdminForm(forms.ModelForm):
             language=cleaned_data.get("language"),
             alias__category=cleaned_data.get("category"),
         ).exists():
-            raise forms.ValidationError(
-                _("Alias with this Name and Category already exists.")
-            )
+            raise forms.ValidationError(_("Alias with this Name and Category already exists."))
 
         return cleaned_data

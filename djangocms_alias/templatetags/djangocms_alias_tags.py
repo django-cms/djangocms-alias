@@ -107,13 +107,9 @@ class StaticAlias(Tag):
                 return None
 
             # Parler's get_or_create doesn't work well with translations, so we must perform our own get or create
-            default_category = Category.objects.filter(
-                translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME
-            ).first()
+            default_category = Category.objects.filter(translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME).first()
             if not default_category:
-                default_category = Category.objects.create(
-                    name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME
-                )
+                default_category = Category.objects.create(name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
 
             alias_creation_kwargs = {
                 "static_code": static_code,
@@ -123,13 +119,9 @@ class StaticAlias(Tag):
             if "site" in extra_bits:
                 alias_creation_kwargs["site"] = current_site
 
-            alias = Alias.objects.create(
-                category=default_category, **alias_creation_kwargs
-            )
+            alias = Alias.objects.create(category=default_category, **alias_creation_kwargs)
 
-        if not AliasContent._base_manager.filter(
-            alias=alias, language=language
-        ).exists():
+        if not AliasContent._base_manager.filter(alias=alias, language=language).exists():
             # Create a first content object if none exists in the given language.
             # If versioning is enabled we can only create the records with a logged-in user / staff member
             if is_versioning_enabled() and not request.user.is_authenticated:
@@ -174,9 +166,7 @@ class StaticAlias(Tag):
             get_draft_content = True
 
         language = get_language_from_request(request)
-        placeholder = alias.get_placeholder(
-            language=language, show_draft_content=get_draft_content
-        )
+        placeholder = alias.get_placeholder(language=language, show_draft_content=get_draft_content)
 
         if placeholder:
             content = renderer.render_placeholder(

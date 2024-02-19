@@ -63,9 +63,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         self.category = Category.objects.create(name="test category")
 
     def _get_draft_page_placeholder(self):
-        page_content = create_page_content(
-            self.language, "Draft Page", self.page, created_by=self.superuser
-        )
+        page_content = create_page_content(self.language, "Draft Page", self.page, created_by=self.superuser)
         return page_content.get_placeholders().get(slot="content")
 
     def _create_alias(
@@ -100,9 +98,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         if is_versioning_enabled():
             from djangocms_versioning.models import Version
 
-            version = Version.objects.create(
-                content=alias_content, created_by=self.superuser
-            )
+            version = Version.objects.create(content=alias_content, created_by=self.superuser)
             if published:
                 version.publish(self.superuser)
 
@@ -115,14 +111,9 @@ class BaseAliasPluginTestCase(CMSTestCase):
 
         from djangocms_versioning.models import Version
 
-        versions = Version.objects.filter_by_grouper(grouper).filter(
-            state=version_state
-        )
+        versions = Version.objects.filter_by_grouper(grouper).filter(state=version_state)
         for version in versions:
-            if (
-                hasattr(version.content, "language")
-                and version.content.language == language
-            ):
+            if hasattr(version.content, "language") and version.content.language == language:
                 return version
 
     def _publish(self, grouper, language=None):
@@ -161,9 +152,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
     def get_alias_request(self, alias, lang_code="en", *args, **kwargs):
         request = self._get_instance_request(alias, *args, **kwargs)
         request.current_page = None
-        request = self._process_request_by_toolbar_middleware(
-            request, obj=alias.get_content(lang_code)
-        )
+        request = self._process_request_by_toolbar_middleware(request, obj=alias.get_content(lang_code))
         return request
 
     def get_page_request(self, page, obj=None, *args, **kwargs):
@@ -239,23 +228,11 @@ class BaseAliasPluginTestCase(CMSTestCase):
 
     def get_staff_user_with_alias_permissions(self):
         staff_user = self._create_user("alias staff", is_staff=True, is_superuser=False)  # noqa: E501
-        self.add_permission(
-            staff_user, get_permission_codename("add", AliasModel._meta)
-        )  # noqa: E501
-        self.add_permission(
-            staff_user, get_permission_codename("change", AliasModel._meta)
-        )  # noqa: E501
-        self.add_permission(
-            staff_user, get_permission_codename("delete", AliasModel._meta)
-        )  # noqa: E501
-        self.add_permission(
-            staff_user, get_permission_codename("add", AliasContent._meta)
-        )  # noqa: E501
-        self.add_permission(
-            staff_user, get_permission_codename("change", AliasContent._meta)
-        )  # noqa: E501
-        self.add_permission(
-            staff_user, get_permission_codename("delete", AliasContent._meta)
-        )  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename("add", AliasModel._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename("change", AliasModel._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename("delete", AliasModel._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename("add", AliasContent._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename("change", AliasContent._meta))  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename("delete", AliasContent._meta))  # noqa: E501
         self.add_permission(staff_user, get_permission_codename("add", Category._meta))  # noqa: E501
         return staff_user

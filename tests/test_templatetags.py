@@ -15,9 +15,7 @@ from .base import BaseAliasPluginTestCase
 
 
 class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
-    alias_template = (
-        """{% load djangocms_alias_tags %}{% render_alias plugin.alias %}"""  # noqa: E501
-    )
+    alias_template = """{% load djangocms_alias_tags %}{% render_alias plugin.alias %}"""  # noqa: E501
 
     def test_render_alias(self):
         alias = self._create_alias()
@@ -83,9 +81,7 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
 
 
 class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
-    alias_template = (
-        """{% load djangocms_alias_tags %}{% static_alias "some_unique_id" %}"""  # noqa: E501
-    )
+    alias_template = """{% load djangocms_alias_tags %}{% static_alias "some_unique_id" %}"""  # noqa: E501
 
     def test_no_alias_rendered_when_no_alias_exists(self):
         alias = self._create_alias(static_code="")
@@ -141,9 +137,7 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         alias_template = """{% load djangocms_alias_tags %}{% static_alias "category_unique_code" %}"""  # noqa: E501
 
         # No Alias or Category exist
-        category = Category.objects.filter(
-            translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME
-        )
+        category = Category.objects.filter(translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
         alias = AliasModel.objects.filter(static_code="category_unique_code")
 
         self.assertEqual(category.count(), 0)
@@ -174,9 +168,7 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         When a template discovers a static code for a site and with no site with the same static_code
         entries are created for both scenarios
         """
-        unlimited_template = (
-            """{% load djangocms_alias_tags %}{% static_alias "limited_alias_code" %}"""  # noqa: E501
-        )
+        unlimited_template = """{% load djangocms_alias_tags %}{% static_alias "limited_alias_code" %}"""  # noqa: E501
         site_limited_template = """{% load djangocms_alias_tags %}{% static_alias "limited_alias_code" site %}"""  # noqa: E501
         site_id = 1
 
@@ -242,24 +234,16 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
         # Should show the contents of the unlimited template
         with override_settings(SITE_ID=site1.pk):
-            site1_unlimited_preview = self.render_template_obj(
-                unlimited_template, {}, self.get_request("/")
-            )
-            site1_limited_preview = self.render_template_obj(
-                site_limited_template, {}, self.get_request("/")
-            )
+            site1_unlimited_preview = self.render_template_obj(unlimited_template, {}, self.get_request("/"))
+            site1_limited_preview = self.render_template_obj(site_limited_template, {}, self.get_request("/"))
 
         self.assertEqual(site1_unlimited_preview, "unlimited text")
         self.assertEqual(site1_limited_preview, "")
 
         # Should show the contents of the site limited template
         with override_settings(SITE_ID=site2.pk):
-            site2_unlimited_preview = self.render_template_obj(
-                unlimited_template, {}, self.get_request("/")
-            )
-            site2_limited_preview = self.render_template_obj(
-                site_limited_template, {}, self.get_request("/")
-            )
+            site2_unlimited_preview = self.render_template_obj(unlimited_template, {}, self.get_request("/"))
+            site2_limited_preview = self.render_template_obj(site_limited_template, {}, self.get_request("/"))
 
         self.assertEqual(site2_unlimited_preview, "unlimited text")
         self.assertEqual(site2_limited_preview, "site limited text")
@@ -318,9 +302,7 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         # The live page should still contain the published contents
         live_response = self.client.get(page_live_url)
 
-        self.assertContains(
-            live_response, "Published content for: template_example_global_alias_code"
-        )
+        self.assertContains(live_response, "Published content for: template_example_global_alias_code")
         self.assertNotContains(
             live_response,
             "Updated Draft content for: template_example_global_alias_code",
@@ -372,19 +354,11 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
                 return get_object_edit_url(page.get_content_obj(lang), language=lang)
 
         with self.login_user_context(self.superuser):
-            self.client.get(
-                page_edit_url("en"), follow=True
-            )  # supposed to create the alias and alias content for en
-            self.client.get(
-                page_edit_url("en"), follow=True
-            )  # supposed to create no additional object
-            self.client.get(
-                page_edit_url("de"), follow=True
-            )  # supposed to create the alias content for de
+            self.client.get(page_edit_url("en"), follow=True)  # supposed to create the alias and alias content for en
+            self.client.get(page_edit_url("en"), follow=True)  # supposed to create no additional object
+            self.client.get(page_edit_url("de"), follow=True)  # supposed to create the alias content for de
 
-        alias = AliasModel.objects.filter(
-            static_code="template_example_global_alias_code"
-        ).first()
+        alias = AliasModel.objects.filter(static_code="template_example_global_alias_code").first()
 
         self.assertIsNotNone(alias, "Alias not created")
         self.assertIsNotNone(alias.get_content("en", show_draft_content=True))
@@ -393,9 +367,7 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         self.assertEqual(alias.contents(manager="admin_manager").count(), 2)
 
     def test_alias_rendered_when_identifier_is_variable(self):
-        alias_template = (
-            """{% load djangocms_alias_tags %}{% static_alias foo_variable %}"""  # noqa: E501
-        )
+        alias_template = """{% load djangocms_alias_tags %}{% static_alias foo_variable %}"""  # noqa: E501
 
         alias = self._create_alias(static_code="some_unique_id")
         add_plugin(

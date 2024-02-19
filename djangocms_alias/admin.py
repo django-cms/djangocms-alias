@@ -91,9 +91,7 @@ class AliasAdmin(*alias_admin_classes):
         """Add alias usage list actions"""
         return super().get_actions_list() + [self._get_alias_usage_link]
 
-    def can_change_content(
-        self, request: HttpRequest, content_obj: AliasContent
-    ) -> bool:
+    def can_change_content(self, request: HttpRequest, content_obj: AliasContent) -> bool:
         """Returns True if user can change content_obj"""
         if content_obj and is_versioning_enabled():
             version = Version.objects.get_for_content(content_obj)
@@ -111,9 +109,7 @@ class AliasAdmin(*alias_admin_classes):
             return request.user.is_superuser
         return False
 
-    def save_model(
-        self, request: HttpRequest, obj: Alias, form: forms.Form, change: bool
-    ) -> None:
+    def save_model(self, request: HttpRequest, obj: Alias, form: forms.Form, change: bool) -> None:
         super().save_model(request, obj, form, change)
 
         # Only emit content changes if Versioning is not installed because
@@ -147,9 +143,7 @@ class AliasAdmin(*alias_admin_classes):
                 sender=self.model,
             )
 
-    def _get_alias_usage_link(
-        self, obj: Alias, request: HttpRequest, disabled: bool = False
-    ) -> str:
+    def _get_alias_usage_link(self, obj: Alias, request: HttpRequest, disabled: bool = False) -> str:
         url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.pk])
         return self.admin_action_button(url, "info", _("View usage"), disabled=disabled)
 
@@ -169,9 +163,7 @@ class AliasContentAdmin(admin.ModelAdmin):
     actions = None
     change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"
 
-    def changelist_view(
-        self, request: HttpRequest, extra_context: dict = None
-    ) -> HttpResponse:
+    def changelist_view(self, request: HttpRequest, extra_context: dict = None) -> HttpResponse:
         """Needed for the Alias Content Admin breadcrumbs"""
         return HttpResponseRedirect(
             admin_reverse(
@@ -191,8 +183,7 @@ class AliasContentAdmin(admin.ModelAdmin):
         if not obj:
             raise Http404()
         return HttpResponseRedirect(
-            admin_reverse(CHANGE_ALIAS_URL_NAME, args=(obj.alias_id,))
-            + f"?language={obj.language}"
+            admin_reverse(CHANGE_ALIAS_URL_NAME, args=(obj.alias_id,)) + f"?language={obj.language}"
         )
 
     def has_module_permission(self, request: HttpRequest) -> bool:

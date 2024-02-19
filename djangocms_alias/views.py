@@ -145,9 +145,7 @@ def create_alias_view(request):
     return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
 
 
-def render_replace_response(
-    request, new_plugins, source_placeholder=None, source_plugin=None
-):
+def render_replace_response(request, new_plugins, source_placeholder=None, source_plugin=None):
     move_plugins, add_plugins = [], []
     for plugin in new_plugins:
         root = plugin.parent.get_bound_plugin() if plugin.parent else plugin

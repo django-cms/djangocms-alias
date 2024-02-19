@@ -38,17 +38,13 @@ class SiteFilter(admin.SimpleListFilter):
         }
         yield {
             "selected": self.value() == SITE_FILTER_NO_SITE_VALUE,
-            "query_string": changelist.get_query_string(
-                {self.parameter_name: SITE_FILTER_NO_SITE_VALUE}
-            ),
+            "query_string": changelist.get_query_string({self.parameter_name: SITE_FILTER_NO_SITE_VALUE}),
             "display": _("No site"),
         }
         for lookup, title in self.lookup_choices:
             yield {
                 "selected": self.value() == str(lookup),
-                "query_string": changelist.get_query_string(
-                    {self.parameter_name: lookup}
-                ),
+                "query_string": changelist.get_query_string({self.parameter_name: lookup}),
                 "display": title,
             }
 
@@ -62,11 +58,7 @@ class CategoryFilter(admin.SimpleListFilter):
         qs = model_admin.get_queryset(request)
         cat_id = qs.values_list("category", flat=True)
         # Ensure the category is ordered by the name alphabetically by default
-        cat = (
-            Category.objects.filter(pk__in=cat_id)
-            .translated(get_language())
-            .order_by("translations__name")
-        )
+        cat = Category.objects.filter(pk__in=cat_id).translated(get_language()).order_by("translations__name")
         for obj in cat:
             yield str(obj.pk), smart_str(obj)
 
@@ -83,8 +75,6 @@ class CategoryFilter(admin.SimpleListFilter):
         for lookup, title in self.lookup_choices:
             yield {
                 "selected": self.value() == str(lookup),
-                "query_string": changelist.get_query_string(
-                    {self.parameter_name: lookup}
-                ),
+                "query_string": changelist.get_query_string({self.parameter_name: lookup}),
                 "display": title,
             }

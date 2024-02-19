@@ -71,11 +71,7 @@ class AliasToolbar(CMSToolbar):
 
         url = admin_reverse(LIST_ALIAS_URL_NAME)
         obj = self.toolbar.get_object()
-        language = (
-            obj.language
-            if hasattr(obj, "language")
-            else get_language_from_request(self.request)
-        )
+        language = obj.language if hasattr(obj, "language") else get_language_from_request(self.request)
         if language is None:
             language = get_default_language()
         url += f'?{urlencode({"language": language})}'
@@ -152,9 +148,7 @@ class AliasToolbar(CMSToolbar):
         return end.index
 
     def enable_create_wizard_button(self):
-        button_lists = [
-            result.item for result in self.toolbar.find_items(item_type=ButtonList)
-        ]
+        button_lists = [result.item for result in self.toolbar.find_items(item_type=ButtonList)]
         buttons = list(
             # flatten the list
             itertools.chain.from_iterable([item.buttons for item in button_lists])
@@ -162,9 +156,7 @@ class AliasToolbar(CMSToolbar):
 
         # There will always be this button, because we are in the context of
         # alias app views
-        create_wizard_button = [
-            button for button in buttons if button.name == gettext("Create")
-        ][0]
+        create_wizard_button = [button for button in buttons if button.name == gettext("Create")][0]
 
         from cms.wizards.wizard_pool import entry_choices
 
@@ -195,9 +187,7 @@ class AliasToolbar(CMSToolbar):
             if alias_content:
                 with force_language(code):
                     url = alias_content.get_absolute_url()
-                language_menu.add_link_item(
-                    name, url=url, active=self.current_lang == code
-                )
+                language_menu.add_link_item(name, url=url, active=self.current_lang == code)
 
     def change_language_menu(self):
         if self.toolbar.edit_mode_active and isinstance(self.toolbar.obj, AliasContent):
@@ -217,17 +207,13 @@ class AliasToolbar(CMSToolbar):
             current_placeholder = alias_content.placeholder
 
             remove = [
-                (code, languages.get(code, code))
-                for code in alias_content.alias.get_languages()
-                if code in languages
+                (code, languages.get(code, code)) for code in alias_content.alias.get_languages() if code in languages
             ]
             add = [code for code in languages.items() if code not in remove]
             copy = [
                 (code, name)
                 for code, name in languages.items()
-                if code != self.current_lang
-                and (code, name) in remove
-                and current_placeholder
+                if code != self.current_lang and (code, name) in remove and current_placeholder
             ]
 
             if add or remove or copy:
@@ -241,9 +227,7 @@ class AliasToolbar(CMSToolbar):
                 add_url = admin_reverse("djangocms_alias_aliascontent_add")
 
                 for code, name in add:
-                    url = add_url_parameters(
-                        add_url, language=code, alias=alias_content.alias_id
-                    )
+                    url = add_url_parameters(add_url, language=code, alias=alias_content.alias_id)
                     add_plugins_menu.add_modal_item(name, url=url)
 
             if remove:

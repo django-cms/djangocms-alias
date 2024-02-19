@@ -12,11 +12,7 @@ from .base import BaseAliasPluginTestCase
 
 class WizardsTestCase(BaseAliasPluginTestCase):
     def _get_wizard_instance(self, wizard_name):
-        return [
-            wizard
-            for wizard in get_wizard_entires()
-            if wizard.__class__.__name__ == wizard_name
-        ][0]
+        return [wizard for wizard in get_wizard_entires() if wizard.__class__.__name__ == wizard_name][0]
 
     def _get_form_kwargs(self, data, language=None):
         language = language or self.language
@@ -35,9 +31,7 @@ class WizardsTestCase(BaseAliasPluginTestCase):
 
         self.assertTrue(wizard.user_has_add_permission(self.superuser))
         self.assertTrue(
-            wizard.user_has_add_permission(
-                self.get_staff_user_with_alias_permissions()
-            ),  # noqa: E501
+            wizard.user_has_add_permission(self.get_staff_user_with_alias_permissions()),  # noqa: E501
         )
         self.assertFalse(
             wizard.user_has_add_permission(self.get_staff_user_with_no_permissions()),  # noqa: E501
@@ -113,9 +107,7 @@ class WizardsTestCase(BaseAliasPluginTestCase):
 
         self.assertTrue(wizard.user_has_add_permission(self.superuser))
         self.assertTrue(
-            wizard.user_has_add_permission(
-                self.get_staff_user_with_alias_permissions()
-            ),  # noqa: E501
+            wizard.user_has_add_permission(self.get_staff_user_with_alias_permissions()),  # noqa: E501
         )
         self.assertFalse(
             wizard.user_has_add_permission(self.get_staff_user_with_no_permissions()),  # noqa: E501

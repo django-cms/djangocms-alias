@@ -19,12 +19,9 @@ class AliasCMSConfig(CMSAppConfig):
     cms_toolbar_enabled_models = [(AliasContent, render_alias_content)]
     moderated_models = [AliasContent]
 
-    djangocms_moderation_enabled = getattr(
-        settings, "MODERATING_ALIAS_MODELS_ENABLED", True
-    )
+    djangocms_moderation_enabled = getattr(settings, "MODERATING_ALIAS_MODELS_ENABLED", True)
     djangocms_versioning_enabled = (
-        getattr(settings, "VERSIONING_ALIAS_MODELS_ENABLED", True)
-        and djangocms_versioning_installed
+        getattr(settings, "VERSIONING_ALIAS_MODELS_ENABLED", True) and djangocms_versioning_installed
     )
 
     if djangocms_versioning_enabled:
@@ -42,9 +39,7 @@ class AliasCMSConfig(CMSAppConfig):
             ),
         ]
 
-    djangocms_references_enabled = getattr(
-        settings, "REFERENCES_ALIAS_MODELS_ENABLED", True
-    )
+    djangocms_references_enabled = getattr(settings, "REFERENCES_ALIAS_MODELS_ENABLED", True)
     reference_fields = [
         (AliasPlugin, "alias"),
     ]

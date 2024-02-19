@@ -66,9 +66,7 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             response_content_decoded,
         )
 
-        usage_url = admin_reverse(
-            USAGE_ALIAS_URL_NAME, args=[expected_en_content.alias.pk]
-        )
+        usage_url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[expected_en_content.alias.pk])
         change_category_and_site_url = admin_reverse(
             f"{expected_en_content._meta.app_label}_{expected_en_content.alias._meta.model_name}_change",
             args=(expected_en_content.alias.pk,),
@@ -168,9 +166,7 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             response_content_decoded,
         )
 
-        usage_url = admin_reverse(
-            USAGE_ALIAS_URL_NAME, args=[expected_en_content.alias.pk]
-        )
+        usage_url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[expected_en_content.alias.pk])
         settings_url = admin_reverse(
             f"{expected_en_content._meta.app_label}_{expected_en_content.alias._meta.model_name}_change",
             args=(expected_en_content.alias.pk,),
@@ -233,9 +229,7 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             alias_content_name = category_name
         category = Category.objects.create(name=category_name)
         alias = AliasModel.objects.create(category=category, position=0)
-        alias_content = AliasContent.objects.create(
-            alias=alias, name=alias_content_name, language="en"
-        )
+        alias_content = AliasContent.objects.create(alias=alias, name=alias_content_name, language="en")
         return category, alias, alias_content
 
     @skipUnless(is_versioning_enabled(), "Test only relevant for versioning")
@@ -275,13 +269,9 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
         from djangocms_versioning.models import Version
 
         Version.objects.create(content=first_alias_content, created_by=self.superuser)
-        Version.objects.create(
-            content=first_alias_content_lower, created_by=self.superuser
-        )
+        Version.objects.create(content=first_alias_content_lower, created_by=self.superuser)
         Version.objects.create(content=middle_alias_content, created_by=self.superuser)
-        Version.objects.create(
-            content=last_alias_content_lower, created_by=self.superuser
-        )
+        Version.objects.create(content=last_alias_content_lower, created_by=self.superuser)
         Version.objects.create(content=last_alias_content, created_by=self.superuser)
 
         with self.login_user_context(self.superuser):
@@ -448,15 +438,9 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             alias1_content = alias1.get_content(language=self.language)
             alias2_content = alias2.get_content(language=self.language)
             alias3_content = alias3.get_content(language=self.language)
-            aliascontent1_url = admin_reverse(
-                CHANGE_ALIAS_URL_NAME, args=[alias1_content.pk]
-            )
-            aliascontent2_url = admin_reverse(
-                CHANGE_ALIAS_URL_NAME, args=[alias2_content.pk]
-            )
-            aliascontent3_url = admin_reverse(
-                CHANGE_ALIAS_URL_NAME, args=[alias3_content.pk]
-            )
+            aliascontent1_url = admin_reverse(CHANGE_ALIAS_URL_NAME, args=[alias1_content.pk])
+            aliascontent2_url = admin_reverse(CHANGE_ALIAS_URL_NAME, args=[alias2_content.pk])
+            aliascontent3_url = admin_reverse(CHANGE_ALIAS_URL_NAME, args=[alias3_content.pk])
 
         self.assertContains(response, aliascontent1_url)
         self.assertContains(response, aliascontent2_url)
@@ -525,9 +509,7 @@ class CategoryAdminViewsTestCase(BaseAliasPluginTestCase):
     def test_changelist_staff_user_with_permission(self):
         user = self.get_staff_user_with_std_permissions()
         user.user_permissions.add(
-            Permission.objects.get(
-                content_type__app_label="djangocms_alias", codename="change_category"
-            )
+            Permission.objects.get(content_type__app_label="djangocms_alias", codename="change_category")
         )
         with self.login_user_context(user):
             response = self.client.get(self.get_category_list_endpoint())
@@ -537,9 +519,7 @@ class CategoryAdminViewsTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             response = self.client.get(self.get_category_list_endpoint())
 
-        self.assertContains(
-            response, '<a href="/en/admin/djangocms_alias/category/1/change/"'
-        )
+        self.assertContains(response, '<a href="/en/admin/djangocms_alias/category/1/change/"')
 
     def test_change_view(self):
         with self.login_user_context(self.superuser):
@@ -573,8 +553,7 @@ class AliasesManagerTestCase(BaseAliasPluginTestCase):
         response = self.client.get(index_url)
 
         unexpected_content = (
-            '<th scope="row"><a href="/en/admin/djangocms_alias/aliascontent/">'
-            "Alias contents</a></th>"
+            '<th scope="row"><a href="/en/admin/djangocms_alias/aliascontent/">' "Alias contents</a></th>"
         )
         expected_content = '<th scope="row"><a href="/en/admin/djangocms_alias/alias/">Aliases</a></th>'
 

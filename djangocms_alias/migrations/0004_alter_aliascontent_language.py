@@ -13,8 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="aliascontent",
             name="language",
-            field=models.CharField(
-                default=django.utils.translation.get_language, max_length=10
-            ),
+            field=models.CharField(default=django.utils.translation.get_language, max_length=10),
         ),
     ]

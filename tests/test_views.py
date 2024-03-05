@@ -1527,9 +1527,13 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
                 if is_versioning_enabled():
                     # we need to call get_object_preview_url on the AliasContent object when versioning is enabled,
                     # since edit is not available for a published content
-                    detail_response = self.client.get(get_object_preview_url(alias.get_content(language="en")), follow=True)
+                    detail_response = self.client.get(
+                        get_object_preview_url(alias.get_content(language="en")), follow=True
+                    )
                 else:
-                    detail_response = self.client.get(get_object_edit_url(alias.get_content(language="en")), follow=True)
+                    detail_response = self.client.get(
+                        get_object_edit_url(alias.get_content(language="en")), follow=True
+                    )
                 list_response = self.client.get(
                     admin_reverse(LIST_ALIAS_URL_NAME),
                 )

@@ -1,3 +1,10 @@
+from cms.models import CMSPlugin, Placeholder
+from cms.utils import get_current_site
+from cms.utils.permissions import (
+    get_model_permission_codename,
+    has_plugin_permission,
+)
+from cms.utils.urlutils import admin_reverse
 from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import (
@@ -7,27 +14,19 @@ from django.contrib.admin.widgets import (
 from django.contrib.sites.models import Site
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
-
-from cms.models import CMSPlugin, Placeholder
-from cms.utils import get_current_site
-from cms.utils.permissions import (
-    get_model_permission_codename,
-    has_plugin_permission,
-)
-from cms.utils.urlutils import admin_reverse
-
 from parler.forms import TranslatableModelForm
 
 from .constants import CATEGORY_SELECT2_URL_NAME, SELECT2_ALIAS_URL_NAME
 from .models import (
     Alias,
-    Alias as AliasModel,
     AliasContent,
     AliasPlugin,
     Category,
 )
+from .models import (
+    Alias as AliasModel,
+)
 from .utils import emit_content_change, is_versioning_enabled
-
 
 __all__ = [
     "AliasPluginForm",
@@ -76,9 +75,7 @@ class BaseCreateAliasForm(forms.Form):
         placeholder = cleaned_data.get("placeholder")
 
         if not plugin and not placeholder:
-            raise forms.ValidationError(
-                _("A plugin or placeholder is required to create an alias.")
-            )
+            raise forms.ValidationError(_("A plugin or placeholder is required to create an alias."))
 
         if plugin and placeholder:
             raise forms.ValidationError(
@@ -126,9 +123,7 @@ class CreateAliasForm(BaseCreateAliasForm):
             language=cleaned_data.get("language"),
             alias__category=cleaned_data.get("category"),
         ).exists():
-            raise forms.ValidationError(
-                _("Alias with this Name and Category already exists.")
-            )
+            raise forms.ValidationError(_("Alias with this Name and Category already exists."))
 
         return cleaned_data
 
@@ -174,9 +169,7 @@ class CreateAliasForm(BaseCreateAliasForm):
 
 
 class CreateAliasWizardForm(forms.Form):
-    name = forms.CharField(
-        label=_("Name"), required=True, widget=AdminTextInputWidget()
-    )
+    name = forms.CharField(label=_("Name"), required=True, widget=AdminTextInputWidget())
     site = forms.ModelChoiceField(
         queryset=Site.objects.all(),
         required=False,
@@ -273,9 +266,7 @@ class AliasPluginForm(forms.ModelForm):
         queryset=Category.objects.all(),
         widget=CategorySelectWidget(
             attrs={
-                "data-placeholder": _(
-                    "Select category to restrict the list of aliases below"
-                ),  # noqa: E501
+                "data-placeholder": _("Select category to restrict the list of aliases below"),  # noqa: E501
             },
         ),
         empty_label="",
@@ -331,8 +322,6 @@ class AliasGrouperAdminForm(forms.ModelForm):
             language=cleaned_data.get("language"),
             alias__category=cleaned_data.get("category"),
         ).exists():
-            raise forms.ValidationError(
-                _("Alias with this Name and Category already exists.")
-            )
+            raise forms.ValidationError(_("Alias with this Name and Category already exists."))
 
         return cleaned_data

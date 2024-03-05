@@ -1,7 +1,6 @@
 import os
 from distutils.util import strtobool
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENABLE_VERSIONING = strtobool(os.environ.get("ENABLE_VERSIONING", "1"))
 EXTRA_INSTALLED_APPS = []

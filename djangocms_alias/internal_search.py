@@ -1,3 +1,4 @@
+from cms.toolbar.utils import get_toolbar_from_request
 from django.template import RequestContext
 from django.utils.translation import gettext_lazy as _
 

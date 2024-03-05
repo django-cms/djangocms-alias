@@ -1,8 +1,7 @@
 from collections import ChainMap
 
-from django import template
-from django.utils.translation import get_language
-
+from classytags.arguments import Argument, MultiValueArgument
+from classytags.core import Tag
 from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_object_preview_url, get_toolbar_from_request
 from cms.utils import get_current_site, get_language_from_request
@@ -10,9 +9,8 @@ from cms.utils.helpers import is_editable_model
 from cms.utils.i18n import get_default_language, get_language_list
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
-
-from classytags.arguments import Argument, MultiValueArgument
-from classytags.core import Tag
+from django import template
+from django.utils.translation import get_language
 
 from ..constants import (
     DEFAULT_STATIC_ALIAS_CATEGORY_NAME,
@@ -20,7 +18,6 @@ from ..constants import (
 )
 from ..models import Alias, AliasContent, Category
 from ..utils import is_versioning_enabled
-
 
 register = template.Library()
 
@@ -127,13 +124,9 @@ class StaticAlias(Tag):
                 return None
 
             # Parler's get_or_create doesn't work well with translations, so we must perform our own get or create
-            default_category = Category.objects.filter(
-                translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME
-            ).first()
+            default_category = Category.objects.filter(translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME).first()
             if not default_category:
-                default_category = Category.objects.create(
-                    name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME
-                )
+                default_category = Category.objects.create(name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
 
             alias_creation_kwargs = {
                 "static_code": static_code,
@@ -143,13 +136,9 @@ class StaticAlias(Tag):
             if "site" in extra_bits:
                 alias_creation_kwargs["site"] = current_site
 
-            alias = Alias.objects.create(
-                category=default_category, **alias_creation_kwargs
-            )
+            alias = Alias.objects.create(category=default_category, **alias_creation_kwargs)
 
-        if not AliasContent._base_manager.filter(
-            alias=alias, language=language
-        ).exists():
+        if not AliasContent._base_manager.filter(alias=alias, language=language).exists():
             # Create a first content object if none exists in the given language.
             # If versioning is enabled we can only create the records with a logged-in user / staff member
             if is_versioning_enabled() and not request.user.is_authenticated:
@@ -194,9 +183,7 @@ class StaticAlias(Tag):
             get_draft_content = True
 
         language = get_language_from_request(request)
-        placeholder = alias.get_placeholder(
-            language=language, show_draft_content=get_draft_content
-        )
+        placeholder = alias.get_placeholder(language=language, show_draft_content=get_draft_content)
 
         if placeholder:
             content = renderer.render_placeholder(

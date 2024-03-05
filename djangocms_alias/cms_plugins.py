@@ -1,10 +1,5 @@
 from copy import copy
 
-from django.utils.translation import (
-    get_language_from_request,
-    gettext_lazy as _,
-)
-
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
 from cms.toolbar.utils import get_object_edit_url
@@ -14,11 +9,17 @@ from cms.utils.permissions import (
 )
 from cms.utils.plugins import copy_plugins_to_placeholder
 from cms.utils.urlutils import add_url_parameters, admin_reverse
+from django.utils.translation import (
+    get_language_from_request,
+)
+from django.utils.translation import (
+    gettext_lazy as _,
+)
 
 from .constants import CREATE_ALIAS_URL_NAME, DETACH_ALIAS_PLUGIN_URL_NAME
 from .forms import AliasPluginForm
-from .models import Alias as AliasModel, AliasContent, AliasPlugin
-
+from .models import Alias as AliasModel
+from .models import AliasContent, AliasPlugin
 
 __all__ = [
     "Alias",
@@ -32,10 +33,7 @@ class Alias(CMSPluginBase):
     form = AliasPluginForm
 
     def get_render_template(self, context, instance, placeholder):
-        if (
-            isinstance(instance.placeholder.source, AliasContent)
-            and instance.is_recursive()
-        ):
+        if isinstance(instance.placeholder.source, AliasContent) and instance.is_recursive():
             return "djangocms_alias/alias_recursive.html"
         return f"djangocms_alias/{instance.template}/alias.html"
 
@@ -117,9 +115,7 @@ class Alias(CMSPluginBase):
             return True
         elif replace:
             target_placeholder = plugins[0].placeholder
-            if not target_placeholder.check_source(user) or not has_plugin_permission(
-                user, Alias.__name__, "add"
-            ):
+            if not target_placeholder.check_source(user) or not has_plugin_permission(user, Alias.__name__, "add"):
                 return False
 
         return all(
@@ -144,9 +140,7 @@ class Alias(CMSPluginBase):
 
     @classmethod
     def detach_alias_plugin(cls, plugin, language):
-        source_placeholder = plugin.alias.get_placeholder(
-            language, show_draft_content=True
-        )  # We're in edit mode
+        source_placeholder = plugin.alias.get_placeholder(language, show_draft_content=True)  # We're in edit mode
         target_placeholder = plugin.placeholder
 
         # Deleting uses a copy of a plugin to preserve pk on existing

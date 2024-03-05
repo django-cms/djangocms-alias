@@ -37,18 +37,14 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         page_content = None
         if is_versioning_enabled():
             # Can only edit page/content that is in DRAFT
-            page_content = create_title(
-                self.language, "Draft Page", self.page, created_by=self.superuser
-            )
+            page_content = create_title(self.language, "Draft Page", self.page, created_by=self.superuser)
             placeholder = page_content.get_placeholders().get(slot="content")
 
         alias_plugin = alias.get_content(self.language).populate(
             replaced_placeholder=placeholder,
         )
         extra_items = Alias.get_extra_plugin_menu_items(
-            self.get_page_request(
-                page=self.page, obj=page_content, user=self.superuser
-            ),
+            self.get_page_request(page=self.page, obj=page_content, user=self.superuser),
             alias_plugin,
         )
 
@@ -261,10 +257,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         )
         self.assertEqual(
             plugins[0].get_bound_plugin().body,
-            alias.get_placeholder(self.language)
-            .get_plugins()[0]
-            .get_bound_plugin()
-            .body,
+            alias.get_placeholder(self.language).get_plugins()[0].get_bound_plugin().body,
         )
 
     def test_replace_plugin_with_alias(self):
@@ -279,9 +272,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             plugins,
         )
         self.assertEqual(plugins[0].get_bound_plugin(), alias_plugin)
-        self.assertEqual(
-            alias_content.placeholder.get_plugins()[0].get_bound_plugin().body, "test"
-        )  # noqa: E501
+        self.assertEqual(alias_content.placeholder.get_plugins()[0].get_bound_plugin().body, "test")  # noqa: E501
 
     def test_replace_plugin_with_alias_correct_position(self):
         second_plugin = add_plugin(
@@ -297,9 +288,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             body="test 3",
         )
         alias = self._create_alias()
-        alias_plugin = alias.get_content(self.language).populate(
-            replaced_plugin=second_plugin
-        )
+        alias_plugin = alias.get_content(self.language).populate(replaced_plugin=second_plugin)
         plugins = self.placeholder.get_plugins()
         self.assertNotIn(
             self.plugin,

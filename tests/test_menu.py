@@ -9,7 +9,7 @@ class AliasMenuTestCase(BaseAliasPluginTestCase):
     def test_alias_pages_have_no_menu_nodes(self):
         alias = self._create_alias()
         with self.login_user_context(self.superuser):
-            response = self.client.get(get_object_edit_url(alias.get_content()))
+            response = self.client.get(get_object_edit_url(alias.get_content()), follow=True)
             if is_versioning_enabled() and False:
                 self.assertNotContains(response, '<ul class="nav">')
             else:

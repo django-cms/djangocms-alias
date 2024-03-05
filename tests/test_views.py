@@ -434,7 +434,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
     def test_alias_content_preview_view(self):
         alias = self._create_alias([self.plugin])
         with self.login_user_context(self.superuser):
-            response = self.client.get(get_object_edit_url(alias.get_content()))
+            response = self.client.get(get_object_edit_url(alias.get_content()), follow=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, alias.name)
@@ -1525,11 +1525,11 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             with force_language("en"):
                 if is_versioning_enabled():
-                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
-                    # otherwise we are taken to the version list url
-                    detail_response = self.client.get(get_object_edit_url(alias.get_content(language="en")))
+                    # we need to call get_object_preview_url on the AliasContent object when versioning is enabled,
+                    # since edit is not available for a published content
+                    detail_response = self.client.get(get_object_preview_url(alias.get_content(language="en")), follow=True)
                 else:
-                    detail_response = self.client.get(alias.get_absolute_url())
+                    detail_response = self.client.get(get_object_edit_url(alias.get_content(language="en")), follow=True)
                 list_response = self.client.get(
                     admin_reverse(LIST_ALIAS_URL_NAME),
                 )
@@ -1543,11 +1543,11 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             with force_language("de"):
                 if is_versioning_enabled():
-                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
-                    # otherwise we are taken to the version list url
-                    detail_response = self.client.get(get_object_edit_url(alias_content_de))
+                    # we need to call get_object_preview_url on the AliasContent object when versioning is enabled,
+                    # since edit is not available for a published content
+                    detail_response = self.client.get(get_object_preview_url(alias_content_de), follow=True)
                 else:
-                    detail_response = self.client.get(get_object_edit_url(alias.get_content()))
+                    detail_response = self.client.get(get_object_edit_url(alias.get_content()), follow=True)
                 list_response = self.client.get(
                     admin_reverse(LIST_ALIAS_URL_NAME),
                 )
@@ -1561,11 +1561,11 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             with force_language("fr"):
                 if is_versioning_enabled():
-                    # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
-                    # otherwise we are taken to the version list url
-                    detail_response = self.client.get(get_object_edit_url(alias_content_fr))
+                    # we need to call get_object_preview_url on the AliasContent object when versioning is enabled,
+                    # since edit is not available for a published content
+                    detail_response = self.client.get(get_object_preview_url(alias_content_fr), follow=True)
                 else:
-                    detail_response = self.client.get(get_object_edit_url(alias.get_content()))
+                    detail_response = self.client.get(get_object_edit_url(alias.get_content()), follow=True)
                 list_response = self.client.get(
                     admin_reverse(LIST_ALIAS_URL_NAME),  # noqa: E501
                 )

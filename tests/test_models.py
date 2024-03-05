@@ -407,7 +407,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         alias.save()  # Django 4.1+ disallows to use relations (cmsplugins) of unsaved objects.
         self.assertEqual(alias.cms_plugins.count(), 0)
 
-    def test_category_get_absolute_url(self):
+    def test_category_get_admin_change_url(self):
         """
         Category uses the admin change view as its absolute url
         """
@@ -416,7 +416,7 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         app_label = category._meta.app_label
         expected = reverse(f"admin:{app_label}_category_change", args=[category.pk])
 
-        self.assertEqual(category.get_absolute_url(), expected)
+        self.assertEqual(category.get_admin_change_url(), expected)
 
     def test_category_name_same_across_languages(self):
         """

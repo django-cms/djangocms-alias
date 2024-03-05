@@ -2,6 +2,7 @@ from copy import copy
 
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
+from cms.toolbar.utils import get_object_edit_url
 from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
@@ -39,20 +40,22 @@ class Alias(CMSPluginBase):
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):
         if plugin.plugin_type == cls.__name__:
-            edit_endpoint = plugin.alias.get_absolute_url()
+            alias_content = plugin.alias.get_content()
             detach_endpoint = admin_reverse(
                 DETACH_ALIAS_PLUGIN_URL_NAME,
                 args=[plugin.pk],
             )
 
-            plugin_menu_items = [
-                PluginMenuItem(
-                    _("Edit Alias"),
-                    edit_endpoint,
-                    action="sideframe",
-                    attributes={"cms-icon": "alias"},
-                ),
-            ]
+            plugin_menu_items = []
+            if alias_content:
+                plugin_menu_items.append(
+                    PluginMenuItem(
+                        _("Edit Alias"),
+                        get_object_edit_url(alias_content),
+                        action="",
+                        attributes={"cms-icon": "alias"},
+                    ),
+                )
 
             if cls.can_detach(
                 request.user,

@@ -1,3 +1,4 @@
+from cms.toolbar.utils import get_object_edit_url
 from cms.utils import get_current_site
 from cms.wizards.forms import WizardStep2BaseForm, step2_form_factory
 from cms.wizards.helpers import get_entries as get_wizard_entires
@@ -59,7 +60,8 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(form.fields["site"].initial, get_current_site())
 
         with self.login_user_context(self.superuser):
-            response = self.client.get(alias.get_absolute_url())
+            url = get_object_edit_url(alias.get_content(show_draft_content=True))
+            response = self.client.get(url)
         self.assertContains(response, data["name"])
 
         if is_versioning_enabled():
@@ -132,5 +134,5 @@ class WizardsTestCase(BaseAliasPluginTestCase):
         category = form.save()
 
         with self.login_user_context(self.superuser):
-            response = self.client.get(category.get_absolute_url())
+            response = self.client.get(category.get_admin_change_url())
         self.assertContains(response, data["name"])

@@ -8,10 +8,10 @@ from cms.cms_toolbars import (
     SHORTCUTS_BREAK,
 )
 from cms.toolbar.items import Break, ButtonList
+from cms.toolbar.utils import get_object_edit_url
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 from cms.utils.i18n import (
-    force_language,
     get_default_language,
     get_language_dict,
     get_language_tuple,
@@ -185,8 +185,7 @@ class AliasToolbar(CMSToolbar):
                 show_draft_content=True,
             )
             if alias_content:
-                with force_language(code):
-                    url = alias_content.get_absolute_url()
+                url = get_object_edit_url(alias_content, language=code)
                 language_menu.add_link_item(name, url=url, active=self.current_lang == code)
 
     def change_language_menu(self):

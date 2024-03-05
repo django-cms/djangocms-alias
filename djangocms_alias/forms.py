@@ -148,15 +148,11 @@ class CreateAliasForm(BaseCreateAliasForm):
             category=self.cleaned_data.get("category"),
             site=self.cleaned_data.get("site"),
         )
-        alias_content = AliasContent.objects.create(
+        alias_content = AliasContent.objects.with_user(self.user).create(
             alias=alias,
             name=self.cleaned_data.get("name"),
             language=self.cleaned_data.get("language"),
         )
-        if is_versioning_enabled():
-            from djangocms_versioning.models import Version
-
-            Version.objects.create(content=alias_content, created_by=self.user)
         if self.cleaned_data.get("replace"):
             placeholder = self.cleaned_data.get("placeholder")
             plugin = self.cleaned_data.get("plugin")

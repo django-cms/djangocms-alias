@@ -3,8 +3,9 @@ from collections import ChainMap
 from classytags.arguments import Argument, MultiValueArgument
 from classytags.core import Tag
 from cms.templatetags.cms_tags import PlaceholderOptions
-from cms.toolbar.utils import get_toolbar_from_request
+from cms.toolbar.utils import get_object_preview_url, get_toolbar_from_request
 from cms.utils import get_current_site, get_language_from_request
+from cms.utils.helpers import is_editable_model
 from cms.utils.i18n import get_default_language, get_language_list
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
@@ -25,6 +26,21 @@ register = template.Library()
 def get_alias_usage_view_url(alias, **kwargs):
     url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[alias.pk])
     return add_url_parameters(url, **ChainMap(kwargs))
+
+
+@register.filter()
+def admin_view_url(obj):
+    if is_editable_model(obj.__class__):
+        # Is obj frontend-editable?
+        return get_object_preview_url(obj)
+    if hasattr(obj, "get_content"):
+        # Is its content object frontend-editable?
+        content_obj = obj.get_content()
+        if is_editable_model(content_obj.__class__):
+            return get_object_preview_url(content_obj)
+    if hasattr(obj, "get_absolute_url"):
+        return obj.get_absolute_url()
+    return ""
 
 
 @register.filter()

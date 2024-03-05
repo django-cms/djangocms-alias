@@ -1,4 +1,4 @@
-from cms.toolbar.utils import get_toolbar_from_request
+from cms.toolbar.utils import get_object_preview_url, get_toolbar_from_request
 from django.template import RequestContext
 from django.utils.translation import gettext_lazy as _
 from djangocms_internalsearch.base import BaseSearchConfig
@@ -77,7 +77,7 @@ class AliasContentConfig(BaseSearchConfig):
         return content
 
     def prepare_url(self, obj):
-        return obj.get_absolute_url()
+        return get_object_preview_url(obj)
 
     def prepare_category(self, obj):
         obj.alias.category.set_current_language(obj.language)

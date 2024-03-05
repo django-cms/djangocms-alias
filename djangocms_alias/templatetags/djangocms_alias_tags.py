@@ -30,7 +30,6 @@ def get_alias_usage_view_url(alias, **kwargs):
 
 @register.filter()
 def admin_view_url(obj):
-    print(f"==> {obj=} {is_editable_model(obj.__class__)=}")
     if is_editable_model(obj.__class__):
         # Is obj frontend-editable?
         return get_object_preview_url(obj)

@@ -1,6 +1,3 @@
-from django.contrib.sites.models import Site
-from django.utils import translation
-
 from cms.toolbar.utils import get_object_edit_url
 from cms.utils import get_current_site
 from cms.wizards.forms import WizardStep2BaseForm, step2_form_factory

@@ -893,10 +893,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         )
         self.assertRegex(
             str(response.content),
-            r'href="{}"[\w+]?>{}<\/a>'.format(
-                re.escape(get_object_preview_url(root_alias.get_content())),
-                str(alias),
-            ),
+            rf'href="{re.escape(get_object_preview_url(root_alias.get_content()))}"[\w+]?>{str(alias)}<\/a>',
         )
         self.assertRegex(
             str(response.content),
@@ -1530,9 +1527,7 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
                 if is_versioning_enabled():
                     # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
                     # otherwise we are taken to the version list url
-                    detail_response = self.client.get(
-                        get_object_edit_url(alias.get_content(language="en"))
-                    )
+                    detail_response = self.client.get(get_object_edit_url(alias.get_content(language="en")))
                 else:
                     detail_response = self.client.get(alias.get_absolute_url())
                 list_response = self.client.get(
@@ -1550,13 +1545,9 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
                 if is_versioning_enabled():
                     # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
                     # otherwise we are taken to the version list url
-                    detail_response = self.client.get(
-                        get_object_edit_url(alias_content_de)
-                    )
+                    detail_response = self.client.get(get_object_edit_url(alias_content_de))
                 else:
-                    detail_response = self.client.get(
-                        get_object_edit_url(alias.get_content())
-                    )
+                    detail_response = self.client.get(get_object_edit_url(alias.get_content()))
                 list_response = self.client.get(
                     admin_reverse(LIST_ALIAS_URL_NAME),
                 )
@@ -1572,13 +1563,9 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
                 if is_versioning_enabled():
                     # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
                     # otherwise we are taken to the version list url
-                    detail_response = self.client.get(
-                        get_object_edit_url(alias_content_fr)
-                    )
+                    detail_response = self.client.get(get_object_edit_url(alias_content_fr))
                 else:
-                    detail_response = self.client.get(
-                        get_object_edit_url(alias.get_content())
-                    )
+                    detail_response = self.client.get(get_object_edit_url(alias.get_content()))
                 list_response = self.client.get(
                     admin_reverse(LIST_ALIAS_URL_NAME),  # noqa: E501
                 )

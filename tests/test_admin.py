@@ -2,19 +2,13 @@ from unittest import skipUnless
 
 from bs4 import BeautifulSoup
 from cms.api import add_plugin
+from cms.toolbar.utils import get_object_preview_url
 from cms.utils.i18n import force_language
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 from django.utils.formats import localize
 from django.utils.timezone import localtime
-
-from cms.api import add_plugin
-from cms.toolbar.utils import get_object_preview_url
-from cms.utils.i18n import force_language
-from cms.utils.urlutils import add_url_parameters, admin_reverse
-
-from bs4 import BeautifulSoup
 
 from djangocms_alias.constants import (
     CHANGE_ALIAS_URL_NAME,
@@ -435,15 +429,9 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             self.assertNotContains(response, "Published")
             self.assertNotContains(response, "Draft")
 
-        aliascontent1_url = get_object_preview_url(
-            alias1.get_content(show_draft_content=True)
-        )
-        aliascontent2_url = get_object_preview_url(
-            alias2.get_content(show_draft_content=True)
-        )
-        aliascontent3_url = get_object_preview_url(
-            alias3.get_content(show_draft_content=True)
-        )
+        aliascontent1_url = get_object_preview_url(alias1.get_content(show_draft_content=True))
+        aliascontent2_url = get_object_preview_url(alias2.get_content(show_draft_content=True))
+        aliascontent3_url = get_object_preview_url(alias3.get_content(show_draft_content=True))
 
         # when versioning is not enabled, the django admin change form
         # is used which used links to the aliascontent_change view

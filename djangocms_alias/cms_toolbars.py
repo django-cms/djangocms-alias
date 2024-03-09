@@ -135,7 +135,7 @@ class AliasToolbar(CMSToolbar):
             start = admin_menu.find_first(Break, identifier=SHORTCUTS_BREAK)
         end = admin_menu.find_first(Break, identifier=ADMINISTRATION_BREAK)
 
-        items = admin_menu.get_items()[start.index + 1 : end.index]
+        items = admin_menu.get_items()[start.index + 1: end.index]
         for idx, item in enumerate(items):
             try:
                 if force_str(item_name.lower()) < force_str(item.name.lower()):  # noqa: E501

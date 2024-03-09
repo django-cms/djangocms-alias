@@ -27,7 +27,6 @@ from djangocms_alias.utils import is_versioning_enabled
 
 
 class BaseAliasPluginTestCase(CMSTestCase):
-
     def get_create_alias_endpoint(self):
         return admin_reverse(CREATE_ALIAS_URL_NAME)
 
@@ -51,25 +50,36 @@ class BaseAliasPluginTestCase(CMSTestCase):
 
     def setUp(self):
         self.superuser = self.get_superuser()
-        self.language = 'en'
-        self.page = self._create_page('test')
+        self.language = "en"
+        self.page = self._create_page("test")
         self.placeholder = self.page.get_placeholders(self.language).get(
-            slot='content',
+            slot="content",
         )
         self.plugin = add_plugin(
             self.placeholder,
-            'TextPlugin',
+            "TextPlugin",
             language=self.language,
-            body='test',
+            body="test",
         )
-        self.category = Category.objects.create(name='test category')
+        self.category = Category.objects.create(name="test category")
 
     def _get_draft_page_placeholder(self):
-        page_content = create_title(self.language, 'Draft Page', self.page, created_by=self.superuser)
-        return page_content.get_placeholders().get(slot='content')
+        page_content = create_title(
+            self.language, "Draft Page", self.page, created_by=self.superuser
+        )
+        return page_content.get_placeholders().get(slot="content")
 
-    def _create_alias(self, plugins=None, name='test alias', category=None, position=0,
-                      language=None, published=True, static_code=None, site=None):
+    def _create_alias(
+        self,
+        plugins=None,
+        name="test alias",
+        category=None,
+        position=0,
+        language=None,
+        published=True,
+        static_code=None,
+        site=None,
+    ):
         if language is None:
             language = self.language
         if category is None:
@@ -90,7 +100,10 @@ class BaseAliasPluginTestCase(CMSTestCase):
 
         if is_versioning_enabled():
             from djangocms_versioning.models import Version
-            version = Version.objects.create(content=alias_content, created_by=self.superuser)
+
+            version = Version.objects.create(
+                content=alias_content, created_by=self.superuser
+            )
             if published:
                 version.publish(self.superuser)
 
@@ -102,18 +115,26 @@ class BaseAliasPluginTestCase(CMSTestCase):
         language = language or self.language
 
         from djangocms_versioning.models import Version
-        versions = Version.objects.filter_by_grouper(grouper).filter(state=version_state)
+
+        versions = Version.objects.filter_by_grouper(grouper).filter(
+            state=version_state
+        )
         for version in versions:
-            if hasattr(version.content, 'language') and version.content.language == language:
+            if (
+                hasattr(version.content, "language")
+                and version.content.language == language
+            ):
                 return version
 
     def _publish(self, grouper, language=None):
         from djangocms_versioning.constants import DRAFT
+
         version = self._get_version(grouper, DRAFT, language)
         version.publish(self.superuser)
 
     def _unpublish(self, grouper, language=None):
         from djangocms_versioning.constants import PUBLISHED
+
         version = self._get_version(grouper, PUBLISHED, language)
         version.unpublish(self.superuser)
 
@@ -121,27 +142,29 @@ class BaseAliasPluginTestCase(CMSTestCase):
         if language is None:
             language = self.language
 
-        if is_versioning_enabled() and not kwargs.get('created_by'):
-            kwargs['created_by'] = self.superuser
+        if is_versioning_enabled() and not kwargs.get("created_by"):
+            kwargs["created_by"] = self.superuser
 
         page = create_page(
             title=title,
             language=language,
-            template='page.html',
-            menu_title='',
+            template="page.html",
+            menu_title="",
             in_navigation=True,
             limit_visibility_in_menu=None,
             site=site,
-            **kwargs
+            **kwargs,
         )
         if is_versioning_enabled() and published:
             self._publish(page, language)
         return page
 
-    def get_alias_request(self, alias, lang_code='en', *args, **kwargs):
+    def get_alias_request(self, alias, lang_code="en", *args, **kwargs):
         request = self._get_instance_request(alias, *args, **kwargs)
         request.current_page = None
-        request = self._process_request_by_toolbar_middleware(request, obj=alias.get_content(lang_code))
+        request = self._process_request_by_toolbar_middleware(
+            request, obj=alias.get_content(lang_code)
+        )
         return request
 
     def get_page_request(self, page, obj=None, *args, **kwargs):
@@ -150,9 +173,17 @@ class BaseAliasPluginTestCase(CMSTestCase):
         request = self._process_request_by_toolbar_middleware(request, obj)
         return request
 
-    def _get_instance_request(self, instance, user, path=None, edit=False,
-                              preview=False, structure=False, lang_code='en',
-                              disable=False):
+    def _get_instance_request(
+        self,
+        instance,
+        user,
+        path=None,
+        edit=False,
+        preview=False,
+        structure=False,
+        lang_code="en",
+        disable=False,
+    ):
         if not path:
             if edit:
                 path = get_object_edit_url(instance)
@@ -167,20 +198,20 @@ class BaseAliasPluginTestCase(CMSTestCase):
         request.session = {}
         request.user = user
         request.LANGUAGE_CODE = lang_code
-        request.GET = QueryDict('', mutable=True)
+        request.GET = QueryDict("", mutable=True)
         if edit:
-            request.GET['edit'] = None
+            request.GET["edit"] = None
         else:
-            request.GET['edit_off'] = None
+            request.GET["edit_off"] = None
         if disable:
-            request.GET[get_cms_setting('CMS_TOOLBAR_URL__DISABLE')] = None
+            request.GET[get_cms_setting("CMS_TOOLBAR_URL__DISABLE")] = None
 
         return request
 
     def _process_request_by_toolbar_middleware(self, request, obj=None):
         middleware = ToolbarMiddleware(request)
         middleware.process_request(request)
-        if hasattr(request, 'toolbar'):
+        if hasattr(request, "toolbar"):
             if obj:
                 request.toolbar.set_object(obj)
             request.toolbar.populate()
@@ -190,33 +221,45 @@ class BaseAliasPluginTestCase(CMSTestCase):
 
     def _add_default_permissions(self, user):
         # Text plugin permissions
-        user.user_permissions.add(Permission.objects.get(codename='add_text'))
-        user.user_permissions.add(Permission.objects.get(codename='delete_text'))
-        user.user_permissions.add(Permission.objects.get(codename='change_text'))
+        user.user_permissions.add(Permission.objects.get(codename="add_text"))
+        user.user_permissions.add(Permission.objects.get(codename="delete_text"))
+        user.user_permissions.add(Permission.objects.get(codename="change_text"))
         # Page permissions
-        user.user_permissions.add(Permission.objects.get(codename='publish_page'))
-        user.user_permissions.add(Permission.objects.get(codename='add_page'))
-        user.user_permissions.add(Permission.objects.get(codename='change_page'))
-        user.user_permissions.add(Permission.objects.get(codename='delete_page'))
+        user.user_permissions.add(Permission.objects.get(codename="publish_page"))
+        user.user_permissions.add(Permission.objects.get(codename="add_page"))
+        user.user_permissions.add(Permission.objects.get(codename="change_page"))
+        user.user_permissions.add(Permission.objects.get(codename="delete_page"))
 
     def add_alias_plugin_to_page(self, page, alias, language=None):
         if language is None:
             language = self.language
 
         add_plugin(
-            page.get_placeholders(language).get(slot='content'),
-            'Alias',
+            page.get_placeholders(language).get(slot="content"),
+            "Alias",
             language=language,
             alias=alias,
         )
 
     def get_staff_user_with_alias_permissions(self):
         staff_user = self._create_user("alias staff", is_staff=True, is_superuser=False)  # noqa: E501
-        self.add_permission(staff_user, get_permission_codename('add', AliasModel._meta))  # noqa: E501
-        self.add_permission(staff_user, get_permission_codename('change', AliasModel._meta))  # noqa: E501
-        self.add_permission(staff_user, get_permission_codename('delete', AliasModel._meta))  # noqa: E501
-        self.add_permission(staff_user, get_permission_codename('add', AliasContent._meta))  # noqa: E501
-        self.add_permission(staff_user, get_permission_codename('change', AliasContent._meta))  # noqa: E501
-        self.add_permission(staff_user, get_permission_codename('delete', AliasContent._meta))  # noqa: E501
-        self.add_permission(staff_user, get_permission_codename('add', Category._meta))  # noqa: E501
+        self.add_permission(
+            staff_user, get_permission_codename("add", AliasModel._meta)
+        )  # noqa: E501
+        self.add_permission(
+            staff_user, get_permission_codename("change", AliasModel._meta)
+        )  # noqa: E501
+        self.add_permission(
+            staff_user, get_permission_codename("delete", AliasModel._meta)
+        )  # noqa: E501
+        self.add_permission(
+            staff_user, get_permission_codename("add", AliasContent._meta)
+        )  # noqa: E501
+        self.add_permission(
+            staff_user, get_permission_codename("change", AliasContent._meta)
+        )  # noqa: E501
+        self.add_permission(
+            staff_user, get_permission_codename("delete", AliasContent._meta)
+        )  # noqa: E501
+        self.add_permission(staff_user, get_permission_codename("add", Category._meta))  # noqa: E501
         return staff_user

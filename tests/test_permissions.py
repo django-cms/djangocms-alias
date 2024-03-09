@@ -11,7 +11,6 @@ from .base import BaseAliasPluginTestCase
 
 
 class AliasPermissionsTestCase(BaseAliasPluginTestCase):
-
     def test_can_create_alias_superuser(self):
         self.assertTrue(
             Alias.can_create_alias(
@@ -43,7 +42,7 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
                 content_type=ContentType.objects.get_for_model(
                     AliasModel,
                 ),
-                codename='add_alias',
+                codename="add_alias",
             )
         )
         user.user_permissions.add(
@@ -51,7 +50,7 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
                 content_type=ContentType.objects.get_for_model(
                     Alias.model,
                 ),
-                codename='add_aliasplugin',
+                codename="add_aliasplugin",
             )
         )
         alias = self._create_alias(self.placeholder.get_plugins())
@@ -75,7 +74,7 @@ class AliasPermissionsTestCase(BaseAliasPluginTestCase):
                 content_type=ContentType.objects.get_for_model(
                     AliasModel,
                 ),
-                codename='add_alias',
+                codename="add_alias",
             )
         )
         self.assertTrue(

@@ -91,9 +91,9 @@ class CategoryFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         qs = model_admin.get_queryset(request)
-        cat_id = qs.values_list('alias__category', flat=True).distinct()
+        cat_id = qs.values_list("alias__category", flat=True).distinct()
         # Ensure the category is ordered by the name alphabetically by default
-        cat = Category.objects.filter(pk__in=cat_id).order_by('translations__name')
+        cat = Category.objects.filter(pk__in=cat_id).order_by("translations__name")
         for obj in cat:
             yield str(obj.pk), smart_str(obj)
 
@@ -138,7 +138,9 @@ if djangocms_versioning_enabled:
         def choices(self, changelist):
             yield {
                 "selected": self.value() is None,
-                "query_string": changelist.get_query_string(remove=[self.parameter_name]),
+                "query_string": changelist.get_query_string(
+                    remove=[self.parameter_name]
+                ),
                 "display": _("Hide"),
             }
             for lookup, title in self.lookup_choices:

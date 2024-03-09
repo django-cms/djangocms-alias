@@ -35,18 +35,18 @@ def detach_alias_plugin_view(request, plugin_pk):
 
     instance = get_object_or_404(AliasPlugin, pk=plugin_pk)
 
-    if request.method == 'GET':
+    if request.method == "GET":
         opts = Alias.model._meta
         context = {
-            'has_change_permission': True,
-            'opts': opts,
-            'root_path': reverse('admin:index'),
-            'is_popup': True,
-            'app_label': opts.app_label,
-            'object_name': _('Alias'),
-            'object': instance.alias,
+            "has_change_permission": True,
+            "opts": opts,
+            "root_path": reverse("admin:index"),
+            "is_popup": True,
+            "app_label": opts.app_label,
+            "object_name": _("Alias"),
+            "object": instance.alias,
         }
-        return render(request, 'djangocms_alias/detach_alias.html', context)
+        return render(request, "djangocms_alias/detach_alias.html", context)
 
     language = get_language_from_request(request, check_path=True)
 
@@ -93,8 +93,8 @@ def create_alias_view(request):
     else:
         initial_data = None
 
-    if request.method == 'GET' and not form.is_valid():
-        return HttpResponseBadRequest('Form received unexpected values')
+    if request.method == "GET" and not form.is_valid():
+        return HttpResponseBadRequest("Form received unexpected values")
 
     user = request.user
 
@@ -107,24 +107,24 @@ def create_alias_view(request):
     if not create_form.is_valid():
         opts = Alias.model._meta
         context = {
-            'form': create_form,
-            'has_change_permission': True,
-            'opts': opts,
-            'root_path': reverse('admin:index'),
-            'is_popup': True,
-            'app_label': opts.app_label,
-            'media': (Alias().media + create_form.media),
+            "form": create_form,
+            "has_change_permission": True,
+            "opts": opts,
+            "root_path": reverse("admin:index"),
+            "is_popup": True,
+            "app_label": opts.app_label,
+            "media": (Alias().media + create_form.media),
         }
-        return render(request, 'djangocms_alias/create_alias.html', context)
+        return render(request, "djangocms_alias/create_alias.html", context)
 
     plugins = create_form.get_plugins()
 
     if not plugins:
         return HttpResponseBadRequest(
-            'Plugins are required to create an alias',
+            "Plugins are required to create an alias",
         )
 
-    replace = create_form.cleaned_data.get('replace')
+    replace = create_form.cleaned_data.get("replace")
     if not Alias.can_create_alias(user, plugins, replace):
         raise PermissionDenied
 
@@ -132,8 +132,8 @@ def create_alias_view(request):
     emit_content_change([alias_content])
 
     if replace:
-        plugin = create_form.cleaned_data.get('plugin')
-        placeholder = create_form.cleaned_data.get('placeholder')
+        plugin = create_form.cleaned_data.get("plugin")
+        placeholder = create_form.cleaned_data.get("placeholder")
         return render_replace_response(
             request,
             new_plugins=[alias_plugin],
@@ -144,8 +144,9 @@ def create_alias_view(request):
     return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
 
 
-def render_replace_response(request, new_plugins, source_placeholder=None,
-                            source_plugin=None):
+def render_replace_response(
+    request, new_plugins, source_placeholder=None, source_plugin=None
+):
     move_plugins, add_plugins = [], []
     for plugin in new_plugins:
         root = plugin.parent.get_bound_plugin() if plugin.parent else plugin
@@ -158,46 +159,52 @@ def render_replace_response(request, new_plugins, source_placeholder=None,
         )
         plugin_tree = get_plugin_tree_as_json(request, plugins)
         move_data = get_plugin_toolbar_info(plugin)
-        move_data['plugin_order'] = plugin_order
+        move_data["plugin_order"] = plugin_order
         move_data.update(json.loads(plugin_tree))
         move_plugins.append(json.dumps(move_data))
-        add_plugins.append((
-            json.dumps(get_plugin_toolbar_info(plugin)),
-            plugin_tree,
-        ))
+        add_plugins.append(
+            (
+                json.dumps(get_plugin_toolbar_info(plugin)),
+                plugin_tree,
+            )
+        )
     context = {
-        'added_plugins': add_plugins,
-        'moved_plugins': move_plugins,
-        'is_popup': True,
+        "added_plugins": add_plugins,
+        "moved_plugins": move_plugins,
+        "is_popup": True,
     }
     if source_plugin is not None:
-        context['replaced_plugin'] = json.dumps(
+        context["replaced_plugin"] = json.dumps(
             get_plugin_toolbar_info(source_plugin),
         )
     if source_placeholder is not None:
-        context['replaced_placeholder'] = json.dumps({
-            'placeholder_id': source_placeholder.pk,
-            'deleted': True,
-        })
-    return render(request, 'djangocms_alias/alias_replace.html', context)
+        context["replaced_placeholder"] = json.dumps(
+            {
+                "placeholder_id": source_placeholder.pk,
+                "deleted": True,
+            }
+        )
+    return render(request, "djangocms_alias/alias_replace.html", context)
 
 
 class CategorySelect2View(ListView):
-    queryset = Category.objects.order_by('translations__name')
+    queryset = Category.objects.order_by("translations__name")
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
         context = self.get_context_data()
-        return JsonResponse({
-            'results': [
-                {
-                    'text': str(obj),
-                    'id': obj.pk,
-                }
-                for obj in context['object_list']
-            ],
-            'more': context['page_obj'].has_next(),
-        })
+        return JsonResponse(
+            {
+                "results": [
+                    {
+                        "text": str(obj),
+                        "id": obj.pk,
+                    }
+                    for obj in context["object_list"]
+                ],
+                "more": context["page_obj"].has_next(),
+            }
+        )
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:
@@ -209,16 +216,14 @@ class CategorySelect2View(ListView):
         Only show Categories that have an Alias attached.
         If site is selected, use that to filter further.
         """
-        term = self.request.GET.get('term')
-        site = self.request.GET.get('site')
+        term = self.request.GET.get("term")
+        site = self.request.GET.get("site")
         queryset = super().get_queryset().distinct()
         # Only get categories that have aliases attached
-        queryset = queryset.filter(
-            aliases__isnull=False
-        )
+        queryset = queryset.filter(aliases__isnull=False)
 
         try:
-            pk = int(self.request.GET.get('pk'))
+            pk = int(self.request.GET.get("pk"))
         except (TypeError, ValueError):
             pk = None
 
@@ -233,25 +238,27 @@ class CategorySelect2View(ListView):
         return queryset.filter(q)
 
     def get_paginate_by(self, queryset):
-        return self.request.GET.get('limit', 30)
+        return self.request.GET.get("limit", 30)
 
 
 class AliasSelect2View(ListView):
-    queryset = AliasModel.objects.order_by('category__translations__name', 'position')
+    queryset = AliasModel.objects.order_by("category__translations__name", "position")
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
         context = self.get_context_data()
-        return JsonResponse({
-            'results': [
-                {
-                    'text': str(obj),
-                    'id': obj.pk,
-                }
-                for obj in context['object_list']
-            ],
-            'more': context['page_obj'].has_next(),
-        })
+        return JsonResponse(
+            {
+                "results": [
+                    {
+                        "text": str(obj),
+                        "id": obj.pk,
+                    }
+                    for obj in context["object_list"]
+                ],
+                "more": context["page_obj"].has_next(),
+            }
+        )
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:
@@ -259,16 +266,21 @@ class AliasSelect2View(ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        term = self.request.GET.get('term')
-        category = self.request.GET.get('category')
-        site = self.request.GET.get('site')
+        term = self.request.GET.get("term")
+        category = self.request.GET.get("category")
+        site = self.request.GET.get("site")
         # Showing published and unpublished aliases
-        queryset = super().get_queryset().filter(
-            contents__language=get_current_language(),
-        ).distinct()
+        queryset = (
+            super()
+            .get_queryset()
+            .filter(
+                contents__language=get_current_language(),
+            )
+            .distinct()
+        )
 
         try:
-            pk = int(self.request.GET.get('pk'))
+            pk = int(self.request.GET.get("pk"))
         except (TypeError, ValueError):
             pk = None
 
@@ -285,7 +297,7 @@ class AliasSelect2View(ListView):
         return queryset.filter(q)
 
     def get_paginate_by(self, queryset):
-        return self.request.GET.get('limit', 30)
+        return self.request.GET.get("limit", 30)
 
 
 def alias_usage_view(request, pk):
@@ -294,23 +306,23 @@ def alias_usage_view(request, pk):
 
     alias = get_object_or_404(AliasModel.objects.all(), pk=pk)
     opts = Alias.model._meta
-    title = _('Objects using alias: {}'.format(alias))
+    title = _(f"Objects using alias: {alias}")
     context = {
-        'has_change_permission': True,
-        'opts': opts,
-        'root_path': reverse('admin:index'),
-        'is_popup': True,
-        'app_label': opts.app_label,
-        'object_name': _('Alias'),
-        'object': alias,
-        'title': title,
-        'original': title,
-        'show_back_btn': request.GET.get('back'),
-        'objects_list': sorted(
+        "has_change_permission": True,
+        "opts": opts,
+        "root_path": reverse("admin:index"),
+        "is_popup": True,
+        "app_label": opts.app_label,
+        "object_name": _("Alias"),
+        "object": alias,
+        "title": title,
+        "original": title,
+        "show_back_btn": request.GET.get("back"),
+        "objects_list": sorted(
             alias.objects_using,
             # First show Pages on list
             key=lambda obj: isinstance(obj, Page),
             reverse=True,
         ),
     }
-    return render(request, 'djangocms_alias/alias_usage.html', context)
+    return render(request, "djangocms_alias/alias_usage.html", context)

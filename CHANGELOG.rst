@@ -7,6 +7,7 @@ Unreleased
 * Introduced Django 4.2 support.
 * Dropped Support for Django<3.1
 
+
 1.11.0 (2022-10-14)
 ===================
 * feat: Hiding Aliases entry from admin index menu as aliases are managed through Alias Content

@@ -198,7 +198,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
 
     def _get_rename_alias_link(self, obj, request, disabled=False):
         url = admin_reverse(
-            "{}_{}_change".format(obj._meta.app_label, obj._meta.model_name),
+            f"{obj._meta.app_label}_{obj._meta.model_name}_change",
             args=(obj.pk,),
         )
         return render_to_string(
@@ -215,7 +215,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
 
     def _get_change_alias_settings_link(self, obj, request, disabled=False):
         url = admin_reverse(
-            "{}_{}_change".format(obj._meta.app_label, obj.alias._meta.model_name),
+            f"{obj._meta.app_label}_{obj.alias._meta.model_name}_change",
             args=(obj.alias.pk,),
         )
         return render_to_string(

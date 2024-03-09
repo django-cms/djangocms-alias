@@ -440,7 +440,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         admin_menu = request.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
         site_aliases_url = admin_menu.items[3].url
         admin_changelist_aliases_url = reverse(
-            "admin:{}_aliascontent_changelist".format(AliasContent._meta.app_label)
+            f"admin:{AliasContent._meta.app_label}_aliascontent_changelist"
         )
 
         with self.login_user_context(self.superuser):

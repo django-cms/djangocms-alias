@@ -5,6 +5,7 @@ from cms.api import add_plugin, create_title
 from cms.models import Placeholder
 
 from djangocms_alias.cms_plugins import Alias
+from djangocms_alias.compat import DJANGO_4_0
 from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
@@ -395,7 +396,8 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(Placeholder.objects.count(), 1)
         alias.delete()
         self.assertFalse(alias.__class__.objects.filter(pk=alias.pk).exists())
-        self.assertEqual(alias.cms_plugins.count(), 0)
+        if DJANGO_4_0:
+            self.assertEqual(alias.cms_plugins.count(), 0)
         self.assertEqual(Placeholder.objects.count(), 0)
 
     def test_category_get_absolute_url(self):

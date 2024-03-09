@@ -1,10 +1,10 @@
 -r requirements_base.txt
 
-django>=3.2,<4.0
+django>=4.2,<5.0
 django-classy-tags
 django-fsm>=2.6
 django-sekizai
-django-parler<=2.1
+django-parler
 
 https://github.com/django-cms/django-cms/tarball/release/4.0.1.x#egg=django-cms
-https://github.com/django-cms/djangocms-versioning/tarball/1.2.2#egg=djangocms-versioning
+https://github.com/joshyu/djangocms-versioning/tarball/feat/django-42-compatible#egg=djangocms-versioning

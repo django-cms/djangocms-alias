@@ -1,11 +1,9 @@
+from cms.utils.permissions import get_model_permission_codename
+from cms.utils.urlutils import admin_reverse
 from django.contrib import admin
 from django.db.models.functions import Lower
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
-
-from cms.utils.permissions import get_model_permission_codename
-from cms.utils.urlutils import admin_reverse
-
 from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
@@ -19,7 +17,6 @@ from .utils import (
     emit_content_delete,
     is_versioning_enabled,
 )
-
 
 __all__ = [
     "AliasAdmin",
@@ -139,11 +136,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         # Force the category set to Lower, to be able to sort the category in ascending/descending order
-        queryset = queryset.annotate(
-            alias_category_translations_ordered=Lower(
-                "alias__category__translations__name"
-            )
-        )
+        queryset = queryset.annotate(alias_category_translations_ordered=Lower("alias__category__translations__name"))
         return queryset
 
     # Add Alias category in the admin manager list and order field

@@ -1,11 +1,9 @@
+from cms.app_base import CMSAppConfig
 from django.apps import apps
 from django.conf import settings
 
-from cms.app_base import CMSAppConfig
-
 from .models import AliasContent, AliasPlugin, copy_alias_content
 from .rendering import render_alias_content
-
 
 try:
     apps.get_app_config("djangocms_internalsearch")
@@ -26,16 +24,11 @@ class AliasCMSConfig(CMSAppConfig):
     cms_toolbar_enabled_models = [(AliasContent, render_alias_content)]
     moderated_models = [AliasContent]
 
-    djangocms_moderation_enabled = getattr(
-        settings, "MODERATING_ALIAS_MODELS_ENABLED", True
-    )
-    djangocms_versioning_enabled = getattr(
-        settings, "VERSIONING_ALIAS_MODELS_ENABLED", True
-    )
+    djangocms_moderation_enabled = getattr(settings, "MODERATING_ALIAS_MODELS_ENABLED", True)
+    djangocms_versioning_enabled = getattr(settings, "VERSIONING_ALIAS_MODELS_ENABLED", True)
 
     if djangocms_versioning_enabled and djangocms_versioning_installed:
         from cms.utils.i18n import get_language_tuple
-
         from djangocms_versioning.datastructures import VersionableItem
 
         versioning = [
@@ -49,9 +42,7 @@ class AliasCMSConfig(CMSAppConfig):
             ),
         ]
 
-    djangocms_references_enabled = getattr(
-        settings, "REFERENCES_ALIAS_MODELS_ENABLED", True
-    )
+    djangocms_references_enabled = getattr(settings, "REFERENCES_ALIAS_MODELS_ENABLED", True)
     reference_fields = [
         (AliasPlugin, "alias"),
     ]

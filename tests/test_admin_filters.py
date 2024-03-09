@@ -1,9 +1,8 @@
 from unittest import skipUnless
 
+from cms.utils import get_current_site
 from django.contrib import admin
 from django.contrib.sites.models import Site
-
-from cms.utils import get_current_site
 
 from djangocms_alias.constants import (
     SITE_FILTER_NO_SITE_VALUE,
@@ -11,7 +10,8 @@ from djangocms_alias.constants import (
     UNPUBLISHED_FILTER_URL_PARAM,
 )
 from djangocms_alias.filters import CategoryFilter
-from djangocms_alias.models import Alias as AliasModel, AliasContent, Category
+from djangocms_alias.models import Alias as AliasModel
+from djangocms_alias.models import AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
@@ -42,12 +42,8 @@ class LanguageFiltersTestCase(BaseAliasPluginTestCase):
         if is_versioning_enabled():
             from djangocms_versioning.models import Version
 
-            Version.objects.create(
-                content=expected_en_content, created_by=self.superuser
-            )
-            Version.objects.create(
-                content=expected_de_content, created_by=self.superuser
-            )
+            Version.objects.create(content=expected_en_content, created_by=self.superuser)
+            Version.objects.create(content=expected_de_content, created_by=self.superuser)
 
         base_url = self.get_admin_url(AliasContent, "changelist")
 
@@ -61,9 +57,7 @@ class LanguageFiltersTestCase(BaseAliasPluginTestCase):
             # fr should have no result and be empty because nothing was created
             response_fr = self.client.get(base_url + "?language=fr")
 
-        self.assertEqual(
-            set(response_default.context["cl"].queryset), {expected_en_content}
-        )
+        self.assertEqual(set(response_default.context["cl"].queryset), {expected_en_content})
         self.assertEqual(set(response_en.context["cl"].queryset), {expected_en_content})
         self.assertEqual(set(response_de.context["cl"].queryset), {expected_de_content})
         self.assertEqual(set(response_fr.context["cl"].queryset), set())
@@ -110,15 +104,9 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
         if is_versioning_enabled():
             from djangocms_versioning.models import Version
 
-            Version.objects.create(
-                content=current_site_alias_content, created_by=self.superuser
-            )
-            Version.objects.create(
-                content=another_site_alias_content, created_by=self.superuser
-            )
-            Version.objects.create(
-                content=no_site_alias_content, created_by=self.superuser
-            )
+            Version.objects.create(content=current_site_alias_content, created_by=self.superuser)
+            Version.objects.create(content=another_site_alias_content, created_by=self.superuser)
+            Version.objects.create(content=no_site_alias_content, created_by=self.superuser)
 
         base_url = self.get_admin_url(AliasContent, "changelist")
 
@@ -126,21 +114,13 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
             # en is the default language configured for the site
             response_default = self.client.get(base_url)
             # filter by aliases with the current site
-            response_current_site = self.client.get(
-                f"{base_url}?{SITE_FILTER_URL_PARAM}={current_site.pk}"
-            )
+            response_current_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={current_site.pk}")
             # filter by aliases with a different site set
-            response_other_site = self.client.get(
-                f"{base_url}?{SITE_FILTER_URL_PARAM}={another_site.pk}"
-            )
+            response_other_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={another_site.pk}")
             # filter by aliases with an empty site set
-            response_empty_site = self.client.get(
-                f"{base_url}?{SITE_FILTER_URL_PARAM}={empty_site.pk}"
-            )
+            response_empty_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={empty_site.pk}")
             # filter by aliases with no site set
-            response_no_site = self.client.get(
-                f"{base_url}?{SITE_FILTER_URL_PARAM}={SITE_FILTER_NO_SITE_VALUE}"
-            )
+            response_no_site = self.client.get(f"{base_url}?{SITE_FILTER_URL_PARAM}={SITE_FILTER_NO_SITE_VALUE}")
 
         # By default all alias are shown
         self.assertEqual(
@@ -162,9 +142,7 @@ class SiteFiltersTestCase(BaseAliasPluginTestCase):
             {another_site_alias_content},
         )
         # Only alias attached to the current site are shown when filtered by no site
-        self.assertEqual(
-            set(response_no_site.context["cl"].queryset), {no_site_alias_content}
-        )
+        self.assertEqual(set(response_no_site.context["cl"].queryset), {no_site_alias_content})
         # No are shown when filtered by an empty site
         self.assertEqual(set(response_empty_site.context["cl"].queryset), set())
 
@@ -182,18 +160,14 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
         category = Category.objects.create(name="Alias Filter Category")
         alias = AliasModel.objects.create(category=category, position=0)
         unpublished_alias = AliasModel.objects.create(category=category, position=0)
-        expected_en_content = AliasContent.objects.create(
-            alias=alias, name="EN Alias Content", language="en"
-        )
+        expected_en_content = AliasContent.objects.create(alias=alias, name="EN Alias Content", language="en")
         Version.objects.create(content=expected_en_content, created_by=self.superuser)
         expected_unpublished = AliasContent.objects.create(
             alias=unpublished_alias,
             name="EN Alias Content unpublished",
             language="en",
         )
-        Version.objects.create(
-            content=expected_unpublished, created_by=self.superuser, state=UNPUBLISHED
-        )
+        Version.objects.create(content=expected_unpublished, created_by=self.superuser, state=UNPUBLISHED)
         base_url = self.get_admin_url(AliasContent, "changelist")
 
         with self.login_user_context(self.get_superuser()):
@@ -201,9 +175,7 @@ class UnpublishedFiltersTestCase(BaseAliasPluginTestCase):
             response_default = self.client.get(base_url)
             # filter by unpublished hide
             qs_default = response_default.context["cl"].queryset
-            response_unpublished = self.client.get(
-                f"{base_url}?{UNPUBLISHED_FILTER_URL_PARAM}=1"
-            )
+            response_unpublished = self.client.get(f"{base_url}?{UNPUBLISHED_FILTER_URL_PARAM}=1")
             qs_unpublished = response_unpublished.context["cl"].queryset
             # filter by unpublished show
 
@@ -245,13 +217,9 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         with self.login_user_context(self.superuser):
             response_default = self.client.get(base_url)
             # category one should have a result
-            category_one_filter_response = self.client.get(
-                f"{base_url}?category={category_one.id}"
-            )
+            category_one_filter_response = self.client.get(f"{base_url}?category={category_one.id}")
             # category two should have a result
-            category_two_filter_response = self.client.get(
-                f"{base_url}?category={category_two.id}"
-            )
+            category_two_filter_response = self.client.get(f"{base_url}?category={category_two.id}")
 
         # By default all alias contents are shown
         self.assertEqual(
@@ -290,9 +258,7 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
             name="EN Alias Content one",
             language="en",
         )
-        Version.objects.create(
-            content=expected_category_one_content, created_by=self.superuser
-        )
+        Version.objects.create(content=expected_category_one_content, created_by=self.superuser)
         category_two = Category.objects.create(name="two")
         alias_two = AliasModel.objects.create(
             category=category_two,
@@ -303,21 +269,15 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
             name="EN Alias Content two",
             language="en",
         )
-        Version.objects.create(
-            content=expected_category_two_content, created_by=self.superuser
-        )
+        Version.objects.create(content=expected_category_two_content, created_by=self.superuser)
         base_url = self.get_admin_url(AliasContent, "changelist")
 
         with self.login_user_context(self.superuser):
             response_default = self.client.get(base_url)
             # category one should have a result
-            category_one_filter_response = self.client.get(
-                f"{base_url}?category={category_one.id}"
-            )
+            category_one_filter_response = self.client.get(f"{base_url}?category={category_one.id}")
             # categopry two should have a result
-            category_two_filter_response = self.client.get(
-                f"{base_url}?category={category_two.id}"
-            )
+            category_two_filter_response = self.client.get(f"{base_url}?category={category_two.id}")
 
         # By default all alias contents are shown
         self.assertEqual(
@@ -364,9 +324,7 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         )
 
         version_admin = admin.site._registry[AliasContent]
-        category_filter = CategoryFilter(
-            None, {"category": ""}, AliasContent, version_admin
-        )
+        category_filter = CategoryFilter(None, {"category": ""}, AliasContent, version_admin)
         # Get the first choice in the filter lookup object
         first_lookup_value = category_filter.lookup_choices[0][1]
         # Lookup value should match the category name linked to alias content
@@ -394,9 +352,7 @@ class CatergoryFiltersTestCase(BaseAliasPluginTestCase):
         )
 
         version_admin = admin.site._registry[AliasContent]
-        category_filter = CategoryFilter(
-            None, {"category": ""}, AliasContent, version_admin
-        )
+        category_filter = CategoryFilter(None, {"category": ""}, AliasContent, version_admin)
 
         # Get the first choice in the filter lookup object
         first_lookup_value = category_filter.lookup_choices[0][1]

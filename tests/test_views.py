@@ -1,17 +1,16 @@
 import re
 from unittest import skip, skipIf, skipUnless
 
-from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.sites.models import Site
-from django.test.utils import override_settings
-
 from cms.api import add_plugin
 from cms.models import Placeholder
 from cms.utils import get_current_site
 from cms.utils.i18n import force_language
 from cms.utils.plugins import downcast_plugins
 from cms.utils.urlutils import add_url_parameters, admin_reverse
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
+from django.test.utils import override_settings
 
 from djangocms_alias.constants import (
     CATEGORY_SELECT2_URL_NAME,
@@ -480,9 +479,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         # when no filtering by site 1 only first object displayed
         with self.login_user_context(self.superuser):
             with force_language("en"):
-                site1_aliases_filter_url = (
-                    f"{aliascontent_list_url}?site={site1_alias.site.id}"
-                )
+                site1_aliases_filter_url = f"{aliascontent_list_url}?site={site1_alias.site.id}"
                 list_response = self.client.get(site1_aliases_filter_url)
 
         self.assertContains(list_response, site1_alias.name)
@@ -491,9 +488,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         # when no filtering by site 2 only first object displayed
         with self.login_user_context(self.superuser):
             with force_language("en"):
-                site2_aliases_filter_url = (
-                    f"{aliascontent_list_url}?site={site2_alias.site.id}"
-                )
+                site2_aliases_filter_url = f"{aliascontent_list_url}?site={site2_alias.site.id}"
                 list_response = self.client.get(site2_aliases_filter_url)
 
         self.assertNotContains(list_response, site1_alias.name)
@@ -549,9 +544,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
             # This will show because it's a new draft version of the same alias
             draft_content = alias2.contents.create(name="foo", language=self.language)
-            Version.objects.create(
-                content=draft_content, created_by=self.superuser, state=DRAFT
-            )
+            Version.objects.create(content=draft_content, created_by=self.superuser, state=DRAFT)
 
         # This shouldn't show because it hasn't content in current language
         self._create_alias(name="foo2", language="fr", position=1)
@@ -895,17 +888,11 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, "<td>Alias</td>")
         self.assertRegex(
             str(response.content),
-            r'href="{}"[\w+]?>{}<\/a>'.format(
-                re.escape(self.page.get_absolute_url(self.language)),
-                str(self.page),
-            ),
+            rf'href="{re.escape(self.page.get_absolute_url(self.language))}"[\w+]?>{str(self.page)}<\/a>',
         )
         self.assertRegex(
             str(response.content),
-            r'href="{}"[\w+]?>{}<\/a>'.format(
-                re.escape(root_alias.get_absolute_url()),
-                str(alias),
-            ),
+            rf'href="{re.escape(root_alias.get_absolute_url())}"[\w+]?>{str(alias)}<\/a>',
         )
         self.assertRegex(
             str(response.content),
@@ -959,9 +946,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 ),
             )
         self.assertContains(response, "This alias is used by following objects:")
-        test = (
-            r"<li>[\s\\n]*Page:[\s\\n]*<a href=\"\/en\/test\/\">test<\/a>[\s\\n]*<\/li>"
-        )
+        test = r"<li>[\s\\n]*Page:[\s\\n]*<a href=\"\/en\/test\/\">test<\/a>[\s\\n]*<\/li>"
         self.assertRegex(str(response.content), test)
 
     def test_delete_alias_view_get_alias_not_used_on_any_page(self):
@@ -1478,9 +1463,7 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         from djangocms_versioning.helpers import remove_published_where
 
         unpublished_alias = self._create_alias(published=False)
-        content = remove_published_where(
-            unpublished_alias.contents.filter(language=self.language)
-        ).first()
+        content = remove_published_where(unpublished_alias.contents.filter(language=self.language)).first()
         alias_placeholder = content.placeholder
 
         body = "unpublished alias"
@@ -1535,13 +1518,9 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         if is_versioning_enabled():
             from djangocms_versioning.models import Version
 
-            version_de = Version.objects.create(
-                content=alias_content_de, created_by=self.superuser
-            )
+            version_de = Version.objects.create(content=alias_content_de, created_by=self.superuser)
             version_de.publish(user=self.superuser)
-            version_fr = Version.objects.create(
-                content=alias_content_fr, created_by=self.superuser
-            )
+            version_fr = Version.objects.create(content=alias_content_fr, created_by=self.superuser)
             version_fr.publish(user=self.superuser)
 
         with self.login_user_context(self.superuser):
@@ -1549,9 +1528,7 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
                 if is_versioning_enabled():
                     # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
                     # otherwise we are taken to the version list url
-                    detail_response = self.client.get(
-                        alias.get_content(language="en").get_absolute_url()
-                    )
+                    detail_response = self.client.get(alias.get_content(language="en").get_absolute_url())
                 else:
                     detail_response = self.client.get(alias.get_absolute_url())
                 list_response = self.client.get(
@@ -1569,9 +1546,7 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
                 if is_versioning_enabled():
                     # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
                     # otherwise we are taken to the version list url
-                    detail_response = self.client.get(
-                        alias_content_de.get_absolute_url()
-                    )
+                    detail_response = self.client.get(alias_content_de.get_absolute_url())
                 else:
                     detail_response = self.client.get(alias.get_absolute_url())
                 list_response = self.client.get(
@@ -1589,9 +1564,7 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
                 if is_versioning_enabled():
                     # we need to call get_absolute_url on the AliasContent object when versioning is enabled,
                     # otherwise we are taken to the version list url
-                    detail_response = self.client.get(
-                        alias_content_fr.get_absolute_url()
-                    )
+                    detail_response = self.client.get(alias_content_fr.get_absolute_url())
                 else:
                     detail_response = self.client.get(alias.get_absolute_url())
                 list_response = self.client.get(

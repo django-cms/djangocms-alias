@@ -1,5 +1,8 @@
 import json
 
+from cms.models import Page
+from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
+from cms.utils.i18n import get_current_language
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
@@ -8,19 +11,17 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import (
     get_language_from_request,
+)
+from django.utils.translation import (
     gettext_lazy as _,
 )
 from django.views.generic import ListView
 
-from cms.models import Page
-from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
-from cms.utils.i18n import get_current_language
-
 from .cms_plugins import Alias
 from .forms import BaseCreateAliasForm, CreateAliasForm
-from .models import Alias as AliasModel, AliasPlugin, Category
+from .models import Alias as AliasModel
+from .models import AliasPlugin, Category
 from .utils import emit_content_change
-
 
 JAVASCRIPT_SUCCESS_RESPONSE = """
     <div><div class="messagelist">
@@ -144,9 +145,7 @@ def create_alias_view(request):
     return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
 
 
-def render_replace_response(
-    request, new_plugins, source_placeholder=None, source_plugin=None
-):
+def render_replace_response(request, new_plugins, source_placeholder=None, source_plugin=None):
     move_plugins, add_plugins = [], []
     for plugin in new_plugins:
         root = plugin.parent.get_bound_plugin() if plugin.parent else plugin

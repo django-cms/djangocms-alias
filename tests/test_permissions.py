@@ -1,7 +1,6 @@
+from cms.api import add_plugin
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-
-from cms.api import add_plugin
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.models import Alias as AliasModel

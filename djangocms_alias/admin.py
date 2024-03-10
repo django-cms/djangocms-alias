@@ -2,7 +2,7 @@ from cms.admin.utils import GrouperModelAdmin
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.http import (
     Http404,
     HttpRequest,
@@ -190,3 +190,15 @@ class AliasContentAdmin(admin.ModelAdmin):
         """Hides admin class in admin site overview"""
 
         return False
+
+    def delete_model(self, request: HttpRequest, obj: AliasContent):
+        if obj.alias._default_manager.filter(language=obj.language).count() == 1:
+            message = _(
+                "Alias content for language {} deleted. A new empty alias content will be created if needed."
+            ).format(obj.language)
+            self.message_user(request, message, level=messages.WARNING)
+
+        return super().delete_model(
+            request=request,
+            obj=obj,
+        )

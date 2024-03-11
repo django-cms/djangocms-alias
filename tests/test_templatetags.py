@@ -1,14 +1,14 @@
 from unittest import skipUnless
 
+from cms.api import add_plugin, create_page
+from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
 
-from cms.api import add_plugin, create_page
-from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
-
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME
-from djangocms_alias.models import Alias as AliasModel, Category
+from djangocms_alias.models import Alias as AliasModel
+from djangocms_alias.models import Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
@@ -26,11 +26,11 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
         output = self.render_template_obj(
             self.alias_template,
             {
-                'plugin': alias_plugin,
+                "plugin": alias_plugin,
             },
-            self.get_request('/'),
+            self.get_request("/"),
         )
-        self.assertEqual(output, 'test')
+        self.assertEqual(output, "test")
 
     def test_render_alias_includes_recursed_alias(self):
         alias = self._create_alias()
@@ -47,13 +47,13 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
         output = self.render_template_obj(
             self.alias_template,
             {
-                'plugin': alias_plugin,
+                "plugin": alias_plugin,
             },
-            self.get_request('/'),
+            self.get_request("/"),
         )
-        self.assertEqual(output, 'test')
+        self.assertEqual(output, "test")
 
-    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    @skipUnless(is_versioning_enabled(), "Test only relevant for versioning")
     def test_render_alias_dont_render_draft_aliases(self):
         alias = self._create_alias([self.plugin], published=False)
         alias_plugin = add_plugin(
@@ -64,20 +64,20 @@ class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
         )
         output = self.render_template_obj(
             self.alias_template,
-            {'plugin': alias_plugin},
-            self.get_request('/'),
+            {"plugin": alias_plugin},
+            self.get_request("/"),
         )
-        self.assertEqual(output, '')
+        self.assertEqual(output, "")
 
         self._publish(alias)
         alias.clear_cache()
 
         output = self.render_template_obj(
             self.alias_template,
-            {'plugin': alias_plugin},
-            self.get_request('/'),
+            {"plugin": alias_plugin},
+            self.get_request("/"),
         )
-        self.assertEqual(output, 'test')
+        self.assertEqual(output, "test")
 
 
 class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
@@ -90,17 +90,17 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         )
         add_plugin(
             alias.get_placeholder(self.language),
-            'TextPlugin',
+            "TextPlugin",
             language=self.language,
-            body='Content Alias 1234',
+            body="Content Alias 1234",
         )
 
         output = self.render_template_obj(
             self.alias_template,
             {
-                'plugin': alias_plugin,
+                "plugin": alias_plugin,
             },
-            self.get_request('/'),
+            self.get_request("/"),
         )
         self.assertEqual(output, "")
 
@@ -111,17 +111,17 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         )
         add_plugin(
             alias.get_placeholder(self.language),
-            'TextPlugin',
+            "TextPlugin",
             language=self.language,
-            body='Content Alias 1234',
+            body="Content Alias 1234",
         )
 
         output = self.render_template_obj(
             self.alias_template,
             {
-                'plugin': alias_plugin,
+                "plugin": alias_plugin,
             },
-            self.get_request('/'),
+            self.get_request("/"),
         )
 
         self.assertEqual(output, "testContent Alias 1234")
@@ -145,14 +145,14 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
         # If versioning is enabled the tag is only created for a user that is logged in
         if is_versioning_enabled():
-            self.render_template_obj(alias_template, {}, self.get_request('/'))
+            self.render_template_obj(alias_template, {}, self.get_request("/"))
 
             self.assertEqual(category.count(), 0)
             self.assertEqual(alias.count(), 0)
 
         with self.login_user_context(self.superuser):
             # A default category, and a new alias is created for the template tag
-            self.render_template_obj(alias_template, {}, self.get_request('/'))
+            self.render_template_obj(alias_template, {}, self.get_request("/"))
 
         category_result = category.first()
         alias_result = alias.first()
@@ -174,8 +174,8 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
         with self.login_user_context(self.superuser):
             # A default category, and a new alias is created for the template tag
-            self.render_template_obj(unlimited_template, {}, self.get_request('/'))
-            self.render_template_obj(site_limited_template, {}, self.get_request('/'))
+            self.render_template_obj(unlimited_template, {}, self.get_request("/"))
+            self.render_template_obj(site_limited_template, {}, self.get_request("/"))
 
         alias = AliasModel.objects.filter(static_code="limited_alias_code")
 
@@ -186,8 +186,8 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         self.assertEqual(alias[1].site.pk, site_id)
 
         # Render both templates again and be sure that the original tags are reused
-        self.render_template_obj(unlimited_template, {}, self.get_request('/'))
-        self.render_template_obj(site_limited_template, {}, self.get_request('/'))
+        self.render_template_obj(unlimited_template, {}, self.get_request("/"))
+        self.render_template_obj(site_limited_template, {}, self.get_request("/"))
 
         alias_requery = AliasModel.objects.filter(static_code="limited_alias_code")
 
@@ -199,46 +199,56 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         """
         unlimited_template = """{% load djangocms_alias_tags %}{% static_alias "site_limit_alias_code" %}"""  # noqa: E501
         site_limited_template = """{% load djangocms_alias_tags %}{% static_alias "site_limit_alias_code" site %}"""  # noqa: E501
-        site1 = Site.objects.create(domain='site1.com', name='1')
-        site2 = Site.objects.create(domain='site2.com', name='2')
+        site1 = Site.objects.create(domain="site1.com", name="1")
+        site2 = Site.objects.create(domain="site2.com", name="2")
 
         category = Category.objects.create(name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
 
         unlimited_alias = self._create_alias(
-            plugins=None, name='test alias', category=category, static_code="site_limit_alias_code", site=None)
+            plugins=None,
+            name="test alias",
+            category=category,
+            static_code="site_limit_alias_code",
+            site=None,
+        )
         site_limited_alias = self._create_alias(
-            plugins=None, name='test alias', category=category, static_code="site_limit_alias_code", site=site2)
+            plugins=None,
+            name="test alias",
+            category=category,
+            static_code="site_limit_alias_code",
+            site=site2,
+        )
 
         add_plugin(
             unlimited_alias.get_placeholder(self.language),
-            'TextPlugin',
+            "TextPlugin",
             language=self.language,
-            body='unlimited text',
+            body="unlimited text",
         )
         add_plugin(
             site_limited_alias.get_placeholder(self.language),
-            'TextPlugin',
+            "TextPlugin",
             language=self.language,
-            body='site limited text',
+            body="site limited text",
         )
 
         # Should show the contents of the unlimited template
         with override_settings(SITE_ID=site1.pk):
-            site1_unlimited_preview = self.render_template_obj(unlimited_template, {}, self.get_request('/'))
-            site1_limited_preview = self.render_template_obj(site_limited_template, {}, self.get_request('/'))
+            site1_unlimited_preview = self.render_template_obj(unlimited_template, {}, self.get_request("/"))
+            site1_limited_preview = self.render_template_obj(site_limited_template, {}, self.get_request("/"))
 
         self.assertEqual(site1_unlimited_preview, "unlimited text")
         self.assertEqual(site1_limited_preview, "")
 
         # Should show the contents of the site limited template
         with override_settings(SITE_ID=site2.pk):
-            site2_unlimited_preview = self.render_template_obj(unlimited_template, {}, self.get_request('/'))
-            site2_limited_preview = self.render_template_obj(site_limited_template, {}, self.get_request('/'))
+            site2_unlimited_preview = self.render_template_obj(unlimited_template, {}, self.get_request("/"))
+            site2_limited_preview = self.render_template_obj(site_limited_template, {}, self.get_request("/"))
 
         self.assertEqual(site2_unlimited_preview, "unlimited text")
         self.assertEqual(site2_limited_preview, "site limited text")
 
-    @skipUnless(is_versioning_enabled(), 'Test only relevant for versioning')
+    @skipUnless(is_versioning_enabled(), "Test only relevant for versioning")
     def test_static_alias_shows_correct_content_for_versioning_states(self):
         """
         The correct contents are shown when viewing the static alias:
@@ -250,36 +260,36 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         category = Category.objects.create(name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
         alias = self._create_alias(
             plugins=None,
-            name='test alias',
+            name="test alias",
             category=category,
             published=True,
-            static_code="template_example_global_alias_code"
+            static_code="template_example_global_alias_code",
         )
         add_plugin(
-            alias.get_placeholder(language='en'),
-            'TextPlugin',
-            language='en',
-            body='Published content for: template_example_global_alias_code',
+            alias.get_placeholder(language="en"),
+            "TextPlugin",
+            language="en",
+            body="Published content for: template_example_global_alias_code",
         )
         page = create_page(
             title="Static Code Test",
-            language='en',
-            template='static_alias.html',
+            language="en",
+            template="static_alias.html",
             limit_visibility_in_menu=None,
-            created_by=self.superuser
+            created_by=self.superuser,
         )
 
         # Publish the page and create a draft alias
-        self._publish(page, 'en')
-        version = self._get_version(alias, PUBLISHED, 'en')
+        self._publish(page, "en")
+        version = self._get_version(alias, PUBLISHED, "en")
         draft = version.copy(self.superuser)
 
         # Add draft content to the draft version
         add_plugin(
             draft.content.placeholder,
-            'TextPlugin',
-            language='en',
-            body='Updated Draft content for: template_example_global_alias_code',
+            "TextPlugin",
+            language="en",
+            body="Updated Draft content for: template_example_global_alias_code",
         )
 
         page_content = page.get_title_obj("en")
@@ -290,13 +300,22 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         # The live page should still contain the published contents
         live_response = self.client.get(page_live_url)
 
-        self.assertContains(live_response, 'Published content for: template_example_global_alias_code')
-        self.assertNotContains(live_response, 'Updated Draft content for: template_example_global_alias_code')
+        self.assertContains(live_response, "Published content for: template_example_global_alias_code")
+        self.assertNotContains(
+            live_response,
+            "Updated Draft content for: template_example_global_alias_code",
+        )
 
         # The edit and preview url should show the draft contents
         with self.login_user_context(self.superuser):
             edit_response = self.client.get(page_edit_url)
             preview_response = self.client.get(page_preview_url)
 
-        self.assertContains(edit_response, 'Updated Draft content for: template_example_global_alias_code')
-        self.assertContains(preview_response, 'Updated Draft content for: template_example_global_alias_code')
+        self.assertContains(
+            edit_response,
+            "Updated Draft content for: template_example_global_alias_code",
+        )
+        self.assertContains(
+            preview_response,
+            "Updated Draft content for: template_example_global_alias_code",
+        )

@@ -1,0 +1,27 @@
+[tool.ruff]
+line-length = 119
+
+[tool.ruff.lint]
+select=[
+  "E",  # pycodestyle errors
+  "W",  # pycodestyle warnings
+  "F",  # pyflakes
+  "I",  # isort
+  "C",  # flake8-comprehensions
+  "B",  # flake8-bugbear
+  "PLE", # pylint error
+  "PLR", # pylint refactor
+  "PLW", # pylint warning
+  "UP", # pyupgrade
+
+]
+
+extend-ignore = [
+  "C901",     # Too complex
+  "PLR0911",  # Too many return statements
+  "PLR0912",  # Too many branches
+  "PLR0913",  # Too many arguments to function call
+  "PLR0915",  # Too many statements
+  # TODO
+  "PLW1510"   # subprocess.run without explicit argument
+]

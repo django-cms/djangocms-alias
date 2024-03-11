@@ -1,11 +1,9 @@
+from cms.utils.permissions import get_model_permission_codename
+from cms.utils.urlutils import admin_reverse
 from django.contrib import admin
 from django.db.models.functions import Lower
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
-
-from cms.utils.permissions import get_model_permission_codename
-from cms.utils.urlutils import admin_reverse
-
 from parler.admin import TranslatableAdmin
 
 from .cms_config import AliasCMSConfig
@@ -20,30 +18,45 @@ from .utils import (
     is_versioning_enabled,
 )
 
-
 __all__ = [
-    'AliasAdmin',
-    'CategoryAdmin',
-    'AliasContentAdmin',
+    "AliasAdmin",
+    "CategoryAdmin",
+    "AliasContentAdmin",
 ]
 
 alias_content_admin_classes = [admin.ModelAdmin]
-alias_content_admin_list_display = ('name', 'get_category',)
-alias_content_admin_list_filter = (SiteFilter, CategoryFilter, LanguageFilter,)
+alias_content_admin_list_display = (
+    "name",
+    "get_category",
+)
+alias_content_admin_list_filter = (
+    SiteFilter,
+    CategoryFilter,
+    LanguageFilter,
+)
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
     from djangocms_versioning.admin import ExtendedVersionAdminMixin
 
     from .filters import UnpublishedFilter
+
     alias_content_admin_classes.insert(0, ExtendedVersionAdminMixin)
-    alias_content_admin_list_display = ('name', 'get_category',)
-    alias_content_admin_list_filter = (SiteFilter, CategoryFilter, LanguageFilter, UnpublishedFilter)
+    alias_content_admin_list_display = (
+        "name",
+        "get_category",
+    )
+    alias_content_admin_list_filter = (
+        SiteFilter,
+        CategoryFilter,
+        LanguageFilter,
+        UnpublishedFilter,
+    )
 
 
 @admin.register(Category)
 class CategoryAdmin(TranslatableAdmin):
-    list_display = ['name']
+    list_display = ["name"]
 
     def save_model(self, request, obj, form, change):
         change = not obj._state.adding
@@ -59,10 +72,10 @@ class CategoryAdmin(TranslatableAdmin):
 
 @admin.register(Alias)
 class AliasAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category']
-    list_filter = ['site', 'category']
-    fields = ('category', 'site')
-    readonly_fields = ('static_code', )
+    list_display = ["name", "category"]
+    list_filter = ["site", "category"]
+    fields = ("category", "site")
+    readonly_fields = ("static_code",)
 
     def get_urls(self):
         return urlpatterns + super().get_urls()
@@ -76,16 +89,21 @@ class AliasAdmin(admin.ModelAdmin):
         if obj:
             if not obj.is_in_use:
                 return request.user.has_perm(
-                    get_model_permission_codename(self.model, 'add'),
+                    get_model_permission_codename(self.model, "add"),
                 )
             return request.user.is_superuser
         return False
 
     def get_deleted_objects(self, objs, request):
-        deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
+        (
+            deleted_objects,
+            model_count,
+            perms_needed,
+            protected,
+        ) = super().get_deleted_objects(objs, request)
         # This is bad and I should feel bad.
-        if 'placeholder' in perms_needed:
-            perms_needed.remove('placeholder')
+        if "placeholder" in perms_needed:
+            perms_needed.remove("placeholder")
         return deleted_objects, model_count, perms_needed, protected
 
     def save_model(self, request, obj, form, change):
@@ -122,11 +140,12 @@ class AliasContentAdmin(*alias_content_admin_classes):
         return queryset
 
     # Add Alias category in the admin manager list and order field
+    @admin.display(
+        description=_("category"),
+        ordering="alias_category_translations_ordered",
+    )
     def get_category(self, obj):
         return obj.alias.category
-
-    get_category.short_description = _('category')
-    get_category.admin_order_field = "alias_category_translations_ordered"
 
     def has_add_permission(self, request, obj=None):
         # FIXME: It is not currently possible to add an alias from the django admin changelist issue #97
@@ -171,8 +190,9 @@ class AliasContentAdmin(*alias_content_admin_classes):
         return super().get_list_display_links(request, list_display)
 
     def _get_rename_alias_link(self, obj, request, disabled=False):
-        url = admin_reverse('{}_{}_change'.format(
-            obj._meta.app_label, obj._meta.model_name), args=(obj.pk,)
+        url = admin_reverse(
+            f"{obj._meta.app_label}_{obj._meta.model_name}_change",
+            args=(obj.pk,),
         )
         return render_to_string(
             "admin/djangocms_alias/icons/rename_alias.html",
@@ -187,8 +207,9 @@ class AliasContentAdmin(*alias_content_admin_classes):
         )
 
     def _get_change_alias_settings_link(self, obj, request, disabled=False):
-        url = admin_reverse('{}_{}_change'.format(
-            obj._meta.app_label, obj.alias._meta.model_name), args=(obj.alias.pk,)
+        url = admin_reverse(
+            f"{obj._meta.app_label}_{obj.alias._meta.model_name}_change",
+            args=(obj.alias.pk,),
         )
         return render_to_string(
             "admin/djangocms_alias/icons/change_alias_settings.html",
@@ -212,10 +233,13 @@ class AliasContentAdmin(*alias_content_admin_classes):
             {"url": preview_url, "disabled": disabled, "keepsideframe": False},
         )
 
-    def change_view(self, request, object_id, form_url='', extra_context=None):
+    def change_view(self, request, object_id, form_url="", extra_context=None):
         extra_context = extra_context or {}
         # Provide additional context to the changeform
-        extra_context['is_versioning_enabled'] = is_versioning_enabled()
+        extra_context["is_versioning_enabled"] = is_versioning_enabled()
         return super().change_view(
-            request, object_id, form_url, extra_context=extra_context,
+            request,
+            object_id,
+            form_url,
+            extra_context=extra_context,
         )

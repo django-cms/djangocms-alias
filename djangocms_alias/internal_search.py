@@ -1,8 +1,6 @@
+from cms.toolbar.utils import get_toolbar_from_request
 from django.template import RequestContext
 from django.utils.translation import gettext_lazy as _
-
-from cms.toolbar.utils import get_toolbar_from_request
-
 from djangocms_internalsearch.base import BaseSearchConfig
 from djangocms_internalsearch.helpers import get_request, get_version_object
 from haystack import indexes
@@ -14,14 +12,14 @@ def get_title(obj):
     return obj.result.title
 
 
-get_title.short_description = _('Title')
+get_title.short_description = _("Title")
 
 
 def get_category(obj):
     return obj.result.category
 
 
-get_category.short_description = _('Category')
+get_category.short_description = _("Category")
 
 
 def get_language(obj):
@@ -63,8 +61,8 @@ class AliasContentConfig(BaseSearchConfig):
     def prepare_text(self, obj):
         request = get_request(obj.language)
         context = RequestContext(request)
-        if 'request' not in context:
-            context['request'] = request
+        if "request" not in context:
+            context["request"] = request
 
         toolbar = get_toolbar_from_request(request)
         renderer = toolbar.get_content_renderer()

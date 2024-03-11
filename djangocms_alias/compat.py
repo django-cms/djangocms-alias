@@ -1,6 +1,6 @@
 from distutils.version import LooseVersion
 
-import django
+from django import get_version
 
-
-DJANGO_GTE_21 = LooseVersion(django.get_version()) >= LooseVersion("2.1")
+DJANGO_VERSION = get_version()
+DJANGO_4_0 = LooseVersion(DJANGO_VERSION) < LooseVersion("4.1")

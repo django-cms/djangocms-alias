@@ -1,9 +1,8 @@
+from cms.forms.utils import get_sites
+from cms.utils.i18n import get_language_tuple, get_site_language_from_request
 from django.contrib import admin
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
-
-from cms.forms.utils import get_sites
-from cms.utils.i18n import get_language_tuple, get_site_language_from_request
 
 from .cms_config import AliasCMSConfig
 from .constants import (
@@ -13,7 +12,6 @@ from .constants import (
     SITE_FILTER_URL_PARAM,
 )
 from .models import Category
-
 
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
@@ -40,9 +38,7 @@ class LanguageFilter(admin.SimpleListFilter):
         for lookup, title in self.lookup_choices:
             yield {
                 "selected": self.value() == str(lookup),
-                "query_string": changelist.get_query_string(
-                    {self.parameter_name: lookup}
-                ),
+                "query_string": changelist.get_query_string({self.parameter_name: lookup}),
                 "display": title,
             }
 
@@ -70,17 +66,13 @@ class SiteFilter(admin.SimpleListFilter):
         }
         yield {
             "selected": self.value() == SITE_FILTER_NO_SITE_VALUE,
-            "query_string": changelist.get_query_string(
-                {self.parameter_name: SITE_FILTER_NO_SITE_VALUE}
-            ),
+            "query_string": changelist.get_query_string({self.parameter_name: SITE_FILTER_NO_SITE_VALUE}),
             "display": _("No site"),
         }
         for lookup, title in self.lookup_choices:
             yield {
                 "selected": self.value() == str(lookup),
-                "query_string": changelist.get_query_string(
-                    {self.parameter_name: lookup}
-                ),
+                "query_string": changelist.get_query_string({self.parameter_name: lookup}),
                 "display": title,
             }
 
@@ -91,9 +83,9 @@ class CategoryFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         qs = model_admin.get_queryset(request)
-        cat_id = qs.values_list('alias__category', flat=True).distinct()
+        cat_id = qs.values_list("alias__category", flat=True).distinct()
         # Ensure the category is ordered by the name alphabetically by default
-        cat = Category.objects.filter(pk__in=cat_id).order_by('translations__name')
+        cat = Category.objects.filter(pk__in=cat_id).order_by("translations__name")
         for obj in cat:
             yield str(obj.pk), smart_str(obj)
 
@@ -110,9 +102,7 @@ class CategoryFilter(admin.SimpleListFilter):
         for lookup, title in self.lookup_choices:
             yield {
                 "selected": self.value() == str(lookup),
-                "query_string": changelist.get_query_string(
-                    {self.parameter_name: lookup}
-                ),
+                "query_string": changelist.get_query_string({self.parameter_name: lookup}),
                 "display": title,
             }
 
@@ -144,8 +134,6 @@ if djangocms_versioning_enabled:
             for lookup, title in self.lookup_choices:
                 yield {
                     "selected": self.value() == str(lookup),
-                    "query_string": changelist.get_query_string(
-                        {self.parameter_name: lookup}
-                    ),
+                    "query_string": changelist.get_query_string({self.parameter_name: lookup}),
                     "display": title,
                 }

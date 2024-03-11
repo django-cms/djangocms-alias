@@ -4,6 +4,9 @@ Changelog
 
 Unreleased
 ==========
+* Introduced Django 4.2 support.
+* Dropped Support for Django<3.1
+
 
 1.11.0 (2022-10-14)
 ===================

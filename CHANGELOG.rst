@@ -2,8 +2,23 @@
 Changelog
 =========
 
-2.0.0rc3 (2023-12-12)
-=====================
+2.0.1 (2024-03-27)
+==================
+
+* fix: Remove newline from alias template by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/220
+* fix Sync pre-commit checks (#216) by @raffaellasuardini in https://github.com/django-cms/djangocms-alias/pull/226
+* fix: Remove `get_absolute_url` from both `Alias` and `AliasContent` models by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/199
+* fix djangocms-versioning draft deletion bug (#214) by @fscherf in https://github.com/django-cms/djangocms-alias/pull/215
+
+Contributors
+
+* @aacimov made their first contribution in https://github.com/django-cms/djangocms-alias/pull/213
+* @raffaellasuardini made their first contribution in https://github.com/django-cms/djangocms-alias/pull/217
+* @fscherf made their first contribution in https://github.com/django-cms/djangocms-alias/pull/215
+
+
+2.0.0 (2023-12-12)
+==================
 * fix: avoid generating migrations based on settings.LANGUAGE by @vasekch in https://github.com/django-cms/djangocms-alias/pull/186
 * fix: Enable caching for `static_alias` template tag by @vasekch in https://github.com/django-cms/djangocms-alias/pull/200
 * fix: `static_alias` unnecessarily creates new content objects when used with versioning by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/202

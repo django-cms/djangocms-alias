@@ -306,11 +306,6 @@ class AliasContent(models.Model):
         return "djangocms_alias/alias_content.html"
 
     @transaction.atomic
-    def delete(self, *args, **kwargs):
-        super().delete(*args, **kwargs)
-        self.alias.cms_plugins.filter(language=self.language).delete()
-
-    @transaction.atomic
     def populate(self, replaced_placeholder=None, replaced_plugin=None, plugins=None):
         if not replaced_placeholder and not replaced_plugin:
             copy_plugins_to_placeholder(

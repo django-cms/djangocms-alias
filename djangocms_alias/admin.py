@@ -1,6 +1,6 @@
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models.functions import Lower
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
@@ -167,6 +167,17 @@ class AliasContentAdmin(*alias_content_admin_classes):
         # Versioning emits it's own signals for changes
         if not is_versioning_enabled():
             emit_content_delete([obj], sender=self.model)
+
+        if obj.alias._default_manager.filter(language=obj.language).count() == 1:
+            message = _(
+                "Alias content for language {} deleted. A new empty alias content will be created if needed."
+            ).format(obj.language)
+            self.message_user(request, message, level=messages.WARNING)
+
+        return super().delete_model(
+            request=request,
+            obj=obj,
+        )
 
     def get_list_actions(self):
         """

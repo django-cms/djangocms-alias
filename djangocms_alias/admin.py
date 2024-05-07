@@ -129,6 +129,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
     form = AliasContentForm
     list_filter = alias_content_admin_list_filter
     list_display = alias_content_admin_list_display
+    search_fields = ["name"]
     # Disable dropdown actions
     actions = None
     change_form_template = "admin/djangocms_alias/aliascontent/change_form.html"

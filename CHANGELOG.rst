@@ -4,9 +4,13 @@ Changelog
 
 Unreleased
 ==========
+
+1.12.0 (2024-05-16)
+==================
 * feat: Added search capability in AliasContent admin
 * Introduced Django 4.2 support.
-* Dropped Support for Django<3.1
+* Dropped Support for Django<3.2
+* Added Support for Python 3.10
 
 
 1.11.0 (2022-10-14)

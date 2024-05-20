@@ -23,6 +23,7 @@ COMPILE_SETTINGS = {
     "py311-dj50-cms41": [],
     "py312-dj50-cms41": [],
     "py311-djmain-cms4dev": [],
+    "py311-djmain-cms41": [],
 }
 
 django_dict = {

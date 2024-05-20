@@ -12,9 +12,9 @@
 
 <form method="post">{% csrf_token %}
   <input type="hidden" name="post" value="yes" />
-  <div>
+  <div class="submit-row">
     <a href="#" class="button cancel-link">{% trans "No, take me back" %}</a>
-    <input type="submit" value="{% trans "Yes, I'm sure" %}" />
+    <input type="submit" class="deletelink" value="{% trans "Yes, I'm sure" %}" />
   </div>
 </form>
 {% endblock %}

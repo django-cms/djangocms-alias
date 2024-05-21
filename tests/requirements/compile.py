@@ -23,6 +23,7 @@ COMPILE_SETTINGS = {
     "py311-dj50-cms41": [],
     "py312-dj50-cms41": [],
     "py311-djmain-cms4dev": [],
+    "py311-djmain-cms41": [],
 }
 
 django_dict = {
@@ -36,8 +37,8 @@ django_dict = {
 
 cms_dict = {
     "cms40": "https://github.com/django-cms/django-cms/tarball/release/4.0.1.x#egg=django-cms",
-    "cms41": "django-cms>=4.1.0rc2,<4.2",
-    "cms4dev": "https://github.com/django-cms/django-cms/tarball/release/4.1.x#egg=django-cms",
+    "cms41": "django-cms>=4.1,<4.2",
+    "cms4dev": "https://github.com/django-cms/django-cms/tarball/develop-4#egg=django-cms",
 }
 
 

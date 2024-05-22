@@ -14,7 +14,7 @@ coverage==7.3.2
     # via -r requirements.in
 dj-database-url==2.1.0
     # via django-app-helper
-django==3.2.23
+django==3.2.25
     # via
     #   dj-database-url
     #   django-classy-tags
@@ -32,7 +32,7 @@ django-classy-tags==4.1.0
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-django-cms==4.1.0rc5
+django-cms==4.1.1
     # via djangocms-versioning
 django-formtools==2.4.1
     # via django-cms
@@ -50,7 +50,7 @@ django-treebeard==4.7
     # via django-cms
 djangocms-admin-style==3.2.6
     # via django-cms
-djangocms-versioning @ https://github.com/django-cms/djangocms-versioning/tarball/master
+djangocms-versioning==2.0.2
     # via -r requirements.in
 docopt==0.6.2
     # via django-app-helper
@@ -74,7 +74,7 @@ six==1.16.0
     # via django-app-helper
 soupsieve==2.5
     # via beautifulsoup4
-sqlparse==0.4.4
+sqlparse==0.5.0
     # via django
 typing-extensions==4.9.0
     # via

@@ -161,7 +161,6 @@ class AliasContentAdmin(*alias_content_admin_classes):
         description=_("category"),
         ordering="alias_category_translations_ordered",
     )
-
     def get_category(self, obj):
         return obj.alias.category
 
@@ -290,6 +289,6 @@ class AliasContentAdmin(*alias_content_admin_classes):
         actions["add_items_to_collection"] = (
             add_items_to_collection,
             "add_items_to_collection",
-            add_items_to_collection.short_description
+            add_items_to_collection.short_description,
         )
         return actions

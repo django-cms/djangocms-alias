@@ -66,7 +66,7 @@ def is_moderation_enabled():
         moderation_config = apps.get_app_config("djangocms_moderation")
     except LookupError:
         return False
-    
+
     return AliasContent in moderation_config.cms_extension.moderated_models
 
 
@@ -173,10 +173,10 @@ class AliasContentAdmin(*alias_content_admin_classes):
         actions = super().get_actions(request)
         if not is_moderation_enabled():
             return actions
-        
+
         from djangocms_moderation.admin_actions import \
-            add_items_to_collections
-        
+            add_items_to_collection
+
         actions["add_items_to_collection"] = (
             add_items_to_collection,
             "add_items_to_collection",

@@ -174,8 +174,7 @@ class AliasContentAdmin(*alias_content_admin_classes):
         if not is_moderation_enabled():
             return actions
 
-        from djangocms_moderation.admin_actions import \
-            add_items_to_collection
+        from djangocms_moderation.admin_actions import add_items_to_collection
 
         actions["add_items_to_collection"] = (
             add_items_to_collection,

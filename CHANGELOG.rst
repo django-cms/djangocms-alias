@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* feat: Added multi select and add to moderation
 * Introduced Django 4.2 support.
 * Dropped Support for Django<3.1
 

@@ -162,27 +162,6 @@ class AliasContentAdmin(*alias_content_admin_classes):
         ordering="alias_category_translations_ordered",
     )
 
-    def get_actions(self, request):
-        """
-        If djangocms-moderation is enabled, adds admin action to allow multiple pages to be added to a moderation
-        collection.
-
-        :param request: Request object
-        :returns: dict of admin actions
-        """
-        actions = super().get_actions(request)
-        if not is_moderation_enabled():
-            return actions
-
-        from djangocms_moderation.admin_actions import add_items_to_collection
-
-        actions["add_items_to_collection"] = (
-            add_items_to_collection,
-            "add_items_to_collection",
-            add_items_to_collection.short_description
-        )
-        return actions
-
     def get_category(self, obj):
         return obj.alias.category
 
@@ -293,3 +272,24 @@ class AliasContentAdmin(*alias_content_admin_classes):
             form_url,
             extra_context=extra_context,
         )
+
+    def get_actions(self, request):
+        """
+        If djangocms-moderation is enabled, adds admin action to allow multiple pages to be added to a moderation
+        collection.
+
+        :param request: Request object
+        :returns: dict of admin actions
+        """
+        actions = super().get_actions(request)
+        if not is_moderation_enabled():
+            return actions
+
+        from djangocms_moderation.admin_actions import add_items_to_collection
+
+        actions["add_items_to_collection"] = (
+            add_items_to_collection,
+            "add_items_to_collection",
+            add_items_to_collection.short_description
+        )
+        return actions

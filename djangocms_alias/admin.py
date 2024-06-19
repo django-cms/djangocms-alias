@@ -1,5 +1,6 @@
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse
+from django.apps import apps
 from django.contrib import admin, messages
 from django.db.models.functions import Lower
 from django.template.loader import render_to_string
@@ -52,6 +53,21 @@ if djangocms_versioning_enabled:
         LanguageFilter,
         UnpublishedFilter,
     )
+
+
+def is_moderation_enabled():
+    """
+    Returns True if the AliasContent model is enabled for moderation.
+    If it is not, or djangocms_moderation is not installed, returns False.
+
+    :returns: True or False
+    """
+    try:
+        moderation_config = apps.get_app_config("djangocms_moderation")
+    except LookupError:
+        return False
+
+    return AliasContent in moderation_config.cms_extension.moderated_models
 
 
 @admin.register(Category)
@@ -255,3 +271,24 @@ class AliasContentAdmin(*alias_content_admin_classes):
             form_url,
             extra_context=extra_context,
         )
+
+    def get_actions(self, request):
+        """
+        If djangocms-moderation is enabled, adds admin action to allow multiple pages to be added to a moderation
+        collection.
+
+        :param request: Request object
+        :returns: dict of admin actions
+        """
+        actions = super().get_actions(request)
+        if not is_moderation_enabled():
+            return actions
+
+        from djangocms_moderation.admin_actions import add_items_to_collection
+
+        actions["add_items_to_collection"] = (
+            add_items_to_collection,
+            "add_items_to_collection",
+            add_items_to_collection.short_description,
+        )
+        return actions

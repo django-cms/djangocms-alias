@@ -4,6 +4,7 @@ Changelog
 
 Unreleased
 ==========
+* feat: Added multi select and add to moderation
 
 1.12.0 (2024-05-16)
 ==================
@@ -11,7 +12,6 @@ Unreleased
 * Introduced Django 4.2 support.
 * Dropped Support for Django<3.2
 * Added Support for Python 3.10
-
 
 1.11.0 (2022-10-14)
 ===================

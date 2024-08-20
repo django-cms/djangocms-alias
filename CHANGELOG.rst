@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased
+==========
+* fix: `get_absolute_url` method not found while creating new alias and category from wizard button.
+
+
 2.0.1 (2024-03-27)
 ==================
 

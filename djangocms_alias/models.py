@@ -17,7 +17,7 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
 
-from .constants import CHANGE_CATEGORY_URL_NAME
+from .constants import CHANGE_ALIAS_URL_NAME, CHANGE_CATEGORY_URL_NAME
 from .utils import is_versioning_enabled
 
 __all__ = [
@@ -122,6 +122,9 @@ class Alias(models.Model):
     @cached_property
     def is_in_use(self):
         return self.cms_plugins.exists()
+
+    def get_admin_change_url(self):
+        return admin_reverse(CHANGE_ALIAS_URL_NAME, args=[self.pk])
 
     @cached_property
     def objects_using(self):

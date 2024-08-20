@@ -13,12 +13,18 @@ class CreateAliasWizard(Wizard):
     def user_has_add_permission(self, user, **kwargs):
         return Alias.can_create_alias(user)
 
+    def get_success_url(self, obj, **kwargs):
+        return obj.get_admin_change_url()
+
 
 class CreateAliasCategoryWizard(Wizard):
     def user_has_add_permission(self, user, **kwargs):
         return user.has_perm(
             get_model_permission_codename(Category, "add"),
         )
+
+    def get_success_url(self, obj, **kwargs):
+        return obj.get_admin_change_url()
 
 
 create_alias_wizard = CreateAliasWizard(

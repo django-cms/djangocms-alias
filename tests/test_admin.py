@@ -553,10 +553,8 @@ class AliasesManagerTestCase(BaseAliasPluginTestCase):
 
         response = self.client.get(index_url)
 
-        unexpected_content = (
-            '<th scope="row"><a href="/en/admin/djangocms_alias/aliascontent/">' "Alias contents</a></th>"
-        )
-        expected_content = '<th scope="row"><a href="/en/admin/djangocms_alias/alias/">Aliases</a></th>'
+        unexpected_content = '<a href="/en/admin/djangocms_alias/aliascontent/">' "Alias contents</a>"
+        expected_content = '<a href="/en/admin/djangocms_alias/alias/">Aliases</a>'
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_content)

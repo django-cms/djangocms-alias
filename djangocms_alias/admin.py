@@ -80,6 +80,7 @@ class AliasAdmin(*alias_admin_classes):
     )
     fields = ("content__name", "category", "site", "content__language")
     readonly_fields = ("static_code",)
+    search_fields = ["content__name"]
     form = AliasGrouperAdminForm
     extra_grouping_fields = ("language",)
     EMPTY_CONTENT_VALUE = mark_safe(_("<i>Missing language</i>"))

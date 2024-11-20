@@ -133,6 +133,11 @@ class Alias(models.Model):
         plugins = self.cms_plugins.select_related("placeholder").prefetch_related("placeholder__source")
         for plugin in plugins:
             obj = plugin.placeholder.source
+
+            # Skip plugins that have no placeholder source e.g clipboard
+            if obj is None:
+                continue
+
             obj_class_name = obj.__class__.__name__
             if obj_class_name.endswith("Content"):
                 attr_name = obj_class_name.replace("Content", "").lower()

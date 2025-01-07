@@ -4,6 +4,10 @@ Changelog
 
 Unreleased
 ==========
+
+
+2.0.2 (2024-11-07)
+==================
 * fix: `get_absolute_url` method not found while creating new alias and category from wizard button.
 * feat: Added search capability in AliasContent admin (migrate the 4.0.x feature from PR #236)
 

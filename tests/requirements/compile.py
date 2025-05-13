@@ -7,14 +7,6 @@ import sys
 from pathlib import Path
 
 COMPILE_SETTINGS = {
-    "py39-dj32-cms41": [],
-    "py310-dj32-cms41": [],
-    "py39-dj40-cms41": [],
-    "py310-dj40-cms41": [],
-    "py311-dj40-cms41": [],
-    "py39-dj41-cms41": [],
-    "py310-dj41-cms41": [],
-    "py311-dj41-cms41": [],
     "py39-dj42-cms41": [],
     "py310-dj42-cms41": [],
     "py311-dj42-cms41": [],
@@ -22,23 +14,33 @@ COMPILE_SETTINGS = {
     "py310-dj50-cms41": [],
     "py311-dj50-cms41": [],
     "py312-dj50-cms41": [],
-    "py311-djmain-cms4dev": [],
-    "py311-djmain-cms41": [],
+    "py39-dj51-cms41": [],
+    "py310-dj51-cms41": [],
+    "py311-dj51-cms41": [],
+    "py311-dj52-cms41": [],
+    "py312-dj52-cms41": [],
+    "py313-dj52-cms41": [],
+    "py311-dj52-cms50": [],
+    "py312-dj52-cms50": [],
+    "py313-dj52-cms50": [],
+    "py313-djmain-cmsdev": [],
+    "py313-djmain-cms41": [],
 }
 
 django_dict = {
     "djmain": "https://github.com/django/django/tarball/main#egg=Django",
     "dj32": "Django>=3.2,<4",
-    "dj40": "Django>=4.0,<4.1",
-    "dj41": "Django>=4.1,<4.2",
     "dj42": "Django>=4.2,<5",
     "dj50": "Django>=5.0,<5.1",
+    "dj51": "Django>=5.1,<5.2",
+    "dj52": "Django>=5.2,<5.3",
 }
 
 cms_dict = {
     "cms40": "https://github.com/django-cms/django-cms/tarball/release/4.0.1.x#egg=django-cms",
     "cms41": "django-cms>=4.1,<4.2",
-    "cms4dev": "https://github.com/django-cms/django-cms/tarball/develop-4#egg=django-cms",
+    "cms50": "django-cms>=5.0,<5.1",
+    "cmsdev": "https://github.com/django-cms/django-cms/tarball/main#egg=django-cms",
 }
 
 

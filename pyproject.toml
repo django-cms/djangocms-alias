@@ -1,6 +1,6 @@
 [tool.ruff]
 line-length = 119
-select=[
+lint.select=[
   "E",  # pycodestyle errors
   "W",  # pycodestyle warnings
   "F",  # pyflakes
@@ -13,7 +13,7 @@ select=[
   "UP", # pyupgrade
 ]
 
-extend-ignore = [
+lint.extend-ignore = [
   "C901",     # Too complex
   "PLR0911",  # Too many return statements
   "PLR0912",  # Too many branches

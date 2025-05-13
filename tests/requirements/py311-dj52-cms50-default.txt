@@ -4,17 +4,17 @@
 #
 #    requirements/compile.py
 #
-asgiref==3.7.2
+asgiref==3.8.1
     # via django
-beautifulsoup4==4.12.2
+beautifulsoup4==4.13.4
     # via bs4
-bs4==0.0.1
+bs4==0.0.2
     # via -r requirements.in
-coverage==7.3.2
+coverage==7.8.0
     # via -r requirements.in
-dj-database-url==2.1.0
+dj-database-url==2.3.0
     # via django-app-helper
-django==4.0.10
+django==5.2.1
     # via
     #   dj-database-url
     #   django-classy-tags
@@ -25,18 +25,18 @@ django==4.0.10
     #   django-treebeard
     #   djangocms-admin-style
     #   djangocms-versioning
-django-app-helper==3.3.3
+django-app-helper==3.3.4
     # via -r requirements.in
 django-classy-tags==4.1.0
     # via
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-django-cms==4.1.1
+django-cms==5.0.0
     # via djangocms-versioning
-django-formtools==2.4.1
+django-formtools==2.5.1
     # via django-cms
-django-fsm==2.8.1
+django-fsm==2.8.2
     # via
     #   -r requirements.in
     #   djangocms-versioning
@@ -46,37 +46,41 @@ django-sekizai==4.1.0
     # via
     #   -r requirements.in
     #   django-cms
-django-treebeard==4.7
+django-treebeard==4.7.1
     # via django-cms
-djangocms-admin-style==3.2.6
+djangocms-admin-style==3.3.1
     # via django-cms
-djangocms-versioning==2.0.2
+djangocms-versioning==2.2.1
     # via -r requirements.in
 docopt==0.6.2
     # via django-app-helper
-flake8==6.1.0
+flake8==7.2.0
     # via -r requirements.in
-isort==5.13.1
+isort==6.0.1
     # via -r requirements.in
 mccabe==0.7.0
     # via flake8
-packaging==23.2
-    # via django-cms
-pycodestyle==2.11.1
+packaging==25.0
+    # via
+    #   django-cms
+    #   djangocms-versioning
+pycodestyle==2.13.0
     # via flake8
-pyflakes==3.1.0
+pyflakes==3.3.2
     # via
     #   -r requirements.in
     #   flake8
-six==1.16.0
+six==1.17.0
     # via django-app-helper
-soupsieve==2.5
+soupsieve==2.7
     # via beautifulsoup4
-sqlparse==0.5.0
+sqlparse==0.5.3
     # via django
-typing-extensions==4.9.0
-    # via dj-database-url
+typing-extensions==4.13.2
+    # via
+    #   beautifulsoup4
+    #   dj-database-url
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==70.0.0
+setuptools==80.4.0
     # via django-cms

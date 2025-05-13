@@ -553,7 +553,7 @@ class AliasesManagerTestCase(BaseAliasPluginTestCase):
 
         response = self.client.get(index_url)
 
-        unexpected_content = '<a href="/en/admin/djangocms_alias/aliascontent/">' "Alias contents</a>"
+        unexpected_content = '<a href="/en/admin/djangocms_alias/aliascontent/">Alias contents</a>'
         expected_content = '<a href="/en/admin/djangocms_alias/alias/">Aliases</a>'
 
         self.assertEqual(response.status_code, 200)

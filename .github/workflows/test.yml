@@ -11,7 +11,7 @@ on:
 jobs:
   unit-tests:
     name: Python ${{ matrix.python-version }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -20,6 +20,7 @@ jobs:
           - '3.10'
           - '3.11'
           - '3.12'
+          - '3.13'
 
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +44,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-data-${{ matrix.python-version }}
+          include-hidden-files: true
           path: '${{ github.workspace }}/.coverage.*'
 
   coverage:
@@ -84,13 +86,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.11']
+        python-version: ['3.13']
         requirements-file: [
           'py311-djmain-cms41-default.txt',
           'py311-djmain-cms41-versioning.txt',
         ]
         os: [
-          ubuntu-20.04,
+          ubuntu-latest,
         ]
 
     steps:
@@ -104,8 +106,8 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r tests/requirements/${{ matrix.requirements-file }}
-        python setup.py install
+        pip install -e .
 
     - name: Run coverage
-      run: coverage run setup.py test
+      run: coverage run ./test_settings.py
       continue-on-error: true

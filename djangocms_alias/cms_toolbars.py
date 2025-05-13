@@ -74,7 +74,7 @@ class AliasToolbar(CMSToolbar):
         language = obj.language if hasattr(obj, "language") else get_language_from_request(self.request)
         if language is None:
             language = get_default_language()
-        url += f'?{urlencode({"language": language})}'
+        url += f"?{urlencode({'language': language})}"
 
         admin_menu.add_sideframe_item(
             _("Aliases"),

@@ -64,7 +64,7 @@ def run(*args, **kwargs):
         print(" ".join(args[0]))
         subprocess.run(*args, **kwargs)
     except Exception as e:
-        print(f'Failed {" ".join(args[0])}: {e}')
+        print(f"Failed {' '.join(args[0])}: {e}")
 
 
 if __name__ == "__main__":

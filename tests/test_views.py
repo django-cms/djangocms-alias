@@ -1580,3 +1580,24 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         self.assertNotContains(list_response, alias_content_de.name)
         self.assertNotContains(detail_response, en_plugin.body)
         self.assertNotContains(list_response, alias.name)
+
+    def test_usage_view_if_alias_is_saved_to_clipboard(self):
+        """
+        The usage view should ignore the clipboard entry
+        """
+
+        alias = self._create_alias()
+        placeholder = Placeholder.objects.create(slot="clipboard")
+        add_plugin(placeholder, "Alias", language="en", alias=alias)
+
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    USAGE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+
+            self.assertEqual(response.status_code, 200)
+            # Check that the alias is displayed in the response content
+            self.assertContains(response, alias.name)

@@ -349,6 +349,7 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
             def page_edit_url(lang):
                 return get_object_edit_url(page.get_title_obj(lang))
         else:
+
             def page_edit_url(lang):
                 return get_object_edit_url(page.get_content_obj(lang), language=lang)
 

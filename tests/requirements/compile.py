@@ -89,7 +89,7 @@ if __name__ == "__main__":
             "--upgrade",
             "pip-tools",
         ]
-        subprocess.run(args, capture_output=True)
+        subprocess.run(args, capture_output=True, check=False)
 
     print("Creating requirement files")
     for key, value in COMPILE_SETTINGS.items():

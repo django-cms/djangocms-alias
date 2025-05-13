@@ -88,8 +88,8 @@ jobs:
       matrix:
         python-version: ['3.13']
         requirements-file: [
-          'py311-djmain-cms41-default.txt',
-          'py311-djmain-cms41-versioning.txt',
+          'py313-djmain-cms50-default.txt',
+          'py313-djmain-cms50-versioning.txt',
         ]
         os: [
           ubuntu-latest,

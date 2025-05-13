@@ -24,7 +24,7 @@ COMPILE_SETTINGS = {
     "py312-dj52-cms50": [],
     "py313-dj52-cms50": [],
     "py313-djmain-cmsdev": [],
-    "py313-djmain-cms41": [],
+    "py313-djmain-cms50": [],
 }
 
 django_dict = {

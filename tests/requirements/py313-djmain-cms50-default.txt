@@ -32,7 +32,7 @@ django-classy-tags==4.1.0
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-django-cms==4.1.6
+django-cms==5.0.0
     # via djangocms-versioning
 django-formtools==2.5.1
     # via django-cms

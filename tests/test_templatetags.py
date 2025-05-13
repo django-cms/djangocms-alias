@@ -349,7 +349,6 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
             def page_edit_url(lang):
                 return get_object_edit_url(page.get_title_obj(lang))
         else:
-
             def page_edit_url(lang):
                 return get_object_edit_url(page.get_content_obj(lang), language=lang)
 
@@ -365,6 +364,30 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         self.assertIsNotNone(alias.get_content("de", show_draft_content=True))
         # Ensure that exactly two content objects have been created
         self.assertEqual(alias.contents(manager="admin_manager").count(), 2)
+
+    def test_static_alias_passes_static_code(self):
+        page = create_page(
+            title="Static Code Test",
+            language="en",
+            template="static_alias.html",
+            limit_visibility_in_menu=None,
+            created_by=self.superuser,
+        )
+        alias = self._create_alias(
+            static_code="template_example_global_alias_code",
+            template="context_alias_template",
+        )
+        add_plugin(
+            alias.get_placeholder("en"),
+            "TextPlugin",
+            language=self.language,
+            body="custom alias content",
+        )
+        self._publish(page, "en")
+
+        response = self.client.get(page.get_absolute_url())
+        input(response.content)
+        self.assertContains(response, "<b>template_example_global_alias_code</b>")
 
     def test_alias_rendered_when_identifier_is_variable(self):
         alias_template = """{% load djangocms_alias_tags %}{% static_alias foo_variable %}"""  # noqa: E501

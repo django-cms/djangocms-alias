@@ -1,7 +1,7 @@
 import json
 
 from cms.models import Page
-from cms.toolbar.utils import get_plugin_toolbar_info, get_plugin_tree_as_json
+from cms.toolbar.utils import get_plugin_toolbar_info
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
@@ -28,6 +28,17 @@ JAVASCRIPT_SUCCESS_RESPONSE = """
     <div class="success"></div>
     </div></div>
 """
+
+try:
+    from cms.toolbar.utils import get_plugin_tree
+except ImportError:
+    from cms.toolbar.utils import get_plugin_tree_as_json
+
+    def get_plugin_tree(request, plugins):
+        """
+        Fallback for older versions of django CMS
+        """
+        return json.loads(get_plugin_tree_as_json(request, plugins))
 
 
 def detach_alias_plugin_view(request, plugin_pk):
@@ -156,15 +167,15 @@ def render_replace_response(request, new_plugins, source_placeholder=None, sourc
             plugin.language,
             parent_id=plugin.parent_id,
         )
-        plugin_tree = get_plugin_tree_as_json(request, plugins)
+        plugin_tree = get_plugin_tree(request, plugins)
         move_data = get_plugin_toolbar_info(plugin)
         move_data["plugin_order"] = plugin_order
-        move_data.update(json.loads(plugin_tree))
+        move_data.update(plugin_tree)
         move_plugins.append(json.dumps(move_data))
         add_plugins.append(
             (
                 json.dumps(get_plugin_toolbar_info(plugin)),
-                plugin_tree,
+                json.dumps(plugin_tree),
             )
         )
     context = {

@@ -2,8 +2,11 @@
 Changelog
 =========
 
-Unreleased
-==========
+2.0.3 (2025-05-15)
+==================
+
+* feat: Prepare for django CMS 5.1 by @dependabot in https://github.com/django-cms/djangocms-alias/pull/247
+* build: Add a description for pypi by @marksweb in https://github.com/django-cms/djangocms-alias/pull/264
 
 
 2.0.2 (2024-11-07)

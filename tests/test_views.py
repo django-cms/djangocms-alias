@@ -889,7 +889,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         self.assertContains(response, "<td>Alias</td>")
         self.assertRegex(
             str(response.content),
-            rf'href="{re.escape(self.page.get_absolute_url(self.language))}"[\w+]?>{str(self.page)}<\/a>',
+            rf'href="{re.escape(self.page.get_absolute_url(self.language))}"[\w+]?>{re.escape(str(self.page))}<\/a>',
         )
         self.assertRegex(
             str(response.content),
@@ -947,7 +947,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 ),
             )
         self.assertContains(response, "This alias is used by following objects:")
-        test = r"<li>[\s\\n]*Page:[\s\\n]*<a href=\"\/en\/test\/\">test<\/a>[\s\\n]*<\/li>"
+        test = (
+            rf"<li>[\s\\n]*Page:[\s\\n]*<a href=\"{re.escape(self.page.get_absolute_url(self.language))}\">"
+            rf"{re.escape(str(self.page))}<\/a>[\s\\n]*<\/li>"
+        )
         self.assertRegex(str(response.content), test)
 
     def test_delete_alias_view_get_alias_not_used_on_any_page(self):

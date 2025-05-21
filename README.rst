@@ -70,13 +70,13 @@ Alternatively, aliases can be used with the Alias plugin. It allows to select wh
 .. |coverage| image:: https://codecov.io/gh/django-cms/djangocms-alias/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/django-cms/djangocms-alias
 
-.. |python| image:: https://img.shields.io/badge/python-3.7+-blue.svg
+.. |python| image:: https://img.shields.io/badge/python-3.9+-blue.svg
    :target: https://pypi.org/project/djangocms-alias/
 
-.. |django| image:: https://img.shields.io/badge/django-3.2--4.1-blue.svg
+.. |django| image:: https://img.shields.io/badge/django-4.2+-blue.svg
    :target: https://www.djangoproject.com/
 
-.. |djangocms4| image:: https://img.shields.io/badge/django%20CMS-4-blue.svg
+.. |djangocms4| image:: https://img.shields.io/badge/django%20CMS-4+-blue.svg
    :target: https://www.django-cms.org/
 
 Side notes

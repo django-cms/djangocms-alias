@@ -82,5 +82,5 @@ typing-extensions==4.9.0
     #   dj-database-url
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==70.0.0
+setuptools==78.1.1
     # via django-cms

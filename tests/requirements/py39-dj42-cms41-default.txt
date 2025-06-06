@@ -14,7 +14,7 @@ coverage==7.3.2
     # via -r requirements.in
 dj-database-url==2.1.0
     # via django-app-helper
-django==4.2.13
+django==4.2.22
     # via
     #   dj-database-url
     #   django-classy-tags

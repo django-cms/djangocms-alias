@@ -1,5 +1,3 @@
-import $ from 'jquery';
-
 $(function() {
     var itemsPerPage = 30;
     var siteField = $('#id_site');

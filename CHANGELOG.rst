@@ -2,6 +2,13 @@
 Changelog
 =========
 
+2.0.4 (2025-06-18)
+==================
+
+* fix: Create Alias plugin form is missing autocompletion by @krmax44 in https://github.com/django-cms/djangocms-alias/pull/274
+* build: Remove node and webpack by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/271
+
+
 2.0.3 (2025-05-15)
 ==================
 
@@ -11,6 +18,7 @@ Changelog
 
 2.0.2 (2024-11-07)
 ==================
+
 * fix: `get_absolute_url` method not found while creating new alias and category from wizard button.
 * feat: Added search capability in AliasContent admin (migrate the 4.0.x feature from PR #236)
 

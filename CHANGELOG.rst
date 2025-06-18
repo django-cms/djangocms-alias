@@ -6,7 +6,7 @@ Changelog
 ==================
 
 * fix: Create Alias plugin form is missing autocompletion by @krmax44 in https://github.com/django-cms/djangocms-alias/pull/274
-* build: Remove node and web pack by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/271
+* build: Remove node and webpack by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/271
 
 
 2.0.3 (2025-05-15)

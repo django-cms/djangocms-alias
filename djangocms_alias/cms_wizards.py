@@ -41,6 +41,3 @@ create_alias_category_wizard = CreateAliasCategoryWizard(
     model=Category,
     description=_("Create a new alias category."),
 )
-
-wizard_pool.register(create_alias_wizard)
-wizard_pool.register(create_alias_category_wizard)

@@ -6,7 +6,6 @@ from .cms_wizards import (
     create_alias_category_wizard,
     create_alias_wizard,
 )
-
 from .models import AliasContent, AliasPlugin, copy_alias_content
 from .rendering import render_alias_content
 

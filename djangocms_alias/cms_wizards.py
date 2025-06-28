@@ -1,6 +1,5 @@
 from cms.utils.permissions import get_model_permission_codename
 from cms.wizards.wizard_base import Wizard
-from cms.wizards.wizard_pool import wizard_pool
 from django.utils.translation import gettext_lazy as _
 
 from .cms_plugins import Alias
@@ -41,6 +40,3 @@ create_alias_category_wizard = CreateAliasCategoryWizard(
     model=Category,
     description=_("Create a new alias category."),
 )
-
-wizard_pool.register(create_alias_wizard)
-wizard_pool.register(create_alias_category_wizard)

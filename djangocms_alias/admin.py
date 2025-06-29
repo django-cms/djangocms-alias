@@ -41,14 +41,6 @@ alias_admin_list_display = ["content__name", "category", "admin_list_actions"]
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
-    from djangocms_versioning.admin import (
-        ExtendedGrouperVersionAdminMixin,
-        StateIndicatorMixin,
-    )
-    from djangocms_versioning.models import Version
-
-    alias_admin_classes.insert(0, ExtendedGrouperVersionAdminMixin)
-    alias_admin_classes.insert(0, StateIndicatorMixin)
     alias_admin_list_display.insert(-1, "get_author")
     alias_admin_list_display.insert(-1, "get_modified_date")
     alias_admin_list_display.insert(-1, "state_indicator")
@@ -65,7 +57,7 @@ class CategoryAdmin(TranslatableAdmin):
             # Don't emit delete content because there is on_delete=PROTECT for
             # category FK on alias
             emit_content_change(
-                AliasContent._base_manager.filter(alias__in=obj.aliases.all()),
+                AliasContent.admin_manager.filter(alias__in=obj.aliases.all()),
                 sender=self.model,
             )
 
@@ -92,13 +84,6 @@ class AliasAdmin(*alias_admin_classes):
         """Add alias usage list actions"""
         return super().get_actions_list() + [self._get_alias_usage_link]
 
-    def can_change_content(self, request: HttpRequest, content_obj: AliasContent) -> bool:
-        """Returns True if user can change content_obj"""
-        if content_obj and is_versioning_enabled():
-            version = Version.objects.get_for_content(content_obj)
-            return version.check_modify.as_bool(request.user)
-        return True
-
     def has_delete_permission(self, request: HttpRequest, obj: Alias = None) -> bool:
         # Alias can be deleted by users who can add aliases,
         # if that alias is not referenced anywhere.
@@ -117,7 +102,7 @@ class AliasAdmin(*alias_admin_classes):
         # Versioning emits its own signals for changes
         if not is_versioning_enabled():
             emit_content_change(
-                AliasContent._base_manager.filter(alias=obj),
+                AliasContent.admin_manager.filter(alias=obj),
                 sender=self.model,
             )
 
@@ -140,7 +125,7 @@ class AliasAdmin(*alias_admin_classes):
         # Versioning emits it' own signals for changes
         if not is_versioning_enabled():
             emit_content_delete(
-                AliasContent._base_manager.filter(alias=obj),
+                AliasContent.admin_manager.filter(alias=obj),
                 sender=self.model,
             )
 

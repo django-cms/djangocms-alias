@@ -4,7 +4,7 @@ from collections import defaultdict
 from cms.api import add_plugin
 from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderRelationField
-from cms.models.managers import WithUserMixin
+from cms.models.managers import ContentAdminManager, WithUserMixin
 from cms.utils.plugins import copy_plugins_to_placeholder
 from cms.utils.urlutils import admin_reverse
 from django.conf import settings
@@ -174,7 +174,7 @@ class Alias(models.Model):
         try:
             return self._content_cache[language]
         except KeyError:
-            if show_draft_content and is_versioning_enabled():
+            if show_draft_content:
                 qs = self.contents(manager="admin_manager").latest_content()
             else:
                 qs = self.contents.all()
@@ -249,7 +249,6 @@ class Alias(models.Model):
 
 class AliasContentManager(WithUserMixin, models.Manager):
     """Adds with_user syntax to AliasContent w/o using versioning"""
-
     pass
 
 
@@ -271,6 +270,7 @@ class AliasContent(models.Model):
     )
 
     objects = AliasContentManager()
+    admin_manager = ContentAdminManager()  # Manager with latest_content
 
     class Meta:
         verbose_name = _("alias content")

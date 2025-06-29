@@ -26,7 +26,7 @@ from .models import (
 from .models import (
     Alias as AliasModel,
 )
-from .utils import emit_content_change, is_versioning_enabled
+from .utils import emit_content_change
 
 __all__ = [
     "AliasPluginForm",
@@ -196,17 +196,11 @@ class CreateAliasWizardForm(forms.Form):
             category=self.cleaned_data.get("category"),
             site=self.cleaned_data.get("site"),
         )
-        alias_content = AliasContent(
+        alias_content = AliasContent.objects.with_user(self._request.user).create(
             alias=alias,
             name=self.cleaned_data.get("name"),
             language=self.language_code,
         )
-        alias_content.save()  # Does not create a Version object
-
-        if is_versioning_enabled():
-            from djangocms_versioning.models import Version
-
-            Version.objects.create(content=alias_content, created_by=self._request.user)
 
         emit_content_change([alias_content])
         return alias

@@ -41,6 +41,7 @@ class AliasCMSConfig(CMSAppConfig):
                 version_list_filter_lookups={"language": get_language_tuple},
                 copy_function=copy_alias_content,
                 grouper_selector_option_label=lambda obj, lang: obj.get_name(lang),
+                grouper_admin_mixin="__default__",
             ),
         ]
 

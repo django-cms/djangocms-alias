@@ -137,23 +137,18 @@ class StaticAlias(Tag):
 
             alias = Alias.objects.create(category=default_category, **alias_creation_kwargs)
 
-        if not AliasContent._base_manager.filter(alias=alias, language=language).exists():
+        if not AliasContent.admin_manager.filter(alias=alias, language=language).exists():
             # Create a first content object if none exists in the given language.
             # If versioning is enabled we can only create the records with a logged-in user / staff member
             if is_versioning_enabled() and not request.user.is_authenticated:
                 return None
 
             # Use base manager since we create version objects ourselves
-            alias_content = AliasContent._base_manager.create(
+            alias_content = AliasContent.objects.with_user(request.user).create(
                 alias=alias,
                 name=static_code,
                 language=language,
             )
-
-            if is_versioning_enabled():
-                from djangocms_versioning.models import Version
-
-                Version.objects.create(content=alias_content, created_by=request.user)
             alias._content_cache[language] = alias_content
 
         return alias

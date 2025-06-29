@@ -540,12 +540,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias3 = self._create_alias(name="foo4", position=1, published=False)
 
         if is_versioning_enabled():
-            from djangocms_versioning.constants import DRAFT
-            from djangocms_versioning.models import Version
-
             # This will show because it's a new draft version of the same alias
-            draft_content = alias2.contents.create(name="foo", language=self.language)
-            Version.objects.create(content=draft_content, created_by=self.superuser, state=DRAFT)
+            alias2.contents.with_user(self.superuser).create(name="foo", language=self.language)
 
         # This shouldn't show because it hasn't content in current language
         self._create_alias(name="foo2", language="fr", position=1)

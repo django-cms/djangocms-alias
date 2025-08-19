@@ -4,7 +4,7 @@
 #
 #    requirements/compile.py
 #
-asgiref==3.8.1
+asgiref==3.9.1
     # via django
 beautifulsoup4==4.13.4
     # via bs4

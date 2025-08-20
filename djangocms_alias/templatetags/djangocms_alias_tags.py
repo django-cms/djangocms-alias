@@ -1,6 +1,6 @@
 from collections import ChainMap
 
-from classytags.arguments import Argument, KeywordArgument, MultiValueArgument
+from classytags.arguments import Argument, MultiValueArgument
 from classytags.core import Tag
 from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_object_preview_url, get_toolbar_from_request
@@ -207,11 +207,7 @@ class StaticAlias(Tag):
                 toolbar
                 and not toolbar.preview_mode_active
                 and toolbar.is_staff
-                and (
-                    preview_link is True
-                    or ALIAS_SHOW_PREVIEW_LINK
-                    and preview_link is None
-                )
+                and (preview_link is True or ALIAS_SHOW_PREVIEW_LINK and preview_link is None)
             ):
                 href = admin_view_url(alias)
                 link = f"""

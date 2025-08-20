@@ -1,6 +1,6 @@
 from collections import ChainMap
 
-from classytags.arguments import Argument, MultiValueArgument
+from classytags.arguments import Argument, KeywordArgument, MultiValueArgument
 from classytags.core import Tag
 from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_object_preview_url, get_toolbar_from_request
@@ -17,6 +17,7 @@ from ..constants import (
     USAGE_ALIAS_URL_NAME,
 )
 from ..models import Alias, AliasContent, Category
+from ..settings import ALIAS_SHOW_PREVIEW_LINK
 from ..utils import is_versioning_enabled
 
 register = template.Library()
@@ -75,10 +76,12 @@ class StaticAlias(Tag):
 
     eg: {% static_alias "identifier_text" %}
     eg: {% static_alias "identifier_text" site %}
+    eg: {% static_alias "identifier_text" preview_link=False %}
 
     Keyword arguments:
     static_code -- the unique identifier of the Alias
     site -- If site is supplied an Alias instance will be created per site.
+    preview_link -- Can be set to True/False to specifically show/hide a link.
     """
 
     name = "static_alias"
@@ -161,6 +164,14 @@ class StaticAlias(Tag):
     def render_tag(self, context, static_code, extra_bits, nodelist=None):
         request = context.get("request")
 
+        preview_link = None
+        for bit in extra_bits:
+            if bit.startswith("preview_link="):
+                val = bit.split("=")[1]
+                if val in ["True", "False"]:
+                    preview_link = val == "True"
+                break
+
         if not static_code or not request:
             # an empty string was passed in or the variable is not available in the context
             if nodelist:
@@ -191,6 +202,31 @@ class StaticAlias(Tag):
                 nodelist=nodelist,
                 use_cache=True,
             )
+
+            if (
+                toolbar
+                and not toolbar.preview_mode_active
+                and toolbar.is_staff
+                and (
+                    preview_link is True
+                    or ALIAS_SHOW_PREVIEW_LINK
+                    and preview_link is None
+                )
+            ):
+                href = admin_view_url(alias)
+                link = f"""
+                <span class="static-alias-preview-link" style="position: relative;">
+                  <a style="background: repeating-linear-gradient(-45deg, #dedede, #dedede 10px, #a9a9a9 10px, #a9a9a9 20px);
+                            display: inline;
+                            opacity: .5;
+                            position: absolute;"
+                     href="{href}">
+                      {static_code}
+                  </a>
+                </span>
+                """
+                content += link
+
             return content
         return ""
 

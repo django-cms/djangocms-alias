@@ -1,6 +1,6 @@
-from collections import ChainMap
+from collections import ChainMap, namedtuple
 
-from classytags.arguments import Argument, MultiValueArgument
+from classytags.arguments import Argument, ListValue, MultiValueArgument
 from classytags.core import Tag
 from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_object_preview_url, get_toolbar_from_request
@@ -12,14 +12,13 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 from django import template
 from django.utils.translation import get_language
 
-from ..constants import (
-    DEFAULT_STATIC_ALIAS_CATEGORY_NAME,
-    USAGE_ALIAS_URL_NAME,
-)
+from ..constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME, USAGE_ALIAS_URL_NAME
 from ..models import Alias, AliasContent, Category
 from ..utils import is_versioning_enabled
 
 register = template.Library()
+
+DeclaredStaticAlias = namedtuple("DeclaredStaticAlias", ["static_code", "site"])
 
 
 @register.simple_tag(takes_context=False)
@@ -102,7 +101,7 @@ class StaticAlias(Tag):
             alias_filter_kwargs["site_id__isnull"] = True
 
         if hasattr(request, "toolbar"):
-            # Try getting language from the toolbar first (end and view endpoints)
+            # Try getting language from the toolbar first (edit and view endpoints)
             language = getattr(request.toolbar.get_object(), "language", None)
             if language not in get_language_list(current_site):
                 language = get_language_from_request(request)
@@ -172,22 +171,34 @@ class StaticAlias(Tag):
             return ""
 
         # Get draft contents in edit or preview mode?
-        get_draft_content = False
-        if toolbar.edit_mode_active or toolbar.preview_mode_active:
-            get_draft_content = True
+        get_draft_content = toolbar.edit_mode_active or toolbar.preview_mode_active
 
         language = get_language_from_request(request)
         placeholder = alias.get_placeholder(language=language, show_draft_content=get_draft_content)
 
         if placeholder:
+            editable = toolbar.edit_mode_active and placeholder.check_source(request.user)
             content = renderer.render_placeholder(
                 placeholder=placeholder,
                 context=context,
                 nodelist=nodelist,
                 use_cache=True,
+                editable=editable,
             )
+            if toolbar.edit_mode_active and not editable:
+                # Also non-editable placeholders need interactivity in the structure board
+                content += renderer.get_placeholder_toolbar_js(placeholder)
             return content
         return ""
+
+    def get_declaration(self):
+        """Used to identify static_alias declarations"""
+        static_code = str(self.kwargs["static_code"].var).strip('"').strip("'")
+        site = False
+        if isinstance(self.kwargs["extra_bits"], ListValue):
+            site = any(extra.var.value.strip() == "site" for extra in self.kwargs["extra_bits"])
+
+        return DeclaredStaticAlias(static_code=static_code, site=site)
 
 
 register.tag(StaticAlias.name, StaticAlias)

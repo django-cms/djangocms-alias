@@ -16,19 +16,18 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Framework :: Django",
-    "Framework :: Django :: 3.2",
-    "Framework :: Django :: 4.0",
-    "Framework :: Django :: 4.1",
     "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
     "Framework :: Django CMS :: 4.1",
 ]
 
 INSTALL_REQUIREMENTS = [
-    "Django>=3.2",
     "django-parler>=1.4",
-    "django-cms>=4.1",
+    "django-cms>=5.0",
 ]
 
 setup(

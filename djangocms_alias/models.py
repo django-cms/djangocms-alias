@@ -5,6 +5,7 @@ from cms.api import add_plugin
 from cms.models import CMSPlugin, Placeholder
 from cms.models.fields import PlaceholderRelationField
 from cms.models.managers import ContentAdminManager, WithUserMixin
+from cms.utils.permissions import get_model_permission_codename
 from cms.utils.plugins import copy_plugins_to_placeholder
 from cms.utils.urlutils import admin_reverse
 from django.conf import settings
@@ -249,7 +250,13 @@ class Alias(models.Model):
 
 class AliasContentManager(WithUserMixin, models.Manager):
     """Adds with_user syntax to AliasContent w/o using versioning"""
+
     pass
+
+
+def can_change_alias(placeholder, user):
+    permission = get_model_permission_codename(AliasContent, "change")
+    return user.has_perm(permission)
 
 
 class AliasContent(models.Model):
@@ -262,7 +269,7 @@ class AliasContent(models.Model):
         verbose_name=_("name"),
         max_length=120,
     )
-    placeholders = PlaceholderRelationField()
+    placeholders = PlaceholderRelationField(checks=[can_change_alias])
     placeholder_slotname = "content"
     language = models.CharField(
         max_length=10,
@@ -285,19 +292,17 @@ class AliasContent(models.Model):
 
     @cached_property
     def placeholder(self):
-        try:
-            return self.placeholders.get(slot=self.placeholder_slotname)
-        except Placeholder.DoesNotExist:
-            from cms.utils.placeholder import rescan_placeholders_for_obj
-
-            rescan_placeholders_for_obj(self)
-            return self.placeholders.get(slot=self.placeholder_slotname)
+        return self.placeholders.get_or_create(slot=self.alias.static_code or self.placeholder_slotname)[0]
 
     def get_placeholders(self):
         return [self.placeholder]
 
     def get_template(self):
-        return "djangocms_alias/alias_content.html"
+        return None
+
+    def get_placeholder_slots(self):
+        """Returns a list of placeholder slots used by this content."""
+        return [self.placeholder.slot]
 
     @transaction.atomic
     def populate(self, replaced_placeholder=None, replaced_plugin=None, plugins=None):

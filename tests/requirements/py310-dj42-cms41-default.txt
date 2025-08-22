@@ -14,7 +14,7 @@ coverage==7.8.0
     # via -r requirements.in
 dj-database-url==2.3.0
     # via django-app-helper
-django==4.2.21
+django==4.2.23
     # via
     #   dj-database-url
     #   django-classy-tags
@@ -32,7 +32,7 @@ django-classy-tags==4.1.0
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-django-cms==4.1.6
+django-cms==4.1.7
     # via djangocms-versioning
 django-formtools==2.5.1
     # via django-cms
@@ -50,7 +50,7 @@ django-treebeard==4.7.1
     # via django-cms
 djangocms-admin-style==3.3.1
     # via django-cms
-djangocms-versioning==2.2.1
+djangocms-versioning==2.4.0
     # via -r requirements.in
 docopt==0.6.2
     # via django-app-helper

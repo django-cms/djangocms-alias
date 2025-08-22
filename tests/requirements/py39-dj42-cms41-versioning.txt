@@ -50,7 +50,7 @@ django-treebeard==4.7
     # via django-cms
 djangocms-admin-style==3.2.6
     # via django-cms
-djangocms-versioning==2.0.2
+djangocms-versioning==2.4.0
     # via -r requirements.in
 docopt==0.6.2
     # via django-app-helper

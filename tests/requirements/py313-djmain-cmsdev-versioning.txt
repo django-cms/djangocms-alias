@@ -23,7 +23,6 @@ django @ https://github.com/django/django/tarball/main
     #   django-parler
     #   django-sekizai
     #   django-treebeard
-    #   djangocms-admin-style
     #   djangocms-versioning
 django-app-helper==3.3.4
     # via -r requirements.in
@@ -48,9 +47,7 @@ django-sekizai==4.1.0
     #   django-cms
 django-treebeard==4.7.1
     # via django-cms
-djangocms-admin-style==3.3.1
-    # via django-cms
-djangocms-versioning==2.2.1
+djangocms-versioning==2.4.0
     # via -r requirements.in
 docopt==0.6.2
     # via django-app-helper
@@ -61,9 +58,7 @@ isort==6.0.1
 mccabe==0.7.0
     # via flake8
 packaging==25.0
-    # via
-    #   django-cms
-    #   djangocms-versioning
+    # via djangocms-versioning
 pycodestyle==2.13.0
     # via flake8
 pyflakes==3.3.2
@@ -83,6 +78,4 @@ typing-extensions==4.13.2
 
 # The following packages are considered to be unsafe in a requirements file:
 setuptools==80.4.0
-    # via
-    #   django-app-helper
-    #   django-cms
+    # via django-app-helper

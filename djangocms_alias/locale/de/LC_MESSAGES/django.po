@@ -2,10 +2,10 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 # Translators:
 # Fabian Braun <fsbraun@gmx.de>, 2025
-#
+# 
 #, fuzzy
 msgid ""
 msgstr ""
@@ -40,8 +40,8 @@ msgid ""
 "Alias content for language {} deleted. A new empty alias content will be "
 "created if needed."
 msgstr ""
-"Alias-Inhalt in der Sprache {} gelöscht. Ein neuer, leerer Alias-Inhalt wird"
-" automatisch erzeugt, falls nötig."
+" Alias-Inhalt für Sprache {} gelöscht. Neuer leerer Alias-Inhalt wird bei "
+"Bedarf erstellt."
 
 #: apps.py:7
 msgid "django CMS Alias"

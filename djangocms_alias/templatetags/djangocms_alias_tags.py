@@ -100,7 +100,7 @@ class StaticAlias(Tag):
         else:
             alias_filter_kwargs["site_id__isnull"] = True
 
-        if hasattr(request, "toolbar"):
+        if getattr(request, "toolbar", None):
             # Try getting language from the toolbar first (edit and view endpoints)
             language = getattr(request.toolbar.get_object(), "language", None)
             if language not in get_language_list(current_site):

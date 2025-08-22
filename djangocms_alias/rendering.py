@@ -27,51 +27,43 @@ def get_declared_static_aliases(template: str, context: dict) -> list:
 
 
 def render_alias_structure_js(context: dict, renderer: BaseRenderer, obj: models.Model) -> str:
-    try:
-        template = obj.get_template()
-    except AttributeError:
-        template = None
+    request = context.get("request")
 
+    # 1. get template, bail early
+    template = getattr(obj, "get_template", lambda: None)()
     if not template:
-        # No template - no static alias declarations
         return ""
 
-    try:
-        lang = context["request"].toolbar.request_language
-    except AttributeError:
-        lang = None
+    # 2. resolve language once
+    lang = getattr(getattr(request, "toolbar", None), "request_language", None)
 
-    declared_static_aliases = get_declared_static_aliases(template, context)
+    # 3. scan for declarations
+    declared = get_declared_static_aliases(template, context)
+    if not declared:
+        return ""
 
-    alias_selector = models.Q()
-    for static_alias in declared_static_aliases:
-        kwargs = {
-            "static_code": static_alias.static_code,
-        }
-        if static_alias.site:
-            kwargs["site"] = renderer.current_site
-        else:
-            kwargs["site_id__isnull"] = True
-        alias_selector |= models.Q(**kwargs)
+    # 4. build Q() in two grouped filters (site vs no‐site)
+    site_codes = [a.static_code for a in declared if a.site]
+    nosite_codes = [a.static_code for a in declared if not a.site]
+    q_parts = models.Q(static_code__in=site_codes, site=renderer.current_site) if site_codes else models.Q()
+    if nosite_codes:
+        q_parts |= models.Q(static_code__in=nosite_codes, site__isnull=True)
+    alias_qs = Alias.objects.filter(q_parts)
 
-    alias_qs = Alias.objects.filter(alias_selector)
-    alias_contents_qs = AliasContent.admin_manager.current_content(alias__in=alias_qs).values_list("pk")
-    placeholders = {
-        placeholder.slot: placeholder
-        for placeholder in Placeholder.objects.filter(
-            content_type=ContentType.objects.get_for_model(AliasContent), object_id__in=alias_contents_qs
-        )
-    }
+    # 5. fetch AliasContent PKs & map CMS Placeholder by slot
+    content_ct = ContentType.objects.get_for_model(AliasContent)
+    alias_pks = AliasContent.admin_manager.current_content(alias__in=alias_qs).values_list("pk", flat=True)
+    placeholders = {ph.slot: ph for ph in Placeholder.objects.filter(content_type=content_ct, object_id__in=alias_pks)}
 
-    alias_js = []
-    for static_alias in declared_static_aliases:
-        placeholder = placeholders.get(static_alias.static_code)
-        placeholder.is_static = True
-        placeholder.is_editable = placeholder.check_source(context["request"].user)
-        if placeholder:
-            alias_js.append(renderer.render_placeholder(placeholder, language=lang, page=obj))
-
-    return "\n".join(alias_js)
+    # 6. render into JS array
+    js_parts = []
+    for decl in declared:
+        ph = placeholders.get(decl.static_code)
+        if not ph:
+            continue
+        ph.is_static = True
+        js_parts.append(renderer.render_placeholder(ph, language=lang, page=obj))
+    return "\n".join(js_parts)
 
 
 def add_static_alias_js(tag):

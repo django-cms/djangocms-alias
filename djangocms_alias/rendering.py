@@ -23,12 +23,7 @@ def get_declared_static_aliases(template: str, context: dict) -> list:
     compiled_template = get_template(template)
     nodes = _scan_placeholders((_get_nodelist(compiled_template)), node_class=StaticAlias)
     placeholders = [node.get_declaration() for node in nodes]
-    placeholders_with_code = []
-
-    for placeholder in placeholders:
-        if placeholder.static_code:
-            placeholders_with_code.append(placeholder)
-    return placeholders_with_code
+    return [placeholder for placeholder in placeholders if placeholder.static_code]
 
 
 def render_alias_structure_js(context: dict, renderer: BaseRenderer, obj: models.Model) -> str:

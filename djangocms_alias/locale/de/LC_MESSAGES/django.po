@@ -2,18 +2,18 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 # Translators:
-# Fabian Braun <fsbraun@gmx.de>, 2023
-#
+# Fabian Braun <fsbraun@gmx.de>, 2025
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-27 19:05+0200\n"
+"POT-Creation-Date: 2025-08-22 23:06+0200\n"
 "PO-Revision-Date: 2023-01-10 21:21+0000\n"
-"Last-Translator: Fabian Braun <fsbraun@gmx.de>, 2023\n"
+"Last-Translator: Fabian Braun <fsbraun@gmx.de>, 2025\n"
 "Language-Team: German (https://app.transifex.com/divio/teams/58664/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,36 +21,45 @@ msgstr ""
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin.py:85
+#: admin.py:78
 msgid "<i>Missing language</i>"
 msgstr "<i>Fehlende Sprache</i>"
 
-#: admin.py:143 cms_toolbars.py:104
-#: templates/djangocms_alias/alias_usage.html:46
+#: admin.py:134 cms_toolbars.py:104
+#: templates/djangocms_alias/alias_usage.html:50
 msgid "View usage"
 msgstr "Verwendung anzeigen"
 
-#: admin.py:147
+#: admin.py:141
 msgid "Delete Alias"
 msgstr "Verlinkung löschen"
+
+#: admin.py:183
+#, python-brace-format
+msgid ""
+"Alias content for language {} deleted. A new empty alias content will be "
+"created if needed."
+msgstr ""
+"Alias-Inhalt in der Sprache {} gelöscht. Ein neuer, leerer Alias-Inhalt wird"
+" automatisch erzeugt, falls nötig."
 
 #: apps.py:7
 msgid "django CMS Alias"
 msgstr "django CMS Alias"
 
-#: cms_plugins.py:29 cms_toolbars.py:52 forms.py:298 views.py:46 views.py:304
+#: cms_plugins.py:31 cms_toolbars.py:52 forms.py:270 views.py:58 views.py:326
 msgid "Alias"
 msgstr "Alias"
 
-#: cms_plugins.py:52
+#: cms_plugins.py:53
 msgid "Edit Alias"
 msgstr "Alias bearbeiten"
 
-#: cms_plugins.py:66
+#: cms_plugins.py:67
 msgid "Detach Alias"
 msgstr "Alias trennen"
 
-#: cms_plugins.py:81 cms_plugins.py:98
+#: cms_plugins.py:82 cms_plugins.py:99
 msgid "Create Alias"
 msgstr "Alias erstellen"
 
@@ -66,164 +75,160 @@ msgstr "Alias-Einstellungen ändern"
 msgid "Delete alias"
 msgstr "Alias löschen"
 
-#: cms_toolbars.py:166 templates/djangocms_alias/create_alias.html:31
+#: cms_toolbars.py:159 templates/djangocms_alias/create_alias.html:31
 msgid "Create"
 msgstr "Erstellen"
 
-#: cms_toolbars.py:180 internal_search.py:31
+#: cms_toolbars.py:172 internal_search.py:29
 msgid "Language"
 msgstr "Sprache"
 
-#: cms_toolbars.py:233
+#: cms_toolbars.py:224
 msgid "Add Translation"
 msgstr "Übersetzung hinzufügen"
 
-#: cms_toolbars.py:244
+#: cms_toolbars.py:235
 msgid "Delete Translation"
 msgstr "Übersetzung löschen"
 
-#: cms_toolbars.py:262
+#: cms_toolbars.py:252
 msgid "Copy all plugins"
 msgstr "Alle Plugins kopieren"
 
-#: cms_toolbars.py:264
+#: cms_toolbars.py:254
 #, python-format
 msgid "from %s"
 msgstr "von %s"
 
-#: cms_toolbars.py:265
+#: cms_toolbars.py:255
 #, python-format
 msgid "Are you sure you want to copy all plugins from %s?"
 msgstr "Sind Sie sicher, dass Sie alle Plugins aus %s kopieren wollen?"
 
-#: cms_wizards.py:27
+#: cms_wizards.py:30
 msgid "New alias"
 msgstr "Neuer Alias"
 
-#: cms_wizards.py:31
+#: cms_wizards.py:34
 msgid "Create a new alias."
 msgstr "Neuen Alias erstellen"
 
-#: cms_wizards.py:34
+#: cms_wizards.py:37
 msgid "New alias category"
 msgstr "Neue Alias-Kategorie"
 
-#: cms_wizards.py:38
+#: cms_wizards.py:41
 msgid "Create a new alias category."
 msgstr "Neue Alias-Kategorie erstellen"
 
-#: filters.py:20 forms.py:276
+#: filters.py:19 forms.py:252
 msgid "Site"
 msgstr "Site"
 
-#: filters.py:38 filters.py:78
+#: filters.py:37 filters.py:73
 msgid "All"
 msgstr "Alle"
 
-#: filters.py:45
+#: filters.py:42
 msgid "No site"
 msgstr "Kein Site"
 
-#: filters.py:58 forms.py:287 internal_search.py:24
+#: filters.py:53 forms.py:259 internal_search.py:22
 msgid "Category"
 msgstr "Kategorie"
 
-#: forms.py:80
+#: forms.py:78
 msgid "A plugin or placeholder is required to create an alias."
 msgstr ""
 "Ein Plugin oder ein Platzhalter is notwendig, um einen Alias zu erstellen."
 
-#: forms.py:86
+#: forms.py:83
 msgid "An alias can only be created from a plugin or placeholder, not both."
 msgstr ""
 "Ein Alias kann nur entweder mit einem Plugin oder mit einem Platzhalter "
 "erstellt werden, nicht mit beidem."
 
-#: forms.py:105
+#: forms.py:102
 msgid "Replace current plugin"
 msgstr "Aktuelles Plugin ersetzen"
 
-#: forms.py:106
+#: forms.py:103
 msgid "Replace current plugin with alias"
 msgstr "Aktuelles Plugin mit Alias ersetzen"
 
-#: forms.py:130 forms.py:348
+#: forms.py:126 forms.py:319
 msgid "Alias with this Name and Category already exists."
 msgstr "Ein Alias mit diesem Namen und in dieser Kategorie existiert bereits."
 
-#: forms.py:181 templates/djangocms_alias/alias_usage.html:32
+#: forms.py:172 templates/djangocms_alias/alias_usage.html:32
 msgid "Name"
 msgstr "Name"
 
-#: forms.py:280
-msgid "Select site to restrict the list of aliases below"
-msgstr "Site auswählen, um die Liste von Aliassen unten einzuschränken."
-
-#: forms.py:291
+#: forms.py:263
 msgid "Select category to restrict the list of aliases below"
 msgstr "Kategorie auswählen, um die Liste von Aliassen unten einzuschränken."
 
-#: forms.py:302
+#: forms.py:274
 msgid "Select an alias"
 msgstr "Alias auswählen"
 
-#: internal_search.py:17
+#: internal_search.py:15
 msgid "Title"
 msgstr "Titel"
 
-#: internal_search.py:38
+#: internal_search.py:36
 msgid "URL"
 msgstr "URL"
 
-#: internal_search.py:45
+#: internal_search.py:43
 msgid "Version status"
 msgstr "Version-Status"
 
-#: models.py:40
+#: models.py:38
 msgid "Default"
 msgstr "Vorgabe"
 
-#: models.py:53 models.py:269
+#: models.py:51 models.py:269
 msgid "name"
 msgstr "Name"
 
-#: models.py:60 models.py:85
+#: models.py:58 models.py:86
 msgid "category"
 msgstr "Kategorie"
 
-#: models.py:61
+#: models.py:59
 msgid "categories"
 msgstr "Kategorien"
 
-#: models.py:76
+#: models.py:74
 msgid "by template"
 msgstr "nach Vorlage"
 
-#: models.py:77
+#: models.py:75
 msgid "by code"
 msgstr "nach Code"
 
-#: models.py:80
+#: models.py:78
 msgid "creation_method"
 msgstr "Erstellungsmethode"
 
-#: models.py:90
+#: models.py:91
 msgid "position"
 msgstr "Position"
 
-#: models.py:94
+#: models.py:95
 msgid "static code"
 msgstr "statischer Code"
 
-#: models.py:98
+#: models.py:99
 msgid "To render the alias in templates."
 msgstr "Um Aliasse in Vorlagen zu rendern"
 
-#: models.py:103 models.py:392
+#: models.py:104 models.py:387
 msgid "alias"
 msgstr "Alias"
 
-#: models.py:104
+#: models.py:105
 msgid "aliases"
 msgstr "Aliasse"
 
@@ -235,15 +240,15 @@ msgstr "Alias-Inhalt"
 msgid "alias contents"
 msgstr "Alias-Inhalte"
 
-#: models.py:397
+#: models.py:392
 msgid "template"
 msgstr "Vorlage"
 
-#: models.py:404
+#: models.py:399
 msgid "alias plugin model"
 msgstr "Alias-Plugin-Model"
 
-#: models.py:405
+#: models.py:400
 msgid "alias plugin models"
 msgstr "Alias-Plugin-Modelle"
 
@@ -280,12 +285,12 @@ msgid "This alias wasn't used by any object."
 msgstr "Dieser Alias wird nirgendwo genutzt."
 
 #: templates/admin/djangocms_alias/alias/delete_confirmation.html:41
-#: templates/djangocms_alias/detach_alias.html:16
+#: templates/djangocms_alias/detach_alias.html:17
 msgid "Yes, I'm sure"
 msgstr "Ja, ich bin sicher!"
 
 #: templates/admin/djangocms_alias/alias/delete_confirmation.html:43
-#: templates/djangocms_alias/detach_alias.html:17
+#: templates/djangocms_alias/detach_alias.html:16
 msgid "No, take me back"
 msgstr "Nein, zurück!"
 
@@ -339,8 +344,3 @@ msgid ""
 msgstr ""
 "Sind Sie sicher, dass Sie %(object_name)s \"%(escaped_object)s\" abtrennen "
 "wollen? "
-
-#: views.py:297
-#, python-brace-format
-msgid "Objects using alias: {alias}"
-msgstr "Objekte, die Alias „{alias}“ nutzen"

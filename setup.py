@@ -12,7 +12,6 @@ CLASSIFIERS = [
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     "Topic :: Software Development",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -22,7 +21,7 @@ CLASSIFIERS = [
     "Framework :: Django :: 5.0",
     "Framework :: Django :: 5.1",
     "Framework :: Django :: 5.2",
-    "Framework :: Django CMS :: 4.1",
+    "Framework :: Django CMS :: 5.0",
 ]
 
 INSTALL_REQUIREMENTS = [

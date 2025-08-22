@@ -4,7 +4,7 @@
 django CMS Alias
 ****************
 
-|coverage| |python| |django| |djangocms4|
+|PyPiVersion| |Coverage| |DjVersion| |CmsVersion|
 
 django CMS Alias replicates and extends the alias function of django CMS version 3 for django CMS version 4.
 
@@ -14,9 +14,9 @@ django CMS Alias supports versioning aliases by django CMS Versioning.
 
 .. warning::
 
-    This is the development branch for django CMS version 4.1 support.
+    django CMS Alias 3 and later require django CMS 5.0 or later.
 
-    For django CMS V4.0 support, see `support/django-cms-4.0.x branch <https://github.com/django-cms/djangocms-alias/tree/support/django-cms-4.0.x>`_
+    Use ``djangocms-alias<3`` for django CMS 4.1.
 
 
 ============
@@ -67,18 +67,24 @@ Alias plugin
 
 Alternatively, aliases can be used with the Alias plugin. It allows to select which alias content is shown at the exact position the alias plugin is placed.
 
-.. |coverage| image:: https://codecov.io/gh/django-cms/djangocms-alias/branch/master/graph/badge.svg
-   :target: https://codecov.io/gh/django-cms/djangocms-alias
-
-.. |python| image:: https://img.shields.io/badge/python-3.9+-blue.svg
-   :target: https://pypi.org/project/djangocms-alias/
-
-.. |django| image:: https://img.shields.io/badge/django-4.2+-blue.svg
-   :target: https://www.djangoproject.com/
-
-.. |djangocms4| image:: https://img.shields.io/badge/django%20CMS-4+-blue.svg
-   :target: https://www.django-cms.org/
-
 Side notes
 ============
 For the plugin to work out of the box ``{% block content %}`` is expected to exist in your main ``base.html`` file.
+
+.. |PyPiVersion| image:: https://img.shields.io/pypi/v/djangocms-alias.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/djangocms-alias
+    :alt: Latest PyPI version
+.. |Coverage| image:: https://codecov.io/gh/django-cms/djangocms-alias/graph/badge.svg?token=UUkVjsHGcA
+ :target: https://codecov.io/gh/django-cms/djangocms-alias
+
+.. |PyVersion| image:: https://img.shields.io/pypi/pyversions/djangocms-alias.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/djangocms-alias
+    :alt: Python versions
+
+.. |DjVersion| image:: https://img.shields.io/pypi/frameworkversions/django/djangocms-alias.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/djangocms-alias
+    :alt: Django versions
+
+.. |CmsVersion| image:: https://img.shields.io/pypi/frameworkversions/django-cms/djangocms-alias.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/djangocms-alias
+    :alt: django CMS versions

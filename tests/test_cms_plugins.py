@@ -2,7 +2,7 @@ from operator import attrgetter
 from unittest import skipUnless
 from urllib.parse import urlparse
 
-from cms.api import add_plugin, create_title
+from cms.api import add_plugin, create_page_content
 from cms.toolbar.utils import get_object_edit_url
 from cms.utils import get_current_site
 from cms.utils.plugins import downcast_plugins
@@ -37,7 +37,7 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         page_content = None
         if is_versioning_enabled():
             # Can only edit page/content that is in DRAFT
-            page_content = create_title(self.language, "Draft Page", self.page, created_by=self.superuser)
+            page_content = create_page_content(self.language, "Draft Page", self.page, created_by=self.superuser)
             placeholder = page_content.get_placeholders().get(slot="content")
 
         alias_plugin = alias.get_content(self.language).populate(

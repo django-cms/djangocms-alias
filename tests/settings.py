@@ -1,8 +1,7 @@
 import os
-from distutils.util import strtobool
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ENABLE_VERSIONING = strtobool(os.environ.get("ENABLE_VERSIONING", "1"))
+ENABLE_VERSIONING = os.environ.get("ENABLE_VERSIONING", "1").lower() in ("y", "yes", "t", "true", "on", "1")
 
 EXTRA_INSTALLED_APPS = ["djangocms_versioning"] if ENABLE_VERSIONING else []
 

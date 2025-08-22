@@ -10,13 +10,12 @@ beautifulsoup4==4.13.4
     # via bs4
 bs4==0.0.2
     # via -r requirements.in
-coverage==7.8.0
-    # via -r requirements.in
-dj-database-url==2.3.0
-    # via django-app-helper
+coverage[toml]==7.8.0
+    # via
+    #   -r requirements.in
+    #   pytest-cov
 django==5.2.5
     # via
-    #   dj-database-url
     #   django-classy-tags
     #   django-cms
     #   django-formtools
@@ -25,8 +24,6 @@ django==5.2.5
     #   django-treebeard
     #   djangocms-admin-style
     #   djangocms-versioning
-django-app-helper==3.3.4
-    # via -r requirements.in
 django-classy-tags==4.1.0
     # via
     #   -r requirements.in
@@ -52,10 +49,10 @@ djangocms-admin-style==3.3.1
     # via django-cms
 djangocms-versioning==2.4.0
     # via -r requirements.in
-docopt==0.6.2
-    # via django-app-helper
 flake8==7.2.0
     # via -r requirements.in
+iniconfig==2.1.0
+    # via pytest
 isort==6.0.1
     # via -r requirements.in
 mccabe==0.7.0
@@ -64,22 +61,33 @@ packaging==25.0
     # via
     #   django-cms
     #   djangocms-versioning
+    #   pytest
+pluggy==1.6.0
+    # via
+    #   pytest
+    #   pytest-cov
 pycodestyle==2.13.0
     # via flake8
 pyflakes==3.3.2
     # via
     #   -r requirements.in
     #   flake8
-six==1.17.0
-    # via django-app-helper
+pygments==2.19.2
+    # via pytest
+pytest==8.4.1
+    # via
+    #   pytest-cov
+    #   pytest-django
+pytest-cov==6.2.1
+    # via -r requirements.in
+pytest-django==4.11.1
+    # via -r requirements.in
 soupsieve==2.7
     # via beautifulsoup4
 sqlparse==0.5.3
     # via django
 typing-extensions==4.13.2
-    # via
-    #   beautifulsoup4
-    #   dj-database-url
+    # via beautifulsoup4
 
 # The following packages are considered to be unsafe in a requirements file:
 setuptools==78.1.1

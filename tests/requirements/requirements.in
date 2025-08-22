@@ -1,6 +1,7 @@
 bs4
 coverage
-django-app-helper
+pytest-django
+pytest-cov
 django-classy-tags
 django-fsm>=2.6
 django-sekizai

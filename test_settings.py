@@ -15,6 +15,7 @@ HELPER_SETTINGS = {
     ],
     "INSTALLED_APPS": [
         "parler",
+        "djangocms_alias.test_utils",
         "djangocms_alias.test_utils.text",
     ]
     + EXTRA_INSTALLED_APPS,

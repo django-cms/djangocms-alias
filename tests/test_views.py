@@ -252,7 +252,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
         alias_plugins = alias.get_placeholder(self.language).get_plugins()
 
         self.assertEqual(alias_plugins.count(), source_plugins.count())
-        for source, target in zip(source_plugins, alias_plugins):
+        for source, target in zip(source_plugins, alias_plugins, strict=False):
             self.assertEqual(source.plugin_type, target.plugin_type)
             self.assertEqual(
                 source.get_bound_plugin().body,
@@ -1415,7 +1415,7 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
         alias_plugins = alias.get_placeholder(self.language).get_plugins()
 
         self.assertEqual(alias_plugins.count(), source_plugins.count())
-        for source, target in zip(source_plugins, alias_plugins):
+        for source, target in zip(source_plugins, alias_plugins, strict=False):
             self.assertEqual(source.plugin_type, target.plugin_type)
             self.assertEqual(
                 source.get_bound_plugin().body,

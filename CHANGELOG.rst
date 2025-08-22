@@ -2,6 +2,12 @@
 Changelog
 =========
 
+2.0.5 (2025-06-29)
+==================
+
+* fix: Use cms_config to register wizards robustly by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/276
+
+
 2.0.4 (2025-06-18)
 ==================
 

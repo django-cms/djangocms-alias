@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from cms.models import Placeholder
 from cms.plugin_rendering import BaseRenderer
 from cms.utils.placeholder import _get_nodelist, _scan_placeholders
@@ -19,7 +21,8 @@ def render_alias_content(request: HttpRequest, alias_content: str) -> TemplateRe
     return TemplateResponse(request, template, context)
 
 
-def get_declared_static_aliases(template: str, context: dict) -> list:
+@lru_cache
+def get_declared_static_aliases(template: str) -> list:
     compiled_template = get_template(template)
     nodes = _scan_placeholders((_get_nodelist(compiled_template)), node_class=StaticAlias)
     placeholders = [node.get_declaration() for node in nodes]
@@ -38,7 +41,7 @@ def render_alias_structure_js(context: dict, renderer: BaseRenderer, obj: models
     lang = getattr(getattr(request, "toolbar", None), "request_language", None)
 
     # 3. scan for declarations
-    declared = get_declared_static_aliases(template, context)
+    declared = get_declared_static_aliases(template)
     if not declared:
         return ""
 

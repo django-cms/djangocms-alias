@@ -1,8 +1,11 @@
-from functools import lru_cache
+import os
+from functools import cache
+from typing import TYPE_CHECKING
 
 from cms.models import Placeholder
 from cms.plugin_rendering import BaseRenderer
 from cms.utils.placeholder import _get_nodelist, _scan_placeholders
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.http import HttpRequest
@@ -14,6 +17,9 @@ from djangocms_alias.templatetags.djangocms_alias_tags import StaticAlias
 
 from .models import Alias, AliasContent
 
+if TYPE_CHECKING:
+    from djangocms_alias.templatetags.djangocms_alias_tags import DeclaredStaticAlias
+
 
 def render_alias_content(request: HttpRequest, alias_content: str) -> TemplateResponse:
     template = "djangocms_alias/alias_content_preview.html"
@@ -21,12 +27,17 @@ def render_alias_content(request: HttpRequest, alias_content: str) -> TemplateRe
     return TemplateResponse(request, template, context)
 
 
-@lru_cache
-def get_declared_static_aliases(template: str) -> list:
+def get_declared_static_aliases(template: str) -> list["DeclaredStaticAlias"]:
     compiled_template = get_template(template)
     nodes = _scan_placeholders((_get_nodelist(compiled_template)), node_class=StaticAlias)
     placeholders = [node.get_declaration() for node in nodes]
     return [placeholder for placeholder in placeholders if placeholder.static_code]
+
+
+if settings.DEBUG is False or "PYTEST_VERSION" in os.environ:
+    # Cache in production only, so template changes in development
+    # are always reflected without needing a server restart
+    get_declared_static_aliases = cache(get_declared_static_aliases)
 
 
 def render_alias_structure_js(context: dict, renderer: BaseRenderer, obj: models.Model) -> str:

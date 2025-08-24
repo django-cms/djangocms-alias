@@ -6,11 +6,9 @@ from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_object_preview_url, get_toolbar_from_request
 from cms.utils import get_current_site, get_language_from_request
 from cms.utils.helpers import is_editable_model
-from cms.utils.i18n import get_default_language, get_language_list
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 from django import template
-from django.utils.translation import get_language
 
 from ..constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME, USAGE_ALIAS_URL_NAME
 from ..models import Alias, AliasContent, Category
@@ -100,19 +98,6 @@ class StaticAlias(Tag):
         else:
             alias_filter_kwargs["site_id__isnull"] = True
 
-        if getattr(request, "toolbar", None):
-            # Try getting language from the toolbar first (edit and view endpoints)
-            language = getattr(request.toolbar.get_object(), "language", None)
-            if language not in get_language_list(current_site):
-                language = get_language_from_request(request)
-        else:
-            language = get_language_from_request(request)
-        if language is None:
-            # Might be on non-cms pages
-            language = get_language()
-
-            if language is None:
-                language = get_default_language()
         # Try and find an Alias to render
         alias = Alias.objects.filter(**alias_filter_kwargs).first()
         # If there is no alias found we need to create one
@@ -136,20 +121,17 @@ class StaticAlias(Tag):
 
             alias = Alias.objects.create(category=default_category, **alias_creation_kwargs)
 
-        if not AliasContent.admin_manager.filter(alias=alias, language=language).exists():
-            # Create a first content object if none exists in the given language.
+        if not alias.get_content(language=self.language, show_draft_content=self.get_draft_content):
             # If versioning is enabled we can only create the records with a logged-in user / staff member
-            if is_versioning_enabled() and not request.user.is_authenticated:
+            if not self.get_draft_content:
                 return None
 
-            # Use base manager since we create version objects ourselves
             alias_content = AliasContent.objects.with_user(request.user).create(
                 alias=alias,
                 name=static_code,
-                language=language,
+                language=self.language,
             )
-            alias._content_cache[language] = alias_content
-
+            alias._content_cache[self.language] = alias_content
         return alias
 
     def render_tag(self, context, static_code, extra_bits, nodelist=None):
@@ -163,21 +145,19 @@ class StaticAlias(Tag):
 
         validate_placeholder_name(static_code)
 
-        toolbar = get_toolbar_from_request(request)
-        renderer = toolbar.get_content_renderer()
-        alias = self._get_alias(request, static_code, extra_bits)
+        self.language = get_language_from_request(request)
+        self.toolbar = get_toolbar_from_request(request)
+        # Get draft contents in edit or preview mode?
+        self.get_draft_content = self.toolbar.edit_mode_active or self.toolbar.preview_mode_active
 
+        alias = self._get_alias(request, static_code, extra_bits)
         if not alias:
             return ""
 
-        # Get draft contents in edit or preview mode?
-        get_draft_content = toolbar.edit_mode_active or toolbar.preview_mode_active
-
-        language = get_language_from_request(request)
-        placeholder = alias.get_placeholder(language=language, show_draft_content=get_draft_content)
-
+        placeholder = alias.get_placeholder(language=self.language, show_draft_content=self.get_draft_content)
         if placeholder:
-            editable = toolbar.edit_mode_active and placeholder.check_source(request.user)
+            editable = self.toolbar.edit_mode_active and placeholder.check_source(request.user)
+            renderer = self.toolbar.get_content_renderer()
             content = renderer.render_placeholder(
                 placeholder=placeholder,
                 context=context,
@@ -185,7 +165,7 @@ class StaticAlias(Tag):
                 use_cache=True,
                 editable=editable,
             )
-            if toolbar.edit_mode_active and not editable:
+            if self.toolbar.edit_mode_active and not editable:
                 # Also non-editable placeholders need interactivity in the structure board
                 content += renderer.get_placeholder_toolbar_js(placeholder)
             return content

@@ -292,7 +292,9 @@ class AliasContent(models.Model):
 
     @cached_property
     def placeholder(self):
-        return self.placeholders.get_or_create(slot=self.alias.static_code or self.placeholder_slotname)[0]
+        placeholder = self.placeholders.get_or_create(slot=self.alias.static_code or self.placeholder_slotname)[0]
+        placeholder.source = self
+        return placeholder
 
     def get_placeholders(self):
         return [self.placeholder]

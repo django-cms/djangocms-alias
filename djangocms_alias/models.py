@@ -179,13 +179,7 @@ class Alias(models.Model):
                 qs = self.contents(manager="admin_manager").latest_content()
             else:
                 qs = self.contents.all()
-            qs = (
-                qs.select_related(
-                    "alias__category",
-                )
-                .prefetch_related("placeholders")
-                .filter(language=language)
-            )
+            qs = qs.filter(language=language)
 
             self._content_cache[language] = qs.first()
             return self._content_cache[language]

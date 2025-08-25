@@ -277,7 +277,7 @@ msgid "This alias is used by following objects:"
 msgstr "Deze alias wordt gebruikt door de volgende objecten:"
 
 #: templates/admin/djangocms_alias/alias/delete_confirmation.html:34
-msgid "This alias wasn't used by any object."
+msgid "This alias is not used by any object."
 msgstr "Deze alias wordt niet gebruikt door een object;"
 
 #: templates/admin/djangocms_alias/alias/delete_confirmation.html:41

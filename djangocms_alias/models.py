@@ -188,13 +188,13 @@ class Alias(models.Model):
         content = self.get_content(language=language, show_draft_content=show_draft_content)
         return getattr(content, "placeholder", None)
 
-    def get_plugins(self, language=None):
+    def get_plugins(self, language=None, show_draft_content=False):
         if not language:
             language = get_language()
         try:
             return self._plugins_cache[language]
         except KeyError:
-            placeholder = self.get_placeholder(language)
+            placeholder = self.get_placeholder(language, show_draft_content=show_draft_content)
             plugins = placeholder.get_plugins_list() if placeholder else []
             self._plugins_cache[language] = plugins
             return self._plugins_cache[language]
@@ -308,25 +308,27 @@ class AliasContent(models.Model):
                 placeholder=self.placeholder,
             )
             return
-
         if replaced_placeholder:
-            plugins = replaced_placeholder.get_plugins(self.language)
-            placeholder = replaced_placeholder
-            add_plugin_kwargs = {}
-        else:
-            plugins = CMSPlugin.objects.filter(
-                id__in=[replaced_plugin.pk] + replaced_plugin._get_descendants_ids(),
+            replaced_placeholder.cmsplugin_set.update(placeholder=self.placeholder)
+            return add_plugin(
+                replaced_placeholder,
+                plugin_type="Alias",
+                language=self.language,
+                alias=self.alias,
             )
-            placeholder = replaced_plugin.placeholder
-            add_plugin_kwargs = {"position": "left", "target": replaced_plugin}
+
+        placeholder = replaced_plugin.placeholder
+        plugins = CMSPlugin.objects.filter(
+            id__in=[replaced_plugin.pk] + replaced_plugin._get_descendants_ids(),
+        )
+        add_plugin_kwargs = {"position": "left", "target": replaced_plugin}
 
         copy_plugins_to_placeholder(
             plugins,
             placeholder=self.placeholder,
             language=self.language,
         )
-        plugins.delete()
-        placeholder._recalculate_plugin_positions(self.language)
+        replaced_plugin.delete()
 
         new_plugin = add_plugin(
             placeholder,
@@ -335,9 +337,6 @@ class AliasContent(models.Model):
             alias=self.alias,
             **add_plugin_kwargs,
         )
-        if replaced_plugin:
-            new_plugin.position = replaced_plugin.position
-            new_plugin.save(update_fields=["position"])
         return new_plugin
 
 

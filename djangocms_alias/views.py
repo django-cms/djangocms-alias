@@ -1,34 +1,16 @@
 import json
 
-from cms.models import Page
 from cms.toolbar.utils import get_plugin_toolbar_info
-from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
+from django.http import JsonResponse
+from django.shortcuts import render
 from django.utils.translation import (
     get_language,
-    get_language_from_request,
-)
-from django.utils.translation import (
-    gettext_lazy as _,
 )
 from django.views.generic import ListView
 
-from .cms_plugins import Alias
-from .forms import BaseCreateAliasForm, CreateAliasForm
-from .models import Alias as AliasModel
-from .models import AliasPlugin, Category
-from .utils import emit_content_change
-
-JAVASCRIPT_SUCCESS_RESPONSE = """<html>
-    <body class="cms-close-frame">
-    <div><div class="messagelist">
-    <div class="success"></div>
-    </div></div>
-"""
+from .models import Alias, Category
 
 try:
     from cms.toolbar.utils import get_plugin_tree
@@ -40,121 +22,6 @@ except ImportError:
         Fallback for older versions of django CMS
         """
         return json.loads(get_plugin_tree_as_json(request, plugins))
-
-
-def detach_alias_plugin_view(request, plugin_pk):
-    if not request.user.is_staff:
-        raise PermissionDenied
-
-    instance = get_object_or_404(AliasPlugin, pk=plugin_pk)
-
-    if request.method == "GET":
-        opts = Alias.model._meta
-        context = {
-            "has_change_permission": True,
-            "opts": opts,
-            "root_path": reverse("admin:index"),
-            "is_popup": True,
-            "app_label": opts.app_label,
-            "object_name": _("Alias"),
-            "object": instance.alias,
-        }
-        return render(request, "djangocms_alias/detach_alias.html", context)
-
-    language = get_language_from_request(request, check_path=True)
-
-    plugins = instance.alias.get_plugins(language)
-
-    can_detach = Alias.can_detach(request.user, instance.placeholder, plugins)
-
-    if not can_detach:
-        raise PermissionDenied
-
-    copied_plugins = Alias.detach_alias_plugin(
-        plugin=instance,
-        language=language,
-    )
-
-    return render_replace_response(
-        request,
-        new_plugins=copied_plugins,
-        source_plugin=instance,
-    )
-
-
-def delete_alias_view(request, pk, *args, **kwargs):
-    from djangocms_alias.admin import AliasAdmin
-
-    alias_admin = AliasAdmin(
-        model=AliasModel,
-        admin_site=admin.site,
-    )
-    response = alias_admin.delete_view(request, str(pk))
-    if request.POST and response.status_code in [200, 302]:
-        return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
-    return response
-
-
-def create_alias_view(request):
-    if not request.user.is_staff:
-        raise PermissionDenied
-
-    form = BaseCreateAliasForm(request.GET or None)
-
-    if form.is_valid():
-        initial_data = form.cleaned_data
-    else:
-        initial_data = None
-
-    if request.method == "GET" and not form.is_valid():
-        return HttpResponseBadRequest("Form received unexpected values")
-
-    user = request.user
-
-    create_form = CreateAliasForm(
-        request.POST or None,
-        initial=initial_data,
-        user=user,
-    )
-
-    if not create_form.is_valid():
-        opts = Alias.model._meta
-        context = {
-            "form": create_form,
-            "has_change_permission": True,
-            "opts": opts,
-            "root_path": reverse("admin:index"),
-            "is_popup": True,
-            "app_label": opts.app_label,
-            "media": (Alias().media + create_form.media),
-        }
-        return render(request, "djangocms_alias/create_alias.html", context)
-
-    plugins = create_form.get_plugins()
-
-    if not plugins:
-        return HttpResponseBadRequest(
-            "Plugins are required to create an alias",
-        )
-
-    replace = create_form.cleaned_data.get("replace")
-    if not Alias.can_create_alias(user, plugins, replace):
-        raise PermissionDenied
-
-    alias, alias_content, alias_plugin = create_form.save()
-    emit_content_change([alias_content])
-
-    if replace:
-        plugin = create_form.cleaned_data.get("plugin")
-        placeholder = create_form.cleaned_data.get("placeholder")
-        return render_replace_response(
-            request,
-            new_plugins=[alias_plugin],
-            source_placeholder=placeholder,
-            source_plugin=plugin,
-        )
-
-    return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
 
 
 def render_replace_response(request, new_plugins, source_placeholder=None, source_plugin=None):
@@ -253,7 +120,7 @@ class CategorySelect2View(ListView):
 
 
 class AliasSelect2View(ListView):
-    queryset = AliasModel.objects.order_by("category__translations__name", "position")
+    queryset = Alias.objects.order_by("category__translations__name", "position")
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
@@ -309,31 +176,3 @@ class AliasSelect2View(ListView):
 
     def get_paginate_by(self, queryset):
         return self.request.GET.get("limit", 30)
-
-
-def alias_usage_view(request, pk):
-    if not request.user.is_staff:
-        raise PermissionDenied
-
-    alias = get_object_or_404(AliasModel.objects.all(), pk=pk)
-    opts = Alias.model._meta
-    title = _(f"Objects using alias: {alias}")
-    context = {
-        "has_change_permission": True,
-        "opts": opts,
-        "root_path": reverse("admin:index"),
-        "is_popup": True,
-        "app_label": opts.app_label,
-        "object_name": _("Alias"),
-        "object": alias,
-        "title": title,
-        "original": title,
-        "show_back_btn": request.GET.get("back"),
-        "objects_list": sorted(
-            alias.objects_using,
-            # First show Pages on list
-            key=lambda obj: isinstance(obj, Page),
-            reverse=True,
-        ),
-    }
-    return render(request, "djangocms_alias/alias_usage.html", context)

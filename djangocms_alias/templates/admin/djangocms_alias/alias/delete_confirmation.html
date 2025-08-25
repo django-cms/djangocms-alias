@@ -18,7 +18,6 @@
   {% endif %}
 </p>
 
-<br/>
 
 {% if object.objects_using %}
   {% blocktrans with escaped_object=object %}This alias is used by following objects:{% endblocktrans %}
@@ -31,7 +30,7 @@
       {% endfor %}
   </ul>
 {% else %}
-  {% blocktrans with escaped_object=object %}This alias wasn't used by any object.{% endblocktrans %}
+  <p>{% blocktrans with escaped_object=object %}This alias is not used by any object.{% endblocktrans %}</p>
 {% endif %}
 
 <form method="post">{% csrf_token %}

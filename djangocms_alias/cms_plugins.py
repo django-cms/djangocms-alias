@@ -32,9 +32,6 @@ __all__ = [
 ]
 
 
-
-
-
 @plugin_pool.register_plugin
 class Alias(CMSPluginBase):
     name = _("Alias")

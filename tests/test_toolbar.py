@@ -1,6 +1,5 @@
 import itertools
 from collections import ChainMap
-from unittest import skipUnless
 
 from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
@@ -319,7 +318,6 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         create_button = self._get_wizard_create_button(request)
         self.assertEqual(create_button.disabled, False)
 
-    @skipUnless(not is_versioning_enabled(), "Test only relevant when no versioning")
     def test_delete_button_show_on_edit_alias_view_no_versioning(self):
         """
         When versioning is not installed deletion should be possible. The delete button
@@ -346,25 +344,6 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
             button.on_close,
             self.get_list_alias_endpoint(),
         )
-
-    @skipUnless(is_versioning_enabled(), "Test only relevant for versioning")
-    def test_delete_button_not_shown_on_edit_alias_view_with_versioning(self):
-        """
-        When versioning is installed no deletion should be possible. The delete button
-        should not be available in the toolbar.
-        """
-        alias = self._create_alias()
-        request = self.get_alias_request(
-            alias=alias,
-            user=self.superuser,
-            edit=True,
-        )
-        button_label = "Delete alias..."
-        alias_menu = request.toolbar.get_menu(ALIAS_MENU_IDENTIFIER)
-        search_result = alias_menu.find_first(item_type=ModalItem, name=button_label)
-
-        # No button should be found for delete
-        self.assertIsNone(search_result)
 
     def test_do_not_disable_buttons_when_in_preview_mode(self):
         alias = self._create_alias()

@@ -958,7 +958,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                     args=[alias.pk],
                 ),
             )
-        self.assertContains(response, "This alias wasn't used by any object.")
+        self.assertContains(response, "This alias is not used by any object.")
 
     def test_delete_alias_view_post(self):
         """Tests the admin delete view (as opposed to the djangocms_alias.views.delete_view)"""

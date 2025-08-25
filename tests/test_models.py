@@ -1,8 +1,5 @@
-from distutils.version import LooseVersion
-
-from cms.api import add_plugin, create_title
+from cms.api import add_plugin, create_page_content
 from cms.models import Placeholder
-from django import get_version
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -13,9 +10,6 @@ from djangocms_alias.models import AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
-
-DJANGO_VERSION = get_version()
-DJANGO_4_0 = LooseVersion(DJANGO_VERSION) < LooseVersion("4.1")
 
 
 class AliasModelsTestCase(BaseAliasPluginTestCase):
@@ -254,10 +248,10 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.add_alias_plugin_to_page(site2_page, alias, "de")
 
         if is_versioning_enabled():
-            create_title("en", "Site2 EN", site2_page, created_by=self.superuser)
+            create_page_content("en", "Site2 EN", site2_page, created_by=self.superuser)
             self._publish(site2_page, "en")
         else:
-            create_title("en", "Site2 EN", site2_page)
+            create_page_content("en", "Site2 EN", site2_page)
 
         self.add_alias_plugin_to_page(site2_page, alias, "en")
         # Should show on the list only once
@@ -401,8 +395,6 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.assertEqual(Placeholder.objects.count(), 1)
         alias.delete()
         self.assertFalse(alias.__class__.objects.filter(pk=alias.pk).exists())
-        if DJANGO_4_0:
-            self.assertEqual(alias.cms_plugins.count(), 0)
         self.assertEqual(Placeholder.objects.count(), 0)
         alias.save()  # Django 4.1+ disallows to use relations (cmsplugins) of unsaved objects.
         self.assertEqual(alias.cms_plugins.count(), 0)

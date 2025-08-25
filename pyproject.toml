@@ -1,3 +1,66 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "djangocms-alias"
+dynamic = ["version"]
+description = "An alias is a collection of plugins that is managed centrally."
+readme = "README.rst"
+license = "BSD-3-Clause"
+authors = [
+    {name = "Divio AG", email = "info@divio.ch"},
+]
+maintainers = [
+    {name = "Django CMS Association and contributors", email = "info@django-cms.org"},
+]
+keywords = ["django", "django-cms", "alias", "plugins"]
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
+    "Framework :: Django CMS :: 5.0",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "django-parler>=1.4",
+    "django-cms>=5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/django-cms/djangocms-alias"
+Repository = "https://github.com/django-cms/djangocms-alias"
+Documentation = "https://github.com/django-cms/djangocms-alias"
+"Bug Tracker" = "https://github.com/django-cms/djangocms-alias/issues"
+
+[tool.setuptools]
+packages = ["djangocms_alias"]
+include-package-data = true
+[tool.setuptools.dynamic]
+version = {attr = "djangocms_alias.__version__"}
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+addopts = [
+  "--nomigrations",
+]
+python_files = [ "tests.py", "test_*.py" ]
+testpaths = [ "tests" ]
+pythonpath = [ "." ]
+
 [tool.ruff]
 line-length = 119
 lint.select=[
@@ -21,3 +84,33 @@ lint.extend-ignore = [
   "PLR0915",  # Too many statements
   "PLW1510",  # `subprocess.run` without explicit `check` argument
 ]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = ["djangocms_alias"]
+omit = [
+    "*apps.py",
+    "*constants.py",
+    "*migrations/*",
+    "*test_utils/*",
+    "*tests/*",
+]
+
+[tool.coverage.paths]
+source = [
+   "djangocms_alias",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+]
+show_missing = true

@@ -1,6 +1,7 @@
 bs4
 coverage
-django-app-helper
+pytest-django
+pytest-cov
 django-classy-tags
 django-fsm>=2.6
 django-sekizai
@@ -9,4 +10,4 @@ flake8
 isort
 pyflakes>=2.1.1
 
-djangocms-versioning
+djangocms-versioning>=2.4

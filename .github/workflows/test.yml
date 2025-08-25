@@ -15,7 +15,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - 3.9
           - '3.10'
           - '3.11'
           - '3.12'
@@ -80,7 +79,7 @@ jobs:
           name: html-report
           path: htmlcov
 
-  unit-tests-django-main:
+  unit-tests-dev:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -108,5 +107,5 @@ jobs:
         python -m pip install -e .
 
     - name: Run coverage
-      run: coverage run ./test_settings.py
+      run: coverage run -m pytest
       continue-on-error: true

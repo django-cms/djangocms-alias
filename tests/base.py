@@ -89,18 +89,16 @@ class BaseAliasPluginTestCase(CMSTestCase):
             static_code=static_code,
             site=site,
         )
-        alias_content = AliasContent.objects.create(
+        alias_content = AliasContent.objects.with_user(self.superuser).create(
             alias=alias,
             name=name,
             language=language,
         )
 
-        if is_versioning_enabled():
+        if is_versioning_enabled() and published:
             from djangocms_versioning.models import Version
 
-            version = Version.objects.create(content=alias_content, created_by=self.superuser)
-            if published:
-                version.publish(self.superuser)
+            Version.objects.get_for_content(alias_content).publish(self.superuser)
 
         if plugins:
             alias_content.populate(plugins=plugins)

@@ -32,14 +32,6 @@ __all__ = [
 ]
 
 
-JAVASCRIPT_SUCCESS_RESPONSE = """<html>
-    <body class="cms-close-frame">
-    <div><div class="messagelist">
-    <div class="success"></div>
-    </div></div>
-"""
-
-
 @plugin_pool.register_plugin
 class Alias(CMSPluginBase):
     name = _("Alias")

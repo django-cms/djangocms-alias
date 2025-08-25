@@ -40,7 +40,7 @@ class Alias(CMSPluginBase):
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):
         if plugin.plugin_type == cls.__name__:
-            alias_content = plugin.alias.get_content()
+            alias_content = plugin.alias.get_content(show_draft_content=True)
             detach_endpoint = admin_reverse(
                 DETACH_ALIAS_PLUGIN_URL_NAME,
                 args=[plugin.pk],

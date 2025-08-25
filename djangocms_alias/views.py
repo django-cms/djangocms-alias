@@ -23,7 +23,8 @@ from .models import Alias as AliasModel
 from .models import AliasPlugin, Category
 from .utils import emit_content_change
 
-JAVASCRIPT_SUCCESS_RESPONSE = """
+JAVASCRIPT_SUCCESS_RESPONSE = """<html>
+    <body class="cms-close-frame">
     <div><div class="messagelist">
     <div class="success"></div>
     </div></div>

@@ -1,3 +1,5 @@
+from unittest import skipIf
+
 from cms.toolbar.utils import get_object_edit_url
 from cms.utils import get_current_site
 from cms.wizards.forms import WizardStep2BaseForm, step2_form_factory
@@ -5,10 +7,14 @@ from cms.wizards.helpers import get_entries as get_wizard_entires
 from django.contrib.sites.models import Site
 from django.utils import translation
 
+from djangocms_alias.cms_config import AliasCMSConfig
+from djangocms_alias.cms_wizards import create_alias_category_wizard
 from djangocms_alias.models import Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
+
+wizards = AliasCMSConfig.cms_wizards
 
 
 class WizardsTestCase(BaseAliasPluginTestCase):
@@ -103,6 +109,7 @@ class WizardsTestCase(BaseAliasPluginTestCase):
 
             self.assertTrue(category_name)
 
+    @skipIf(create_alias_category_wizard not in wizards, "CreateAliasCategoryWizard is not registered")
     def test_create_alias_category_wizard_instance(self):
         wizard = self._get_wizard_instance("CreateAliasCategoryWizard")
         self.assertEqual(wizard.title, "New alias category")
@@ -118,6 +125,7 @@ class WizardsTestCase(BaseAliasPluginTestCase):
             wizard.user_has_add_permission(self.get_standard_user()),
         )
 
+    @skipIf(create_alias_category_wizard not in wizards, "CreateAliasCategoryWizard is not registered")
     def test_create_alias_category_wizard_form(self):
         wizard = self._get_wizard_instance("CreateAliasCategoryWizard")
         data = {

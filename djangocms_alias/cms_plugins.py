@@ -1,23 +1,29 @@
-from copy import copy
-
+from cms.models import Page
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
 from cms.toolbar.utils import get_object_edit_url
+from cms.utils import get_language_from_request
 from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
 )
 from cms.utils.plugins import copy_plugins_to_placeholder
 from cms.utils.urlutils import add_url_parameters, admin_reverse
-from django.utils.translation import (
-    get_language_from_request,
-)
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
+from django.template.response import TemplateResponse
+from django.urls import path
 from django.utils.translation import (
     gettext_lazy as _,
 )
 
+from djangocms_alias import constants
+from djangocms_alias.utils import emit_content_change
+
+from . import views
 from .constants import CREATE_ALIAS_URL_NAME, DETACH_ALIAS_PLUGIN_URL_NAME
-from .forms import AliasPluginForm
+from .forms import AliasPluginForm, BaseCreateAliasForm, CreateAliasForm
 from .models import Alias as AliasModel
 from .models import AliasContent, AliasPlugin
 
@@ -40,7 +46,7 @@ class Alias(CMSPluginBase):
     @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):
         if plugin.plugin_type == cls.__name__:
-            alias_content = plugin.alias.get_content()
+            alias_content = plugin.alias.get_content(show_draft_content=True)
             detach_endpoint = admin_reverse(
                 DETACH_ALIAS_PLUGIN_URL_NAME,
                 args=[plugin.pk],
@@ -74,7 +80,7 @@ class Alias(CMSPluginBase):
 
         data = {
             "plugin": plugin.pk,
-            "language": get_language_from_request(request, check_path=True),
+            "language": get_language_from_request(request),
         }
         endpoint = add_url_parameters(admin_reverse(CREATE_ALIAS_URL_NAME), **data)
         return [
@@ -90,19 +96,20 @@ class Alias(CMSPluginBase):
     def get_extra_placeholder_menu_items(cls, request, placeholder):
         data = {
             "placeholder": placeholder.pk,
-            "language": get_language_from_request(request, check_path=True),
+            "language": get_language_from_request(request),
         }
         endpoint = add_url_parameters(admin_reverse(CREATE_ALIAS_URL_NAME), **data)
 
-        menu_items = [
-            PluginMenuItem(
-                _("Create Alias"),
-                endpoint,
-                action="modal",
-                attributes={"cms-icon": "alias"},
-            ),
-        ]
-        return menu_items
+        if placeholder.cmsplugin_set.exists():
+            return [
+                PluginMenuItem(
+                    _("Create Alias"),
+                    endpoint,
+                    action="modal",
+                    attributes={"cms-icon": "alias"},
+                ),
+            ]
+        return []
 
     @classmethod
     def can_create_alias(cls, user, plugins=None, replace=False):
@@ -140,26 +147,169 @@ class Alias(CMSPluginBase):
 
     @classmethod
     def detach_alias_plugin(cls, plugin, language):
-        source_placeholder = plugin.alias.get_placeholder(language, show_draft_content=True)  # We're in edit mode
+        source_plugins = plugin.alias.get_plugins(language, show_draft_content=True)  # We're in edit mode
         target_placeholder = plugin.placeholder
+        plugin_position = plugin.position
+        target_placeholder.delete_plugin(plugin)
+        if source_plugins:
+            if target_last_plugin := target_placeholder.get_last_plugin(plugin.language):
+                target_placeholder._shift_plugin_positions(
+                    language,
+                    start=plugin_position,
+                    offset=len(source_plugins) + target_last_plugin.position + 1,  # enough space to shift back
+                )
 
-        # Deleting uses a copy of a plugin to preserve pk on existing
-        # ``plugin`` object. This is done due to
-        # plugin.get_plugin_toolbar_info requiring a PK in a passed
-        # instance.
-        target_placeholder.delete_plugin(copy(plugin))
-        target_placeholder._shift_plugin_positions(
-            language,
-            plugin.position,
-            offset=target_placeholder.get_last_plugin_position(language),
-        )
-        if source_placeholder:
-            source_plugins = source_placeholder.get_plugins_list()
-            copied_plugins = copy_plugins_to_placeholder(
+            return copy_plugins_to_placeholder(
                 source_plugins,
                 placeholder=target_placeholder,
                 language=language,
-                start_positions={language: plugin.position},
+                start_positions={language: plugin_position},
             )
-            return copied_plugins
         return []
+
+    def get_plugin_urls(self):
+        return super().get_plugin_urls() + [
+            path(
+                "create-alias/",
+                self.create_alias_view,
+                name=constants.CREATE_ALIAS_URL_NAME,
+            ),
+            path(
+                "aliases/<int:pk>/usage/",
+                self.alias_usage_view,
+                name=constants.USAGE_ALIAS_URL_NAME,
+            ),
+            path(
+                "detach-alias/<int:plugin_pk>/",
+                self.detach_alias_plugin_view,
+                name=constants.DETACH_ALIAS_PLUGIN_URL_NAME,
+            ),
+            path(
+                "select2/",
+                views.AliasSelect2View.as_view(),
+                name=constants.SELECT2_ALIAS_URL_NAME,
+            ),
+            path(
+                "category-select2/",
+                views.CategorySelect2View.as_view(),
+                name=constants.CATEGORY_SELECT2_URL_NAME,
+            ),
+        ]
+
+    def create_alias_view(self, request):
+        if not request.user.is_staff:
+            raise PermissionDenied
+
+        form = BaseCreateAliasForm(request.GET or None)
+
+        initial_data = form.cleaned_data if form.is_valid() else None
+        if request.method == "GET" and not form.is_valid():
+            return HttpResponseBadRequest("Form received unexpected values")
+
+        user = request.user
+
+        create_form = CreateAliasForm(
+            request.POST or None,
+            initial=initial_data,
+            user=user,
+        )
+
+        if not create_form.is_valid():
+            opts = self.model._meta
+            context = {
+                "form": create_form,
+                "has_change_permission": True,
+                "opts": opts,
+                "root_path": admin_reverse("index"),
+                "is_popup": True,
+                "app_label": opts.app_label,
+                "media": (Alias().media + create_form.media),
+            }
+            return TemplateResponse(request, "djangocms_alias/create_alias.html", context)
+
+        plugins = create_form.get_plugins()
+
+        if not plugins:
+            return HttpResponseBadRequest(
+                "Plugins are required to create an alias",
+            )
+
+        replace = create_form.cleaned_data.get("replace")
+        if not Alias.can_create_alias(user, plugins, replace):
+            raise PermissionDenied
+
+        alias, alias_content, alias_plugin = create_form.save()
+        emit_content_change([alias_content])
+
+        if replace:
+            return self.render_close_frame(
+                request,
+                obj=alias_plugin,
+                action="reload",
+            )
+        return TemplateResponse(request, "admin/cms/page/close_frame.html")
+
+    def detach_alias_plugin_view(self, request, plugin_pk):
+        if not request.user.is_staff:
+            raise PermissionDenied
+
+        instance = get_object_or_404(AliasPlugin, pk=plugin_pk)
+
+        if request.method == "GET":
+            opts = self.model._meta
+            context = {
+                "has_change_permission": True,
+                "opts": opts,
+                "root_path": admin_reverse("index"),
+                "is_popup": True,
+                "app_label": opts.app_label,
+                "object_name": _("Alias"),
+                "object": instance.alias,
+            }
+            return TemplateResponse(request, "djangocms_alias/detach_alias.html", context)
+
+        language = get_language_from_request(request)
+
+        plugins = instance.alias.get_plugins(language, show_draft_content=True)
+        can_detach = self.can_detach(request.user, instance.placeholder, plugins)
+
+        if not can_detach:
+            raise PermissionDenied
+
+        self.detach_alias_plugin(
+            plugin=instance,
+            language=language,
+        )
+
+        return self.render_close_frame(
+            request,
+            obj=instance,
+            action="reload",
+        )
+
+    def alias_usage_view(self, request, pk):
+        if not request.user.is_staff:
+            raise PermissionDenied
+
+        alias = get_object_or_404(AliasModel, pk=pk)
+        opts = AliasModel._meta
+        title = _(f"Objects using alias: {alias}")
+        context = {
+            "has_change_permission": True,
+            "opts": opts,
+            "root_path": admin_reverse("index"),
+            "is_popup": True,
+            "app_label": opts.app_label,
+            "object_name": _("Alias"),
+            "object": alias,
+            "title": title,
+            "original": title,
+            "show_back_btn": request.GET.get("back"),
+            "objects_list": sorted(
+                alias.objects_using,
+                # First show Pages on list
+                key=lambda obj: isinstance(obj, Page),
+                reverse=True,
+            ),
+        }
+        return TemplateResponse(request, "djangocms_alias/alias_usage.html", context)

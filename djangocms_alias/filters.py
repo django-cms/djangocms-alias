@@ -78,3 +78,35 @@ class CategoryFilter(admin.SimpleListFilter):
                 "query_string": changelist.get_query_string({self.parameter_name: lookup}),
                 "display": title,
             }
+
+
+class UsedFilter(admin.SimpleListFilter):
+    title = _("Usage in Alias Plugins")
+    parameter_name = "used"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("yes", _("Used")),
+            ("no", _("Unused")),
+        ]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == "yes":
+            return queryset.filter(cmsplugins_count__gt=0)
+        elif value == "no":
+            return queryset.filter(cmsplugins_count=0)
+        return queryset
+
+    def choices(self, changelist):
+        yield {
+            "selected": self.value() is None,
+            "query_string": changelist.get_query_string(remove=[self.parameter_name]),
+            "display": _("All"),
+        }
+        for lookup, title in self.lookup_choices:
+            yield {
+                "selected": self.value() == lookup,
+                "query_string": changelist.get_query_string({self.parameter_name: lookup}),
+                "display": title,
+            }

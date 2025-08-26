@@ -3,6 +3,7 @@ from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse
 from django import forms
 from django.contrib import admin, messages
+from django.db import models
 from django.http import (
     Http404,
     HttpRequest,
@@ -20,10 +21,8 @@ from .constants import (
     LIST_ALIAS_URL_NAME,
     USAGE_ALIAS_URL_NAME,
 )
-from .filters import CategoryFilter, SiteFilter
-from .forms import AliasGrouperAdminForm
+from .filters import CategoryFilter, SiteFilter, UsedFilter
 from .models import Alias, AliasContent, Category
-from .urls import urlpatterns
 from .utils import (
     emit_content_change,
     emit_content_delete,
@@ -36,8 +35,7 @@ __all__ = [
     "AliasContentAdmin",
 ]
 
-alias_admin_classes = [GrouperModelAdmin]
-alias_admin_list_display = ["content__name", "category", "admin_list_actions"]
+alias_admin_list_display = ["content__name", "category", "used", "admin_list_actions"]
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
@@ -49,6 +47,7 @@ if djangocms_versioning_enabled:
 @admin.register(Category)
 class CategoryAdmin(TranslatableAdmin):
     list_display = ["name"]
+    search_fields = ["translations__name"]
 
     def save_model(self, request, obj, form, change):
         change = not obj._state.adding
@@ -63,26 +62,33 @@ class CategoryAdmin(TranslatableAdmin):
 
 
 @admin.register(Alias)
-class AliasAdmin(*alias_admin_classes):
+class AliasAdmin(GrouperModelAdmin):
     list_display = alias_admin_list_display
     list_display_links = None
     list_filter = (
         SiteFilter,
         CategoryFilter,
+        UsedFilter,
     )
     fields = ("content__name", "category", "site", "content__language")
     readonly_fields = ("static_code",)
     search_fields = ["content__name"]
-    form = AliasGrouperAdminForm
+    autocomplete_fields = ["category", "site"]
     extra_grouping_fields = ("language",)
     EMPTY_CONTENT_VALUE = mark_safe(_("<i>Missing language</i>"))
 
-    def get_urls(self) -> list:
-        return urlpatterns + super().get_urls()
-
     def get_actions_list(self) -> list:
         """Add alias usage list actions"""
-        return super().get_actions_list() + [self._get_alias_usage_link]
+        return super().get_actions_list() + [self._get_alias_usage_link, self._get_alias_delete_link]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # Annotate each Alias with a boolean indicating if related cmsplugins exist
+        return qs.annotate(cmsplugins_count=models.Count("cms_plugins"))
+
+    @admin.display(description=_("Used"), boolean=True, ordering="cmsplugins_count")
+    def used(self, obj: Alias) -> bool:
+        return obj.cmsplugins_count > 0
 
     def has_delete_permission(self, request: HttpRequest, obj: Alias = None) -> bool:
         # Alias can be deleted by users who can add aliases,
@@ -93,7 +99,7 @@ class AliasAdmin(*alias_admin_classes):
                     get_model_permission_codename(self.model, "add"),
                 )
             return request.user.is_superuser
-        return False
+        return True
 
     def save_model(self, request: HttpRequest, obj: Alias, form: forms.Form, change: bool) -> None:
         super().save_model(request, obj, form, change)
@@ -129,9 +135,9 @@ class AliasAdmin(*alias_admin_classes):
                 sender=self.model,
             )
 
-    def _get_alias_usage_link(self, obj: Alias, request: HttpRequest, disabled: bool = False) -> str:
+    def _get_alias_usage_link(self, obj: Alias, request: HttpRequest) -> str:
         url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[obj.pk])
-        return self.admin_action_button(url, "info", _("View usage"), disabled=disabled)
+        return self.admin_action_button(url, "info", _("View usage"))
 
     def _get_alias_delete_link(self, obj: Alias, request: HttpRequest) -> str:
         url = admin_reverse(DELETE_ALIAS_URL_NAME, args=[obj.pk])

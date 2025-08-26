@@ -4,10 +4,7 @@ from django.apps import apps
 from django.conf import settings
 from packaging.version import Version as PackageVersion
 
-from .cms_wizards import (
-    create_alias_category_wizard,
-    create_alias_wizard,
-)
+from .cms_wizards import create_alias_wizard
 from .models import AliasContent, AliasPlugin, copy_alias_content
 from .rendering import add_static_alias_js, render_alias_content
 
@@ -24,7 +21,7 @@ class AliasCMSConfig(CMSAppConfig):
     cms_enabled = True
     cms_toolbar_enabled_models = [(AliasContent, render_alias_content, "alias")]
     moderated_models = [AliasContent]
-    cms_wizards = [create_alias_wizard, create_alias_category_wizard]
+    cms_wizards = [create_alias_wizard]
 
     djangocms_moderation_enabled = getattr(settings, "MODERATING_ALIAS_MODELS_ENABLED", True)
     djangocms_versioning_enabled = getattr(settings, "VERSIONING_ALIAS_MODELS_ENABLED", djangocms_versioning_installed)

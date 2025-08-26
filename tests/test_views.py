@@ -909,6 +909,20 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
     def test_delete_alias_view_get(self):
         alias = self._create_alias([self.plugin])
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    DELETE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+        self.assertContains(
+            response,
+            f'Are you sure you want to delete the alias "{alias.name}"?',  # noqa: E501
+        )
+
+    def test_delete_alias_view_get_protected(self):
+        alias = self._create_alias([self.plugin])
         add_plugin(
             self.placeholder,
             "Alias",
@@ -922,13 +936,13 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                     args=[alias.pk],
                 ),
             )
-        self.assertContains(
-            response,
-            f'Are you sure you want to delete the alias "{alias.name}"?',  # noqa: E501
-        )
+
+        self.assertContains(response, "Cannot delete alias")
+        self.assertContains(response, "This alias is used by following objects")
 
     def test_delete_alias_view_get_using_objects(self):
         alias = self._create_alias([self.plugin])
+
         add_plugin(
             self.placeholder,
             "Alias",
@@ -958,7 +972,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                     args=[alias.pk],
                 ),
             )
-        self.assertContains(response, "This alias wasn't used by any object.")
+        self.assertContains(response, "This alias is not used by any object.")
 
     def test_delete_alias_view_post(self):
         """Tests the admin delete view (as opposed to the djangocms_alias.views.delete_view)"""

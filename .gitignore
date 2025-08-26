@@ -15,3 +15,4 @@ htmlcov
 venv*
 node_modules
 .editorconfig
+.vscode/

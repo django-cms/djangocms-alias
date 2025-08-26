@@ -27,13 +27,13 @@ def get_alias_usage_view_url(alias, **kwargs):
 
 @register.filter()
 def admin_view_url(obj):
-    if is_editable_model(obj.__class__):
+    if obj and is_editable_model(obj.__class__):
         # Is obj frontend-editable?
         return get_object_preview_url(obj)
     if hasattr(obj, "get_content"):
         # Is its content object frontend-editable?
         content_obj = obj.get_content()
-        if is_editable_model(content_obj.__class__):
+        if content_obj and is_editable_model(content_obj.__class__):
             return get_object_preview_url(content_obj)
     if hasattr(obj, "get_absolute_url"):
         return obj.get_absolute_url()
@@ -46,20 +46,16 @@ def verbose_name(obj):
 
 
 @register.simple_tag(takes_context=True)
-def render_alias(context, instance, editable=False):
+def render_alias(context, instance):
     request = context["request"]
 
     toolbar = get_toolbar_from_request(request)
     renderer = toolbar.get_content_renderer()
 
-    editable = editable and renderer._placeholders_are_editable
-    source = instance.get_placeholder()
-
-    if source:
+    if source := instance.get_placeholder(show_draft_content=toolbar.edit_mode_active or toolbar.preview_mode_active):
         content = renderer.render_placeholder(
             placeholder=source,
             context=context,
-            editable=editable,
         )
         return content or ""
     return ""

@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 08:10+0200\n"
+"POT-Creation-Date: 2025-08-26 08:14+0200\n"
 "PO-Revision-Date: 2023-01-10 21:21+0000\n"
 "Last-Translator: Fabian Braun <fsbraun@gmx.de>, 2025\n"
 "Language-Team: German (https://app.transifex.com/divio/teams/58664/de/)\n"
@@ -25,7 +25,7 @@ msgstr ""
 msgid "<i>Missing language</i>"
 msgstr "<i>Fehlende Sprache</i>"
 
-#: admin.py:89 filters.py:88
+#: admin.py:89 filters.py:89
 msgid "Used"
 msgstr "In Verwendung"
 
@@ -130,7 +130,7 @@ msgstr "Neue Alias-Kategorie erstellen"
 msgid "Site"
 msgstr "Site"
 
-#: filters.py:37 filters.py:73 filters.py:104
+#: filters.py:37 filters.py:73 filters.py:105
 msgid "All"
 msgstr "Alle"
 
@@ -142,11 +142,11 @@ msgstr "Kein Site"
 msgid "Category"
 msgstr "Kategorie"
 
-#: filters.py:83
-msgid "Used in Alias Plugin"
-msgstr "In Alias-Baustein verwendet"
+#: filters.py:84
+msgid "Usage in Alias Plugin"
+msgstr "Verwendung in Alias-Bausteinen"
 
-#: filters.py:89
+#: filters.py:90
 msgid "Unused"
 msgstr "Nicht in Verwendung"
 

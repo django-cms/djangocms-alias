@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 08:10+0200\n"
+"POT-Creation-Date: 2025-08-26 08:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "<i>Missing language</i>"
 msgstr ""
 
-#: admin.py:89 filters.py:88
+#: admin.py:89 filters.py:89
 msgid "Used"
 msgstr ""
 
@@ -125,7 +125,7 @@ msgstr ""
 msgid "Site"
 msgstr ""
 
-#: filters.py:37 filters.py:73 filters.py:104
+#: filters.py:37 filters.py:73 filters.py:105
 msgid "All"
 msgstr ""
 
@@ -137,11 +137,11 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
-#: filters.py:83
-msgid "Used in Alias Plugin"
+#: filters.py:84
+msgid "Usage in Alias Plugin"
 msgstr ""
 
-#: filters.py:89
+#: filters.py:90
 msgid "Unused"
 msgstr ""
 

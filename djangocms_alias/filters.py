@@ -81,7 +81,7 @@ class CategoryFilter(admin.SimpleListFilter):
 
 
 class UsedFilter(admin.SimpleListFilter):
-    title = _("Used in Alias Plugin")
+    title = _("Usage in Alias Plugin")
     parameter_name = "used"
 
     def lookups(self, request, model_admin):

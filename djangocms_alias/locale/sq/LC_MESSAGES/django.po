@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 08:14+0200\n"
+"POT-Creation-Date: 2025-08-26 08:15+0200\n"
 "PO-Revision-Date: 2023-01-10 21:21+0000\n"
 "Last-Translator: Besnik Bleta <besnik@programeshqip.org>, 2025\n"
 "Language-Team: Albanian (https://app.transifex.com/divio/teams/58664/sq/)\n"
@@ -143,7 +143,7 @@ msgstr "Kategori"
 #: filters.py:84
 #, fuzzy
 #| msgid "Usage of alias"
-msgid "Usage in Alias Plugin"
+msgid "Usage in Alias Plugins"
 msgstr "Përdorim aliasesh"
 
 #: filters.py:90

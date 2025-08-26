@@ -152,9 +152,7 @@ class Alias(CMSPluginBase):
         plugin_position = plugin.position
         target_placeholder.delete_plugin(plugin)
         if source_plugins:
-            if target_last_plugin := target_placeholder.get_last_plugin(
-                plugin.language
-            ):
+            if target_last_plugin := target_placeholder.get_last_plugin(plugin.language):
                 target_placeholder._shift_plugin_positions(
                     language,
                     start=plugin_position,

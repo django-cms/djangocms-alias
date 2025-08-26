@@ -276,7 +276,6 @@ class Alias(CMSPluginBase):
         language = get_language_from_request(request)
 
         plugins = instance.alias.get_plugins(language, show_draft_content=True)
-        print(plugins)
         can_detach = self.can_detach(request.user, instance.placeholder, plugins)
 
         if not can_detach:

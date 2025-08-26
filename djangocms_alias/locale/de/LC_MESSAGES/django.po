@@ -11,30 +11,34 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-22 23:06+0200\n"
+"POT-Creation-Date: 2025-08-26 08:10+0200\n"
 "PO-Revision-Date: 2023-01-10 21:21+0000\n"
 "Last-Translator: Fabian Braun <fsbraun@gmx.de>, 2025\n"
 "Language-Team: German (https://app.transifex.com/divio/teams/58664/de/)\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: admin.py:78
 msgid "<i>Missing language</i>"
 msgstr "<i>Fehlende Sprache</i>"
 
-#: admin.py:134 cms_toolbars.py:104
+#: admin.py:89 filters.py:88
+msgid "Used"
+msgstr "In Verwendung"
+
+#: admin.py:140 cms_toolbars.py:103
 #: templates/djangocms_alias/alias_usage.html:50
 msgid "View usage"
 msgstr "Verwendung anzeigen"
 
-#: admin.py:141
+#: admin.py:147
 msgid "Delete Alias"
 msgstr "Verlinkung löschen"
 
-#: admin.py:183
+#: admin.py:189
 #, python-brace-format
 msgid ""
 "Alias content for language {} deleted. A new empty alias content will be "
@@ -47,60 +51,61 @@ msgstr ""
 msgid "django CMS Alias"
 msgstr "django CMS Alias"
 
-#: cms_plugins.py:31 cms_toolbars.py:52 forms.py:270 views.py:58 views.py:326
+#: cms_plugins.py:37 cms_plugins.py:271 cms_plugins.py:309 cms_toolbars.py:51
+#: forms.py:270
 msgid "Alias"
 msgstr "Alias"
 
-#: cms_plugins.py:53
+#: cms_plugins.py:59
 msgid "Edit Alias"
 msgstr "Alias bearbeiten"
 
-#: cms_plugins.py:67
+#: cms_plugins.py:73
 msgid "Detach Alias"
 msgstr "Alias trennen"
 
-#: cms_plugins.py:82 cms_plugins.py:99
+#: cms_plugins.py:88 cms_plugins.py:106
 msgid "Create Alias"
 msgstr "Alias erstellen"
 
-#: cms_toolbars.py:53 cms_toolbars.py:80 templates/djangocms_alias/base.html:4
+#: cms_toolbars.py:52 cms_toolbars.py:79 templates/djangocms_alias/base.html:4
 msgid "Aliases"
 msgstr "Aliasse"
 
-#: cms_toolbars.py:96
+#: cms_toolbars.py:95
 msgid "Change alias settings"
 msgstr "Alias-Einstellungen ändern"
 
-#: cms_toolbars.py:114
+#: cms_toolbars.py:112
 msgid "Delete alias"
 msgstr "Alias löschen"
 
-#: cms_toolbars.py:159 templates/djangocms_alias/create_alias.html:31
+#: cms_toolbars.py:157 templates/djangocms_alias/create_alias.html:31
 msgid "Create"
 msgstr "Erstellen"
 
-#: cms_toolbars.py:172 internal_search.py:29
+#: cms_toolbars.py:170 internal_search.py:29
 msgid "Language"
 msgstr "Sprache"
 
-#: cms_toolbars.py:224
+#: cms_toolbars.py:222
 msgid "Add Translation"
 msgstr "Übersetzung hinzufügen"
 
-#: cms_toolbars.py:235
+#: cms_toolbars.py:233
 msgid "Delete Translation"
 msgstr "Übersetzung löschen"
 
-#: cms_toolbars.py:252
+#: cms_toolbars.py:250
 msgid "Copy all plugins"
 msgstr "Alle Plugins kopieren"
 
-#: cms_toolbars.py:254
+#: cms_toolbars.py:252
 #, python-format
 msgid "from %s"
 msgstr "von %s"
 
-#: cms_toolbars.py:255
+#: cms_toolbars.py:253
 #, python-format
 msgid "Are you sure you want to copy all plugins from %s?"
 msgstr "Sind Sie sicher, dass Sie alle Plugins aus %s kopieren wollen?"
@@ -125,7 +130,7 @@ msgstr "Neue Alias-Kategorie erstellen"
 msgid "Site"
 msgstr "Site"
 
-#: filters.py:37 filters.py:73
+#: filters.py:37 filters.py:73 filters.py:104
 msgid "All"
 msgstr "Alle"
 
@@ -136,6 +141,14 @@ msgstr "Kein Site"
 #: filters.py:53 forms.py:259 internal_search.py:22
 msgid "Category"
 msgstr "Kategorie"
+
+#: filters.py:83
+msgid "Used in Alias Plugin"
+msgstr "In Alias-Baustein verwendet"
+
+#: filters.py:89
+msgid "Unused"
+msgstr "Nicht in Verwendung"
 
 #: forms.py:78
 msgid "A plugin or placeholder is required to create an alias."
@@ -188,7 +201,7 @@ msgstr "Version-Status"
 msgid "Default"
 msgstr "Vorgabe"
 
-#: models.py:51 models.py:269
+#: models.py:51 models.py:263
 msgid "name"
 msgstr "Name"
 
@@ -224,7 +237,7 @@ msgstr "statischer Code"
 msgid "To render the alias in templates."
 msgstr "Um Aliasse in Vorlagen zu rendern"
 
-#: models.py:104 models.py:387
+#: models.py:104 models.py:382
 msgid "alias"
 msgstr "Alias"
 
@@ -232,23 +245,23 @@ msgstr "Alias"
 msgid "aliases"
 msgstr "Aliasse"
 
-#: models.py:283
+#: models.py:277
 msgid "alias content"
 msgstr "Alias-Inhalt"
 
-#: models.py:284
+#: models.py:278
 msgid "alias contents"
 msgstr "Alias-Inhalte"
 
-#: models.py:392
+#: models.py:387
 msgid "template"
 msgstr "Vorlage"
 
-#: models.py:399
+#: models.py:394
 msgid "alias plugin model"
 msgstr "Alias-Plugin-Model"
 
-#: models.py:400
+#: models.py:395
 msgid "alias plugin models"
 msgstr "Alias-Plugin-Modelle"
 
@@ -259,9 +272,9 @@ msgstr "Speichern"
 #: templates/admin/djangocms_alias/alias/delete_confirmation.html:15
 #, python-format
 msgid ""
-"You don't have permissions to delete %(object_name)s \"%(escaped_object)s\"."
-" Please request your site admin to add permissions to delete alias, or "
-"delete alias from all places that it being used."
+"You don't have permissions to delete %(object_name)s \"%(escaped_object)s\". "
+"Please request your site admin to add permissions to delete alias, or delete "
+"alias from all places that it being used."
 msgstr ""
 "Sie haben keine Berechtigung, %(object_name)s \"%(escaped_object)s\" zu "
 "löschen. Bitte fragen Sie Ihren Administrator, Ihnen die Rechte zum Löschen "
@@ -276,20 +289,20 @@ msgstr ""
 "Sind Sie sicher, dass Sie %(object_name)s \"%(escaped_object)s\" löschen "
 "möchten?"
 
-#: templates/admin/djangocms_alias/alias/delete_confirmation.html:24
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:23
 msgid "This alias is used by following objects:"
 msgstr "Dieser Alias wird von folgenden Objekten genutzt:"
 
-#: templates/admin/djangocms_alias/alias/delete_confirmation.html:34
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:33
 msgid "This alias is not used by any object."
 msgstr "Dieser Alias wird nirgendwo genutzt."
 
-#: templates/admin/djangocms_alias/alias/delete_confirmation.html:41
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:40
 #: templates/djangocms_alias/detach_alias.html:17
 msgid "Yes, I'm sure"
 msgstr "Ja, ich bin sicher!"
 
-#: templates/admin/djangocms_alias/alias/delete_confirmation.html:43
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:42
 #: templates/djangocms_alias/detach_alias.html:16
 msgid "No, take me back"
 msgstr "Nein, zurück!"

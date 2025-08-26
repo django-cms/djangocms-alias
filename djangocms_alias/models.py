@@ -381,7 +381,7 @@ class AliasPlugin(CMSPlugin):
         Alias,
         verbose_name=_("alias"),
         related_name="cms_plugins",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,  # Never let the ORM delete a plugin
     )
     template = models.CharField(
         verbose_name=_("template"),

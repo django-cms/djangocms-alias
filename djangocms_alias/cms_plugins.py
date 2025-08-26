@@ -202,11 +202,7 @@ class Alias(CMSPluginBase):
 
         form = BaseCreateAliasForm(request.GET or None)
 
-        if form.is_valid():
-            initial_data = form.cleaned_data
-        else:
-            initial_data = None
-
+        initial_data = form.cleaned_data if form.is_valid() else None
         if request.method == "GET" and not form.is_valid():
             return HttpResponseBadRequest("Form received unexpected values")
 

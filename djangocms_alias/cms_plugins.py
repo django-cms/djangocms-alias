@@ -47,7 +47,6 @@ class Alias(CMSPluginBase):
     def _get_allowed_root_plugins(cls):
         if not hasattr(cls, "_cached_allowed_root_plugins"):
             cls._cached_allowed_root_plugins = set(plugin_pool.get_all_plugins(root_plugin=True))
-            print("==>", cls._cached_allowed_root_plugins)
         return cls._cached_allowed_root_plugins
 
     @classmethod
@@ -303,12 +302,6 @@ class Alias(CMSPluginBase):
             source_plugin=instance,
         )
 
-        return self.render_close_frame(
-            request,
-            obj=instance,
-            action="reload",
-        )
-
     def render_replace_response(self, request, new_plugins, source_placeholder=None, source_plugin=None):
         move_plugins, add_plugins = [], []
         for plugin in new_plugins:
@@ -331,7 +324,7 @@ class Alias(CMSPluginBase):
             "movedPlugins": move_plugins,
             "is_popup": True,
         }
-        if source_plugin is not None:
+        if source_plugin and source_plugin.pk:
             data["replacedPlugin"] = get_plugin_toolbar_info(source_plugin)
         if source_placeholder is not None:
             data["replacedPlaceholder"] = {

@@ -114,6 +114,7 @@ class CreateAliasForm(BaseCreateAliasForm):
             self.fields["replace"].widget = forms.HiddenInput()
 
         # Remove the replace option, if "Alias" cannot be a child of parent plugin
+        initial = initial or {}
         plugin = initial.get("plugin")
         if plugin and plugin.parent:
             plugin_class = plugin.parent.get_plugin_class()

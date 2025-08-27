@@ -2,26 +2,32 @@
 
     const processDataBridge = function (data) {
         let actionsPerformed = 0;
+        let updateNeeded = false;
 
         if (data.replacedPlaceholder) {
-            CMS.API.StructureBoard.invalidateState('CLEAR_PLACEHOLDER', data.replacedPlaceholder);
+            updateNeeded |= CMS.API.StructureBoard.handleClearPlaceholder(data.replacedPlaceholder);
             actionsPerformed++;
         }
         if (data.replacedPlugin) {
-            CMS.API.StructureBoard.invalidateState('DELETE', data.replacedPlugin);
+            updateNeeded |= CMS.API.StructureBoard.handleDeletePlugin(data.replacedPlugin);
             actionsPerformed++;
         }
         if (data.addedPlugins) {
             for (const addedPlugin of data.addedPlugins) {
-                CMS.API.StructureBoard.invalidateState('ADD', addedPlugin);
+                updateNeeded |= CMS.API.StructureBoard.handleAddPlugin(addedPlugin);
                 actionsPerformed++;
             }
         }
         if (data.movedPlugins) {
             for (const movedPlugin of data.movedPlugins) {
-                CMS.API.StructureBoard.invalidateState('MOVE', movedPlugin);
+                updateNeeded |= CMS.API.StructureBoard.handleMovePlugin(movedPlugin);
                 actionsPerformed++;
             }
+        }
+
+        if (updateNeeded) {
+            CMS.API.StructureBoard._requestcontent = null;
+            CMS.API.StructureBoard.updateContent();
         }
         return actionsPerformed;
     }

@@ -313,7 +313,7 @@ class Alias(CMSPluginBase):
                 plugin.language,
                 parent_id=plugin.parent_id,
             )
-            plugin_tree = get_plugin_tree(request, plugins)
+            plugin_tree = get_plugin_tree(request, plugins, target_plugin=root)
             move_data = get_plugin_toolbar_info(plugin)
             move_data["plugin_order"] = plugin_order
             move_data.update(plugin_tree)

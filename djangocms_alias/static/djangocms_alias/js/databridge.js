@@ -27,7 +27,7 @@
     }
 
     const iframe = window.parent.document.querySelector('.cms-modal-frame > iframe');
-    const CMS = window.parent.CMS;
+    const {CMS} = window.parent;
 
     // Register the event handler in the capture phase to increase the chance it runs first
     iframe.addEventListener('load', function (event) {

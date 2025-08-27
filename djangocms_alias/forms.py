@@ -104,13 +104,22 @@ class CreateAliasForm(BaseCreateAliasForm):
         required=False,
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, initial=None, **kwargs):
         self.user = kwargs.pop("user")
 
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, initial=initial, **kwargs)
 
+        # Remove the replace option, if user does not have permission to add "Alias"
         if not has_plugin_permission(self.user, "Alias", "add"):
             self.fields["replace"].widget = forms.HiddenInput()
+
+        # Remove the replace option, if "Alias" cannot be a child of parent plugin
+        plugin = initial.get("plugin")
+        if plugin and plugin.parent:
+            plugin_class = plugin.parent.get_plugin_class()
+            allowed_children = plugin_class.get_child_classes(plugin.placeholder.slot, instance=plugin.parent)
+            if allowed_children and "Alias" not in allowed_children:
+                self.fields["replace"].widget = forms.HiddenInput()
 
         self.set_category_widget(self.user)
         self.fields["site"].initial = get_current_site()

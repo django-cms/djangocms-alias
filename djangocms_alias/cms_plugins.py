@@ -1,7 +1,7 @@
 from cms.models import Page
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
-from cms.toolbar.utils import get_object_edit_url
+from cms.toolbar.utils import get_object_edit_url, get_plugin_toolbar_info, get_plugin_tree
 from cms.utils import get_language_from_request
 from cms.utils.permissions import (
     get_model_permission_codename,
@@ -44,6 +44,13 @@ class Alias(CMSPluginBase):
         return f"djangocms_alias/{instance.template}/alias.html"
 
     @classmethod
+    def _get_allowed_root_plugins(cls):
+        if not hasattr(cls, "_cached_allowed_root_plugins"):
+            cls._cached_allowed_root_plugins = set(plugin_pool.get_all_plugins(root_plugin=True))
+            print("==>", cls._cached_allowed_root_plugins)
+        return cls._cached_allowed_root_plugins
+
+    @classmethod
     def get_extra_plugin_menu_items(cls, request, plugin):
         if plugin.plugin_type == cls.__name__:
             alias_content = plugin.alias.get_content(show_draft_content=True)
@@ -82,15 +89,19 @@ class Alias(CMSPluginBase):
             "plugin": plugin.pk,
             "language": get_language_from_request(request),
         }
-        endpoint = add_url_parameters(admin_reverse(CREATE_ALIAS_URL_NAME), **data)
-        return [
-            PluginMenuItem(
-                _("Create Alias"),
-                endpoint,
-                action="modal",
-                attributes={"cms-icon": "alias"},
-            ),
-        ]
+        # Check if the plugin can become root: Should be allowed as a root plugin (in the alias)
+        can_become_alias = plugin.get_plugin_class() in cls._get_allowed_root_plugins()
+        if can_become_alias:
+            endpoint = add_url_parameters(admin_reverse(CREATE_ALIAS_URL_NAME), **data)
+            return [
+                PluginMenuItem(
+                    _("Create Alias"),
+                    endpoint,
+                    action="modal",
+                    attributes={"cms-icon": "alias"},
+                ),
+            ]
+        return []
 
     @classmethod
     def get_extra_placeholder_menu_items(cls, request, placeholder):
@@ -150,6 +161,7 @@ class Alias(CMSPluginBase):
         source_plugins = plugin.alias.get_plugins(language, show_draft_content=True)  # We're in edit mode
         target_placeholder = plugin.placeholder
         plugin_position = plugin.position
+        plugin_parent = plugin.parent
         target_placeholder.delete_plugin(plugin)
         if source_plugins:
             if target_last_plugin := target_placeholder.get_last_plugin(plugin.language):
@@ -163,6 +175,7 @@ class Alias(CMSPluginBase):
                 source_plugins,
                 placeholder=target_placeholder,
                 language=language,
+                root_plugin=plugin_parent,
                 start_positions={language: plugin_position},
             )
         return []
@@ -242,10 +255,13 @@ class Alias(CMSPluginBase):
         emit_content_change([alias_content])
 
         if replace:
-            return self.render_close_frame(
+            plugin = create_form.cleaned_data.get("plugin")
+            placeholder = create_form.cleaned_data.get("placeholder")
+            return self.render_replace_response(
                 request,
-                obj=alias_plugin,
-                action="reload",
+                new_plugins=[alias_plugin],
+                source_placeholder=placeholder,
+                source_plugin=plugin,
             )
         return TemplateResponse(request, "admin/cms/page/close_frame.html")
 
@@ -276,9 +292,15 @@ class Alias(CMSPluginBase):
         if not can_detach:
             raise PermissionDenied
 
-        self.detach_alias_plugin(
+        copied_plugins = self.detach_alias_plugin(
             plugin=instance,
             language=language,
+        )
+
+        return self.render_replace_response(
+            request,
+            new_plugins=copied_plugins,
+            source_plugin=instance,
         )
 
         return self.render_close_frame(
@@ -286,6 +308,37 @@ class Alias(CMSPluginBase):
             obj=instance,
             action="reload",
         )
+
+    def render_replace_response(self, request, new_plugins, source_placeholder=None, source_plugin=None):
+        move_plugins, add_plugins = [], []
+        for plugin in new_plugins:
+            root = plugin.parent.get_bound_plugin() if plugin.parent else plugin
+
+            plugins = [root] + list(root.get_descendants())
+
+            plugin_order = plugin.placeholder.get_plugin_tree_order(
+                plugin.language,
+                parent_id=plugin.parent_id,
+            )
+            plugin_tree = get_plugin_tree(request, plugins)
+            move_data = get_plugin_toolbar_info(plugin)
+            move_data["plugin_order"] = plugin_order
+            move_data.update(plugin_tree)
+            move_plugins.append(move_data)
+            add_plugins.append({**get_plugin_toolbar_info(plugin), "structure": plugin_tree})
+        data = {
+            "addedPlugins": add_plugins,
+            "movedPlugins": move_plugins,
+            "is_popup": True,
+        }
+        if source_plugin is not None:
+            data["replacedPlugin"] = get_plugin_toolbar_info(source_plugin)
+        if source_placeholder is not None:
+            data["replacedPlaceholder"] = {
+                "placeholder_id": source_placeholder.pk,
+                "deleted": True,
+            }
+        return self.render_close_frame(request, obj=None, action="ALIAS_REPLACE", extra_data=data)
 
     def alias_usage_view(self, request, pk):
         if not request.user.is_staff:

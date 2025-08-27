@@ -57,6 +57,7 @@ class Category(TranslatableModel):
     class Meta:
         verbose_name = _("category")
         verbose_name_plural = _("categories")
+        ordering = ["translations__name"]
 
     def __str__(self):
         # Be sure to be able to see the category name even if it's not in the current language

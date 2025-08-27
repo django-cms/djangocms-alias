@@ -38,6 +38,25 @@ class Alias(CMSPluginBase):
     model = AliasPlugin
     form = AliasPluginForm
 
+    create_alias_fieldset = (
+        (
+            None,
+            {
+                "fields": (
+                    "name",
+                    "site",
+                    "category",
+                    "replace",
+                    "plugin",
+                    "placeholder",
+                    "language",
+                ),
+            },
+        ),
+    )
+
+    autocomplete_fields = ["alias"]
+
     def get_render_template(self, context, instance, placeholder):
         if isinstance(instance.placeholder.source, AliasContent) and instance.is_recursive():
             return "djangocms_alias/alias_recursive.html"
@@ -227,17 +246,28 @@ class Alias(CMSPluginBase):
         )
 
         if not create_form.is_valid():
-            opts = self.model._meta
+            from django.contrib import admin
+
+            fieldsets = self.create_alias_fieldset
+            admin_form = admin.helpers.AdminForm(create_form, fieldsets, {})
+            self.opts = self.model._meta
+            self.admin_site = admin.site
             context = {
-                "form": create_form,
-                "has_change_permission": True,
-                "opts": opts,
-                "root_path": admin_reverse("index"),
+                "title": _("Create Alias"),
+                "adminform": admin_form,
                 "is_popup": True,
-                "app_label": opts.app_label,
-                "media": (Alias().media + create_form.media),
+                "media": admin_form.media,
+                "errors": create_form.errors,
+                "preserved_filters": self.get_preserved_filters(request),
+                "inline_admin_formsets": [],
             }
-            return TemplateResponse(request, "djangocms_alias/create_alias.html", context)
+            return self.render_change_form(
+                request,
+                context,
+                add=True,
+                change=False,
+                obj=None,
+            )
 
         plugins = create_form.get_plugins()
 
@@ -273,6 +303,7 @@ class Alias(CMSPluginBase):
         if request.method == "GET":
             opts = self.model._meta
             context = {
+                "title": _("Detach Alias"),
                 "has_change_permission": True,
                 "opts": opts,
                 "root_path": admin_reverse("index"),

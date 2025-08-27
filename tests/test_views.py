@@ -47,7 +47,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
             self.assertEqual(response.status_code, 200)
             self.assertEqual(
-                response.context["form"].initial["plugin"].pk,
+                response.context["adminform"].form.initial["plugin"].pk,
                 self.plugin.pk,
             )
 
@@ -62,7 +62,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
             self.assertEqual(response.status_code, 200)
             self.assertEqual(
-                response.context["form"].initial["placeholder"],
+                response.context["adminform"].form.initial["placeholder"],
                 self.placeholder,
             )
 
@@ -86,7 +86,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             )
             self.assertEqual(response.status_code, 200)
             self.assertTrue(
-                response.context["form"].fields["replace"].widget.is_hidden,
+                response.context["adminform"].form.fields["replace"].widget.is_hidden,
             )
 
     def test_create_alias_view_post_plugin(self):
@@ -188,7 +188,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 },
             )
             self.assertEqual(response.status_code, 200)
-            self.assertFalse(response.context["form"].is_valid())
+            self.assertFalse(response.context["adminform"].form.is_valid())
 
     def test_create_alias_view_post_both_plugin_and_placeholder(self):
         with self.login_user_context(self.superuser):
@@ -203,7 +203,7 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 },
             )
             self.assertEqual(response.status_code, 200)
-            self.assertFalse(response.context["form"].is_valid())
+            self.assertFalse(response.context["adminform"].form.is_valid())
 
     def test_create_alias_view_post_empty_placeholder(self):
         placeholder = Placeholder(slot="empty")

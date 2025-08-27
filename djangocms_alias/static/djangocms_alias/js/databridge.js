@@ -2,7 +2,7 @@
 
     const processDataBridge = function (data) {
         let actionsPerformed = 0;
-        window.parent.console.log('Processing data bridge:', data);
+
         if (data.replacedPlaceholder) {
             CMS.API.StructureBoard.invalidateState('CLEAR_PLACEHOLDER', data.replacedPlaceholder);
             actionsPerformed++;
@@ -29,7 +29,7 @@
     const iframe = window.parent.document.querySelector('.cms-modal-frame > iframe');
     const {CMS} = window.parent;
 
-    if (!iframe || !CMS) {
+    if (!iframe || !CMS) {
         return;
     }
 
@@ -38,7 +38,6 @@
         const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
         const dataBridge = iframeDocument.body.querySelector('script#data-bridge');
         if (dataBridge) {
-            window.parent.console.log('iframe loaded', dataBridge);
             try {
                 const data = JSON.parse(dataBridge.textContent);
                 if (data.action === 'ALIAS_REPLACE') {

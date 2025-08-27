@@ -326,7 +326,7 @@ class Alias(CMSPluginBase):
         }
         if source_plugin and source_plugin.pk:
             data["replacedPlugin"] = get_plugin_toolbar_info(source_plugin)
-        if source_placeholder is not None:
+        if source_placeholder and source_placeholder.pk:
             data["replacedPlaceholder"] = {
                 "placeholder_id": source_placeholder.pk,
                 "deleted": True,

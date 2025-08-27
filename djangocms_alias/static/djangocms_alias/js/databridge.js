@@ -1,6 +1,6 @@
 (function () {
 
-    function processDataBridge(data) {
+    const processDataBridge = function (data) {
         let actionsPerformed = 0;
         window.parent.console.log('Processing data bridge:', data);
         if (data.replacedPlaceholder) {
@@ -29,6 +29,10 @@
     const iframe = window.parent.document.querySelector('.cms-modal-frame > iframe');
     const {CMS} = window.parent;
 
+    if (!iframe || !CMS) {
+        return;
+    }
+
     // Register the event handler in the capture phase to increase the chance it runs first
     iframe.addEventListener('load', function (event) {
         const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
@@ -36,7 +40,7 @@
         if (dataBridge) {
             window.parent.console.log('iframe loaded', dataBridge);
             try {
-                data = JSON.parse(dataBridge.textContent);
+                const data = JSON.parse(dataBridge.textContent);
                 if (data.action === 'ALIAS_REPLACE') {
                     event.stopPropagation();
                     dataBridge.parentNode.removeChild(dataBridge);

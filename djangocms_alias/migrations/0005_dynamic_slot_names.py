@@ -7,7 +7,7 @@ def migrate_slots(apps, schema_editor, forward=True):
     Placeholder = apps.get_model("cms", "Placeholder")
 
     db_alias = schema_editor.connection.alias
-    content_type = ContentType.objects.get(app_label="djangocms_alias", model="aliascontent")
+    content_type, _ = ContentType.objects.get_or_create(app_label="djangocms_alias", model="aliascontent")
     placeholder_qs = Placeholder.objects.using(db_alias).filter(content_type=content_type)
     qs = AliasContent._default_manager.using(db_alias).prefetch_related("alias").exclude(alias__static_code="")
 

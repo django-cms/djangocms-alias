@@ -56,6 +56,15 @@ version = {attr = "djangocms_alias.__version__"}
 where = ["."]
 include = ["djangocms_alias*"]
 
+[tool.setuptools.package-data]
+"*" = [
+    "templates/**/*.html",
+    "static/**/*",
+    "locale/**/*",
+    "*.po",
+    "*.mo",
+]
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"
 addopts = [

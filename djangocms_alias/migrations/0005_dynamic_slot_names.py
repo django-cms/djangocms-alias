@@ -3,13 +3,17 @@ from django.db import migrations, transaction
 
 def migrate_slots(apps, schema_editor, forward=True):
     AliasContent = apps.get_model("djangocms_alias", "AliasContent")
+    ContentType = apps.get_model("contenttypes", "ContentType")
+    Placeholder = apps.get_model("cms", "Placeholder")
 
     db_alias = schema_editor.connection.alias
-    qs = AliasContent.objects.using(db_alias).prefetch_related("alias").exclude(alias__static_code="")
+    content_type = ContentType.objects.get(app_label="djangocms_alias", model="aliascontent")
+    placeholder_qs = Placeholder.objects.using(db_alias).filter(content_type=content_type)
+    qs = AliasContent._default_manager.using(db_alias).prefetch_related("alias").exclude(alias__static_code="")
 
     with transaction.atomic(using=db_alias):
         for alias_content in qs:
-            slots = list(alias_content.placeholders.all())
+            slots = list(placeholder_qs.filter(object_id=alias_content.pk))
             if len(slots) == 1:
                 placeholder = slots[0]
                 # Ensure the placeholder exists with the correct slot name

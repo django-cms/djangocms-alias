@@ -47,10 +47,14 @@ Documentation = "https://github.com/django-cms/djangocms-alias"
 "Bug Tracker" = "https://github.com/django-cms/djangocms-alias/issues"
 
 [tool.setuptools]
-packages = ["djangocms_alias"]
 include-package-data = true
+
 [tool.setuptools.dynamic]
 version = {attr = "djangocms_alias.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["djangocms_alias*"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"

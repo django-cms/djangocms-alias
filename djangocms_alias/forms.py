@@ -9,6 +9,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import (
     AdminTextInputWidget,
+    AutocompleteSelect,
     RelatedFieldWidgetWrapper,
 )
 from django.contrib.sites.models import Site
@@ -68,6 +69,9 @@ class BaseCreateAliasForm(forms.Form):
     )
     language = forms.CharField(widget=forms.HiddenInput())
 
+    class Media:
+        js = ("djangocms_alias/js/databridge.js",)
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -104,13 +108,36 @@ class CreateAliasForm(BaseCreateAliasForm):
         required=False,
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, initial=None, **kwargs):
         self.user = kwargs.pop("user")
 
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, initial=initial, **kwargs)
 
+        self.fields["site"].widget = AutocompleteSelect(
+            Alias.site.field,
+            admin.site,
+            choices=self.fields["site"].choices,
+            attrs={"data-placeholder": _("Select a site")},
+        )
+        self.fields["category"].widget = AutocompleteSelect(
+            Alias.category.field,
+            admin.site,
+            choices=self.fields["category"].choices,
+            attrs={"data-placeholder": _("Select a category")},
+        )
+
+        # Remove the replace option, if user does not have permission to add "Alias"
         if not has_plugin_permission(self.user, "Alias", "add"):
             self.fields["replace"].widget = forms.HiddenInput()
+
+        # Remove the replace option, if "Alias" cannot be a child of parent plugin
+        initial = initial or {}
+        plugin = initial.get("plugin")
+        if plugin and plugin.parent:
+            plugin_class = plugin.parent.get_plugin_class()
+            allowed_children = plugin_class.get_child_classes(plugin.placeholder.slot, instance=plugin.parent)
+            if allowed_children and "Alias" not in allowed_children:
+                self.fields["replace"].widget = forms.HiddenInput()
 
         self.set_category_widget(self.user)
         self.fields["site"].initial = get_current_site()
@@ -217,7 +244,7 @@ class CreateCategoryWizardForm(TranslatableModelForm):
 class Select2Mixin:
     class Media:
         css = {
-            "all": ("cms/js/select2/select2.css",),
+            "screen": ("cms/js/select2/select2.css",),
         }
         js = (
             "admin/js/jquery.init.js",

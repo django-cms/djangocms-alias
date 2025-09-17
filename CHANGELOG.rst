@@ -2,6 +2,16 @@
 Changelog
 =========
 
+3.0.0 (2026-09-17)
+==================
+
+* feat: (Re-) Introduce static aliases in the structure board by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/283
+* fix: CSP-compliant data bridge for Django CMS 5 by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/285
+* fix: Only allow turning plugins into alias if they can be a root plugin by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/286
+* fix: Migration 0005 used manager not available in migration by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/288
+* fix: Improve placeholder retrieval and admin representation for alias models, fix deletion signal emission, and clean up alias tag behavior. by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/292
+
+
 2.0.5 (2025-06-29)
 ==================
 

@@ -439,3 +439,19 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             Category.objects.create(name="Samename B")
             c = Category(name="Samename B")
             self.assertRaises(ValidationError, c.validate_unique)
+
+    def test_get_placeholder(self):
+        alias = AliasModel.objects.create(
+            category=self.category,
+            static_code="static-code",
+            site=None,
+        )
+        AliasContent.objects.with_user(self.superuser).create(
+            alias=alias,
+            name="Static code alias",
+            language=self.language,
+        )
+        placeholder = alias.get_placeholder(self.language, show_draft_content=True)
+
+        self.assertIsNotNone(placeholder)
+        self.assertEqual(placeholder.slot, "static-code")

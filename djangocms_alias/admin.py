@@ -86,13 +86,11 @@ class AliasAdmin(GrouperModelAdmin):
         return qs.annotate(cmsplugins_count=models.Count("cms_plugins"))
 
     @admin.display(description=_("Used"), boolean=True, ordering="cmsplugins_count")
-    def used(self, obj: Alias) -> bool | None:
-        if not obj.static_code:
-            return True
+    def used(self, obj: Alias) -> bool:
         return obj.cmsplugins_count > 0
 
     @admin.display(description=_("Static"), boolean=True)
-    def static(self, obj: Alias) -> bool | None:
+    def static(self, obj: Alias) -> bool:
         return bool(obj.static_code)
 
     def has_delete_permission(self, request: HttpRequest, obj: Alias = None) -> bool:

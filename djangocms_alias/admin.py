@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from cms.admin.utils import GrouperModelAdmin
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse
@@ -35,13 +37,12 @@ __all__ = [
     "AliasContentAdmin",
 ]
 
-alias_admin_list_display = ["content__name", "category", "used", "admin_list_actions"]
+alias_admin_list_display = ["content__name", "category", "static", "used", "admin_list_actions"]
 djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 if djangocms_versioning_enabled:
     alias_admin_list_display.insert(-1, "get_author")
     alias_admin_list_display.insert(-1, "get_modified_date")
-    alias_admin_list_display.insert(-1, "state_indicator")
 
 
 @admin.register(Category)
@@ -87,8 +88,14 @@ class AliasAdmin(GrouperModelAdmin):
         return qs.annotate(cmsplugins_count=models.Count("cms_plugins"))
 
     @admin.display(description=_("Used"), boolean=True, ordering="cmsplugins_count")
-    def used(self, obj: Alias) -> bool:
+    def used(self, obj: Alias) -> bool | None:
+        if obj.static_code and obj.cmsplugins_count == 0:
+            return None
         return obj.cmsplugins_count > 0
+
+    @admin.display(description=_("Static"), boolean=True)
+    def static(self, obj: Alias) -> bool:
+        return bool(obj.static_code)
 
     def has_delete_permission(self, request: HttpRequest, obj: Alias = None) -> bool:
         # Alias can be deleted by users who can add aliases,
@@ -125,13 +132,14 @@ class AliasAdmin(GrouperModelAdmin):
         return deleted_objects, model_count, perms_needed, protected
 
     def delete_model(self, request: HttpRequest, obj: Alias):
+        pk = obj.pk
         super().delete_model(request, obj)
 
         # Only emit content changes if Versioning is not installed because
         # Versioning emits it' own signals for changes
         if not is_versioning_enabled():
             emit_content_delete(
-                AliasContent.admin_manager.filter(alias=obj),
+                AliasContent.admin_manager.filter(alias_id=pk),
                 sender=self.model,
             )
 

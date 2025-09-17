@@ -117,11 +117,10 @@ class StaticAlias(Tag):
 
             alias = Alias.objects.create(category=default_category, **alias_creation_kwargs)
 
-        if not alias.get_content(language=self.language, show_draft_content=self.get_draft_content):
-            # If versioning is enabled we can only create the records with a logged-in user / staff member
-            if not self.get_draft_content:
-                return None
-
+        if (
+            not alias.get_content(language=self.language, show_draft_content=self.get_draft_content)
+            and request.user.is_authenticated
+        ):
             alias_content = AliasContent.objects.with_user(request.user).create(
                 alias=alias,
                 name=static_code,

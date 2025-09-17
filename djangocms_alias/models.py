@@ -187,7 +187,7 @@ class Alias(models.Model):
 
     def get_placeholder(self, language=None, show_draft_content=False):
         content = self.get_content(language=language, show_draft_content=show_draft_content)
-        return getattr(content, "placeholder", None)
+        return content.placeholder if content else None
 
     def get_plugins(self, language=None, show_draft_content=False):
         if not language:

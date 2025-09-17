@@ -86,7 +86,9 @@ class AliasAdmin(GrouperModelAdmin):
         return qs.annotate(cmsplugins_count=models.Count("cms_plugins"))
 
     @admin.display(description=_("Used"), boolean=True, ordering="cmsplugins_count")
-    def used(self, obj: Alias) -> bool:
+    def used(self, obj: Alias) -> bool | None:
+        if obj.static_code and obj.cmsplugins_count == 0:
+            return None
         return obj.cmsplugins_count > 0
 
     @admin.display(description=_("Static"), boolean=True)

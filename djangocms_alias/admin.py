@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from cms.admin.utils import GrouperModelAdmin
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse

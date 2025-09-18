@@ -132,8 +132,8 @@ Alias plugin
 Alternatively, aliases can be used with the Alias plugin. It allows to select which alias content is shown at the
 exact position the alias plugin is placed.
 
-Teemplates
-==========
+Templates
+=========
 For the plugin to work out of the box ``{% block content %}`` is expected to exist in your main ``base.html`` file.
 Here is the template hierarchy for the edit and preview endpoints::
 

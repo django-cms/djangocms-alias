@@ -147,6 +147,7 @@ Here is the template hierarchy for the edit and preview endpoints::
 Use Django's template override mechanism to customize these templates as needed. Say, if your base template has
 a different name and the content goes into a block called ``main_content``, you would create a template at
 ``templates/djangocms_alias/base.html`` with the following content::
+
     {% extends "mybase.html" %}
     {% load i18n %}
 

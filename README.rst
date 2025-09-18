@@ -148,10 +148,6 @@ a different name and the content goes into a block called ``main_content``, you 
     {% load i18n %}
 
     {% block title %}{% translate "Aliases" %}{% endblock %}
-
-    {% block breadcrumb %}{% endblock %}
-    {% block footer %}{% endblock %}
-
     {% block main_content %}
         <div class="aliases my-additional-class">
             {% block aliases_content %}

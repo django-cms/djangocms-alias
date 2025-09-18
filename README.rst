@@ -142,7 +142,7 @@ Here is the template hierarchy for the edit and preview endpoints::
               └── djangocms_alias/alias_content_preview.html  {% block alias_content %}
 
 Use Django's template override mechanism to customize these templates as needed. Say, if your base template has
-a different name and the content goes into a block called `main_content`, you would create a template at
+a different name and the content goes into a block called ``main_content``, you would create a template at
 `templates/djangocms_alias/base.html` with the following content::
     {% extends "mybase.html" %}
     {% load i18n %}
@@ -152,12 +152,12 @@ a different name and the content goes into a block called `main_content`, you wo
     {% block breadcrumb %}{% endblock %}
     {% block footer %}{% endblock %}
 
-    {% block main %}
+    {% block main_content %}
         <div class="aliases my-additional-class">
             {% block aliases_content %}
             {% endblock aliases_content %}
         </div>
-    {% endblock main %}
+    {% endblock main_content %}
 
 
 

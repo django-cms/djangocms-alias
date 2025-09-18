@@ -8,7 +8,7 @@ from django.test.utils import override_settings
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME
 from djangocms_alias.models import Alias as AliasModel
-from djangocms_alias.models import Category
+from djangocms_alias.models import AliasContent, Category
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
@@ -192,6 +192,30 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         alias_requery = AliasModel.objects.filter(static_code="limited_alias_code")
 
         self.assertEqual(alias_requery.count(), 2)
+
+    def test_no_alias_content_creation_on_view_on_site(self):
+        """
+        When a template discovers a static code that doesn't exist in preview or on-site mode,
+        no alias or category is created
+        """
+        alias_template = """{% load djangocms_alias_tags %}{% static_alias "no_creation_code" site %}"""  # noqa: E501
+
+        # No Alias or Category exist
+        category = Category.objects.filter(translations__name=DEFAULT_STATIC_ALIAS_CATEGORY_NAME)
+        alias = AliasModel.objects.filter(static_code="no_creation_code")
+        alias_content = AliasContent.admin_manager
+
+        self.assertEqual(category.count(), 0)
+        self.assertEqual(alias.count(), 0)
+        self.assertEqual(alias_content.count(), 0)
+
+        with self.login_user_context(self.superuser):
+            # A default category, and a new alias is created for the template tag
+            self.render_template_obj(alias_template, {}, self.get_request("/"))
+
+        self.assertEqual(category.count(), 1)
+        self.assertEqual(alias.count(), 1)
+        self.assertEqual(alias_content.count(), 0)
 
     def test_site_limited_alias_displays_the_correct_contents(self):
         """

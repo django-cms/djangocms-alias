@@ -9,6 +9,7 @@ from cms.utils.helpers import is_editable_model
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 from django import template
+from django.conf import settings
 
 from ..constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME, USAGE_ALIAS_URL_NAME
 from ..models import Alias, AliasContent, Category
@@ -18,15 +19,17 @@ register = template.Library()
 
 DeclaredStaticAlias = namedtuple("DeclaredStaticAlias", ["static_code", "site"])
 
+_static_alias_editing_enabled = getattr(settings, "STATIC_ALIAS_EDITING_ENABLED", True)
+
 
 @register.simple_tag(takes_context=False)
-def get_alias_usage_view_url(alias, **kwargs):
+def get_alias_usage_view_url(alias, **kwargs) -> str:
     url = admin_reverse(USAGE_ALIAS_URL_NAME, args=[alias.pk])
     return add_url_parameters(url, **ChainMap(kwargs))
 
 
 @register.filter()
-def admin_view_url(obj):
+def admin_view_url(obj) -> str:
     if obj and is_editable_model(obj.__class__):
         # Is obj frontend-editable?
         return get_object_preview_url(obj)
@@ -41,12 +44,12 @@ def admin_view_url(obj):
 
 
 @register.filter()
-def verbose_name(obj):
+def verbose_name(obj) -> str:
     return obj._meta.verbose_name
 
 
 @register.simple_tag(takes_context=True)
-def render_alias(context, instance):
+def render_alias(context, instance) -> str:
     request = context["request"]
 
     toolbar = get_toolbar_from_request(request)
@@ -83,7 +86,7 @@ class StaticAlias(Tag):
         ],
     )
 
-    def _get_alias(self, request, static_code, extra_bits):
+    def _get_alias(self, request, static_code, extra_bits) -> Alias | None:
         alias_filter_kwargs = {
             "static_code": static_code,
         }
@@ -129,7 +132,7 @@ class StaticAlias(Tag):
             alias._content_cache[self.language] = alias_content
         return alias
 
-    def render_tag(self, context, static_code, extra_bits, nodelist=None):
+    def render_tag(self, context, static_code, extra_bits, nodelist=None) -> str:
         request = context.get("request")
 
         if not static_code or not request:
@@ -158,16 +161,18 @@ class StaticAlias(Tag):
                 context=context,
                 nodelist=nodelist,
                 use_cache=True,
-                editable=editable,
+                editable=editable and _static_alias_editing_enabled,
             )
-            if self.toolbar.edit_mode_active and not editable:
+            if self.toolbar.edit_mode_active and not editable and _static_alias_editing_enabled:
                 # Also non-editable placeholders need interactivity in the structure board
                 content += renderer.get_placeholder_toolbar_js(placeholder)
             return content
         return ""
 
-    def get_declaration(self):
+    def get_declaration(self) -> DeclaredStaticAlias | None:
         """Used to identify static_alias declarations"""
+        if not _static_alias_editing_enabled:
+            return None
         static_code = str(self.kwargs["static_code"].var).strip('"').strip("'")
         site = False
         if isinstance(self.kwargs["extra_bits"], ListValue):

@@ -13,7 +13,7 @@ from django.template.loader import get_template
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 
-from djangocms_alias.templatetags.djangocms_alias_tags import StaticAlias
+from djangocms_alias.templatetags.djangocms_alias_tags import StaticAlias, _static_alias_editing_enabled
 
 from .models import Alias, AliasContent
 
@@ -28,6 +28,11 @@ def render_alias_content(request: HttpRequest, alias_content: str) -> TemplateRe
 
 
 def get_declared_static_aliases(template: str) -> list["DeclaredStaticAlias"]:
+    """Scan a template for static_alias declarations.
+    Returns a list of DeclaredStaticAlias namedtuples.
+    """
+    if _static_alias_editing_enabled is False:
+        return []
     compiled_template = get_template(template)
     nodes = _scan_placeholders((_get_nodelist(compiled_template)), node_class=StaticAlias)
     placeholders = [node.get_declaration() for node in nodes]

@@ -14,7 +14,7 @@ coverage[toml]==7.8.0
     # via
     #   -r requirements.in
     #   pytest-cov
-django==5.2.5
+django==5.2.6
     # via
     #   django-classy-tags
     #   django-cms
@@ -29,7 +29,7 @@ django-classy-tags==4.1.0
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-django-cms==5.0.2
+django-cms==5.0.3
     # via djangocms-versioning
 django-formtools==2.5.1
     # via django-cms

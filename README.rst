@@ -58,6 +58,34 @@ Run::
 to perform the application's database migrations.
 
 
+=============
+Configuration
+=============
+
+django CMS Alias provides several Django settings to control its behavior:
+
+**STATIC_ALIAS_EDITING_ENABLED**
+    Default: ``True``
+
+    Controls whether static aliases can be edited directly on frontend editable objects
+    (such as pages) that include the ``{% static_alias %}`` template tag. When set to ``False``,
+    static aliases will only be visible in the structure board but not editable in context.
+
+**VERSIONING_ALIAS_MODELS_ENABLED**
+    Default: ``True`` (if djangocms-versioning is installed)
+
+    Enables versioning support for alias models when djangocms-versioning is available. When enabled,
+    aliases support draft/published workflows, version history, and proper content lifecycle management.
+    Set to ``False`` to disable versioning for aliases even if djangocms-versioning is installed.
+
+**MODERATING_ALIAS_MODELS_ENABLED**
+    Default: ``True`` (if djangocms-moderation is installed)
+
+    Enables moderation workflows for alias models when djangocms-moderation is available. When enabled,
+    aliases can be subject to approval workflows before publication. Set to ``False`` to disable moderation
+    for aliases even if djangocms-moderation is installed.
+
+
 =====
 Usage
 =====

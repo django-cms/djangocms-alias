@@ -2,6 +2,12 @@
 Changelog
 =========
 
+3.0.1 (2026-09-18)
+==================
+
+* fix: Draft static aliases disappeared when viewing pages on site by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/295
+* fix: Error message message referred to wrong package by @mbi in https://github.com/django-cms/djangocms-alias/pull/296
+
 3.0.0 (2026-09-17)
 ==================
 

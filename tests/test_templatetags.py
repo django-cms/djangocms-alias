@@ -195,8 +195,8 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
 
     def test_no_alias_content_creation_on_view_on_site(self):
         """
-        When a template discovers a static code that doesn't exist in preview or on-site mode,
-        no alias or category is created
+        Regression test: Ensure that viewing a template with a non-existent static alias code
+        in live (on-site) mode DOES create an Alias, Category, but does NOT create any AliasContent entries.
         """
         alias_template = """{% load djangocms_alias_tags %}{% static_alias "no_creation_code" site %}"""  # noqa: E501
 

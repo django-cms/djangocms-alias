@@ -132,9 +132,34 @@ Alias plugin
 Alternatively, aliases can be used with the Alias plugin. It allows to select which alias content is shown at the
 exact position the alias plugin is placed.
 
-Side notes
+Teemplates
 ==========
 For the plugin to work out of the box ``{% block content %}`` is expected to exist in your main ``base.html`` file.
+Here is the template hierarchy for the edit and preview endpoints::
+
+    base.html
+        └── djangocms_alias/base.html {% block content %}
+              └── djangocms_alias/alias_content_preview.html  {% block alias_content %}
+
+Use Django's template override mechanism to customize these templates as needed. Say, if your base template has
+a different name and the content goes into a block called `main_content`, you would create a template at
+`templates/djangocms_alias/base.html` with the following content::
+    {% extends "mybase.html" %}
+    {% load i18n %}
+
+    {% block title %}{% translate "Aliases" %}{% endblock %}
+
+    {% block breadcrumb %}{% endblock %}
+    {% block footer %}{% endblock %}
+
+    {% block main %}
+        <div class="aliases my-additional-class">
+            {% block aliases_content %}
+            {% endblock aliases_content %}
+        </div>
+    {% endblock main %}
+
+
 
 .. |PyPiVersion| image:: https://img.shields.io/pypi/v/djangocms-alias.svg?style=flat-square
     :target: https://pypi.python.org/pypi/djangocms-alias

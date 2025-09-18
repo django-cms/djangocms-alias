@@ -67,14 +67,16 @@ django CMS Alias provides several Django settings to control its behavior:
 
     Controls whether static aliases can be edited directly on frontend editable objects
     (such as pages) that include the ``{% static_alias %}`` template tag. When set to ``False``,
-    static aliases will only be visible in the structure board but not editable in context.
+    static aliases will not be visible in the structure board and only editable from the alias
+    admin endpoint.
 
 ``VERSIONING_ALIAS_MODELS_ENABLED``
     Default: ``True`` (if djangocms-versioning is installed)
 
     Enables versioning support for alias models when djangocms-versioning is available. When enabled,
     aliases support draft/published workflows, version history, and proper content lifecycle management.
-    Set to ``False`` to disable versioning for aliases even if djangocms-versioning is installed.
+    Set to ``False`` to disable versioning for aliases even if djangocms-versioning is installed. Any changes
+    to any alias will then be immediately visible to the world.
 
 ``MODERATING_ALIAS_MODELS_ENABLED``
     Default: ``True`` (if djangocms-moderation is installed)

@@ -33,7 +33,7 @@ class AliasCMSConfig(CMSAppConfig):
 
         if PackageVersion(djangocms_versioning_version) < PackageVersion("2.4"):  # pragma: no cover
             raise ImportError(
-                "djangocms_versioning >= 2.4.0 is required for djangocms_stories to work properly."
+                "djangocms_versioning >= 2.4.0 is required for djangocms_alias to work properly."
                 " Please upgrade djangocms_versioning."
             )
 

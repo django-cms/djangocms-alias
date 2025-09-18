@@ -34,8 +34,11 @@ def migrate_slots(apps, schema_editor, forward=True):
             elif len(slots) > 1:
                 print(
                     f"AliasContent {alias_content.pk} has multiple placeholders, expected only one. "
-                    "Skipping migration for this instance."
+                    "Skipping migration for this instance:\n"
+                    f"{alias_content.alias.static_code} ({alias_content.language})",
                 )
+                for placeholder in slots:
+                    print(f" - Placeholder {placeholder.pk} with slot '{placeholder.slot}'")
 
 
 class Migration(migrations.Migration):

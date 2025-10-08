@@ -5,19 +5,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('djangocms_alias', '0006_alter_alias_id_alter_aliascontent_id_and_more'),
+        ("djangocms_alias", "0006_alter_alias_id_alter_aliascontent_id_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='category',
-            options={'ordering': ['translations__name'], 'verbose_name': 'category', 'verbose_name_plural': 'categories'},
+            name="category",
+            options={
+                "ordering": ["translations__name"],
+                "verbose_name": "category",
+                "verbose_name_plural": "categories",
+            },
         ),
         migrations.AlterField(
-            model_name='aliasplugin',
-            name='alias',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='cms_plugins', to='djangocms_alias.alias', verbose_name='alias'),
+            model_name="aliasplugin",
+            name="alias",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="cms_plugins",
+                to="djangocms_alias.alias",
+                verbose_name="alias",
+            ),
         ),
     ]

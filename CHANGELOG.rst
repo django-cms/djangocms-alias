@@ -2,13 +2,20 @@
 Changelog
 =========
 
-3.0.1 (2026-09-18)
+3.0.2 (2025-10-08)
+==================
+
+* fix: Adds missing migrations and test for missing migrations by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/303
+
+
+3.0.1 (2025-09-18)
 ==================
 
 * fix: Draft static aliases disappeared when viewing pages on site by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/295
 * fix: Error message message referred to wrong package by @mbi in https://github.com/django-cms/djangocms-alias/pull/296
 
-3.0.0 (2026-09-17)
+
+3.0.0 (2025-09-17)
 ==================
 
 * feat: (Re-) Introduce static aliases in the structure board by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/283

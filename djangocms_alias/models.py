@@ -192,13 +192,14 @@ class Alias(models.Model):
     def get_plugins(self, language=None, show_draft_content=False):
         if not language:
             language = get_language()
+        cache_key = f"{language}-{show_draft_content}"
         try:
-            return self._plugins_cache[language]
+            return self._plugins_cache[cache_key]
         except KeyError:
             placeholder = self.get_placeholder(language, show_draft_content=show_draft_content)
             plugins = placeholder.get_plugins_list() if placeholder else []
-            self._plugins_cache[language] = plugins
-            return self._plugins_cache[language]
+            self._plugins_cache[cache_key] = plugins
+            return self._plugins_cache[cache_key]
 
     def get_languages(self):
         if not self._content_languages_cache:

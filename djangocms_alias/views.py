@@ -144,13 +144,13 @@ def create_alias_view(request):
     emit_content_change([alias_content])
 
     if replace:
-        create_form.cleaned_data.get("plugin")
+        plugin = create_form.cleaned_data.get("plugin")
         placeholder = create_form.cleaned_data.get("placeholder")
         return render_replace_response(
             request,
             new_plugins=[alias_plugin],
             source_placeholder=placeholder,
-            # source_plugin=plugin,
+            source_plugin=plugin,
         )
 
     return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)
@@ -183,7 +183,7 @@ def render_replace_response(request, new_plugins, source_placeholder=None, sourc
         "moved_plugins": move_plugins,
         "is_popup": True,
     }
-    if source_plugin is not None:
+    if source_plugin is not None and source_plugin.pk:
         context["replaced_plugin"] = json.dumps(
             get_plugin_toolbar_info(source_plugin),
         )

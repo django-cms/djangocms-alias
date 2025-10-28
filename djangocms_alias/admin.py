@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
+
 from cms.admin.utils import GrouperModelAdmin
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse
@@ -74,12 +76,12 @@ class AliasAdmin(GrouperModelAdmin):
         """Add alias usage list actions"""
         return super().get_actions_list() + [self._get_alias_usage_link, self._get_alias_delete_link]
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> models.QuerySet:
         qs = super().get_queryset(request)
         # Annotate each Alias with a boolean indicating if related cmsplugins exist
         return qs.annotate(cmsplugins_count=models.Count("cms_plugins"))
 
-    def get_list_display(self, request):
+    def get_list_display(self, request: HttpRequest) -> Iterable[str]:
         list_display = super().get_list_display(request)
         if hasattr(self, "get_author"):
             list_display = list(list_display)

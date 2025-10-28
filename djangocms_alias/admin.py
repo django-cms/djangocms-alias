@@ -16,7 +16,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
 
-from .cms_config import AliasCMSConfig
 from .constants import (
     CHANGE_ALIAS_URL_NAME,
     DELETE_ALIAS_URL_NAME,
@@ -36,13 +35,6 @@ __all__ = [
     "CategoryAdmin",
     "AliasContentAdmin",
 ]
-
-alias_admin_list_display = ["content__name", "category", "static", "used", "admin_list_actions"]
-djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
-
-if djangocms_versioning_enabled:
-    alias_admin_list_display.insert(-1, "get_author")
-    alias_admin_list_display.insert(-1, "get_modified_date")
 
 
 @admin.register(Category)
@@ -64,7 +56,7 @@ class CategoryAdmin(TranslatableAdmin):
 
 @admin.register(Alias)
 class AliasAdmin(GrouperModelAdmin):
-    list_display = alias_admin_list_display
+    list_display = ["content__name", "category", "static", "used", "admin_list_actions"]
     list_display_links = None
     list_filter = (
         SiteFilter,
@@ -86,6 +78,14 @@ class AliasAdmin(GrouperModelAdmin):
         qs = super().get_queryset(request)
         # Annotate each Alias with a boolean indicating if related cmsplugins exist
         return qs.annotate(cmsplugins_count=models.Count("cms_plugins"))
+
+    def get_list_display(self, request):
+        list_display = super().get_list_display(request)
+        if hasattr(self, "get_author"):
+            list_display = list(list_display)
+            list_display.insert(-1, "get_author")
+            list_display.insert(-1, "get_modified_date")
+        return list_display
 
     @admin.display(description=_("Used"), boolean=True, ordering="cmsplugins_count")
     def used(self, obj: Alias) -> bool | None:

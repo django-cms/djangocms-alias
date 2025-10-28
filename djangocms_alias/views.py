@@ -144,13 +144,13 @@ def create_alias_view(request):
     emit_content_change([alias_content])
 
     if replace:
-        plugin = create_form.cleaned_data.get("plugin")
+        create_form.cleaned_data.get("plugin")
         placeholder = create_form.cleaned_data.get("placeholder")
         return render_replace_response(
             request,
             new_plugins=[alias_plugin],
             source_placeholder=placeholder,
-            source_plugin=plugin,
+            # source_plugin=plugin,
         )
 
     return HttpResponse(JAVASCRIPT_SUCCESS_RESPONSE)

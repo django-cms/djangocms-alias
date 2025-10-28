@@ -83,9 +83,10 @@ class AliasAdmin(GrouperModelAdmin):
 
     def get_list_display(self, request: HttpRequest) -> Iterable[str]:
         list_display = super().get_list_display(request)
+        list_display = list(list_display)
         if hasattr(self, "get_author"):
-            list_display = list(list_display)
             list_display.insert(-1, "get_author")
+        if hasattr(self, "get_modified_date"):
             list_display.insert(-1, "get_modified_date")
         return list_display
 

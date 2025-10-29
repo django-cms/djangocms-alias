@@ -1,5 +1,3 @@
-from copy import copy
-
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
 from cms.toolbar.utils import get_object_edit_url
@@ -140,26 +138,24 @@ class Alias(CMSPluginBase):
 
     @classmethod
     def detach_alias_plugin(cls, plugin, language):
-        source_placeholder = plugin.alias.get_placeholder(language, show_draft_content=True)  # We're in edit mode
+        source_plugins = plugin.alias.get_plugins(language, show_draft_content=True)  # We're in edit mode
         target_placeholder = plugin.placeholder
+        plugin_position = plugin.position
+        plugin_parent = plugin.parent
+        target_placeholder.delete_plugin(plugin)
+        if source_plugins:
+            if target_last_plugin := target_placeholder.get_last_plugin(plugin.language):
+                target_placeholder._shift_plugin_positions(
+                    language,
+                    start=plugin_position,
+                    offset=len(source_plugins) + target_last_plugin.position + 1,  # enough space to shift back
+                )
 
-        # Deleting uses a copy of a plugin to preserve pk on existing
-        # ``plugin`` object. This is done due to
-        # plugin.get_plugin_toolbar_info requiring a PK in a passed
-        # instance.
-        target_placeholder.delete_plugin(copy(plugin))
-        target_placeholder._shift_plugin_positions(
-            language,
-            plugin.position,
-            offset=target_placeholder.get_last_plugin_position(language),
-        )
-        if source_placeholder:
-            source_plugins = source_placeholder.get_plugins_list()
-            copied_plugins = copy_plugins_to_placeholder(
+            return copy_plugins_to_placeholder(
                 source_plugins,
                 placeholder=target_placeholder,
                 language=language,
-                start_positions={language: plugin.position},
+                root_plugin=plugin_parent,
+                start_positions={language: plugin_position},
             )
-            return copied_plugins
         return []

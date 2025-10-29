@@ -4,6 +4,7 @@
 .idea/
 .tox/
 .eggs/
+.vscode/
 dist/
 !djangocms_alias/static/djangocms_alias/js/dist/
 build/

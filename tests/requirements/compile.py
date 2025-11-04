@@ -7,11 +7,13 @@ import sys
 from pathlib import Path
 
 COMPILE_SETTINGS = {
-    "py311-dj52-cms50": [],
-    "py312-dj52-cms50": [],
-    "py313-dj52-cms50": [],
-    "py312-dj60-cms50": [],
-    "py313-dj60-cms50": [],
+"py311-dj52-cms50": [],
+"py312-dj52-cms50": [],
+"py313-dj52-cms50": [],
+"py314-dj52-cms50": [],
+"py312-dj60-cms50": [],
+"py313-dj60-cms50": [],
+"py314-dj60-cms50": [],
     "py313-djmain-cmsdev": [],
     "py313-djmain-cms50": [],
 }

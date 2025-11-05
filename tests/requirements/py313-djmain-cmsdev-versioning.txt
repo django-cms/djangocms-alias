@@ -19,6 +19,7 @@ django @ https://github.com/django/django/tarball/main
     #   django-classy-tags
     #   django-cms
     #   django-formtools
+    #   django-fsm-2
     #   django-parler
     #   django-sekizai
     #   django-treebeard
@@ -33,9 +34,9 @@ django-cms @ https://github.com/django-cms/django-cms/tarball/main
 django-formtools==2.5.1
     # via django-cms
 django-fsm==2.8.2
-    # via
-    #   -r requirements.in
-    #   djangocms-versioning
+    # via djangocms-versioning
+django-fsm-2==4.1.0
+    # via -r requirements.in
 django-parler==2.3
     # via -r requirements.in
 django-sekizai==4.1.0

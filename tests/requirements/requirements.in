@@ -3,7 +3,7 @@ coverage
 pytest-django
 pytest-cov
 django-classy-tags
-django-fsm>=2.6
+django-fsm-2
 django-sekizai
 django-parler
 flake8

@@ -10,10 +10,14 @@ COMPILE_SETTINGS = {
     "py311-dj52-cms50": [],
     "py312-dj52-cms50": [],
     "py313-dj52-cms50": [],
+    "py314-dj52-cms50": [],
     "py312-dj60-cms50": [],
     "py313-dj60-cms50": [],
+    "py314-dj60-cms50": [],
     "py313-djmain-cmsdev": [],
     "py313-djmain-cms50": [],
+    "py314-djmain-cmsdev": [],
+    "py314-djmain-cms50": [],
 }
 
 django_dict = {
@@ -71,12 +75,14 @@ if __name__ == "__main__":
     print("Upgrading pip-tools")
     for py_ver in {key.split("-")[0] for key in COMPILE_SETTINGS.keys()}:
         args = [
-            f"python{py_ver[2]}.{py_ver[3:]}",
-            "-m",
-            "pip",
-            "install",
-            "--upgrade",
-            "pip-tools",
+        f"python{py_ver[2]}.{py_ver[3:]}",
+        "-m",
+        "pip",
+        "install",
+        "--upgrade",
+        "pip-tools",
+        "pip==24.3.1",
+        "--break-system-packages",
         ]
         subprocess.run(args, capture_output=True, check=False)
 

@@ -14,7 +14,13 @@ coverage[toml]==7.10.6
     # via
     #   -r requirements.in
     #   pytest-cov
+<<<<<<< HEAD
 django==6.0b1
+||||||| fb4be63
+django==5.2.7
+=======
+django==5.2.8
+>>>>>>> master
     # via
     #   django-classy-tags
     #   django-cms

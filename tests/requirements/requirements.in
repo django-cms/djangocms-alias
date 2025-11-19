@@ -10,4 +10,4 @@ flake8
 isort
 pyflakes>=2.1.1
 
-djangocms-versioning>=2.4
+djangocms-versioning>=2.5.0

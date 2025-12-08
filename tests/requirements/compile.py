@@ -26,7 +26,7 @@ django_dict = {
     "dj50": "Django>=5.0,<5.1",
     "dj51": "Django>=5.1,<5.2",
     "dj52": "Django>=5.2,<5.3",
-    "dj60": "Django>=6.0a1,<6.1",
+    "dj60": "Django>=6.0,<6.1",
 }
 
 cms_dict = {

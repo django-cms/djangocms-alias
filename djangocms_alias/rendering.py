@@ -82,8 +82,10 @@ def render_alias_structure_js(context: dict, renderer: BaseRenderer, obj: models
             continue
         ph.is_static = True
         try:
+            # django CMS 5.1+: page kw argument has been replaced by the obj kw argument
             js_parts.append(renderer.render_placeholder(ph, language=lang, obj=obj))
         except TypeError:
+            # django CMS 5.0
             js_parts.append(renderer.render_placeholder(ph, language=lang, page=obj))
     return "\n".join(js_parts)
 

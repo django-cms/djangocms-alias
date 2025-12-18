@@ -136,6 +136,8 @@ def create_alias_view(request):
             "Plugins are required to create an alias",
         )
 
+    plugin = create_form.cleaned_data.get("plugin")
+    plugin_pk = plugin.pk if plugin else None
     replace = create_form.cleaned_data.get("replace")
     if not Alias.can_create_alias(user, plugins, replace):
         raise PermissionDenied
@@ -144,8 +146,9 @@ def create_alias_view(request):
     emit_content_change([alias_content])
 
     if replace:
-        plugin = create_form.cleaned_data.get("plugin")
         placeholder = create_form.cleaned_data.get("placeholder")
+        if plugin is not None:
+            plugin.pk = plugin_pk  # Restore pk after it was set to None in form.save()
         return render_replace_response(
             request,
             new_plugins=[alias_plugin],

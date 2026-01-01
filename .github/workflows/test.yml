@@ -38,7 +38,7 @@ jobs:
         run: tox --py current
 
       - name: Upload coverage data
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-data-${{ matrix.python-version }}
           include-hidden-files: true
@@ -59,7 +59,7 @@ jobs:
         run: python -m pip install --upgrade coverage[toml]
 
       - name: Download data
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: ${{ github.workspace }}
           pattern: coverage-data-*
@@ -73,7 +73,7 @@ jobs:
 
       - name: Upload HTML report
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: html-report
           path: htmlcov

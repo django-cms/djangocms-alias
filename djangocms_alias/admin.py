@@ -90,7 +90,7 @@ class AliasAdmin(GrouperModelAdmin):
             list_display.insert(-1, "get_modified_date")
         return list_display
 
-    @admin.display(description=_("Name"), ordering="contents__name__lc")
+    @admin.display(description=_("Name"), ordering=models.functions.Lower("contents__name"))
     def content_name(self, obj: Alias) -> str:
         return self.get_content_field(obj, "name") or obj.static_code or self.EMPTY_CONTENT_VALUE
 

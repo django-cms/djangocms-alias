@@ -1,8 +1,9 @@
 from unittest import skipUnless
 
 from bs4 import BeautifulSoup
+from cms import __version__ as cms_version
 from cms.api import add_plugin
-from cms.toolbar.utils import get_object_preview_url
+from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
 from cms.utils.i18n import force_language
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 from django.contrib.auth.models import Permission
@@ -208,8 +209,13 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             response = self.client.get(base_url)
         response_content_decoded = response.content.decode()
 
+        if cms_version >= "5.1":
+            expected_url = get_object_edit_url(expected_en_content)
+        else:
+            expected_url = get_object_preview_url(expected_en_content)
+
         self.assertIn(
-            get_object_preview_url(expected_en_content),
+            expected_url,
             response_content_decoded,
         )
         self.assertNotIn(
@@ -429,9 +435,14 @@ class AliasContentManagerTestCase(BaseAliasPluginTestCase):
             self.assertNotContains(response, "Published")
             self.assertNotContains(response, "Draft")
 
-        aliascontent1_url = get_object_preview_url(alias1.get_content(show_draft_content=True))
-        aliascontent2_url = get_object_preview_url(alias2.get_content(show_draft_content=True))
-        aliascontent3_url = get_object_preview_url(alias3.get_content(show_draft_content=True))
+        if cms_version >= "5.1":
+            aliascontent1_url = get_object_edit_url(alias1.get_content(show_draft_content=True))
+            aliascontent2_url = get_object_edit_url(alias2.get_content(show_draft_content=True))
+            aliascontent3_url = get_object_edit_url(alias3.get_content(show_draft_content=True))
+        else:
+            aliascontent1_url = get_object_preview_url(alias1.get_content(show_draft_content=True))
+            aliascontent2_url = get_object_preview_url(alias2.get_content(show_draft_content=True))
+            aliascontent3_url = get_object_preview_url(alias3.get_content(show_draft_content=True))
 
         # when versioning is not enabled, the django admin change form
         # is used which used links to the aliascontent_change view
@@ -573,3 +584,27 @@ class AliasesManagerTestCase(BaseAliasPluginTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(module_name, "aliases")
+
+    def test_alias_listed_by_static_code_when_no_content_available(self):
+        """
+        Alias is listed by its static_code if no content object is available
+        """
+        from django.contrib.admin.sites import AdminSite
+
+        from djangocms_alias.admin import AliasAdmin
+
+        category = Category.objects.create(name="Test Category")
+        # Create an alias with static_code but no content
+        alias = AliasModel.objects.create(
+            category=category,
+            position=0,
+            static_code="my_static_alias",
+        )
+
+        # Test the content_name method directly
+        admin_site = AdminSite()
+        alias_admin = AliasAdmin(AliasModel, admin_site)
+        result = alias_admin.content_name(alias)
+
+        # Verify that static_code is returned when no content is available
+        self.assertEqual(result, "my_static_alias")

@@ -81,7 +81,7 @@ def render_alias_structure_js(context: dict, renderer: BaseRenderer, obj: models
         if not ph:
             continue
         ph.is_static = True
-        js_parts.append(renderer.render_placeholder(ph, language=lang, page=obj))
+        js_parts.append(renderer.render_placeholder(ph, lang, obj))
     return "\n".join(js_parts)
 
 

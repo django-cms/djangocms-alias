@@ -58,7 +58,7 @@ class CategoryAdmin(TranslatableAdmin):
 
 @admin.register(Alias)
 class AliasAdmin(GrouperModelAdmin):
-    list_display = ["content__name", "category", "static", "used", "admin_list_actions"]
+    list_display = ["content_name", "category", "static", "used", "admin_list_actions"]
     list_display_links = None
     list_filter = (
         SiteFilter,
@@ -89,6 +89,10 @@ class AliasAdmin(GrouperModelAdmin):
         if hasattr(self, "get_modified_date"):
             list_display.insert(-1, "get_modified_date")
         return list_display
+
+    @admin.display(description=_("Name"), ordering="contents__name__lc")
+    def content_name(self, obj: Alias) -> str:
+        return self.get_content_field(obj, "name") or obj.static_code or self.EMPTY_CONTENT_VALUE
 
     @admin.display(description=_("Used"), boolean=True, ordering="cmsplugins_count")
     def used(self, obj: Alias) -> bool | None:

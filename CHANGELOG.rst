@@ -2,6 +2,13 @@
 Changelog
 =========
 
+3.0.3 (2026-01-13)
+==================
+
+* fix: Admin complained about missing methods get_author and get_modified_date by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/307
+* fix: If static alias has no name, use static code as name by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/326
+
+
 3.0.2 (2025-10-08)
 ==================
 

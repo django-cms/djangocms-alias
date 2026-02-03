@@ -1,14 +1,26 @@
+from functools import cache
+
 from django.apps import apps
 
 
-def is_versioning_enabled():
+@cache
+def get_versionable_item(cms_config) -> type | None:
+    if hasattr(cms_config, "get_contract"):
+        return cms_config.get_contract("djangocms_versioning")
+    return None
+
+
+@cache
+def is_versioning_enabled() -> bool:
     from .models import AliasContent
 
-    try:
-        app_config = apps.get_app_config("djangocms_versioning")
-        return app_config.cms_extension.is_content_model_versioned(AliasContent)
-    except LookupError:
-        return False
+    for app_config in apps.get_app_configs():
+        try:
+            print(app_config)
+            return app_config.cms_extension.is_content_model_versioned(AliasContent)
+        except AttributeError:
+            continue
+    return False
 
 
 def emit_content_change(objs, sender=None):

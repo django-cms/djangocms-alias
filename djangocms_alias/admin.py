@@ -14,6 +14,7 @@ from django.http import (
     HttpResponse,
     HttpResponseRedirect,
 )
+from django.template.defaultfilters import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
@@ -92,7 +93,12 @@ class AliasAdmin(GrouperModelAdmin):
 
     @admin.display(description=_("Name"), ordering=models.functions.Lower("contents__name"))
     def content_name(self, obj: Alias) -> str:
-        return self.get_content_field(obj, "name") or obj.static_code or self.EMPTY_CONTENT_VALUE
+        return (
+            self.get_content_field(obj, "name")
+            or obj.static_code
+            or mark_safe(f"<i>{escape(obj.name)}</i>")
+            or self.EMPTY_CONTENT_VALUE
+        )
 
     @admin.display(description=_("Used"), boolean=True, ordering="cmsplugins_count")
     def used(self, obj: Alias) -> bool | None:

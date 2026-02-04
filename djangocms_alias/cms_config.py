@@ -23,6 +23,7 @@ class AliasCMSConfig(CMSAppConfig):
     cms_wizards = [create_alias_wizard]
 
     def __init__(self, app_config):
+        super().__init__(app_config)
         VersionableItem = get_versionable_item(self)
         self.djangocms_moderation_enabled = getattr(settings, "MODERATING_ALIAS_MODELS_ENABLED", True)
         self.djangocms_versioning_enabled = getattr(

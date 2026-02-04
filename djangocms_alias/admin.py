@@ -67,7 +67,7 @@ class AliasAdmin(GrouperModelAdmin):
     )
     fields = ("content__name", "category", "site", "content__language")
     readonly_fields = ("static_code",)
-    search_fields = ["content__name"]
+    search_fields = ["content__name", "static_code"]
     autocomplete_fields = ["category", "site"]
     extra_grouping_fields = ("language",)
     EMPTY_CONTENT_VALUE = mark_safe(_("<i>Missing language</i>"))

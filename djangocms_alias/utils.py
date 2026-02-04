@@ -16,7 +16,6 @@ def is_versioning_enabled() -> bool:
 
     for app_config in apps.get_app_configs():
         try:
-            print(app_config)
             return app_config.cms_extension.is_content_model_versioned(AliasContent)
         except AttributeError:
             continue

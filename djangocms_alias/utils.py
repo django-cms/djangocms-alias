@@ -10,14 +10,13 @@ def get_versionable_item(cms_config) -> type | None:
     return None
 
 
-@cache
 def is_versioning_enabled() -> bool:
     """
     is_versioning_enabled returns True if djangocms-alias has registered itself
     for verisoning
     """
     cms_config = apps.get_app_config("djangocms_alias").cms_config
-    return hasattr(cms_config, "versioning") and bool(cms_config.versioning)
+    return bool(getattr(cms_config, "versioning", False))
 
 
 def emit_content_change(objs, sender=None):

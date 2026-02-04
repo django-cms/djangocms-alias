@@ -12,14 +12,12 @@ def get_versionable_item(cms_config) -> type | None:
 
 @cache
 def is_versioning_enabled() -> bool:
-    from .models import AliasContent
-
-    for app_config in apps.get_app_configs():
-        try:
-            return app_config.cms_extension.is_content_model_versioned(AliasContent)
-        except AttributeError:
-            continue
-    return False
+    """
+    is_versioning_enabled returns True if djangocms-alias has registered itself
+    for verisoning
+    """
+    cms_config = apps.get_app_config("djangocms_alias").cms_config
+    return hasattr(cms_config, "versioning") and bool(cms_config.versioning)
 
 
 def emit_content_change(objs, sender=None):

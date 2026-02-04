@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
+
 from cms.admin.utils import GrouperModelAdmin
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse
@@ -16,7 +18,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
 
-from .cms_config import AliasCMSConfig
 from .constants import (
     CHANGE_ALIAS_URL_NAME,
     DELETE_ALIAS_URL_NAME,
@@ -36,13 +37,6 @@ __all__ = [
     "CategoryAdmin",
     "AliasContentAdmin",
 ]
-
-alias_admin_list_display = ["content__name", "category", "static", "used", "admin_list_actions"]
-djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
-
-if djangocms_versioning_enabled:
-    alias_admin_list_display.insert(-1, "get_author")
-    alias_admin_list_display.insert(-1, "get_modified_date")
 
 
 @admin.register(Category)
@@ -64,7 +58,7 @@ class CategoryAdmin(TranslatableAdmin):
 
 @admin.register(Alias)
 class AliasAdmin(GrouperModelAdmin):
-    list_display = alias_admin_list_display
+    list_display = ["content_name", "category", "static", "used", "admin_list_actions"]
     list_display_links = None
     list_filter = (
         SiteFilter,
@@ -73,7 +67,7 @@ class AliasAdmin(GrouperModelAdmin):
     )
     fields = ("content__name", "category", "site", "content__language")
     readonly_fields = ("static_code",)
-    search_fields = ["content__name"]
+    search_fields = ["content__name", "static_code"]
     autocomplete_fields = ["category", "site"]
     extra_grouping_fields = ("language",)
     EMPTY_CONTENT_VALUE = mark_safe(_("<i>Missing language</i>"))
@@ -82,10 +76,23 @@ class AliasAdmin(GrouperModelAdmin):
         """Add alias usage list actions"""
         return super().get_actions_list() + [self._get_alias_usage_link, self._get_alias_delete_link]
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest) -> models.QuerySet:
         qs = super().get_queryset(request)
         # Annotate each Alias with a boolean indicating if related cmsplugins exist
         return qs.annotate(cmsplugins_count=models.Count("cms_plugins"))
+
+    def get_list_display(self, request: HttpRequest) -> Iterable[str]:
+        list_display = super().get_list_display(request)
+        list_display = list(list_display)
+        if hasattr(self, "get_author"):
+            list_display.insert(-1, "get_author")
+        if hasattr(self, "get_modified_date"):
+            list_display.insert(-1, "get_modified_date")
+        return list_display
+
+    @admin.display(description=_("Name"), ordering=models.functions.Lower("contents__name"))
+    def content_name(self, obj: Alias) -> str:
+        return self.get_content_field(obj, "name") or obj.static_code or self.EMPTY_CONTENT_VALUE
 
     @admin.display(description=_("Used"), boolean=True, ordering="cmsplugins_count")
     def used(self, obj: Alias) -> bool | None:

@@ -14,7 +14,7 @@ coverage[toml]==7.8.0
     # via
     #   -r requirements.in
     #   pytest-cov
-django==5.2.8
+django==5.2.11
     # via
     #   django-classy-tags
     #   django-cms

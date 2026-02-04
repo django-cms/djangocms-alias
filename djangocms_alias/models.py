@@ -168,7 +168,7 @@ class Alias(models.Model):
             if version.state == DRAFT:
                 return f"{name} (Not published)"
         except (ImportError, ModuleNotFoundError, AttributeError):
-            pass
+            return name  # djangocms versioning unreachable for draft check - just return the name
         return name
 
     def get_content(self, language=None, show_draft_content=False):

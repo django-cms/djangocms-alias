@@ -162,7 +162,7 @@ a different name and the content goes into a block called ``main_content``, you 
 A note about versioning
 =======================
 
-If you enable versioning after creating aliases, you need to run the management command
+If you enable djangocms-versioning after creating aliases, you need to run the management command
 ``manage.py create_versions --userid=<pk>`` to create Version objects for existing alias content.
 See the `create_versions command documentation <https://djangocms-versioning.readthedocs.io/en/latest/api/management_commands.html#create-versions>`_
 for more details.

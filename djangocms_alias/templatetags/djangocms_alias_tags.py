@@ -17,7 +17,10 @@ from ..utils import is_versioning_enabled
 
 register = template.Library()
 
-DeclaredStaticAlias = namedtuple("DeclaredStaticAlias", ["static_code", "site"])
+DeclaredStaticAlias = namedtuple(
+    "DeclaredStaticAlias",
+    ["static_code", "site", "placeholder_preview_link"],
+)
 
 _static_alias_editing_enabled = getattr(settings, "STATIC_ALIAS_EDITING_ENABLED", True)
 
@@ -71,10 +74,12 @@ class StaticAlias(Tag):
 
     eg: {% static_alias "identifier_text" %}
     eg: {% static_alias "identifier_text" site %}
+    eg: {% static_alias "identifier_text" placeholder_preview_link %}
 
     Keyword arguments:
     static_code -- the unique identifier of the Alias
     site -- If site is supplied an Alias instance will be created per site.
+    placeholder_preview_link -- If supplied, show a link to the placeholder.
     """
 
     name = "static_alias"
@@ -166,6 +171,29 @@ class StaticAlias(Tag):
             if self.toolbar.edit_mode_active and not editable and _static_alias_editing_enabled:
                 # Also non-editable placeholders need interactivity in the structure board
                 content += renderer.get_placeholder_toolbar_js(placeholder)
+
+            if (
+                "placeholder_preview_link" in extra_bits
+                and self.toolbar
+                and not self.toolbar.preview_mode_active
+                and self.toolbar.is_staff
+            ):
+                href = admin_view_url(alias)
+                link = f"""
+                <span class="static-alias-placeholder-preview-link" style="position: relative;">
+                  <a href="{href}" class="cms-icon cms-icon-view"
+                     style="background: repeating-linear-gradient(-45deg, #dedede, #dedede 10px, #a9a9a9 10px, #a9a9a9 20px);
+                            bottom: 0;
+                            opacity: .5;
+                            padding: 5px;
+                            position: absolute;
+                            right: 0;
+                            text-decoration: none;">
+                  </a>
+                </span>
+                """
+                content = link + content
+
             return content
         return ""
 
@@ -175,10 +203,18 @@ class StaticAlias(Tag):
             return None
         static_code = str(self.kwargs["static_code"].var).strip('"').strip("'")
         site = False
+        placeholder_preview_link = False
         if isinstance(self.kwargs["extra_bits"], ListValue):
             site = any(extra.var.value.strip() == "site" for extra in self.kwargs["extra_bits"])
+            placeholder_preview_link = any(
+                extra.var.value.strip() == "placeholder_preview_link" for extra in self.kwargs["extra_bits"]
+            )
 
-        return DeclaredStaticAlias(static_code=static_code, site=site)
+        return DeclaredStaticAlias(
+            static_code=static_code,
+            site=site,
+            placeholder_preview_link=placeholder_preview_link,
+        )
 
 
 register.tag(StaticAlias.name, StaticAlias)

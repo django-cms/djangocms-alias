@@ -168,6 +168,7 @@ class Alias(models.Model):
             if version.state == DRAFT:
                 return f"{name} (Not published)"
         except (ImportError, ModuleNotFoundError, AttributeError):
+            # djangocms-versioning not installed
             pass
         return name
 

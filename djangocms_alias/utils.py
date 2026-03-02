@@ -1,14 +1,22 @@
+from functools import cache
+
 from django.apps import apps
 
 
-def is_versioning_enabled():
-    from .models import AliasContent
+@cache
+def get_versionable_item(cms_config) -> type | None:
+    if hasattr(cms_config, "get_contract"):
+        return cms_config.get_contract("djangocms_versioning")
+    return None
 
-    try:
-        app_config = apps.get_app_config("djangocms_versioning")
-        return app_config.cms_extension.is_content_model_versioned(AliasContent)
-    except LookupError:
-        return False
+
+def is_versioning_enabled() -> bool:
+    """
+    is_versioning_enabled returns True if djangocms-alias has registered itself
+    for verisoning
+    """
+    cms_config = apps.get_app_config("djangocms_alias").cms_config
+    return bool(getattr(cms_config, "versioning", False))
 
 
 def emit_content_change(objs, sender=None):

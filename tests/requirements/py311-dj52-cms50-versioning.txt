@@ -84,7 +84,7 @@ pytest-django==4.11.1
     # via -r requirements.in
 soupsieve==2.7
     # via beautifulsoup4
-sqlparse==0.5.3
+sqlparse==0.5.4
     # via django
 typing-extensions==4.13.2
     # via beautifulsoup4

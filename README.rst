@@ -166,15 +166,15 @@ When editing or previewing content managed via ``djangocms-alias`` (for example,
 static aliases like headers or footers), django CMS renders the content inside
 a dedicated template.
 
-This template may extend your project's ``base.html`` template by default. 
-This could cause the full page layout to be displayed while editing a small piece of 
+This template may extend your project's ``base.html`` template by default.
+This could cause the full page layout to be displayed while editing a small piece of
 content and make it difficult to focus on the alias itself.
 
 You can override this default behaviour by supplying your template at::
 
     templates/djangocms_alias/base.html
 
-The provided template will then be used when rendering aliases in edit and preview 
+The provided template will then be used when rendering aliases in edit and preview
 mode. Also, it does not need to extend your main ``base.html`` template.
 
 However, be sure that the required CMS tags and assets are included, for example::
@@ -195,7 +195,7 @@ However, be sure that the required CMS tags and assets are included, for example
     </html>
 
 
-This helps you keep the editing interface focused on the alias content instead of 
+This helps you keep the editing interface focused on the alias content instead of
 the surrounding site layout.
 
 

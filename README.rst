@@ -174,7 +174,7 @@ You can override this default behaviour by supplying your own template at::
 
     templates/djangocms_alias/base.html
 
-The provided template will then be used when rendering aliases in edit and preview 
+The provided template will then be used when rendering aliases in edit and preview
 modes. Also, it does not need to extend your main ``base.html`` template.
 
 However, be sure that the required CMS tags and assets are included, for example::

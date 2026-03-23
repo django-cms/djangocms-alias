@@ -170,12 +170,12 @@ This template may extend your project's ``base.html`` template by default.
 This could cause the full page layout to be displayed while editing a small piece of
 content and make it difficult to focus on the alias itself.
 
-You can override this default behaviour by supplying your template at::
+You can override this default behaviour by supplying your own template at::
 
     templates/djangocms_alias/base.html
 
-The provided template will then be used when rendering aliases in edit and preview
-mode. Also, it does not need to extend your main ``base.html`` template.
+The provided template will then be used when rendering aliases in edit and preview 
+modes. Also, it does not need to extend your main ``base.html`` template.
 
 However, be sure that the required CMS tags and assets are included, for example::
 

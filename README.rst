@@ -188,21 +188,20 @@ modes. Also, it does not need to extend your main ``base.html`` template.
 
 However, be sure that the required CMS tags and assets are included, for example:
 
-.. code-block:: html+django
-
-    {% load cms_tags sekizai_tags %}
-    <!DOCTYPE html>
-    <html>
-        <head>
-            {% render_block "css" %}
-        </head>
-        <body>
-            {% cms_toolbar %}
-            {% block content %}{% endblock %}
-            {% render_block "js" %}
-        </body>
-    </html>
-
+```
+{% load cms_tags sekizai_tags %}
+<!DOCTYPE html>
+<html>
+    <head>
+        {% render_block "css" %}
+    </head>
+    <body>
+        {% cms_toolbar %}
+        {% block content %}{% endblock %}
+        {% render_block "js" %}
+    </body>
+</html>
+```
 
 This helps you keep the editing interface focused on the alias content instead of
 the surrounding site layout.

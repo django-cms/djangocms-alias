@@ -168,6 +168,7 @@ class Alias(models.Model):
             if version.state == DRAFT:
                 return f"{name} (Not published)"
         except (ImportError, ModuleNotFoundError, AttributeError):
+            # djangocms-versioning not installed
             pass
         return name
 
@@ -184,7 +185,9 @@ class Alias(models.Model):
                 qs = self.contents.all()
             for content in qs:
                 self._content_cache.setdefault(content.language, content)
-            return self._content_cache.get(language)
+            return self._content_cache.setdefault(
+                language, self._content_cache.get(language)
+            )  # Update to cache "no content" as None
 
     def get_placeholder(self, language=None, show_draft_content=False):
         content = self.get_content(language=language, show_draft_content=show_draft_content)

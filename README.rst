@@ -159,6 +159,56 @@ a different name and the content goes into a block called ``main_content``, you 
         </div>
     {% endblock main_content %}
 
+Customizing the alias preview template
+======================================
+
+When editing or previewing content managed via ``djangocms-alias`` (for example,
+static aliases like headers or footers), django CMS renders the content inside
+a dedicated template.
+
+This template may extend your project's ``base.html`` template by default.
+This could cause the full page layout to be displayed while editing a small piece of
+content and make it difficult to focus on the alias itself.
+
+You can override this default behaviour by supplying your own template at::
+
+    templates/djangocms_alias/base.html
+
+The provided template will then be used when rendering aliases in edit and preview
+modes. Also, it does not need to extend your main ``base.html`` template.
+
+However, be sure that the required CMS tags and assets are included, for example::
+
+.. code-block:: html+django
+
+    {% load cms_tags sekizai_tags %}
+    <!DOCTYPE html>
+    <html>
+        <head>
+            {% render_block "css" %}
+        </head>
+        <body>
+            {% cms_toolbar %}
+            {% block content %}{% endblock %}
+            {% render_block "js" %}
+        </body>
+    </html>
+
+
+This helps you keep the editing interface focused on the alias content instead of
+the surrounding site layout.
+
+
+A note about versioning
+=======================
+
+If you enable djangocms-versioning after creating aliases, you need to run the management command
+``manage.py create_versions --userid=<pk>`` to create Version objects for existing alias content.
+See the `create_versions command documentation <https://djangocms-versioning.readthedocs.io/en/latest/api/management_commands.html#create-versions>`_
+for more details.
+
+For more information about djangocms-versioning, see the `djangocms-versioning documentation <https://djangocms-versioning.readthedocs.io/en/latest/>`_.
+
 
 
 .. |PyPiVersion| image:: https://img.shields.io/pypi/v/djangocms-alias.svg?style=flat-square

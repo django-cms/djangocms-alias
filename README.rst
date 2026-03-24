@@ -142,7 +142,12 @@ Here is the template hierarchy for the edit and preview endpoints::
 
     base.html
         └── djangocms_alias/base.html {% block content %}
-              └── djangocms_alias/alias_content_preview.html  {% block alias_content %}
+              ├── djangocms_alias/<static_code>/alias_content_preview.html  {% block alias_content %}
+              └── djangocms_alias/alias_content_preview.html                {% block alias_content %}
+
+For static aliases, ``<static_code>`` is the alias static code (or placeholder slotname when no static code is set).
+django CMS Alias first tries the slot-specific preview template and falls back to
+``djangocms_alias/alias_content_preview.html``.
 
 Use Django's template override mechanism to customize these templates as needed. Say, if your base template has
 a different name and the content goes into a block called ``main_content``, you would create a template at
@@ -174,10 +179,14 @@ You can override this default behaviour by supplying your own template at::
 
     templates/djangocms_alias/base.html
 
+For static aliases you can also provide a slot-specific preview template at::
+
+    templates/djangocms_alias/<static_code>/alias_content_preview.html
+
 The provided template will then be used when rendering aliases in edit and preview
 modes. Also, it does not need to extend your main ``base.html`` template.
 
-However, be sure that the required CMS tags and assets are included, for example::
+However, be sure that the required CMS tags and assets are included, for example:
 
 .. code-block:: html+django
 
@@ -215,7 +224,8 @@ For more information about djangocms-versioning, see the `djangocms-versioning d
     :target: https://pypi.python.org/pypi/djangocms-alias
     :alt: Latest PyPI version
 .. |Coverage| image:: https://codecov.io/gh/django-cms/djangocms-alias/graph/badge.svg?token=UUkVjsHGcA
- :target: https://codecov.io/gh/django-cms/djangocms-alias
+    :target: https://codecov.io/gh/django-cms/djangocms-alias
+    :alt: Coverage
 
 .. |PyVersion| image:: https://img.shields.io/pypi/pyversions/djangocms-alias.svg?style=flat-square
     :target: https://pypi.python.org/pypi/djangocms-alias

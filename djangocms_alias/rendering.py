@@ -21,10 +21,14 @@ if TYPE_CHECKING:
     from djangocms_alias.templatetags.djangocms_alias_tags import DeclaredStaticAlias
 
 
-def render_alias_content(request: HttpRequest, alias_content: str) -> TemplateResponse:
-    template = "djangocms_alias/alias_content_preview.html"
+def render_alias_content(request: HttpRequest, alias_content: AliasContent) -> TemplateResponse:
+    static_code = alias_content.alias.static_code or alias_content.placeholder_slotname
+    templates = [
+        f"djangocms_alias/{static_code}/alias_content_preview.html",
+        "djangocms_alias/alias_content_preview.html",
+    ]
     context = {"alias_content": alias_content}
-    return TemplateResponse(request, template, context)
+    return TemplateResponse(request, templates, context)
 
 
 def get_declared_static_aliases(template: str) -> list["DeclaredStaticAlias"]:

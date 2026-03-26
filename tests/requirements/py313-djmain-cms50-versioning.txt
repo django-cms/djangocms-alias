@@ -19,21 +19,21 @@ django @ https://github.com/django/django/tarball/main
     #   django-classy-tags
     #   django-cms
     #   django-formtools
+    #   django-fsm-2
     #   django-parler
     #   django-sekizai
     #   django-treebeard
     #   djangocms-admin-style
-    #   djangocms-versioning
 django-classy-tags==4.1.0
     # via
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-django-cms==5.0.3
+django-cms==5.0.5
     # via djangocms-versioning
 django-formtools==2.5.1
     # via django-cms
-django-fsm==2.8.2
+django-fsm-2==4.1.0
     # via
     #   -r requirements.in
     #   djangocms-versioning
@@ -47,7 +47,7 @@ django-treebeard==4.7.1
     # via django-cms
 djangocms-admin-style==3.3.1
     # via django-cms
-djangocms-versioning==2.4.0
+djangocms-versioning==2.5.0
     # via -r requirements.in
 flake8==7.2.0
     # via -r requirements.in

@@ -165,6 +165,9 @@ class StaticAlias(Tag):
                 use_cache=True,
                 editable=editable and _static_alias_editing_enabled and not is_nested,
             )
+            if self.toolbar.edit_mode_active and not editable and _static_alias_editing_enabled and not is_nested:
+                # Also non-editable placeholders need interactivity in the structure board
+                content += renderer.get_placeholder_toolbar_js(placeholder)
             return content
         return ""
 

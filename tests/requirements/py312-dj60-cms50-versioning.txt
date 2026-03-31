@@ -14,7 +14,7 @@ coverage[toml]==7.10.6
     # via
     #   -r requirements.in
     #   pytest-cov
-django==5.2.11
+django==5.2.12
     # via
     #   django-classy-tags
     #   django-cms
@@ -72,7 +72,7 @@ pyflakes==3.4.0
     # via
     #   -r requirements.in
     #   flake8
-pygments==2.19.2
+pygments==2.20.0
     # via pytest
 pytest==8.4.2
     # via

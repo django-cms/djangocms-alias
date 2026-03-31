@@ -26,7 +26,7 @@ def render_alias_content(request: HttpRequest, alias_content: AliasContent) -> T
     templates = [
         f"djangocms_alias/{static_code}/alias_content_preview.html",
         "djangocms_alias/alias_content_preview.html",
-    ]
+    ] if static_code else "djangocms_alias/alias_content_preview.html"
     context = {"alias_content": alias_content}
     return TemplateResponse(request, templates, context)
 

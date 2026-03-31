@@ -154,6 +154,8 @@ class StaticAlias(Tag):
 
         placeholder = alias.get_placeholder(language=self.language, show_draft_content=self.get_draft_content)
         if placeholder:
+            # In render_tag, before rendering:
+            is_nested = "instance" in context  # We're inside a plugin's template
             editable = self.toolbar.edit_mode_active and placeholder.check_source(request.user)
             renderer = self.toolbar.get_content_renderer()
             content = renderer.render_placeholder(
@@ -161,11 +163,8 @@ class StaticAlias(Tag):
                 context=context,
                 nodelist=nodelist,
                 use_cache=True,
-                editable=editable and _static_alias_editing_enabled,
+                editable=editable and _static_alias_editing_enabled and not is_nested,
             )
-            if self.toolbar.edit_mode_active and not editable and _static_alias_editing_enabled:
-                # Also non-editable placeholders need interactivity in the structure board
-                content += renderer.get_placeholder_toolbar_js(placeholder)
             return content
         return ""
 

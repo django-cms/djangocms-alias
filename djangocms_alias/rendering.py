@@ -23,10 +23,14 @@ if TYPE_CHECKING:
 
 def render_alias_content(request: HttpRequest, alias_content: AliasContent) -> TemplateResponse:
     static_code = alias_content.alias.static_code or alias_content.placeholder_slotname
-    templates = [
-        f"djangocms_alias/{static_code}/alias_content_preview.html",
-        "djangocms_alias/alias_content_preview.html",
-    ] if static_code else "djangocms_alias/alias_content_preview.html"
+    templates = (
+        [
+            f"djangocms_alias/{static_code}/alias_content_preview.html",
+            "djangocms_alias/alias_content_preview.html",
+        ]
+        if static_code
+        else "djangocms_alias/alias_content_preview.html"
+    )
     context = {"alias_content": alias_content}
     return TemplateResponse(request, templates, context)
 

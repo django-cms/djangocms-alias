@@ -154,8 +154,8 @@ class StaticAlias(Tag):
 
         placeholder = alias.get_placeholder(language=self.language, show_draft_content=self.get_draft_content)
         if placeholder:
-            # In render_tag, before rendering:
-            is_nested = "instance" in context  # We're inside a plugin's template
+            # Heuristic: treat this as nested/plugin rendering when "instance" is present in the context
+            is_nested = "instance" in context
             editable = self.toolbar.edit_mode_active and placeholder.check_source(request.user)
             renderer = self.toolbar.get_content_renderer()
             content = renderer.render_placeholder(

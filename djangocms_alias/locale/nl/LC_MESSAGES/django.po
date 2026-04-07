@@ -2,11 +2,11 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
+#
 # Translators:
 # Stefan van den Eertwegh <stefan@corebyte.nl>, 2023
 # Fabian Braun <fsbraun@gmx.de>, 2026
-# 
+#
 #, fuzzy
 msgid ""
 msgstr ""

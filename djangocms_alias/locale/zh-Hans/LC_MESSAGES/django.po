@@ -1,0 +1,348 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# Fabian Braun <fsbraun@gmx.de>, 2026
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-07 10:29+0200\n"
+"PO-Revision-Date: 2023-01-10 21:21+0000\n"
+"Last-Translator: Fabian Braun <fsbraun@gmx.de>, 2026\n"
+"Language-Team: Chinese Simplified (https://app.transifex.com/divio/teams/58664/zh-Hans/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: zh-Hans\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: admin.py:74
+msgid "<i>Missing language</i>"
+msgstr "<i>缺少语言</i>"
+
+#: admin.py:94 forms.py:199 templates/djangocms_alias/alias_usage.html:32
+msgid "Name"
+msgstr "名称"
+
+#: admin.py:103 filters.py:86
+msgid "Used"
+msgstr "已使用"
+
+#: admin.py:109
+msgid "Static"
+msgstr "静态"
+
+#: admin.py:161 cms_toolbars.py:103
+#: templates/djangocms_alias/alias_usage.html:50
+msgid "View usage"
+msgstr "查看使用情况"
+
+#: admin.py:168
+msgid "Delete Alias"
+msgstr "删除别名"
+
+#: admin.py:210
+#, python-brace-format
+msgid ""
+"Alias content for language {} deleted. A new empty alias content will be "
+"created if needed."
+msgstr "语言 {} 的别名内容已删除。如有需要，将创建新的空别名内容。"
+
+#: apps.py:7
+msgid "django CMS Alias"
+msgstr "django CMS 别名"
+
+#: cms_plugins.py:37 cms_plugins.py:312 cms_plugins.py:380 cms_toolbars.py:51
+#: forms.py:297
+msgid "Alias"
+msgstr "别名"
+
+#: cms_plugins.py:84
+msgid "Edit Alias"
+msgstr "编辑别名"
+
+#: cms_plugins.py:98 cms_plugins.py:306
+msgid "Detach Alias"
+msgstr "分离别名"
+
+#: cms_plugins.py:116 cms_plugins.py:135 cms_plugins.py:256
+msgid "Create Alias"
+msgstr "创建别名"
+
+#: cms_toolbars.py:52 cms_toolbars.py:79 templates/djangocms_alias/base.html:4
+msgid "Aliases"
+msgstr "别名"
+
+#: cms_toolbars.py:95
+msgid "Change alias settings"
+msgstr "修改别名设置"
+
+#: cms_toolbars.py:112
+msgid "Delete alias"
+msgstr "删除别名"
+
+#: cms_toolbars.py:157
+msgid "Create"
+msgstr "创建"
+
+#: cms_toolbars.py:170 internal_search.py:29
+msgid "Language"
+msgstr "语言"
+
+#: cms_toolbars.py:222
+msgid "Add Translation"
+msgstr "添加翻译"
+
+#: cms_toolbars.py:233
+msgid "Delete Translation"
+msgstr "删除翻译"
+
+#: cms_toolbars.py:250
+msgid "Copy all plugins"
+msgstr "复制所有插件"
+
+#: cms_toolbars.py:252
+#, python-format
+msgid "from %s"
+msgstr "从 %s"
+
+#: cms_toolbars.py:253
+#, python-format
+msgid "Are you sure you want to copy all plugins from %s?"
+msgstr "您确定要从 %s 复制所有插件吗？"
+
+#: cms_wizards.py:30
+msgid "New alias"
+msgstr "新建别名"
+
+#: cms_wizards.py:34
+msgid "Create a new alias."
+msgstr "创建新别名。"
+
+#: cms_wizards.py:37
+msgid "New alias category"
+msgstr "新建别名分类"
+
+#: cms_wizards.py:41
+msgid "Create a new alias category."
+msgstr "创建新的别名分类。"
+
+#: filters.py:16 forms.py:279
+msgid "Site"
+msgstr "站点"
+
+#: filters.py:34 filters.py:70 filters.py:102
+msgid "All"
+msgstr "全部"
+
+#: filters.py:39
+msgid "No site"
+msgstr "无站点"
+
+#: filters.py:50 forms.py:286 internal_search.py:22
+msgid "Category"
+msgstr "分类"
+
+#: filters.py:81
+msgid "Usage in Alias Plugins"
+msgstr "在别名插件中的使用情况"
+
+#: filters.py:87
+msgid "Unused"
+msgstr "未使用"
+
+#: forms.py:82
+msgid "A plugin or placeholder is required to create an alias."
+msgstr "创建别名需要一个插件或占位符。"
+
+#: forms.py:87
+msgid "An alias can only be created from a plugin or placeholder, not both."
+msgstr "别名只能从插件或占位符创建，不能同时使用两者。"
+
+#: forms.py:106
+msgid "Replace current plugin"
+msgstr "替换当前插件"
+
+#: forms.py:107
+msgid "Replace current plugin with alias"
+msgstr "用别名替换当前插件"
+
+#: forms.py:120
+msgid "Select a site"
+msgstr "选择站点"
+
+#: forms.py:126
+msgid "Select a category"
+msgstr "选择分类"
+
+#: forms.py:153 forms.py:346
+msgid "Alias with this Name and Category already exists."
+msgstr "具有此名称和分类的别名已存在。"
+
+#: forms.py:290
+msgid "Select category to restrict the list of aliases below"
+msgstr "选择分类以筛选下方的别名列表"
+
+#: forms.py:301
+msgid "Select an alias"
+msgstr "选择别名"
+
+#: internal_search.py:15
+msgid "Title"
+msgstr "标题"
+
+#: internal_search.py:36
+msgid "URL"
+msgstr "URL"
+
+#: internal_search.py:43
+msgid "Version status"
+msgstr "版本状态"
+
+#: models.py:37
+msgid "Default"
+msgstr "默认"
+
+#: models.py:50 models.py:269
+msgid "name"
+msgstr "名称"
+
+#: models.py:57 models.py:86
+msgid "category"
+msgstr "分类"
+
+#: models.py:58
+msgid "categories"
+msgstr "分类"
+
+#: models.py:74
+msgid "by template"
+msgstr "通过模板"
+
+#: models.py:75
+msgid "by code"
+msgstr "通过代码"
+
+#: models.py:78
+msgid "creation_method"
+msgstr "创建方式"
+
+#: models.py:91
+msgid "position"
+msgstr "位置"
+
+#: models.py:95
+msgid "static code"
+msgstr "静态代码"
+
+#: models.py:99
+msgid "To render the alias in templates."
+msgstr "用于在模板中渲染别名。"
+
+#: models.py:104 models.py:384
+msgid "alias"
+msgstr "别名"
+
+#: models.py:105
+msgid "aliases"
+msgstr "别名"
+
+#: models.py:283
+msgid "alias content"
+msgstr "别名内容"
+
+#: models.py:284
+msgid "alias contents"
+msgstr "别名内容"
+
+#: models.py:389
+msgid "template"
+msgstr "模板"
+
+#: models.py:396
+msgid "alias plugin model"
+msgstr "别名插件模型"
+
+#: models.py:397
+msgid "alias plugin models"
+msgstr "别名插件模型"
+
+#: templates/admin/djangocms_alias/alias/change_form.html:8
+msgid "Save"
+msgstr "保存"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:15
+#, python-format
+msgid ""
+"You don't have permissions to delete %(object_name)s \"%(escaped_object)s\"."
+" Please request your site admin to add permissions to delete alias, or "
+"delete alias from all places that it being used."
+msgstr ""
+"您没有权限删除 %(object_name)s "
+"\"%(escaped_object)s\"。请联系站点管理员添加删除别名的权限，或从所有使用该别名的位置将其删除。"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:17
+#, python-format
+msgid ""
+"Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"?"
+msgstr "您确定要删除 %(object_name)s \"%(escaped_object)s\" 吗？"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:23
+msgid "This alias is used by following objects:"
+msgstr "此别名被以下对象使用："
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:33
+msgid "This alias is not used by any object."
+msgstr "此别名未被任何对象使用。"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:40
+#: templates/djangocms_alias/detach_alias.html:16
+msgid "Yes, I'm sure"
+msgstr "是的，我确定"
+
+#: templates/admin/djangocms_alias/alias/delete_confirmation.html:42
+#: templates/djangocms_alias/detach_alias.html:15
+msgid "No, take me back"
+msgstr "不，返回"
+
+#: templates/djangocms_alias/add_alias.html:5
+msgid "Add alias"
+msgstr "添加别名"
+
+#: templates/djangocms_alias/add_alias.html:14
+#, python-format
+msgid ""
+"Are you sure you want to add alias <a "
+"href=\"%(alias.get_absolute_url)s\">%(alias_name)s</a>?"
+msgstr "您确定要添加别名 <a href=\"%(alias.get_absolute_url)s\">%(alias_name)s</a> 吗？"
+
+#: templates/djangocms_alias/add_alias.html:28
+msgid "Add"
+msgstr "添加"
+
+#: templates/djangocms_alias/alias_usage.html:16
+msgid "Home"
+msgstr "首页"
+
+#: templates/djangocms_alias/alias_usage.html:20
+msgid "Usage of alias"
+msgstr "别名使用情况"
+
+#: templates/djangocms_alias/alias_usage.html:26
+msgid "Back"
+msgstr "返回"
+
+#: templates/djangocms_alias/alias_usage.html:31
+msgid "Type"
+msgstr "类型"
+
+#: templates/djangocms_alias/detach_alias.html:7
+#, python-format
+msgid ""
+"Are you sure you want to detach the %(object_name)s \"%(escaped_object)s\"?"
+msgstr "您确定要分离 %(object_name)s \"%(escaped_object)s\" 吗？"

@@ -2,6 +2,22 @@
 Changelog
 =========
 
+3.1.0 (2026-04-07)
+==================
+
+* feat: Add search box by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/333
+* feat: Support djangocms-versioning contract by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/336
+* feat: Allow slot-specific preview templates by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/345
+* fix: Show fallback languages in changelist view by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/334
+* fix: Only add first-level alias as editable by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/347
+* doc: add short note about versioning (management command, doc website link) in README by @corentinbettiol in https://github.com/django-cms/djangocms-alias/pull/337
+* docs: specify how to customize preview & edit alias template by @entuziaz in https://github.com/django-cms/djangocms-alias/pull/343
+
+**New Contributors**
+
+* @corentinbettiol made their first contribution in https://github.com/django-cms/djangocms-alias/pull/337
+* @entuziaz made their first contribution in https://github.com/django-cms/djangocms-alias/pull/343
+
 3.0.3 (2026-01-13)
 ==================
 
@@ -67,7 +83,7 @@ Changelog
 * fix: Remove `get_absolute_url` from both `Alias` and `AliasContent` models by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/199
 * fix djangocms-versioning draft deletion bug (#214) by @fscherf in https://github.com/django-cms/djangocms-alias/pull/215
 
-Contributors
+**New Contributors**
 
 * @aacimov made their first contribution in https://github.com/django-cms/djangocms-alias/pull/213
 * @raffaellasuardini made their first contribution in https://github.com/django-cms/djangocms-alias/pull/217

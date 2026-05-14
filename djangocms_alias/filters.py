@@ -4,15 +4,12 @@ from django.utils.encoding import smart_str
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
-from .cms_config import AliasCMSConfig
 from .constants import (
     CATEGORY_FILTER_PARAM,
     SITE_FILTER_NO_SITE_VALUE,
     SITE_FILTER_URL_PARAM,
 )
 from .models import Category
-
-djangocms_versioning_enabled = AliasCMSConfig.djangocms_versioning_enabled
 
 
 class SiteFilter(admin.SimpleListFilter):

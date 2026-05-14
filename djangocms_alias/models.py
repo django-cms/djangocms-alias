@@ -19,7 +19,6 @@ from django.utils.translation import gettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
 
 from .constants import CHANGE_ALIAS_URL_NAME, CHANGE_CATEGORY_URL_NAME
-from .utils import is_versioning_enabled
 
 __all__ = [
     "Category",
@@ -158,15 +157,19 @@ class Alias(models.Model):
 
     def get_name(self, language=None):
         content = self.get_content(language, show_draft_content=True)
+        if not content:
+            content = next(iter(self._content_cache.values()), None)
         name = getattr(content, "name", f"Alias {self.pk} (No content)")
-        if is_versioning_enabled() and content:
+        try:
             from djangocms_versioning.constants import DRAFT
 
             version = content.versions.first()
 
             if version.state == DRAFT:
                 return f"{name} (Not published)"
-
+        except (ImportError, ModuleNotFoundError, AttributeError):
+            # djangocms-versioning not installed
+            pass
         return name
 
     def get_content(self, language=None, show_draft_content=False):
@@ -180,10 +183,11 @@ class Alias(models.Model):
                 qs = self.contents(manager="admin_manager").latest_content()
             else:
                 qs = self.contents.all()
-            qs = qs.filter(language=language)
-
-            self._content_cache[language] = qs.first()
-            return self._content_cache[language]
+            for content in qs:
+                self._content_cache.setdefault(content.language, content)
+            return self._content_cache.setdefault(
+                language, self._content_cache.get(language)
+            )  # Update to cache "no content" as None
 
     def get_placeholder(self, language=None, show_draft_content=False):
         content = self.get_content(language=language, show_draft_content=show_draft_content)

@@ -3,11 +3,11 @@ coverage
 pytest-django
 pytest-cov
 django-classy-tags
-django-fsm>=2.6
+django-fsm-2
 django-sekizai
 django-parler
 flake8
 isort
 pyflakes>=2.1.1
 
-djangocms-versioning>=2.4
+djangocms-versioning>=2.5.0

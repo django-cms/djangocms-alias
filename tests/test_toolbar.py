@@ -218,7 +218,7 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         )
         language_menu = request.toolbar.get_menu(LANGUAGE_MENU_IDENTIFIER)
 
-        self.assertEqual([item.name for item in language_menu.items], expected_result)
+        self.assertEqual([item.name for item in language_menu.items if not isinstance(item, Break)], expected_result)
 
     def test_language_switcher_when_toolbar_object_isnt_alias_content(self):
         request = self.get_page_request(
@@ -231,10 +231,10 @@ class AliasToolbarTestCase(BaseAliasPluginTestCase):
         # Versioning changes the toolbar language selector and only shows
         # languages that have translations
         if is_versioning_enabled():
-            expected_result = ["English"]
+            expected_result = ["English", "Add Translation"]
 
         # Don't change default language switcher that is used for Pages
-        self.assertEqual([item.name for item in language_menu.items], expected_result)
+        self.assertEqual([item.name for item in language_menu.items if not isinstance(item, Break)], expected_result)
 
     def test_page_toolbar_no_language_menu(self):
         from django.utils.translation import gettext as _

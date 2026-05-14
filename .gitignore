@@ -17,3 +17,4 @@ node_modules
 .editorconfig
 .vscode/
 .claude/
+uv.lock

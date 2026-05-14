@@ -244,17 +244,41 @@ class CreateCategoryWizardForm(TranslatableModelForm):
 class Select2Mixin:
     class Media:
         css = {
-            "screen": ("cms/js/select2/select2.css",),
+            "screen": ("admin/css/vendor/select2/select2.css",),
         }
         js = (
+            "admin/js/vendor/jquery/jquery.js",
+            "admin/js/vendor/select2/select2.full.js",
             "admin/js/jquery.init.js",
-            "cms/js/select2/select2.js",
             "djangocms_alias/js/create.js",
             "djangocms_alias/js/alias_plugin.js",
         )
 
+    def optgroups(self, name, value, attr=None):
+        """Render only the currently selected option; the rest are loaded via AJAX."""
+        default = (None, [], 0)
+        groups = [default]
+        if not self.is_required and not self.allow_multiple_selected:
+            default[1].append(self.create_option(name, "", "", False, 0))
+        selected = {str(v) for v in value if v not in (None, "")}
+        queryset = getattr(self.choices, "queryset", None)
+        field = getattr(self.choices, "field", None)
+        if not selected or queryset is None or field is None:
+            return groups
+        for obj in queryset.filter(pk__in=selected):
+            default[1].append(
+                self.create_option(
+                    name,
+                    field.prepare_value(obj),
+                    field.label_from_instance(obj),
+                    True,
+                    0,
+                )
+            )
+        return groups
 
-class CategorySelectWidget(Select2Mixin, forms.TextInput):
+
+class CategorySelectWidget(Select2Mixin, forms.Select):
     def get_url(self):
         return admin_reverse(CATEGORY_SELECT2_URL_NAME)
 
@@ -264,7 +288,7 @@ class CategorySelectWidget(Select2Mixin, forms.TextInput):
         return attrs
 
 
-class AliasSelectWidget(Select2Mixin, forms.TextInput):
+class AliasSelectWidget(Select2Mixin, forms.Select):
     def get_url(self):
         return admin_reverse(SELECT2_ALIAS_URL_NAME)
 

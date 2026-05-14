@@ -2,14 +2,19 @@
 Changelog
 =========
 
-3.1.0 (2026-04-07)
+
+## What's Changed
+
+3.1.0 (2026-05-14)
 ==================
 
 * feat: Add search box by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/333
 * feat: Support djangocms-versioning contract by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/336
 * feat: Allow slot-specific preview templates by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/345
+* feat: add support for python 3.14 and replace django-fsm to django-fsm-2 by @vinitkumar in https://github.com/django-cms/djangocms-alias/pull/314
 * fix: Show fallback languages in changelist view by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/334
 * fix: Only add first-level alias as editable by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/347
+* fix: Remove outdated django CMS select2 dependency by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/362
 * doc: add short note about versioning (management command, doc website link) in README by @corentinbettiol in https://github.com/django-cms/djangocms-alias/pull/337
 * docs: specify how to customize preview & edit alias template by @entuziaz in https://github.com/django-cms/djangocms-alias/pull/343
 

@@ -68,6 +68,7 @@ if __name__ == "__main__":
         "-m",
         "piptools",
         "compile",
+        "-U",
         # temporarily remove "--generate-hashes", until all dependencies are actual releases
         "--allow-unsafe",
     ] + sys.argv[1:]

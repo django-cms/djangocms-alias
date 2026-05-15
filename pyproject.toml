@@ -38,7 +38,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "django-parler>=1.4",
+    "django-parler>=2.4",
     "django-cms>=5.0",
 ]
 

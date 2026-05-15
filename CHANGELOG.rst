@@ -5,6 +5,11 @@ Changelog
 
 ## What's Changed
 
+3.2.0 (2026-05-16)
+==================
+
+* fix: Pin django-parler to >=2.4 and add missing migrations
+
 3.1.0 (2026-05-14)
 ==================
 

@@ -16,6 +16,9 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='categorytranslation',
-            constraint=models.UniqueConstraint(fields=('language_code', 'master'), name='djangocms_alias_category_translation_uniq_lang'),
+            constraint=models.UniqueConstraint(
+                fields=('language_code', 'master'),
+                name='djangocms_alias_category_translation_uniq_lang',
+            ),
         ),
     ]

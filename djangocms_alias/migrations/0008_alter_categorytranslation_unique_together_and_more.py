@@ -4,21 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('djangocms_alias', '0007_alter_category_options_alter_aliasplugin_alias'),
+        ("djangocms_alias", "0007_alter_category_options_alter_aliasplugin_alias"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='categorytranslation',
-            unique_together={('name', 'language_code')},
+            name="categorytranslation",
+            unique_together={("name", "language_code")},
         ),
         migrations.AddConstraint(
-            model_name='categorytranslation',
+            model_name="categorytranslation",
             constraint=models.UniqueConstraint(
-                fields=('language_code', 'master'),
-                name='djangocms_alias_category_translation_uniq_lang',
+                fields=("language_code", "master"),
+                name="djangocms_alias_category_translation_uniq_lang",
             ),
         ),
     ]

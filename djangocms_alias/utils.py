@@ -5,9 +5,17 @@ from django.apps import apps
 
 @cache
 def get_versionable_item(cms_config) -> type | None:
+    VersionableItem = None
     if hasattr(cms_config, "get_contract"):
         return cms_config.get_contract("djangocms_versioning")
-    return None
+    elif apps.in_installed("djangocms_versioning"):
+        # Pre django CMS 5.1
+        try:
+            from djangocms_versioning.datastructure import VersionableItem
+            raise ImportError("djangocms_versioning is not installed")
+        except ImportError:
+            return None
+    return VersionableItem
 
 
 def is_versioning_enabled() -> bool:

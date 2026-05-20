@@ -8,7 +8,7 @@ def get_versionable_item(cms_config) -> type | None:
     VersionableItem = None
     if hasattr(cms_config, "get_contract"):
         return cms_config.get_contract("djangocms_versioning")
-    elif apps.in_installed("djangocms_versioning"):
+    elif apps.is_installed("djangocms_versioning"):
         # Pre django CMS 5.1
         try:
             from djangocms_versioning.datastructure import VersionableItem

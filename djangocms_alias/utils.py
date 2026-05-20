@@ -12,6 +12,7 @@ def get_versionable_item(cms_config) -> type | None:
         # Pre django CMS 5.1
         try:
             from djangocms_versioning.datastructure import VersionableItem
+
             raise ImportError("djangocms_versioning is not installed")
         except ImportError:
             return None

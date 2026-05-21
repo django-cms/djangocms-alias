@@ -7,6 +7,18 @@ from django.apps import apps
 def get_versionable_item(cms_config) -> type | None:
     if hasattr(cms_config, "get_contract"):
         return cms_config.get_contract("djangocms_versioning")
+    elif apps.is_installed("djangocms_versioning"):
+        # Pre django CMS 5.1
+        try:
+            from djangocms_versioning.datastructures import VersionableItem
+
+            return VersionableItem
+        except ModuleNotFoundError as exc:
+            # Only treat a missing djangocms_versioning module as "no versioning";
+            # re-raise for any other import issue so real errors are not hidden.
+            if exc.name in ("djangocms_versioning.datastructures", "djangocms_versioning"):
+                return None
+            raise
     return None
 
 

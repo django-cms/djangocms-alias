@@ -13,8 +13,12 @@ def get_versionable_item(cms_config) -> type | None:
             from djangocms_versioning.datastructures import VersionableItem
 
             return VersionableItem
-        except ImportError:
-            return None
+        except ModuleNotFoundError as exc:
+            # Only treat a missing djangocms_versioning module as "no versioning";
+            # re-raise for any other import issue so real errors are not hidden.
+            if exc.name in ("djangocms_versioning.datastructures", "djangocms_versioning"):
+                return None
+            raise
     return None
 
 

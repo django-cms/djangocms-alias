@@ -3,6 +3,16 @@ from functools import cache
 from django.apps import apps
 
 
+def get_current_site(request):
+    from cms.utils import get_current_site as cms_get_current_site
+
+    try: 
+        return cms_get_current_site(request)
+    except TypeError: 
+        # django CMS < 5.1
+        return cms_get_current_site()
+
+
 @cache
 def get_versionable_item(cms_config) -> type | None:
     if hasattr(cms_config, "get_contract"):

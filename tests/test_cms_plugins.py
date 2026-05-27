@@ -7,6 +7,7 @@ from cms.toolbar.utils import get_object_edit_url
 from cms.utils import get_current_site
 from cms.utils.plugins import downcast_plugins
 from cms.utils.urlutils import admin_reverse
+from django.contrib import admin
 
 from djangocms_alias.cms_plugins import Alias
 from djangocms_alias.constants import SELECT2_ALIAS_URL_NAME
@@ -333,8 +334,12 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         """
         current_site = get_current_site()
 
-        # Initially load the empty add form
-        form = AliasPluginForm(data={})
+        # Initially load the empty add form via the plugin's get_form,
+        # which is where the request-aware site default is wired up.
+        request = self.get_request("/")
+        plugin = Alias(Alias.model, admin.site)
+        form_class = plugin.get_form(request)
+        form = form_class(data={})
 
         self.assertEqual(form.fields["site"].initial, current_site)
         self.assertEqual(form.fields["category"].initial, None)
@@ -354,7 +359,10 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
             language=self.language,
             alias=alias,
         )
-        form = AliasPluginForm(instance=alias_plugin)
+        request = self.get_request("/")
+        plugin = Alias(Alias.model, admin.site)
+        form_class = plugin.get_form(request, obj=alias_plugin)
+        form = form_class(instance=alias_plugin)
 
         self.assertNotEqual(form.fields["site"].initial, alias.site)
         self.assertEqual(form.fields["site"].initial, current_site)

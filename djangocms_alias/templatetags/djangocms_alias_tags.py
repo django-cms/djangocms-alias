@@ -4,7 +4,7 @@ from classytags.arguments import Argument, ListValue, MultiValueArgument
 from classytags.core import Tag
 from cms.templatetags.cms_tags import PlaceholderOptions
 from cms.toolbar.utils import get_object_preview_url, get_toolbar_from_request
-from cms.utils import get_current_site, get_language_from_request
+from cms.utils import get_language_from_request
 from cms.utils.helpers import is_editable_model
 from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
@@ -13,7 +13,7 @@ from django.conf import settings
 
 from ..constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME, USAGE_ALIAS_URL_NAME
 from ..models import Alias, AliasContent, Category
-from ..utils import is_versioning_enabled
+from ..utils import get_current_site, is_versioning_enabled
 
 register = template.Library()
 
@@ -91,7 +91,7 @@ class StaticAlias(Tag):
             "static_code": static_code,
         }
         # Site
-        current_site = get_current_site()
+        current_site = get_current_site(request)
         if "site" in extra_bits:
             alias_filter_kwargs["site"] = current_site
         else:

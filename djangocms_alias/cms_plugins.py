@@ -197,7 +197,7 @@ class Alias(CMSPluginBase):
                 start_positions={language: plugin_position},
             )
         return []
-    
+
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         form.base_fields["site"].initial = get_current_site(request)

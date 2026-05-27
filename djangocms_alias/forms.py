@@ -26,7 +26,7 @@ from .models import (
 from .models import (
     Alias as AliasModel,
 )
-from .utils import get_current_site, emit_content_change
+from .utils import emit_content_change, get_current_site
 
 __all__ = [
     "AliasPluginForm",
@@ -139,7 +139,7 @@ class CreateAliasForm(BaseCreateAliasForm):
                 self.fields["replace"].widget = forms.HiddenInput()
 
         self.set_category_widget(self.user)
- 
+
     def clean(self):
         cleaned_data = super().clean()
 

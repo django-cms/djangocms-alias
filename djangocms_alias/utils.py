@@ -6,9 +6,9 @@ from django.apps import apps
 def get_current_site(request):
     from cms.utils import get_current_site as cms_get_current_site
 
-    try: 
+    try:
         return cms_get_current_site(request)
-    except TypeError: 
+    except TypeError:
         # django CMS < 5.1
         return cms_get_current_site()
 

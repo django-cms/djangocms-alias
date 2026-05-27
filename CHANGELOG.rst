@@ -10,6 +10,11 @@ Changelog
 
 * fix: Pin django-parler to >=2.4 and add missing migrations
 
+3.1.1 (2026-05-20)
+==================
+
+* fix: djangocms-versioning was not recognized for django CMS 5.0 or less
+
 3.1.0 (2026-05-14)
 ==================
 

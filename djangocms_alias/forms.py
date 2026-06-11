@@ -1,5 +1,4 @@
 from cms.models import CMSPlugin, Placeholder
-from cms.utils import get_current_site
 from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
@@ -27,7 +26,7 @@ from .models import (
 from .models import (
     Alias as AliasModel,
 )
-from .utils import emit_content_change
+from .utils import emit_content_change, get_current_site
 
 __all__ = [
     "AliasPluginForm",
@@ -140,7 +139,6 @@ class CreateAliasForm(BaseCreateAliasForm):
                 self.fields["replace"].widget = forms.HiddenInput()
 
         self.set_category_widget(self.user)
-        self.fields["site"].initial = get_current_site()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -211,7 +209,7 @@ class CreateAliasWizardForm(forms.Form):
         if not getattr(self, "user", None):
             self.user = self._request.user
         self.set_category_widget(self.user)
-        self.fields["site"].initial = get_current_site()
+        self.fields["site"].initial = get_current_site(self._request)
 
     def set_category_widget(self, user):
         formfield = self.fields["category"]
@@ -343,7 +341,6 @@ class AliasPluginForm(forms.ModelForm):
         # Set the site to the current site by default
         else:
             pass
-        self.fields["site"].initial = get_current_site()
 
     class Meta:
         model = AliasPlugin

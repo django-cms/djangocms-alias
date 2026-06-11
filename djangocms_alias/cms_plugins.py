@@ -19,7 +19,7 @@ from django.utils.translation import (
 )
 
 from djangocms_alias import constants
-from djangocms_alias.utils import emit_content_change
+from djangocms_alias.utils import emit_content_change, get_current_site
 
 from . import views
 from .constants import CREATE_ALIAS_URL_NAME, DETACH_ALIAS_PLUGIN_URL_NAME
@@ -198,6 +198,11 @@ class Alias(CMSPluginBase):
             )
         return []
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields["site"].initial = get_current_site(request)
+        return form
+
     def get_plugin_urls(self):
         return super().get_plugin_urls() + [
             path(
@@ -233,12 +238,13 @@ class Alias(CMSPluginBase):
 
         form = BaseCreateAliasForm(request.GET or None)
 
-        initial_data = form.cleaned_data if form.is_valid() else None
+        initial_data = form.cleaned_data if form.is_valid() else {}
         if request.method == "GET" and not form.is_valid():
             return HttpResponseBadRequest("Form received unexpected values")
 
         user = request.user
 
+        initial_data["site"] = get_current_site(request)
         create_form = CreateAliasForm(
             request.POST or None,
             initial=initial_data,

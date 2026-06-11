@@ -11,7 +11,7 @@ class MigrationTestCase(TestCase):
         output = StringIO()
         options = {
             "interactive": False,
-            "dry_run": True,
+            "dry_run": False,
             "stdout": output,
             "check_changes": True,
             "verbosity": 3,

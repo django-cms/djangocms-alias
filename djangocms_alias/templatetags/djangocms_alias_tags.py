@@ -29,17 +29,34 @@ def get_alias_usage_view_url(alias, **kwargs) -> str:
     return add_url_parameters(url, **ChainMap(kwargs))
 
 
+def _using_contents_by_language(obj) -> dict:
+    """The content objects collected by Alias.objects_using, newest one per
+    language (versioning copies plugins into every version of a content)."""
+    by_language = {}
+    for content in getattr(obj, "_using_contents", []):
+        language = getattr(content, "language", None)
+        newest = by_language.get(language)
+        if newest is None or (content.pk or 0) > (newest.pk or 0):
+            by_language[language] = content
+    return by_language
+
+
+@register.filter()
+def using_contents(obj) -> list:
+    """One content object per language through which obj uses the alias."""
+    return list(_using_contents_by_language(obj).values())
+
+
 @register.filter()
 def admin_view_url(obj) -> str:
     if obj and is_editable_model(obj.__class__):
         # Is obj frontend-editable?
         return get_object_preview_url(obj)
-    contents = getattr(obj, "_using_contents", None)
+    contents = _using_contents_by_language(obj)
     if contents:
         # Content objects collected by Alias.objects_using - their preview
         # endpoint works regardless of admin language or publication state
-        language = get_language()
-        content_obj = next((c for c in contents if getattr(c, "language", None) == language), contents[0])
+        content_obj = contents.get(get_language()) or next(iter(contents.values()))
         return get_object_preview_url(content_obj)
     if hasattr(obj, "get_content"):
         # Is its content object frontend-editable?

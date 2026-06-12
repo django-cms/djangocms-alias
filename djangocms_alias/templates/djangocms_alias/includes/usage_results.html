@@ -29,11 +29,22 @@ djangocms_alias.utils.get_alias_usage_context).
                     {% with item|verbose_name as object_type %}
                     <td class="field-type">{{ object_type|capfirst|escape }}</td>
                     <th class="field-name">
-                      {% if item|admin_view_url %}
+                      {% with item|using_contents as contents %}
+                      {% if contents|length > 1 %}
+                        <details class="usage-contents">
+                            <summary>{{ item }}</summary>
+                            <ul>
+                                {% for content in contents %}
+                                <li><a target="_top" class="js-close-sideframe" href="{{ content|admin_view_url }}">{{ content }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </details>
+                      {% elif item|admin_view_url %}
                         <a target="_top" class="js-close-sideframe" href="{{ item|admin_view_url }}">{{ item }}</a>
                       {% else %}
                         {{ item }}
                       {% endif %}
+                      {% endwith %}
                     </th>
                     <td class="field-actions">
                         {% if object_type == 'alias' %}

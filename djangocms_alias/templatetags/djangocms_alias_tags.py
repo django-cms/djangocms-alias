@@ -73,6 +73,12 @@ def verbose_name(obj) -> str:
     return obj._meta.verbose_name
 
 
+@register.filter()
+def model_name(obj) -> str:
+    """Stable, non-localized model identifier for template conditions."""
+    return obj._meta.model_name
+
+
 @register.simple_tag(takes_context=True)
 def render_alias(context, instance) -> str:
     request = context["request"]

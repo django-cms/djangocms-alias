@@ -153,6 +153,8 @@ class Alias(models.Model):
                 try:
                     grouper_field = model._meta.get_field(model.__name__.removesuffix("Content").lower())
                 except FieldDoesNotExist:
+                    # Named *Content but without a grouper relation - fall
+                    # through and treat the source itself as the using object
                     pass
             if grouper_field is None:
                 # Not a content model - the source itself is the object using the alias

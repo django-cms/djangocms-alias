@@ -26,8 +26,7 @@ djangocms_alias.utils.get_alias_usage_context).
             <tbody>
                 {% for item in objects_list %}
                 <tr>
-                    {% with item|verbose_name as object_type %}
-                    <td class="field-type">{{ object_type|capfirst|escape }}</td>
+                    <td class="field-type">{{ item|verbose_name|capfirst|escape }}</td>
                     <th class="field-name">
                       {% with item|using_contents as contents %}
                       {% if contents|length > 1 %}
@@ -47,11 +46,10 @@ djangocms_alias.utils.get_alias_usage_context).
                       {% endwith %}
                     </th>
                     <td class="field-actions">
-                        {% if object_type == 'alias' %}
+                        {% if item|model_name == 'alias' %}
                         <a href="{% get_alias_usage_view_url alias=item back=1 %}">{% trans 'View usage' %}</a>
                         {% endif %}
                     </td>
-                    {% endwith %}
                 </tr>
                 {% endfor %}
                 {% for placeholder in hidden_usages %}

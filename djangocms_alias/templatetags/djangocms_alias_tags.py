@@ -10,6 +10,7 @@ from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 from django import template
 from django.conf import settings
+from django.utils.translation import get_language
 
 from ..constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME, USAGE_ALIAS_URL_NAME
 from ..models import Alias, AliasContent, Category
@@ -33,13 +34,20 @@ def admin_view_url(obj) -> str:
     if obj and is_editable_model(obj.__class__):
         # Is obj frontend-editable?
         return get_object_preview_url(obj)
+    contents = getattr(obj, "_using_contents", None)
+    if contents:
+        # Content objects collected by Alias.objects_using - their preview
+        # endpoint works regardless of admin language or publication state
+        language = get_language()
+        content_obj = next((c for c in contents if getattr(c, "language", None) == language), contents[0])
+        return get_object_preview_url(content_obj)
     if hasattr(obj, "get_content"):
         # Is its content object frontend-editable?
         content_obj = obj.get_content()
         if content_obj and is_editable_model(content_obj.__class__):
             return get_object_preview_url(content_obj)
     if hasattr(obj, "get_absolute_url"):
-        return obj.get_absolute_url()
+        return obj.get_absolute_url() or ""
     return ""
 
 

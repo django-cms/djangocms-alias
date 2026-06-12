@@ -2,7 +2,7 @@ import operator
 from collections import defaultdict
 
 from cms.api import add_plugin
-from cms.models import CMSPlugin, Placeholder
+from cms.models import CMSPlugin, Page, Placeholder
 from cms.models.fields import PlaceholderRelationField
 from cms.models.managers import ContentAdminManager, WithUserMixin
 from cms.utils.permissions import get_model_permission_codename
@@ -10,6 +10,7 @@ from cms.utils.plugins import copy_plugins_to_placeholder
 from cms.utils.urlutils import admin_reverse
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.core.exceptions import FieldDoesNotExist
 from django.db import models, transaction
 from django.db.models import F, Q
 from django.utils.encoding import force_str
@@ -129,31 +130,73 @@ class Alias(models.Model):
 
     @cached_property
     def objects_using(self):
-        objects = set()
-        object_ids = defaultdict(set)
         plugins = self.cms_plugins.select_related("placeholder").prefetch_related("placeholder__source")
+        # The prefetch fetches the placeholder sources in one query per content type
+        sources_by_type = defaultdict(list)
+        hidden_placeholders = {}
         for plugin in plugins:
             obj = plugin.placeholder.source
-
-            # Skip plugins that have no placeholder source e.g clipboard
             if obj is None:
-                continue
-
-            obj_class_name = obj.__class__.__name__
-            if obj_class_name.endswith("Content"):
-                attr_name = obj_class_name.replace("Content", "").lower()
-                attr_related_model = obj._meta.get_field(attr_name).related_model
-                id_attr = getattr(obj, f"{attr_name}_id")
-                if id_attr:
-                    object_ids[attr_related_model].update([id_attr])
-                else:
-                    objects.update([obj])
+                # Plugins on placeholders without a source, e.g. the clipboard
+                # or orphaned placeholders - they block deletion but have no
+                # object to show, so the usage view lists them separately
+                hidden_placeholders.setdefault(plugin.placeholder_id, plugin.placeholder)
             else:
-                objects.update([obj])
-        objects.update(
-            [obj for model_class, ids in object_ids.items() for obj in model_class.objects.filter(pk__in=ids)]
-        )
+                sources_by_type[type(obj)].append(obj)
+        self._hidden_usages = list(hidden_placeholders.values())
+
+        objects = set()
+        contents_by_grouper = defaultdict(lambda: defaultdict(list))
+        for model, sources in sources_by_type.items():
+            grouper_field = None
+            if model.__name__.endswith("Content"):
+                try:
+                    grouper_field = model._meta.get_field(model.__name__.removesuffix("Content").lower())
+                except FieldDoesNotExist:
+                    pass
+            if grouper_field is None:
+                # Not a content model - the source itself is the object using the alias
+                objects.update(sources)
+                continue
+            for obj in sources:
+                grouper_id = getattr(obj, grouper_field.attname)
+                if grouper_id:
+                    contents_by_grouper[grouper_field.related_model][grouper_id].append(obj)
+                else:
+                    objects.add(obj)
+        for grouper_model, contents_by_id in contents_by_grouper.items():
+            # One query per grouper model fetches all groupers of that type
+            queryset = grouper_model.objects.filter(pk__in=contents_by_id)
+            if issubclass(grouper_model, Page):
+                # Page.__str__ renders title and path - batch-fetch what it
+                # reads so the usage list does not query per page
+                queryset = queryset.prefetch_related("pagecontent_set", "urls")
+            groupers = list(queryset)
+            if issubclass(grouper_model, Alias):
+                self._prefill_content_caches(groupers)
+            for grouper in groupers:
+                # The content objects through which this alias references the
+                # grouper - they exist even when the grouper has no URL in the
+                # current language (e.g. unpublished or untranslated pages)
+                grouper._using_contents = contents_by_id[grouper.pk]
+                objects.add(grouper)
         return list(objects)
+
+    @staticmethod
+    def _prefill_content_caches(aliases):
+        """Batch-fill the per-instance content cache that get_name reads,
+        mirroring what get_content(show_draft_content=True) would cache."""
+        contents = AliasContent.admin_manager.filter(alias__in=aliases).latest_content()
+        contents_by_alias = defaultdict(list)
+        for content in contents:
+            contents_by_alias[content.alias_id].append(content)
+        language = get_language()
+        for alias in aliases:
+            for content in contents_by_alias[alias.pk]:
+                alias._content_cache.setdefault(content.language, content)
+            # Cache "no content" for the current language like get_content
+            # does, so aliases without a translation do not re-query
+            alias._content_cache.setdefault(language, None)
 
     def get_name(self, language=None):
         content = self.get_content(language, show_draft_content=True)

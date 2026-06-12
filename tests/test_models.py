@@ -257,7 +257,8 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
         self.add_alias_plugin_to_page(site2_page, alias, "en")
         # Should show on the list only once
 
-        with self.assertNumQueries(3):
+        # plugins, sources, pages + 2 batched prefetches (page contents, urls)
+        with self.assertNumQueries(5):
             objects = alias.objects_using
 
         self.assertEqual(
@@ -338,28 +339,29 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             alias=alias4,
         )
 
-        with self.assertNumQueries(3):
+        # plugins, sources, aliases + 1 batched content-cache prefill
+        with self.assertNumQueries(4):
             objects = alias1.objects_using
         self.assertEqual(
             sorted(obj.pk for obj in objects),
             [root_alias.pk],
         )
 
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             objects = alias2.objects_using
         self.assertEqual(
             sorted(obj.pk for obj in objects),
             [root_alias.pk, root_alias2.pk],
         )
 
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             objects = alias3.objects_using
         self.assertEqual(
             sorted(obj.pk for obj in objects),
             [alias2.pk],
         )
 
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             objects = alias4.objects_using
         self.assertEqual(
             sorted(obj.pk for obj in objects),
@@ -376,7 +378,8 @@ class AliasModelsTestCase(BaseAliasPluginTestCase):
             alias=alias,
         )
         self.add_alias_plugin_to_page(self.page, alias, "en")
-        with self.assertNumQueries(5):
+        # plugins, 2 source types, 2 grouper fetches + 3 batched prefetches
+        with self.assertNumQueries(8):
             objects = alias.objects_using
         self.assertEqual(
             sorted(obj.pk for obj in objects),

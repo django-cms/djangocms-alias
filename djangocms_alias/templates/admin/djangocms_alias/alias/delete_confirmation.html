@@ -1,10 +1,16 @@
 {% extends "admin/delete_confirmation.html" %}
 {% load i18n static admin_urls cms_tags djangocms_alias_tags %}
 
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'admin/css/changelists.css' %}">
+{% endblock %}
+
 {% block extrahead %}
     {{ block.super }}
     {{ media }}
     <script src="{% static 'admin/js/cancel.js' %}" async></script>
+    <script src="{% static 'cms/js/admin/actions.js' %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}{% endblock %}
@@ -19,16 +25,9 @@
 </p>
 
 
-{% if object.objects_using %}
-  {% blocktrans with escaped_object=object %}This alias is used by following objects:{% endblocktrans %}
-  <ul>
-      {% for item in object.objects_using %}
-      <li>
-          {{ item|verbose_name|capfirst|escape }}:
-          {% if item|admin_view_url %}<a href="{{ item|admin_view_url }}">{{ item }}</a>{% else %}{{ item }}{% endif %}
-      </li>
-      {% endfor %}
-  </ul>
+{% if objects_list or hidden_usages %}
+  <p>{% blocktrans with escaped_object=object %}This alias is used by following objects:{% endblocktrans %}</p>
+  {% include "djangocms_alias/includes/usage_results.html" %}
 {% else %}
   <p>{% blocktrans with escaped_object=object %}This alias is not used by any object.{% endblocktrans %}</p>
 {% endif %}

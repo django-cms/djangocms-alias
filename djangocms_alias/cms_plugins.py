@@ -1,4 +1,3 @@
-from cms.models import Page
 from cms.plugin_base import CMSPluginBase, PluginMenuItem
 from cms.plugin_pool import plugin_pool
 from cms.toolbar.utils import get_object_edit_url, get_plugin_toolbar_info, get_plugin_tree
@@ -19,7 +18,7 @@ from django.utils.translation import (
 )
 
 from djangocms_alias import constants
-from djangocms_alias.utils import emit_content_change, get_current_site
+from djangocms_alias.utils import emit_content_change, get_alias_usage_context, get_current_site
 
 from . import views
 from .constants import CREATE_ALIAS_URL_NAME, DETACH_ALIAS_PLUGIN_URL_NAME
@@ -388,11 +387,6 @@ class Alias(CMSPluginBase):
             "title": title,
             "original": title,
             "show_back_btn": request.GET.get("back"),
-            "objects_list": sorted(
-                alias.objects_using,
-                # First show Pages on list
-                key=lambda obj: isinstance(obj, Page),
-                reverse=True,
-            ),
+            **get_alias_usage_context(alias),
         }
         return TemplateResponse(request, "djangocms_alias/alias_usage.html", context)

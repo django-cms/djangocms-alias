@@ -7,6 +7,7 @@ from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import admin_reverse
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin.utils import unquote
 from django.db import models
 from django.http import (
     Http404,
@@ -30,6 +31,7 @@ from .models import Alias, AliasContent, Category
 from .utils import (
     emit_content_change,
     emit_content_delete,
+    get_alias_usage_context,
     is_versioning_enabled,
 )
 
@@ -120,6 +122,13 @@ class AliasAdmin(GrouperModelAdmin):
                 )
             return request.user.is_superuser
         return True
+
+    def delete_view(self, request: HttpRequest, object_id: str, extra_context: dict = None):
+        obj = self.get_object(request, unquote(object_id))
+        if obj:
+            # Same usage listing as the alias usage view
+            extra_context = {**(extra_context or {}), **get_alias_usage_context(obj)}
+        return super().delete_view(request, object_id, extra_context)
 
     def save_model(self, request: HttpRequest, obj: Alias, form: forms.Form, change: bool) -> None:
         super().save_model(request, obj, form, change)

@@ -6,18 +6,82 @@ headless API using the cms_config contract: ``cms_config.py`` declares
 ``djangocms_rest_enabled`` and mounts :data:`urlpatterns` via
 ``cms_rest_endpoints``.
 
-It also teaches ``serialize_fk`` how to link an ``AliasPlugin``'s ``alias``
-reference to its API endpoint, by adding a ``get_api_endpoint`` method to the
-``Alias`` model -- the same duck-typed hook djangocms-rest uses for pages.
+``serialize_fk`` links an ``AliasPlugin``'s ``alias`` reference to its API
+endpoint via the ``Alias.get_api_endpoint`` method (defined on the model) --
+the same duck-typed hook djangocms-rest uses for pages.
+
+:class:`AliasInlineSerializer` is the plugin serializer attached to the
+``Alias`` plugin (see ``cms_plugins.py``). It expands the referenced alias'
+placeholder content inline so an ``AliasPlugin`` nested in a page renders its
+plugin tree directly in the headless API response, guarding against recursive
+aliases via a per-request stack.
 """
+
+from typing import Any
 
 from django.urls import path
 from djangocms_rest.serializers.placeholders import PlaceholderSerializer
+from djangocms_rest.serializers.plugins import GenericPluginSerializer, base_exclude
 from djangocms_rest.views_base import BaseAPIView
+from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
-from .models import Alias
+from .models import Alias, AliasPlugin
+
+
+class AliasInlineSerializer(GenericPluginSerializer):
+    """Serialize an ``AliasPlugin``, expanding the alias content inline.
+
+    Adds a ``content`` field holding the serialized plugin tree of the
+    referenced alias' placeholder (for the plugin's language). Recursive
+    aliases are short-circuited with a per-request stack so an alias that
+    (directly or transitively) references itself yields an empty ``content``
+    instead of recursing forever.
+    """
+
+    content = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AliasPlugin
+        exclude = tuple(base_exclude)
+
+    def get_content(self, instance: AliasPlugin) -> list[dict[str, Any]]:
+        request = self.request
+        language = getattr(instance, "language", None)
+        if not request or not language:  # pragma: no cover
+            return []
+
+        alias_stack = getattr(request, "_rest_alias_stack", None)
+        if alias_stack is None:
+            alias_stack = []
+            request._rest_alias_stack = alias_stack
+
+        if instance.alias_id in alias_stack:
+            # Recursive alias reference -- stop here.
+            return []
+
+        alias_stack.append(instance.alias_id)
+        try:
+            placeholder = instance.alias.get_placeholder(
+                language=language,
+                show_draft_content=bool(getattr(request, "_preview_mode", False)),
+            )
+            if placeholder is None:  # pragma: no cover
+                return []
+
+            # Imported lazily: plugin_rendering pulls in the full CMS renderer
+            # stack, which we only need when actually expanding alias content.
+            from djangocms_rest.plugin_rendering import RESTRenderer
+
+            renderer = RESTRenderer(request=request)
+            return renderer.serialize_plugins(
+                placeholder=placeholder,
+                language=language,
+                context=self.context,
+            )
+        finally:
+            alias_stack.pop()
 
 
 class AliasContentView(BaseAPIView):

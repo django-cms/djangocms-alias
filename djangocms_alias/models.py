@@ -249,11 +249,12 @@ class Alias(models.Model):
         self.save()
         self.category.aliases.filter(*filters).update(position=op(F("position"), 1))  # noqa: E501
 
-    def alias_get_api_endpoint(self, language=None):
+    def get_api_endpoint(self, language=None):
         """Return the API endpoint for an alias in a given language.
 
         Used by djangocms-rest's ``serialize_fk`` to resolve an ``AliasPlugin``'s
-        ``alias`` foreign key to a URL.
+        ``alias`` foreign key to a URL. Returns ``None`` when djangocms-rest is
+        not installed (the ``alias-detail`` route is then unreachable).
         """
         language = language or get_current_language()
         try:

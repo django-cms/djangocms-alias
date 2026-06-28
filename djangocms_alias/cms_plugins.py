@@ -27,6 +27,12 @@ from .forms import AliasPluginForm, BaseCreateAliasForm, CreateAliasForm
 from .models import Alias as AliasModel
 from .models import AliasContent, AliasPlugin
 
+try:
+    # Optional: expand alias content inline in djangocms-rest's headless API.
+    from .rest import AliasInlineSerializer
+except ImportError:
+    AliasInlineSerializer = None
+
 __all__ = [
     "Alias",
 ]
@@ -37,6 +43,11 @@ class Alias(CMSPluginBase):
     name = _("Alias")
     model = AliasPlugin
     form = AliasPluginForm
+
+    # djangocms-rest: expand the referenced alias' content inline in the
+    # headless API. ``None`` (djangocms-rest absent) lets djangocms-rest fall
+    # back to its generic auto-serializer.
+    serializer_class = AliasInlineSerializer
 
     create_alias_fieldset = (
         (

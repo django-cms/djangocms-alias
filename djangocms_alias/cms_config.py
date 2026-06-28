@@ -15,6 +15,12 @@ try:
 except (ImportError, LookupError):
     AliasContentConfig = None
 
+try:
+    # Optional: expose alias content through djangocms-rest's headless API.
+    from . import rest as rest_integration
+except ImportError:
+    rest_integration = None
+
 
 class AliasCMSConfig(CMSAppConfig):
     cms_enabled = True
@@ -59,6 +65,11 @@ class AliasCMSConfig(CMSAppConfig):
     reference_fields = [
         (AliasPlugin, "alias"),
     ]
+
+    # djangocms-rest integration (only when djangocms-rest is installed).
+    if rest_integration is not None:
+        djangocms_rest_enabled = True
+        cms_rest_endpoints = rest_integration.urlpatterns
 
     # Internalsearch configuration
     if AliasContentConfig:

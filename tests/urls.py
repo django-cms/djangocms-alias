@@ -12,6 +12,15 @@ urlpatterns = [
     re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT, "show_indexes": True}),  # NOQA
     re_path(r"^jsi18n/(?P<packages>\S+?)/$", JavaScriptCatalog.as_view()),  # NOQA
 ]
+
+try:
+    # djangocms-rest uses explicit <slug:language> segments, so mount it
+    # outside i18n_patterns.
+    import djangocms_rest  # noqa: F401
+
+    urlpatterns.append(path("api/", include("djangocms_rest.urls")))
+except ImportError:
+    pass
 i18n_urls = [
     re_path(r"^admin/", admin.site.urls),
     path("", include("cms.urls")),

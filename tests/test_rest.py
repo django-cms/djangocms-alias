@@ -39,6 +39,51 @@ class AliasRESTIntegrationTestCase(BaseAliasPluginTestCase):
             data["content"],
         )
 
+    def test_published_alias_is_public(self):
+        """Published alias content is readable without authentication."""
+        alias = self._create_alias_with_text(body="public body")
+
+        response = self.client.get(f"/api/en/aliases/{alias.pk}/")
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_preview_requires_staff(self):
+        """Draft content (?preview=true) is not served to anonymous users."""
+        alias = self._create_alias_with_text(body="draft body")
+
+        response = self.client.get(f"/api/en/aliases/{alias.pk}/?preview=true")
+
+        self.assertIn(response.status_code, (401, 403))
+
+    def test_preview_denied_without_view_permission(self):
+        """A staff user lacking the alias view permission cannot preview."""
+        staff_user = self._create_user("no-view staff", is_staff=True, is_superuser=False)
+        # Sanity check: the user genuinely lacks the permission under test.
+        self.assertFalse(staff_user.has_perm("djangocms_alias.view_alias"))
+        alias = self._create_alias_with_text(body="draft body")
+
+        self.client.force_login(staff_user)
+        response = self.client.get(f"/api/en/aliases/{alias.pk}/?preview=true")
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_preview_allowed_with_view_permission(self):
+        """A staff user with the alias view permission may preview drafts."""
+        from cms.utils.permissions import get_model_permission_codename
+        from django.contrib.auth.models import Permission
+
+        from djangocms_alias.models import Alias as AliasModel
+
+        staff_user = self._create_user("view staff", is_staff=True, is_superuser=False)
+        codename = get_model_permission_codename(AliasModel, "view").split(".", 1)[1]
+        staff_user.user_permissions.add(Permission.objects.get(codename=codename))
+        alias = self._create_alias_with_text(body="draft body")
+
+        self.client.force_login(staff_user)
+        response = self.client.get(f"/api/en/aliases/{alias.pk}/?preview=true")
+
+        self.assertEqual(response.status_code, 200)
+
     def test_unknown_alias_returns_404(self):
         # Call the view directly: the project's LocaleMiddleware rewrites
         # unprefixed 404s to a language-prefixed URL (302), which would mask

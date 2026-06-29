@@ -19,12 +19,15 @@ aliases via a per-request stack.
 
 from typing import Any
 
+from cms.utils.permissions import get_model_permission_codename
 from django.urls import path
+from djangocms_rest.permissions import IsAllowedLanguage, IsAllowedPublicLanguage
 from djangocms_rest.serializers.placeholders import PlaceholderSerializer
 from djangocms_rest.serializers.plugins import GenericPluginSerializer, base_exclude
 from djangocms_rest.views_base import BaseAPIView
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from .models import Alias, AliasPlugin
@@ -84,6 +87,27 @@ class AliasInlineSerializer(GenericPluginSerializer):
             alias_stack.pop()
 
 
+class CanViewAlias(IsAllowedLanguage):
+    """Object-level permission for the alias content endpoint.
+
+    Published alias content is public -- it is editorial content embedded in
+    public pages, so anyone who may read the page may read the alias. Draft
+    content (``?preview=true``) is only served to users who hold the django
+    ``view`` permission on :class:`Alias`.
+    """
+
+    def has_object_permission(self, request: Request, view: BaseAPIView, obj: Alias) -> bool:
+        if not isinstance(obj, Alias):
+            return False
+        if not super().has_permission(request, view):
+            raise NotFound()
+        if view._preview_requested():
+            return request.user.has_perm(
+                get_model_permission_codename(Alias, "view"),
+            )
+        return True
+
+
 class AliasContentView(BaseAPIView):
     """Serialize the placeholder content of an alias for a given language.
 
@@ -93,10 +117,15 @@ class AliasContentView(BaseAPIView):
     published version when versioning is enabled.
     """
 
+    permission_classes = [IsAllowedPublicLanguage, CanViewAlias]
+    serializer_class = PlaceholderSerializer
+
     def get(self, request, language, pk):
         alias = Alias.objects.filter(pk=pk).first()
         if alias is None:
             raise NotFound()
+
+        self.check_object_permissions(request, alias)
 
         placeholder = alias.get_placeholder(
             language,
@@ -105,7 +134,7 @@ class AliasContentView(BaseAPIView):
         if placeholder is None:
             raise NotFound()
 
-        serializer = PlaceholderSerializer(
+        serializer = self.serializer_class(
             instance=placeholder,
             request=request,
             language=language,

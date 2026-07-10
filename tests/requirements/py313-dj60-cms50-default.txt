@@ -82,7 +82,7 @@ pytest-cov==7.0.0
     # via -r requirements.in
 pytest-django==4.11.1
     # via -r requirements.in
-soupsieve==2.8
+soupsieve==2.8.4
     # via beautifulsoup4
 sqlparse==0.5.4
     # via django

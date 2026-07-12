@@ -10,6 +10,7 @@ from cms.utils.placeholder import validate_placeholder_name
 from cms.utils.urlutils import add_url_parameters, admin_reverse
 from django import template
 from django.conf import settings
+from django.utils.translation import get_language
 
 from ..constants import DEFAULT_STATIC_ALIAS_CATEGORY_NAME, USAGE_ALIAS_URL_NAME
 from ..models import Alias, AliasContent, Category
@@ -28,24 +29,54 @@ def get_alias_usage_view_url(alias, **kwargs) -> str:
     return add_url_parameters(url, **ChainMap(kwargs))
 
 
+def _using_contents_by_language(obj) -> dict:
+    """The content objects collected by Alias.objects_using, newest one per
+    language (versioning copies plugins into every version of a content)."""
+    by_language = {}
+    for content in getattr(obj, "_using_contents", []):
+        language = getattr(content, "language", None)
+        newest = by_language.get(language)
+        if newest is None or (content.pk or 0) > (newest.pk or 0):
+            by_language[language] = content
+    return by_language
+
+
+@register.filter()
+def using_contents(obj) -> list:
+    """One content object per language through which obj uses the alias."""
+    return list(_using_contents_by_language(obj).values())
+
+
 @register.filter()
 def admin_view_url(obj) -> str:
     if obj and is_editable_model(obj.__class__):
         # Is obj frontend-editable?
         return get_object_preview_url(obj)
+    contents = _using_contents_by_language(obj)
+    if contents:
+        # Content objects collected by Alias.objects_using - their preview
+        # endpoint works regardless of admin language or publication state
+        content_obj = contents.get(get_language()) or next(iter(contents.values()))
+        return get_object_preview_url(content_obj)
     if hasattr(obj, "get_content"):
         # Is its content object frontend-editable?
         content_obj = obj.get_content()
         if content_obj and is_editable_model(content_obj.__class__):
             return get_object_preview_url(content_obj)
     if hasattr(obj, "get_absolute_url"):
-        return obj.get_absolute_url()
+        return obj.get_absolute_url() or ""
     return ""
 
 
 @register.filter()
 def verbose_name(obj) -> str:
     return obj._meta.verbose_name
+
+
+@register.filter()
+def model_name(obj) -> str:
+    """Stable, non-localized model identifier for template conditions."""
+    return obj._meta.model_name
 
 
 @register.simple_tag(takes_context=True)

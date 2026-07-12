@@ -1,0 +1,74 @@
+{% load i18n djangocms_alias_tags %}
+{% comment %}
+Changelist-style listing of the objects using an alias. Expects
+``objects_list`` and ``hidden_usages`` in the context (see
+djangocms_alias.utils.get_alias_usage_context).
+{% endcomment %}
+<div class="module" id="changelist">
+    <div class="results">
+        <table id="result_list">
+            <thead>
+                <tr>
+                    <th scope="col" class="column-type">
+                        <div class="text"><span>{% trans 'Type' %}</span></div>
+                        <div class="clear"></div>
+                    </th>
+                    <th scope="col" class="column-name">
+                        <div class="text"><span>{% trans 'Name' %}</span></div>
+                        <div class="clear"></div>
+                    </th>
+                    <th scope="col" class="column-actions">
+                        <div class="text"><span>&nbsp;</span></div>
+                        <div class="clear"></div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in objects_list %}
+                <tr>
+                    <td class="field-type">{{ item|verbose_name|capfirst|escape }}</td>
+                    <th class="field-name">
+                      {% with item|using_contents as contents %}
+                      {% if contents|length > 1 %}
+                        <details class="usage-contents">
+                            <summary>{{ item }}</summary>
+                            <ul>
+                                {% for content in contents %}
+                                <li><a target="_top" class="js-close-sideframe" href="{{ content|admin_view_url }}">{{ content }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </details>
+                      {% elif item|admin_view_url %}
+                        <a target="_top" class="js-close-sideframe" href="{{ item|admin_view_url }}">{{ item }}</a>
+                      {% else %}
+                        {{ item }}
+                      {% endif %}
+                      {% endwith %}
+                    </th>
+                    <td class="field-actions">
+                        {% if item|model_name == 'alias' %}
+                        <a href="{% get_alias_usage_view_url alias=item back=1 %}">{% trans 'View usage' %}</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% for placeholder in hidden_usages %}
+                <tr>
+                    <td class="field-type">{{ placeholder|verbose_name|capfirst|escape }}</td>
+                    <th class="field-name">{{ placeholder }} <em>({% trans 'hidden usage, e.g. clipboard content or an orphaned placeholder' %})</em></th>
+                    <td class="field-actions"></td>
+                </tr>
+                {% endfor %}
+                {% if not objects_list and not hidden_usages %}
+                <tr>
+                    <td colspan="3">{% trans 'This alias is not used by any object.' %}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <p class="paginator">
+        {% blocktrans count counter=objects_list|length %}{{ counter }} object{% plural %}{{ counter }} objects{% endblocktrans %}{% if hidden_usages %},
+        {% blocktrans count counter=hidden_usages|length %}{{ counter }} hidden usage{% plural %}{{ counter }} hidden usages{% endblocktrans %}{% endif %}
+    </p>
+</div>

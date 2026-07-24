@@ -90,5 +90,5 @@ typing-extensions==4.15.0
     # via beautifulsoup4
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==80.9.0
+setuptools==83.0.0
     # via django-cms

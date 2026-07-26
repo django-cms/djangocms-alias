@@ -15,6 +15,10 @@ the same duck-typed hook djangocms-rest uses for pages.
 placeholder content inline so an ``AliasPlugin`` nested in a page renders its
 plugin tree directly in the headless API response, guarding against recursive
 aliases via a per-request stack.
+
+Two endpoints are registered: :class:`AliasListView` (``/<language>/aliases/``)
+enumerates the aliases available for a language, and :class:`AliasContentView`
+(``/<language>/aliases/<pk or static code>/``) serves one alias' content.
 """
 
 from typing import Any
@@ -25,9 +29,12 @@ from django.urls import path
 from djangocms_rest.permissions import IsAllowedLanguage, IsAllowedPublicLanguage
 from djangocms_rest.serializers.placeholders import PlaceholderSerializer
 from djangocms_rest.serializers.plugins import GenericPluginSerializer, base_exclude
-from djangocms_rest.views_base import BaseAPIView
+from djangocms_rest.utils import get_absolute_frontend_url
+from djangocms_rest.views_base import BaseAPIView, BaseListAPIView
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -109,6 +116,87 @@ class CanViewAlias(IsAllowedLanguage):
         return True
 
 
+class CanPreviewAliases(BasePermission):
+    """Draft listings (``?preview=true``) require the django ``view`` permission.
+
+    The published listing is public: it only names alias content that is
+    already embedded in public pages.
+    """
+
+    def has_permission(self, request: Request, view: BaseListAPIView) -> bool:
+        if not view._preview_requested():
+            return True
+        return request.user.has_perm(get_model_permission_codename(Alias, "view"))
+
+
+class AliasListSerializer(serializers.Serializer):
+    """Alias metadata for the list endpoint.
+
+    Deliberately without the plugin tree -- ``api_endpoint`` points at
+    :class:`AliasContentView`, which serves the content for one alias.
+    """
+
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.SerializerMethodField()
+    static_code = serializers.CharField(read_only=True, allow_null=True)
+    category = serializers.CharField(source="category.name", read_only=True)
+    site = serializers.IntegerField(source="site_id", read_only=True, allow_null=True)
+    languages = serializers.SerializerMethodField()
+    api_endpoint = serializers.SerializerMethodField()
+
+    def get_name(self, alias: Alias) -> str:
+        # Read the name off the content the endpoint actually serves, rather
+        # than Alias.get_name(), which annotates drafts with "(Not published)".
+        content = alias.get_content(
+            self.context["language"],
+            show_draft_content=self.context["preview"],
+        )
+        return getattr(content, "name", "")
+
+    def get_languages(self, alias: Alias) -> list[str]:
+        return list(alias.get_languages())
+
+    def get_api_endpoint(self, alias: Alias) -> str | None:
+        return get_absolute_frontend_url(
+            self.context["request"],
+            alias.get_api_endpoint(self.context["language"]),
+        )
+
+
+class AliasListView(BaseListAPIView):
+    """List the aliases available for a language on the current site.
+
+    Aliases without content in the requested language are left out, as are
+    those belonging to another site. Add ``?preview=true`` (admin only, django
+    ``view`` permission on :class:`Alias` required) to list draft content.
+    """
+
+    permission_classes = [IsAllowedPublicLanguage, CanPreviewAliases]
+    serializer_class = AliasListSerializer
+    pagination_class = LimitOffsetPagination
+
+    def get_serializer_context(self) -> dict[str, Any]:
+        return {
+            **super().get_serializer_context(),
+            "language": self.kwargs["language"],
+            "preview": self._preview_requested(),
+        }
+
+    def get_queryset(self) -> list[Alias]:
+        language = self.kwargs["language"]
+        preview = self._preview_requested()
+        # NB: no prefetch_related("contents") -- a prefetched related manager
+        # drops the versioning manager's current_content()/latest_content(),
+        # which Alias.get_languages() and draft lookups rely on.
+        queryset = Alias.objects.filter(Q(site=self.site) | Q(site__isnull=True)).select_related("category")
+        aliases = [alias for alias in queryset if alias.get_content(language, show_draft_content=preview)]
+
+        # A site-specific static alias shadows the site-less one sharing its
+        # code -- the detail endpoint serves only the former, so list it once.
+        shadowed = {alias.static_code for alias in aliases if alias.static_code and alias.site_id}
+        return [alias for alias in aliases if alias.site_id or alias.static_code not in shadowed]
+
+
 class AliasContentView(BaseAPIView):
     """Serialize the placeholder content of an alias for a given language.
 
@@ -169,6 +257,11 @@ class AliasContentView(BaseAPIView):
 
 
 urlpatterns = [
+    path(
+        "<slug:language>/aliases/",
+        AliasListView.as_view(),
+        name="alias-list",
+    ),
     path(
         "<slug:language>/aliases/<int:pk>/",
         AliasContentView.as_view(),

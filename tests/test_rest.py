@@ -150,6 +150,70 @@ class AliasRESTIntegrationTestCase(BaseAliasPluginTestCase):
 
         self.assertEqual(response.status_code, 404)
 
+    def _alias_list(self, language="en", query=""):
+        """Return the entries of the alias list endpoint.
+
+        The endpoint paginates only when the project sets ``PAGE_SIZE``, so the
+        payload is either a list or a paginated envelope.
+        """
+        response = self.client.get(f"/api/{language}/aliases/{query}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        return data["results"] if isinstance(data, dict) else data
+
+    def test_list_endpoint_lists_aliases(self):
+        alias = self._create_alias_with_text(body="listed body")
+
+        entries = self._alias_list()
+
+        entry = next(entry for entry in entries if entry["id"] == alias.pk)
+        self.assertEqual(entry["name"], "test alias")
+        self.assertIsNone(entry["static_code"])
+        self.assertEqual(entry["languages"], ["en"])
+        self.assertTrue(entry["api_endpoint"].endswith(f"/api/en/aliases/{alias.pk}/"), entry["api_endpoint"])
+
+    def test_list_endpoint_exposes_static_code_and_endpoint(self):
+        """A static alias is discoverable by code, without knowing its pk."""
+        self._create_static_alias_with_text("footer", body="footer body")
+
+        entries = self._alias_list()
+
+        entry = next(entry for entry in entries if entry["static_code"] == "footer")
+        self.assertTrue(entry["api_endpoint"].endswith("/api/en/aliases/footer/"), entry["api_endpoint"])
+
+    def test_list_endpoint_omits_other_languages(self):
+        """An alias without content in the requested language is not listed."""
+        alias = self._create_alias_with_text(body="english only")
+
+        self.assertNotIn(alias.pk, [entry["id"] for entry in self._alias_list(language="de")])
+
+    def test_list_endpoint_omits_other_sites(self):
+        from django.contrib.sites.models import Site
+
+        other_site = Site.objects.create(domain="other.example.com", name="other")
+        alias = self._create_static_alias_with_text("footer", body="other site footer", site=other_site)
+
+        self.assertNotIn(alias.pk, [entry["id"] for entry in self._alias_list()])
+
+    def test_list_endpoint_lists_shadowed_static_code_once(self):
+        """A site-specific alias hides the site-less one sharing its code."""
+        from django.contrib.sites.models import Site
+
+        self._create_static_alias_with_text("footer", body="global footer")
+        site_alias = self._create_static_alias_with_text("footer", body="site footer", site=Site.objects.get_current())
+
+        entries = [entry for entry in self._alias_list() if entry["static_code"] == "footer"]
+
+        # Both share one api_endpoint, so only the alias it resolves to is listed.
+        self.assertEqual([entry["id"] for entry in entries], [site_alias.pk])
+
+    def test_list_preview_requires_permission(self):
+        self._create_alias_with_text(body="draft body")
+
+        response = self.client.get("/api/en/aliases/?preview=true")
+
+        self.assertIn(response.status_code, (401, 403))
+
     def _get_view_response(self, language="en", **kwargs):
         """Call the view directly.
 

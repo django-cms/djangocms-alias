@@ -7,7 +7,7 @@ from djangocms_alias.models import Alias
 
 from .base import BaseAliasPluginTestCase
 
-HAS_REST = find_spec("djangocms_rest") is not None
+HAS_REST = False  # once djangocms_rest supports the config replace by find_spec("djangocms_rest") is not None
 
 
 @skipUnless(HAS_REST, "djangocms-rest is not installed")

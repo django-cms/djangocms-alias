@@ -5,6 +5,7 @@ from cms.api import add_plugin
 from cms.models import CMSPlugin, Page, Placeholder
 from cms.models.fields import PlaceholderRelationField
 from cms.models.managers import ContentAdminManager, WithUserMixin
+from cms.utils.i18n import get_current_language
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.plugins import copy_plugins_to_placeholder
 from cms.utils.urlutils import admin_reverse
@@ -13,6 +14,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models, transaction
 from django.db.models import F, Q
+from django.urls import NoReverseMatch, reverse
 from django.utils.encoding import force_str
 from django.utils.functional import cached_property
 from django.utils.translation import get_language
@@ -291,6 +293,30 @@ class Alias(models.Model):
         self.position = position
         self.save()
         self.category.aliases.filter(*filters).update(position=op(F("position"), 1))  # noqa: E501
+
+    def get_api_endpoint(self, language=None):
+        """Return the API endpoint for an alias in a given language.
+
+        Used by djangocms-rest's ``serialize_fk`` to resolve an ``AliasPlugin``'s
+        ``alias`` foreign key to a URL. Static aliases are addressed by their
+        static code (the identifier used by ``{% static_alias %}``), all others
+        by primary key. Returns ``None`` when djangocms-rest is not installed
+        (the alias routes are then unreachable).
+        """
+        language = language or get_current_language()
+        # A numeric static code would resolve to the pk route instead.
+        if self.static_code and not self.static_code.isdigit():
+            try:
+                return reverse(
+                    "alias-static-detail",
+                    kwargs={"language": language, "static_code": self.static_code},
+                )
+            except NoReverseMatch:
+                pass
+        try:
+            return reverse("alias-detail", kwargs={"language": language, "pk": self.pk})
+        except NoReverseMatch:
+            return None
 
 
 class AliasContentManager(WithUserMixin, models.Manager):

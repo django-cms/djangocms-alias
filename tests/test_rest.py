@@ -1,4 +1,3 @@
-from importlib.util import find_spec
 from unittest import skipUnless
 
 from cms.api import add_plugin

@@ -253,10 +253,21 @@ class Alias(models.Model):
         """Return the API endpoint for an alias in a given language.
 
         Used by djangocms-rest's ``serialize_fk`` to resolve an ``AliasPlugin``'s
-        ``alias`` foreign key to a URL. Returns ``None`` when djangocms-rest is
-        not installed (the ``alias-detail`` route is then unreachable).
+        ``alias`` foreign key to a URL. Static aliases are addressed by their
+        static code (the identifier used by ``{% static_alias %}``), all others
+        by primary key. Returns ``None`` when djangocms-rest is not installed
+        (the alias routes are then unreachable).
         """
         language = language or get_current_language()
+        # A numeric static code would resolve to the pk route instead.
+        if self.static_code and not self.static_code.isdigit():
+            try:
+                return reverse(
+                    "alias-static-detail",
+                    kwargs={"language": language, "static_code": self.static_code},
+                )
+            except NoReverseMatch:
+                pass
         try:
             return reverse("alias-detail", kwargs={"language": language, "pk": self.pk})
         except NoReverseMatch:

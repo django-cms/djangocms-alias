@@ -20,6 +20,7 @@ aliases via a per-request stack.
 from typing import Any
 
 from cms.utils.permissions import get_model_permission_codename
+from django.db.models import Q
 from django.urls import path
 from djangocms_rest.permissions import IsAllowedLanguage, IsAllowedPublicLanguage
 from djangocms_rest.serializers.placeholders import PlaceholderSerializer
@@ -111,6 +112,10 @@ class CanViewAlias(IsAllowedLanguage):
 class AliasContentView(BaseAPIView):
     """Serialize the placeholder content of an alias for a given language.
 
+    The alias is addressed either by primary key (``/en/aliases/42/``) or, for
+    static aliases, by its static code (``/en/aliases/footer/``) -- the same
+    identifier templates use with ``{% static_alias "footer" %}``.
+
     The response shape matches djangocms-rest's placeholder endpoint: ``slot``,
     ``label``, ``language``, ``content`` (the plugin tree) and ``details``.
     Add ``?preview=true`` (admin only) to read the latest draft instead of the
@@ -120,8 +125,28 @@ class AliasContentView(BaseAPIView):
     permission_classes = [IsAllowedPublicLanguage, CanViewAlias]
     serializer_class = PlaceholderSerializer
 
-    def get(self, request, language, pk):
-        alias = Alias.objects.filter(pk=pk).first()
+    def get_alias(self, pk: int | None = None, static_code: str | None = None) -> Alias | None:
+        """Resolve the alias by primary key or by static code.
+
+        Static codes are unique per site, and an alias without a site acts as
+        the fallback for every site -- so a site-specific alias takes
+        precedence over the site-less one, mirroring what the ``static_alias``
+        template tag renders.
+        """
+        if pk is not None:
+            return Alias.objects.filter(pk=pk).first()
+
+        candidates = Alias.objects.filter(
+            Q(site=self.site) | Q(site__isnull=True),
+            static_code=static_code,
+        )
+        return next(
+            (alias for alias in candidates if alias.site_id == self.site.pk),
+            None,
+        ) or next(iter(candidates), None)
+
+    def get(self, request, language, pk=None, static_code=None):
+        alias = self.get_alias(pk=pk, static_code=static_code)
         if alias is None:
             raise NotFound()
 
@@ -148,5 +173,12 @@ urlpatterns = [
         "<slug:language>/aliases/<int:pk>/",
         AliasContentView.as_view(),
         name="alias-detail",
+    ),
+    # Registered after the pk route, so a purely numeric static code is not
+    # reachable by code -- static codes are template identifiers, not numbers.
+    path(
+        "<slug:language>/aliases/<str:static_code>/",
+        AliasContentView.as_view(),
+        name="alias-static-detail",
     ),
 ]

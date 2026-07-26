@@ -27,11 +27,25 @@ from .forms import AliasPluginForm, BaseCreateAliasForm, CreateAliasForm
 from .models import Alias as AliasModel
 from .models import AliasContent, AliasPlugin
 
-try:
-    # Optional: expand alias content inline in djangocms-rest's headless API.
-    from .rest import AliasInlineSerializer
-except ImportError:
-    AliasInlineSerializer = None
+
+class _LazyAliasSerializerClass:
+    """Resolve :class:`~djangocms_alias.rest.AliasInlineSerializer` on access.
+
+    This module is imported during plugin discovery, which happens while the
+    admin autodiscovers -- before the ``cms`` app config is ready. Importing
+    djangocms-rest that early blows up, since it pulls in the CMS toolbar at
+    module level. djangocms-rest only reads ``serializer_class`` when
+    serializing a plugin, so the import is deferred until then.
+    """
+
+    def __get__(self, instance, owner=None):
+        try:
+            # Optional: expand alias content inline in djangocms-rest's headless API.
+            from .rest import AliasInlineSerializer
+        except ImportError:
+            return None
+        return AliasInlineSerializer
+
 
 __all__ = [
     "Alias",
@@ -47,7 +61,7 @@ class Alias(CMSPluginBase):
     # djangocms-rest: expand the referenced alias' content inline in the
     # headless API. ``None`` (djangocms-rest absent) lets djangocms-rest fall
     # back to its generic auto-serializer.
-    serializer_class = AliasInlineSerializer
+    serializer_class = _LazyAliasSerializerClass()
 
     create_alias_fieldset = (
         (

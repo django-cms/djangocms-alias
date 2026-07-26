@@ -97,6 +97,7 @@ lint.extend-ignore = [
   "PLR0912",  # Too many branches
   "PLR0913",  # Too many arguments to function call
   "PLR0915",  # Too many statements
+  "PLR0917",  # Too many positional arguments
   "PLW1510",  # `subprocess.run` without explicit `check` argument
 ]
 

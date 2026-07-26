@@ -82,7 +82,7 @@ pytest-cov==7.0.0
     # via -r requirements.in
 pytest-django==4.11.1
     # via -r requirements.in
-soupsieve==2.8
+soupsieve==2.8.4
     # via beautifulsoup4
 sqlparse==0.5.3
     # via django
@@ -90,5 +90,5 @@ typing-extensions==4.15.0
     # via beautifulsoup4
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==80.9.0
+setuptools==83.0.0
     # via django-cms

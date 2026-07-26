@@ -41,6 +41,24 @@ def is_versioning_enabled() -> bool:
     return bool(getattr(cms_config, "versioning", False))
 
 
+def get_alias_usage_context(alias) -> dict:
+    """Common template context for the usage and delete confirmation views."""
+    from cms.models import Page
+
+    objects_list = sorted(
+        alias.objects_using,
+        # First show Pages on list
+        key=lambda obj: isinstance(obj, Page),
+        reverse=True,
+    )
+    return {
+        "objects_list": objects_list,
+        # Usages without a visible object (e.g. clipboard content or orphaned
+        # placeholders) - set by accessing objects_using above
+        "hidden_usages": getattr(alias, "_hidden_usages", []),
+    }
+
+
 def emit_content_change(objs, sender=None):
     try:
         from djangocms_internalsearch.helpers import emit_content_change

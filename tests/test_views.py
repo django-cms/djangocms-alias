@@ -863,8 +863,8 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 ),
             )
 
-        self.assertContains(response, "<td>Page</td>")
-        self.assertNotContains(response, "<td>Alias</td>")
+        self.assertContains(response, '<td class="field-type">Page</td>')
+        self.assertNotContains(response, '<td class="field-type">Alias</td>')
 
         add_plugin(
             root_alias.get_placeholder(self.language),
@@ -881,11 +881,12 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 ),
             )
 
-        self.assertContains(response, "<td>Page</td>")
-        self.assertContains(response, "<td>Alias</td>")
+        self.assertContains(response, '<td class="field-type">Page</td>')
+        self.assertContains(response, '<td class="field-type">Alias</td>')
         self.assertRegex(
             str(response.content),
-            rf'href="{re.escape(self.page.get_absolute_url(self.language))}"[\w+]?>{re.escape(str(self.page))}<\/a>',
+            rf'href="{re.escape(get_object_preview_url(self.page.get_admin_content(self.language)))}"'
+            rf"[\w+]?>{re.escape(str(self.page))}<\/a>",
         )
         self.assertRegex(
             str(response.content),
@@ -906,6 +907,28 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 "View usage",
             ),
         )
+
+    def test_alias_usage_view_shows_hidden_usages(self):
+        alias = self._create_alias()
+        # A plugin on a placeholder without a source, like the clipboard,
+        # blocks deletion but has no object to list
+        placeholder = Placeholder.objects.create(slot="clipboard")
+        add_plugin(
+            placeholder,
+            "Alias",
+            language=self.language,
+            alias=alias,
+        )
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                admin_reverse(
+                    USAGE_ALIAS_URL_NAME,
+                    args=[alias.pk],
+                ),
+            )
+
+        self.assertContains(response, "hidden usage")
+        self.assertContains(response, "clipboard")
 
     def test_delete_alias_view_get(self):
         alias = self._create_alias([self.plugin])
@@ -957,9 +980,10 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 ),
             )
         self.assertContains(response, "This alias is used by following objects:")
+        self.assertContains(response, '<td class="field-type">Page</td>')
         test = (
-            rf"<li>[\s\\n]*Page:[\s\\n]*<a href=\"{re.escape(self.page.get_absolute_url(self.language))}\">"
-            rf"{re.escape(str(self.page))}<\/a>[\s\\n]*<\/li>"
+            rf"<a[^>]*href=\"{re.escape(get_object_preview_url(self.page.get_admin_content(self.language)))}\""
+            rf"[^>]*>{re.escape(str(self.page))}<\/a>"
         )
         self.assertRegex(str(response.content), test)
 

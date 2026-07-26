@@ -1,4 +1,35 @@
 #!/usr/bin/env python
+"""Compile the pinned test requirements in this directory from requirements.in.
+
+Run it through tox, which provides both pip-tools and the interpreters:
+
+  * whole matrix, one tox env per Python version::
+
+        tox run -m compile
+
+  * a single Python version::
+
+        tox run -e compile-py313
+
+  * extra arguments after ``--`` are passed on to pip-compile, e.g. to see what
+    would be resolved without writing the files::
+
+        tox run -m compile -- --dry-run
+
+pip-tools resolves against the interpreter it runs on, so the matrix cannot be
+compiled from a single environment: each ``compile-pyXYZ`` env in ``tox.ini``
+runs this script with its own interpreter, and the script compiles only the
+:data:`COMPILE_SETTINGS` rows belonging to that Python version. Running the
+script directly works the same way, for the Python you invoke it with::
+
+    python tests/requirements/compile.py
+
+Every Python version in :data:`COMPILE_SETTINGS` therefore needs a matching
+``compile-pyXYZ`` env in the ``compile`` label in ``tox.ini``; tox skips the
+versions whose interpreter is not installed. After editing ``requirements.in``,
+recompile and commit the regenerated ``*.txt`` files.
+"""
+
 from __future__ import annotations
 
 import os
@@ -40,7 +71,8 @@ def get_args(key, value, common_args):
     assert py_ver[:2] == "py"
     assert mode.endswith(".txt")
     return [
-        f"python{py_ver[2]}.{py_ver[3:]}",
+        # The interpreter running this script -- pip-tools compiles for it.
+        sys.executable,
         *common_args,
         "-P",
         django_dict[dj_ver],
@@ -52,17 +84,20 @@ def get_args(key, value, common_args):
     ]
 
 
-def run(*args, **kwargs):
-    try:
-        print(" ".join(args[0]))
-        subprocess.run(*args, **kwargs)
-    except Exception as e:
-        print(f"Failed {' '.join(args[0])}: {e}")
+def run(args):
+    """Run pip-compile, reporting its output only when it fails."""
+    print(" ".join(args))
+    result = subprocess.run(args, capture_output=True, text=True)
+    if result.returncode:
+        print(f"Failed {' '.join(args)}", file=sys.stderr)
+        sys.stdout.write(result.stdout)
+        sys.stderr.write(result.stderr)
+    return result.returncode
 
 
 if __name__ == "__main__":
     os.chdir(Path(__file__).parent)
-    os.environ["CUSTOM_COMPILE_COMMAND"] = "requirements/compile.py"
+    os.environ["CUSTOM_COMPILE_COMMAND"] = "tox run -m compile"
     os.environ.pop("PIP_REQUIRE_VIRTUALENV", None)
     common_args = [
         "-m",
@@ -73,29 +108,16 @@ if __name__ == "__main__":
         "--allow-unsafe",
     ] + sys.argv[1:]
 
-    print("Upgrading pip-tools")
-    for py_ver in {key.split("-")[0] for key in COMPILE_SETTINGS.keys()}:
-        args = [
-            f"python{py_ver[2]}.{py_ver[3:]}",
-            "-m",
-            "pip",
-            "install",
-            "--upgrade",
-            "pip-tools",
-            "pip==24.3.1",
-            "--break-system-packages",
-        ]
-        subprocess.run(args, capture_output=True, check=False)
+    current = f"py3{sys.version_info[1]}"
+    keys = [key for key in COMPILE_SETTINGS if key.split("-")[0] == current]
+    if not keys:
+        supported = ", ".join(sorted({key.split("-")[0] for key in COMPILE_SETTINGS}))
+        sys.exit(f"Nothing to compile for {current}. Supported: {supported}")
 
-    print("Creating requirement files")
-    for key, value in COMPILE_SETTINGS.items():
-        run(
-            get_args(key + "-default.txt", value, common_args),
-            check=True,
-            capture_output=True,
-        )
-        run(
-            get_args(key + "-versioning.txt", value, common_args),
-            check=True,
-            capture_output=True,
-        )
+    print(f"Creating requirement files for {current}")
+    failures = 0
+    for key in keys:
+        value = COMPILE_SETTINGS[key]
+        for mode in ("default", "versioning"):
+            failures += run(get_args(f"{key}-{mode}.txt", value, common_args))
+    sys.exit(1 if failures else 0)

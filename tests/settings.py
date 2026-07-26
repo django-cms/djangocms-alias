@@ -1,16 +1,14 @@
 import os
+from importlib.util import find_spec
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENABLE_VERSIONING = os.environ.get("ENABLE_VERSIONING", "1").lower() in ("y", "yes", "t", "true", "on", "1")
 
 EXTRA_INSTALLED_APPS = ["djangocms_versioning"] if ENABLE_VERSIONING else []
 
-try:
-    import djangocms_rest  # noqa: F401
-
-    HAS_REST = True
-except ImportError:
-    HAS_REST = False
+# Probed rather than imported: djangocms-rest pulls in the CMS toolbar, which is
+# not importable while the settings module is being read.
+HAS_REST = find_spec("djangocms_rest") is not None
 
 REST_INSTALLED_APPS = (
     # djangocms_text is intentionally omitted: the alias test suite already

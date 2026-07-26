@@ -1,3 +1,4 @@
+from importlib.util import find_spec
 from unittest import skipUnless
 
 from cms.api import add_plugin
@@ -6,12 +7,7 @@ from djangocms_alias.models import Alias
 
 from .base import BaseAliasPluginTestCase
 
-try:
-    import djangocms_rest  # noqa: F401
-
-    HAS_REST = True
-except ImportError:
-    HAS_REST = False
+HAS_REST = find_spec("djangocms_rest") is not None
 
 
 @skipUnless(HAS_REST, "djangocms-rest is not installed")

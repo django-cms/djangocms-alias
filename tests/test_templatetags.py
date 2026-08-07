@@ -1,7 +1,12 @@
 from unittest import skipUnless
 
 from cms.api import add_plugin, create_page, create_page_content
-from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
+from cms.toolbar.utils import (
+    get_object_edit_url,
+    get_object_preview_url,
+    get_toolbar_from_request,
+)
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.sites.models import Site
 from django.test.utils import override_settings
 
@@ -408,3 +413,93 @@ class AliasTemplateTagAliasPlaceholderTestCase(BaseAliasPluginTestCase):
         )
 
         self.assertEqual(output, "Content Alias 1234")
+
+    def test_alias_rendered_including_placeholder_preview_link(self):
+        alias_template = """{% load djangocms_alias_tags %}{% static_alias "some_unique_id" %}"""  # noqa: E501
+        alias_link_enabled_template = (
+            """{% load djangocms_alias_tags %}{% static_alias "some_unique_id" placeholder_preview_link %}"""  # noqa: E501
+        )
+        alias_content = "Content Alias 1234"
+        alias_preview_link = '<span class="static-alias-placeholder-preview-link" '
+
+        alias = self._create_alias(static_code="some_unique_id")
+        add_plugin(
+            alias.get_placeholder(self.language),
+            "TextPlugin",
+            language=self.language,
+            body=alias_content,
+        )
+
+        request = self.get_request("/")
+        toolbar = get_toolbar_from_request(request)
+        toolbar.is_staff = True
+        toolbar.preview_mode_active = False
+        request.toolbar = toolbar
+
+        with self.subTest("preview-link disabled"):
+            output = self.render_template_obj(alias_template, {}, request)
+            self.assertEqual(alias_content, output)
+
+        with self.subTest("preview-link disabled due to preview-mode"):
+            request.toolbar.preview_mode_active = True
+            output = self.render_template_obj(
+                alias_link_enabled_template,
+                {},
+                request,
+            )
+            self.assertEqual(alias_content, output)
+
+            request.toolbar.preview_mode_active = False
+
+        with self.subTest("preview-link enabled in edit-mode"):
+            output = self.render_template_obj(
+                alias_link_enabled_template,
+                {},
+                request,
+            )
+            self.assertNotEqual(alias_content, output)
+            self.assertIn(alias_preview_link, output)
+
+            # check that other "extra_bits" don't interfere with functionality
+            output = self.render_template_obj(
+                alias_link_enabled_template.replace(
+                    "placeholder_preview_link",
+                    "site placeholder_preview_link",
+                ),
+                {},
+                request,
+            )
+            self.assertNotEqual(alias_content, output)
+            self.assertIn(alias_preview_link, output)
+
+        with self.subTest("preview-link disabled for missing staff-rights"):
+            request.toolbar.is_staff = False
+            output = self.render_template_obj(
+                alias_link_enabled_template,
+                {},
+                request,
+            )
+            self.assertEqual(alias_content, output)
+
+            request.toolbar.is_staff = True
+
+        with self.subTest("preview-link disabled for missing toolbar"):
+            del request.toolbar
+            output = self.render_template_obj(
+                alias_link_enabled_template,
+                {},
+                request,
+            )
+            self.assertEqual(alias_content, output)
+
+            request.toolbar = toolbar
+
+        with self.subTest("preview-link hidden for anonymous user"):
+            anon_request = self.get_request("/")
+            anon_request.user = AnonymousUser()
+            output = self.render_template_obj(
+                alias_link_enabled_template,
+                {},
+                anon_request,
+            )
+            self.assertEqual(alias_content, output)

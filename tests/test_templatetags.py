@@ -1,5 +1,6 @@
 from unittest import skipUnless
 
+import django
 from cms.api import add_plugin, create_page, create_page_content
 from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
 from django.contrib.sites.models import Site
@@ -16,6 +17,24 @@ from .base import BaseAliasPluginTestCase
 
 class AliasTemplateTagsTestCase(BaseAliasPluginTestCase):
     alias_template = """{% load djangocms_alias_tags %}{% render_alias plugin.alias %}"""  # noqa: E501
+
+    def test_django_version_gte(self):
+        template = "{% load djangocms_alias_tags %}{% django_version_gte major minor as result %}{{ result }}"
+        major, minor = django.VERSION[:2]
+
+        for version, expected in (
+            ((major, minor), "True"),
+            ((major, minor - 1), "True"),
+            ((major, minor + 1), "False"),
+            ((major + 1, 0), "False"),
+        ):
+            with self.subTest(version=version):
+                output = self.render_template_obj(
+                    template,
+                    {"major": version[0], "minor": version[1]},
+                    self.get_request("/"),
+                )
+                self.assertEqual(output, expected)
 
     def test_render_alias(self):
         alias = self._create_alias()

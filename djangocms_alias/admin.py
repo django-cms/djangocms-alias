@@ -9,6 +9,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.utils import unquote
 from django.db import models
+from django.db.models import Q
 from django.http import (
     Http404,
     HttpRequest,
@@ -17,6 +18,7 @@ from django.http import (
 )
 from django.template.defaultfilters import escape
 from django.utils.safestring import mark_safe
+from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from parler.admin import TranslatableAdmin
 
@@ -42,10 +44,31 @@ __all__ = [
 ]
 
 
+def is_autocomplete_request(request: HttpRequest) -> bool:
+    """The alias plugin form uses ``admin:autocomplete`` for its category and
+    alias fields and passes the selected site (and category) along. Only those
+    requests may narrow the choices down - the changelists have their own
+    filters using the same query parameter names."""
+    return getattr(request.resolver_match, "url_name", None) == "autocomplete"
+
+
 @admin.register(Category)
 class CategoryAdmin(TranslatableAdmin):
     list_display = ["name"]
     search_fields = ["translations__name"]
+
+    def get_search_results(self, request: HttpRequest, queryset: models.QuerySet, search_term: str) -> tuple:
+        queryset, may_have_duplicates = super().get_search_results(request, queryset, search_term)
+        if is_autocomplete_request(request):
+            # Only offer categories that have aliases attached, restricted to
+            # the selected site (if any).
+            queryset = queryset.filter(aliases__isnull=False)
+            site = request.GET.get("site")
+            if site:
+                queryset = queryset.filter(Q(aliases__site=site) | Q(aliases__site__isnull=True))
+            queryset = queryset.order_by("translations__name")
+            may_have_duplicates = True
+        return queryset, may_have_duplicates
 
     def save_model(self, request, obj, form, change):
         change = not obj._state.adding
@@ -74,6 +97,22 @@ class AliasAdmin(GrouperModelAdmin):
     autocomplete_fields = ["category", "site"]
     extra_grouping_fields = ("language",)
     EMPTY_CONTENT_VALUE = mark_safe(_("<i>Missing language</i>"))
+
+    def get_search_results(self, request: HttpRequest, queryset: models.QuerySet, search_term: str) -> tuple:
+        queryset, may_have_duplicates = super().get_search_results(request, queryset, search_term)
+        if is_autocomplete_request(request):
+            # Published and unpublished aliases that have content in the
+            # current language, narrowed down by the alias plugin's selection.
+            queryset = queryset.filter(contents__language=get_language())
+            category = request.GET.get("category")
+            if category:
+                queryset = queryset.filter(category=category)
+            site = request.GET.get("site")
+            if site:
+                queryset = queryset.filter(Q(site=site) | Q(site__isnull=True))
+            queryset = queryset.order_by("category__translations__name", "position")
+            may_have_duplicates = True
+        return queryset, may_have_duplicates
 
     def get_actions_list(self) -> list:
         """Add alias usage list actions"""

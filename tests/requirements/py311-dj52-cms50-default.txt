@@ -145,7 +145,7 @@ rpds-py==2026.6.3
     #   referencing
 soupsieve==2.9.1
     # via beautifulsoup4
-sqlparse==0.5.5
+sqlparse==0.5.4
     # via django
 svglib==2.0.2
     # via easy-thumbnails

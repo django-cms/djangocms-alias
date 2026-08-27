@@ -1,6 +1,7 @@
 import re
 from unittest import skip, skipIf, skipUnless
 
+import django
 from cms.api import add_plugin
 from cms.models import Placeholder
 from cms.toolbar.utils import get_object_edit_url, get_object_preview_url
@@ -11,6 +12,7 @@ from cms.utils.urlutils import add_url_parameters, admin_reverse
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.template.loader import render_to_string
 from django.test.utils import override_settings
 
 from djangocms_alias.constants import (
@@ -21,7 +23,7 @@ from djangocms_alias.constants import (
     USAGE_ALIAS_URL_NAME,
 )
 from djangocms_alias.models import Alias, AliasContent, Category
-from djangocms_alias.utils import is_versioning_enabled
+from djangocms_alias.utils import get_alias_usage_context, is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
 
@@ -907,6 +909,39 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 "View usage",
             ),
         )
+
+    def test_alias_usage_view_breadcrumbs(self):
+        """Django 6.1 replaced div.breadcrumbs by ol.breadcrumbs and generates
+        the separators itself - the markup has to follow, or the breadcrumbs
+        end up unstyled (#395). The view itself renders as a popup, which is
+        why the block is rendered directly here."""
+        alias = self._create_alias()
+        opts = Alias._meta
+        title = f"Objects using alias: {alias}"
+        html = render_to_string(
+            "djangocms_alias/alias_usage.html",
+            {
+                "has_change_permission": True,
+                "opts": opts,
+                "app_label": opts.app_label,
+                "object": alias,
+                "title": title,
+                "original": title,
+                **get_alias_usage_context(alias),
+            },
+            request=self.get_request("/"),
+        )
+
+        if django.VERSION >= (6, 1):
+            self.assertIn('<ol class="breadcrumbs">', html)
+            self.assertIn('<li aria-current="page">', html)
+            self.assertNotIn('<div class="breadcrumbs">', html)
+            # 6.1 generates the separators through li::after
+            self.assertNotIn("&rsaquo;", html)
+        else:
+            self.assertIn('<div class="breadcrumbs">', html)
+            self.assertNotIn('<ol class="breadcrumbs">', html)
+            self.assertIn("&rsaquo;", html)
 
     def test_alias_usage_view_shows_hidden_usages(self):
         alias = self._create_alias()

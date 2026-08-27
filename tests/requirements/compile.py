@@ -14,6 +14,9 @@ COMPILE_SETTINGS = {
     "py312-dj60-cms50": [],
     "py313-dj60-cms50": [],
     "py314-dj60-cms50": [],
+    "py312-dj61-cms50": [],
+    "py313-dj61-cms50": [],
+    "py314-dj61-cms50": [],
     "py313-djmain-cmsdev": [],
     "py313-djmain-cms50": [],
     "py314-djmain-cmsdev": [],
@@ -27,6 +30,7 @@ django_dict = {
     "dj51": "Django>=5.1,<5.2",
     "dj52": "Django>=5.2,<5.3",
     "dj60": "Django>=6.0a1,<6.1",
+    "dj61": "Django>=6.1,<6.2",
 }
 
 cms_dict = {

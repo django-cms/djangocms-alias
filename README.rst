@@ -134,6 +134,33 @@ Alias plugin
 Alternatively, aliases can be used with the Alias plugin. It allows to select which alias content is shown at the
 exact position the alias plugin is placed.
 
+Headless API
+============
+
+When `djangocms-rest <https://github.com/django-cms/djangocms-rest>`_ is installed, django CMS Alias adds
+two endpoints below the prefix you mount ``djangocms_rest.urls`` at (``/api/`` in the examples here). There is
+no setting to switch on -- the integration follows the package.
+
+``GET /api/<language>/aliases/``
+    Lists the aliases that have content in that language on the current site.
+
+``GET /api/<language>/aliases/<pk or static code>/``
+    Serves one alias' placeholder content. Static aliases are addressable by their static code, the same
+    identifier used with ``{% static_alias %}``, e.g. ``/api/en/aliases/footer/``.
+
+Both accept ``?preview=true`` to read the draft instead of the published version. That requires the Django
+``view`` permission on ``Alias``. Published alias content itself is public, as it is already embedded in
+public pages.
+
+An Alias plugin placed in a page has the referenced alias' plugin tree expanded inline in that page's API
+response, so no second request is needed. An alias that references itself yields empty content rather than
+recursing.
+
+.. note::
+
+    The ``cms_rest_endpoints`` hook this builds on is not in a djangocms-rest release yet -- it requires a
+    version later than 1.2.0.
+
 =========
 Templates
 =========

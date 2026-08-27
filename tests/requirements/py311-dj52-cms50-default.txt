@@ -30,7 +30,7 @@ django-classy-tags==4.1.0
     #   -r requirements.in
     #   django-cms
     #   django-sekizai
-django-cms==5.0.9
+django-cms==5.0.7
     # via djangocms-versioning
 django-formtools==2.5.1
     # via django-cms
@@ -87,7 +87,7 @@ pytest-django==4.12.0
     # via -r requirements.in
 soupsieve==2.8.4
     # via beautifulsoup4
-sqlparse==0.6.0
+sqlparse==0.5.4
     # via django
 typing-extensions==4.15.0
     # via

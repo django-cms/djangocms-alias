@@ -268,13 +268,19 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         self.assertIn("djangocms-alias-autocomplete", attrs["class"].split())
 
     def test_alias_plugin_form_media_uses_admin_select2(self):
-        media = AliasPluginForm().media
+        # Rendered rather than read off media._js: Django 6.1 stores Script
+        # objects there instead of plain paths.
+        media = str(AliasPluginForm().media)
 
-        self.assertIn("admin/js/jquery.init.js", media._js)
-        self.assertIn("admin/js/autocomplete.js", media._js)
-        self.assertTrue(any("select2.full" in js for js in media._js))
-        # Initializes the widgets, so it has to come last
-        self.assertEqual(media._js[-1], "djangocms_alias/js/alias_plugin.js")
+        self.assertIn("admin/js/jquery.init.js", media)
+        self.assertIn("admin/js/autocomplete.js", media)
+        self.assertIn("select2.full", media)
+        # alias_plugin.js initializes the widgets, so it has to come last
+        self.assertIn("djangocms_alias/js/alias_plugin.js", media)
+        self.assertLess(
+            media.index("admin/js/autocomplete.js"),
+            media.index("djangocms_alias/js/alias_plugin.js"),
+        )
 
     def test_create_alias_from_plugin_list(self):
         plugins = self.placeholder.get_plugins()

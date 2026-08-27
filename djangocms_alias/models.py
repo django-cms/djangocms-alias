@@ -2,7 +2,7 @@ import operator
 from collections import defaultdict
 
 from cms.api import add_plugin
-from cms.models import CMSPlugin, Page, Placeholder
+from cms.models import CMSPlugin, Page, PageContent, Placeholder
 from cms.models.fields import PlaceholderRelationField
 from cms.models.managers import ContentAdminManager, WithUserMixin
 from cms.utils.permissions import get_model_permission_codename
@@ -12,7 +12,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models, transaction
-from django.db.models import F, Q
+from django.db.models import F, Prefetch, Q
 from django.utils.encoding import force_str
 from django.utils.functional import cached_property
 from django.utils.translation import get_language
@@ -171,8 +171,15 @@ class Alias(models.Model):
             queryset = grouper_model.objects.filter(pk__in=contents_by_id)
             if issubclass(grouper_model, Page):
                 # Page.__str__ renders title and path - batch-fetch what it
-                # reads so the usage list does not query per page
-                queryset = queryset.prefetch_related("pagecontent_set", "urls")
+                # reads so the usage list does not query per page. Prefetch
+                # through the admin manager: django CMS 5.1 reads the page
+                # content as `pagecontent_set(manager="admin_manager")`, and a
+                # plain prefetch lands in the same cache without the versioning
+                # API that call then expects.
+                queryset = queryset.prefetch_related(
+                    Prefetch("pagecontent_set", queryset=PageContent.admin_manager.latest_content()),
+                    "urls",
+                )
             groupers = list(queryset)
             if issubclass(grouper_model, Alias):
                 self._prefill_content_caches(groupers)

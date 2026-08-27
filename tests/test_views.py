@@ -527,6 +527,12 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             1,
         )
 
+    def test_select2_view_is_deprecated(self):
+        with self.login_user_context(self.superuser), self.assertWarns(DeprecationWarning) as cm:
+            self.client.get(admin_reverse(SELECT2_ALIAS_URL_NAME))
+
+        self.assertIn("AliasSelect2View is deprecated", str(cm.warning))
+
     def test_select2_view_no_permission(self):
         response = self.client.get(
             admin_reverse(
@@ -1162,6 +1168,12 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
 
 class AliasCategorySelect2ViewTestCase(BaseAliasPluginTestCase):
+    def test_select2_view_is_deprecated(self):
+        with self.login_user_context(self.superuser), self.assertWarns(DeprecationWarning) as cm:
+            self.client.get(admin_reverse(CATEGORY_SELECT2_URL_NAME))
+
+        self.assertIn("CategorySelect2View is deprecated", str(cm.warning))
+
     def test_select2_view_no_permission(self):
         """
         The category list view is private

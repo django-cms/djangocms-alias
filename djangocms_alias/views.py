@@ -1,4 +1,5 @@
 import json
+import warnings
 
 from cms.toolbar.utils import get_plugin_toolbar_info
 from django.core.exceptions import PermissionDenied
@@ -65,12 +66,31 @@ def render_replace_response(request, new_plugins, source_placeholder=None, sourc
     return render(request, "djangocms_alias/alias_replace.html", context)
 
 
-class CategorySelect2View(ListView):
-    """Legacy select2 endpoint.
+class Select2ViewDeprecationMixin:
+    """Warns about the legacy select2 endpoints.
 
     The alias plugin form autocompletes through Django admin's
-    ``admin:autocomplete`` view (see ``CategoryAdmin.get_search_results``);
-    this view is only kept for third-party code still pointing at it.
+    ``admin:autocomplete`` view (see ``AliasAdmin.get_search_results`` and
+    ``CategoryAdmin.get_search_results``); these views are only kept for
+    third-party code still pointing at them.
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        warnings.warn(
+            f"{self.__class__.__name__} is deprecated and will be removed in "
+            "djangocms-alias 4.0. Use Django admin's autocomplete view "
+            "(admin:autocomplete) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+
+class CategorySelect2View(Select2ViewDeprecationMixin, ListView):
+    """Legacy select2 endpoint for categories.
+
+    .. deprecated:: 3.3
+        Use Django admin's ``admin:autocomplete`` view instead.
     """
 
     queryset = Category.objects.order_by("translations__name")
@@ -126,12 +146,11 @@ class CategorySelect2View(ListView):
         return self.request.GET.get("limit", 30)
 
 
-class AliasSelect2View(ListView):
-    """Legacy select2 endpoint.
+class AliasSelect2View(Select2ViewDeprecationMixin, ListView):
+    """Legacy select2 endpoint for aliases.
 
-    The alias plugin form autocompletes through Django admin's
-    ``admin:autocomplete`` view (see ``AliasAdmin.get_search_results``); this
-    view is only kept for third-party code still pointing at it.
+    .. deprecated:: 3.3
+        Use Django admin's ``admin:autocomplete`` view instead.
     """
 
     queryset = Alias.objects.order_by("category__translations__name", "position")

@@ -156,11 +156,6 @@ An Alias plugin placed in a page has the referenced alias' plugin tree expanded 
 response, so no second request is needed. An alias that references itself yields empty content rather than
 recursing.
 
-.. note::
-
-    The ``cms_rest_endpoints`` hook this builds on is not in a djangocms-rest release yet -- it requires a
-    version later than 1.2.0.
-
 =========
 Templates
 =========

@@ -66,6 +66,13 @@ def render_replace_response(request, new_plugins, source_placeholder=None, sourc
 
 
 class CategorySelect2View(ListView):
+    """Legacy select2 endpoint.
+
+    The alias plugin form autocompletes through Django admin's
+    ``admin:autocomplete`` view (see ``CategoryAdmin.get_search_results``);
+    this view is only kept for third-party code still pointing at it.
+    """
+
     queryset = Category.objects.order_by("translations__name")
 
     def get(self, request, *args, **kwargs):
@@ -120,6 +127,13 @@ class CategorySelect2View(ListView):
 
 
 class AliasSelect2View(ListView):
+    """Legacy select2 endpoint.
+
+    The alias plugin form autocompletes through Django admin's
+    ``admin:autocomplete`` view (see ``AliasAdmin.get_search_results``); this
+    view is only kept for third-party code still pointing at it.
+    """
+
     queryset = Alias.objects.order_by("category__translations__name", "position")
 
     def get(self, request, *args, **kwargs):

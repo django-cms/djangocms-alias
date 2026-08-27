@@ -3,20 +3,19 @@ from cms.utils.permissions import (
     get_model_permission_codename,
     has_plugin_permission,
 )
-from cms.utils.urlutils import admin_reverse
 from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import (
     AdminTextInputWidget,
     AutocompleteSelect,
     RelatedFieldWidgetWrapper,
+    get_select2_language,
 )
 from django.contrib.sites.models import Site
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from parler.forms import TranslatableModelForm
 
-from .constants import CATEGORY_SELECT2_URL_NAME, SELECT2_ALIAS_URL_NAME
 from .models import (
     Alias,
     AliasContent,
@@ -239,61 +238,63 @@ class CreateCategoryWizardForm(TranslatableModelForm):
         ]
 
 
-class Select2Mixin:
-    class Media:
-        css = {
-            "screen": ("admin/css/vendor/select2/select2.css",),
-        }
-        js = (
-            "admin/js/vendor/jquery/jquery.js",
-            "admin/js/vendor/select2/select2.full.js",
-            "admin/js/jquery.init.js",
-            "djangocms_alias/js/create.js",
-            "djangocms_alias/js/alias_plugin.js",
+class AliasAutocompleteMixin:
+    """Mixin for Django admin autocomplete widgets used by the alias plugin form.
+
+    The plugin form narrows its category and alias choices down by the site and
+    the category selected in the very same form. Those values cannot be passed
+    along by ``admin/js/autocomplete.js``, so the widgets opt out of its
+    automatic initialization - they are marked with the
+    ``djangocms-alias-autocomplete`` class instead of ``admin-autocomplete`` -
+    and are initialized by ``djangocms_alias/js/alias_plugin.js`` instead.
+    """
+
+    def build_attrs(self, base_attrs, extra_attrs=None):
+        self.i18n_name = get_select2_language()
+        merged = {**base_attrs, **(extra_attrs or {})}
+        attrs = super().build_attrs(base_attrs, extra_attrs=extra_attrs)
+        # ``AutocompleteMixin`` blanks out the placeholder to allow clearing the
+        # input - keep the one the form asked for.
+        if merged.get("data-placeholder"):
+            attrs["data-placeholder"] = merged["data-placeholder"]
+        attrs["class"] = attrs["class"].replace("admin-autocomplete", "djangocms-alias-autocomplete")
+        return attrs
+
+    @property
+    def media(self):
+        self.i18n_name = get_select2_language()
+        return super().media + forms.Media(
+            # ``admin/js/autocomplete.js`` is repeated so that the merged media
+            # keeps alias_plugin.js behind the admin's select2 assets.
+            js=("admin/js/autocomplete.js", "djangocms_alias/js/alias_plugin.js"),
+            css={"screen": ("djangocms_alias/css/autocomplete.css",)},
         )
 
-    def optgroups(self, name, value, attr=None):
-        """Render only the currently selected option; the rest are loaded via AJAX."""
-        default = (None, [], 0)
-        groups = [default]
-        if not self.is_required and not self.allow_multiple_selected:
-            default[1].append(self.create_option(name, "", "", False, 0))
-        selected = {str(v) for v in value if v not in (None, "")}
-        queryset = getattr(self.choices, "queryset", None)
-        field = getattr(self.choices, "field", None)
-        if not selected or queryset is None or field is None:
-            return groups
-        for obj in queryset.filter(pk__in=selected):
-            default[1].append(
-                self.create_option(
-                    name,
-                    field.prepare_value(obj),
-                    field.label_from_instance(obj),
-                    True,
-                    0,
-                )
-            )
-        return groups
+
+class CategorySelectWidget(AliasAutocompleteMixin, AutocompleteSelect):
+    """Autocompletes categories through ``admin:autocomplete`` for ``Alias.category``."""
+
+    def __init__(self, attrs=None, choices=(), using=None):
+        super().__init__(
+            AliasModel.category.field,
+            admin.site,
+            attrs=attrs,
+            choices=choices,
+            using=using,
+        )
 
 
-class CategorySelectWidget(Select2Mixin, forms.Select):
-    def get_url(self):
-        return admin_reverse(CATEGORY_SELECT2_URL_NAME)
+class AliasSelectWidget(AliasAutocompleteMixin, AutocompleteSelect):
+    """Autocompletes aliases through ``admin:autocomplete`` for ``AliasPlugin.alias``."""
 
-    def build_attrs(self, *args, **kwargs):
-        attrs = super().build_attrs(*args, **kwargs)
-        attrs.setdefault("data-select2-url", self.get_url())
-        return attrs
-
-
-class AliasSelectWidget(Select2Mixin, forms.Select):
-    def get_url(self):
-        return admin_reverse(SELECT2_ALIAS_URL_NAME)
-
-    def build_attrs(self, *args, **kwargs):
-        attrs = super().build_attrs(*args, **kwargs)
-        attrs.setdefault("data-select2-url", self.get_url())
-        return attrs
+    def __init__(self, attrs=None, choices=(), using=None):
+        super().__init__(
+            AliasPlugin.alias.field,
+            admin.site,
+            attrs=attrs,
+            choices=choices,
+            using=using,
+        )
 
 
 class AliasPluginForm(forms.ModelForm):

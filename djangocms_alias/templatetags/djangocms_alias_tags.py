@@ -1,5 +1,6 @@
 from collections import ChainMap, namedtuple
 
+import django
 from classytags.arguments import Argument, ListValue, MultiValueArgument
 from classytags.core import Tag
 from cms.templatetags.cms_tags import PlaceholderOptions
@@ -21,6 +22,13 @@ register = template.Library()
 DeclaredStaticAlias = namedtuple("DeclaredStaticAlias", ["static_code", "site"])
 
 _static_alias_editing_enabled = getattr(settings, "STATIC_ALIAS_EDITING_ENABLED", True)
+
+
+@register.simple_tag(takes_context=False)
+def django_version_gte(major: int, minor: int = 0) -> bool:
+    """Templates that have to render different markup depending on the Django
+    version, e.g. the admin breadcrumbs which changed in Django 6.1."""
+    return django.VERSION[:2] >= (major, minor)
 
 
 @register.simple_tag(takes_context=False)

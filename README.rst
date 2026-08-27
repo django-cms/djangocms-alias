@@ -158,7 +158,7 @@ recursing.
 
 .. note::
 
-    The ``cms_rest_endpoints`` hook this builds on requires a djangocms-rest version later than 1.2.0.
+    The ``cms_rest_endpoints`` hook this builds on requires a djangocms-rest version later than 1.3.0.
 
 =========
 Templates

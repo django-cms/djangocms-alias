@@ -6,12 +6,15 @@ from cms.api import add_plugin, create_page_content
 from cms.toolbar.utils import get_object_edit_url
 from cms.utils import get_current_site
 from cms.utils.plugins import downcast_plugins
-from cms.utils.urlutils import admin_reverse
 from django.contrib import admin
+from django.urls import reverse
 
 from djangocms_alias.cms_plugins import Alias
-from djangocms_alias.constants import SELECT2_ALIAS_URL_NAME
-from djangocms_alias.forms import AliasPluginForm, AliasSelectWidget
+from djangocms_alias.forms import (
+    AliasPluginForm,
+    AliasSelectWidget,
+    CategorySelectWidget,
+)
 from djangocms_alias.utils import is_versioning_enabled
 
 from .base import BaseAliasPluginTestCase
@@ -240,14 +243,38 @@ class AliasPluginTestCase(BaseAliasPluginTestCase):
         form = AliasPluginForm()
         self.assertEqual(form.fields["category"].initial, None)
 
-    def test_alias_widget_attrs_include_select2_view_url(self):
-        widget = AliasSelectWidget()
-        attrs = widget.build_attrs({})
-        self.assertIn("data-select2-url", attrs)
-        self.assertEqual(
-            attrs["data-select2-url"],
-            admin_reverse(SELECT2_ALIAS_URL_NAME),
-        )
+    def test_alias_widget_uses_admin_autocomplete(self):
+        widget = AliasSelectWidget(attrs={"data-placeholder": "Select an alias"})
+        attrs = widget.build_attrs(widget.attrs)
+
+        self.assertEqual(attrs["data-ajax--url"], reverse("admin:autocomplete"))
+        self.assertEqual(attrs["data-app-label"], "djangocms_alias")
+        self.assertEqual(attrs["data-model-name"], "aliasplugin")
+        self.assertEqual(attrs["data-field-name"], "alias")
+        # Not initialized by admin/js/autocomplete.js, but by alias_plugin.js
+        self.assertNotIn("admin-autocomplete", attrs["class"].split())
+        self.assertIn("djangocms-alias-autocomplete", attrs["class"].split())
+        # The placeholder the form asked for survives
+        self.assertEqual(attrs["data-placeholder"], "Select an alias")
+
+    def test_category_widget_uses_admin_autocomplete(self):
+        widget = CategorySelectWidget()
+        attrs = widget.build_attrs(widget.attrs)
+
+        self.assertEqual(attrs["data-ajax--url"], reverse("admin:autocomplete"))
+        self.assertEqual(attrs["data-app-label"], "djangocms_alias")
+        self.assertEqual(attrs["data-model-name"], "alias")
+        self.assertEqual(attrs["data-field-name"], "category")
+        self.assertIn("djangocms-alias-autocomplete", attrs["class"].split())
+
+    def test_alias_plugin_form_media_uses_admin_select2(self):
+        media = AliasPluginForm().media
+
+        self.assertIn("admin/js/jquery.init.js", media._js)
+        self.assertIn("admin/js/autocomplete.js", media._js)
+        self.assertTrue(any("select2.full" in js for js in media._js))
+        # Initializes the widgets, so it has to come last
+        self.assertEqual(media._js[-1], "djangocms_alias/js/alias_plugin.js")
 
     def test_create_alias_from_plugin_list(self):
         plugins = self.placeholder.get_plugins()

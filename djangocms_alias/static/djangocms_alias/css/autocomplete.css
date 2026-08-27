@@ -1,0 +1,5 @@
+/* Django admin styles `select.admin-autocomplete`; these widgets carry their
+   own class so that `admin/js/autocomplete.js` does not initialize them. */
+select.djangocms-alias-autocomplete {
+    width: 20em;
+}

@@ -14,6 +14,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
 from django.test.utils import override_settings
+from django.urls import reverse
 
 from djangocms_alias.constants import (
     CATEGORY_SELECT2_URL_NAME,
@@ -527,6 +528,12 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
             ).count(),
             1,
         )
+
+    def test_select2_view_is_deprecated(self):
+        with self.login_user_context(self.superuser), self.assertWarns(DeprecationWarning) as cm:
+            self.client.get(admin_reverse(SELECT2_ALIAS_URL_NAME))
+
+        self.assertIn("AliasSelect2View is deprecated", str(cm.warning))
 
     def test_select2_view_no_permission(self):
         response = self.client.get(
@@ -1196,6 +1203,12 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
 
 
 class AliasCategorySelect2ViewTestCase(BaseAliasPluginTestCase):
+    def test_select2_view_is_deprecated(self):
+        with self.login_user_context(self.superuser), self.assertWarns(DeprecationWarning) as cm:
+            self.client.get(admin_reverse(CATEGORY_SELECT2_URL_NAME))
+
+        self.assertIn("CategorySelect2View is deprecated", str(cm.warning))
+
     def test_select2_view_no_permission(self):
         """
         The category list view is private
@@ -1673,3 +1686,141 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
             self.assertEqual(response.status_code, 200)
             # Check that the alias is displayed in the response content
             self.assertContains(response, alias.name)
+
+
+class AliasAdminAutocompleteTestCase(BaseAliasPluginTestCase):
+    """The alias plugin form autocompletes through Django admin's endpoint."""
+
+    def _autocomplete(self, model_name, field_name, **data):
+        return self.client.get(
+            reverse("admin:autocomplete"),
+            data={
+                "app_label": "djangocms_alias",
+                "model_name": model_name,
+                "field_name": field_name,
+                **data,
+            },
+        )
+
+    def get_alias_autocomplete(self, **data):
+        return self._autocomplete("aliasplugin", "alias", **data)
+
+    def get_category_autocomplete(self, **data):
+        return self._autocomplete("alias", "category", **data)
+
+    def test_alias_autocomplete_requires_staff(self):
+        self._create_alias(name="test 2")
+
+        response = self.get_alias_autocomplete()
+
+        # Django's admin site redirects anonymous users to its login view
+        self.assertEqual(response.status_code, 302)
+
+        with self.login_user_context(self.get_standard_user()):
+            response = self.get_alias_autocomplete()
+
+        self.assertEqual(response.status_code, 302)
+
+    def test_alias_autocomplete_only_lists_current_language(self):
+        alias = self._create_alias(name="test 2")
+        # No content in the current language
+        self._create_alias(name="foo2", language="fr", position=1)
+
+        with self.login_user_context(self.superuser):
+            response = self.get_alias_autocomplete()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [result["id"] for result in response.json()["results"]],
+            [str(alias.pk)],
+        )
+
+    def test_alias_autocomplete_order_by_category_and_position(self):
+        category2 = Category.objects.create(name="foo")
+        alias1 = self._create_alias(name="test 2")
+        alias2 = self._create_alias(name="foo", position=1)
+        alias3 = self._create_alias(name="bar", category=category2)
+        alias4 = self._create_alias(name="baz", category=category2, position=1)
+
+        with self.login_user_context(self.superuser):
+            response = self.get_alias_autocomplete()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [result["id"] for result in response.json()["results"]],
+            [str(alias.pk) for alias in (alias3, alias4, alias1, alias2)],
+        )
+
+    def test_alias_autocomplete_term(self):
+        alias = self._create_alias(name="test 2")
+        self._create_alias(name="foo", position=1)
+
+        with self.login_user_context(self.superuser):
+            response = self.get_alias_autocomplete(term="test")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [result["id"] for result in response.json()["results"]],
+            [str(alias.pk)],
+        )
+
+    def test_alias_autocomplete_category(self):
+        category2 = Category.objects.create(name="foo")
+        self._create_alias(name="test 2")
+        alias = self._create_alias(name="bar", category=category2)
+
+        with self.login_user_context(self.superuser):
+            response = self.get_alias_autocomplete(category=category2.pk)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [result["id"] for result in response.json()["results"]],
+            [str(alias.pk)],
+        )
+
+    def test_alias_autocomplete_site(self):
+        site = Site.objects.create(domain="http://bar.com", name="bar.com")
+        site_alias = self._create_alias(name="site alias", site=site)
+        # Aliases without a site are available on every site
+        no_site_alias = self._create_alias(name="no site alias", position=1)
+        other_site = Site.objects.create(domain="http://baz.com", name="baz.com")
+        self._create_alias(name="other site alias", site=other_site, position=2)
+
+        with self.login_user_context(self.superuser):
+            response = self.get_alias_autocomplete(site=site.pk)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            {result["id"] for result in response.json()["results"]},
+            {str(site_alias.pk), str(no_site_alias.pk)},
+        )
+
+    def test_category_autocomplete_only_lists_categories_with_aliases(self):
+        Category.objects.create(name="empty category")
+        self._create_alias(name="test 2")
+
+        with self.login_user_context(self.superuser):
+            response = self.get_category_autocomplete()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [result["id"] for result in response.json()["results"]],
+            [str(self.category.pk)],
+        )
+
+    def test_category_autocomplete_site(self):
+        site = Site.objects.create(domain="http://bar.com", name="bar.com")
+        other_site = Site.objects.create(domain="http://baz.com", name="baz.com")
+        site_category = Category.objects.create(name="site category")
+        other_category = Category.objects.create(name="other category")
+        self._create_alias(name="site alias", category=site_category, site=site)
+        self._create_alias(name="other alias", category=other_category, site=other_site, position=1)
+
+        with self.login_user_context(self.superuser):
+            response = self.get_category_autocomplete(site=site.pk)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            {result["id"] for result in response.json()["results"]},
+            {str(site_category.pk)},
+        )

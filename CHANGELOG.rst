@@ -3,12 +3,15 @@ Changelog
 =========
 
 
-## What's Changed
-
-3.2.0 (2026-05-16)
+3.2.0 (2026-08-28)
 ==================
 
-* fix: Pin django-parler to >=2.4 and add missing migrations
+* feat: Add djangocms-rest support by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/378
+* feat: Clearer overview of alias usages in both the usage and delete view by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/377
+* fix: Add induced migration by django-parler 2.4 by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/367
+* fix: Refactor current site detection to respect the request object by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/371
+* fix: Render Django 6.1 breadcrumb markup on the alias usage page by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/396
+* fix: Use Django admin autocomplete widgets in alias plugin form by @fsbraun in https://github.com/django-cms/djangocms-alias/pull/397
 
 3.1.1 (2026-05-20)
 ==================

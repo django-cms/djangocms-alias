@@ -11,3 +11,11 @@ isort
 pyflakes>=2.1.1
 
 djangocms-versioning>=2.5.0
+
+# Headless API integration (tests/test_rest.py). djangocms-rest's
+# cms_rest_endpoints hook, which mounts the alias endpoints, is not part of a
+# release yet -- track main until it ships in a version after 1.2.0.
+https://github.com/django-cms/djangocms-rest/tarball/main#egg=djangocms-rest
+# Not required by djangocms-rest itself, but enabled in the REST test settings
+django-filer
+drf-spectacular

@@ -15,6 +15,13 @@ try:
 except (ImportError, LookupError):
     AliasContentConfig = None
 
+try:
+    # Optional: expose alias content through djangocms-rest's headless API.
+    apps.get_app_config("djangocms_rest")
+    rest_installed = True
+except LookupError:
+    rest_installed = False
+
 
 class AliasCMSConfig(CMSAppConfig):
     cms_enabled = True
@@ -59,6 +66,22 @@ class AliasCMSConfig(CMSAppConfig):
     reference_fields = [
         (AliasPlugin, "alias"),
     ]
+
+    # djangocms-rest integration (only when djangocms-rest is installed).
+    djangocms_rest_enabled = rest_installed
+
+    @property
+    def cms_rest_endpoints(self):
+        """Alias url patterns to mount under djangocms-rest's API root.
+
+        Imported lazily: djangocms-rest imports the CMS toolbar at module
+        level, which is not yet importable while cms_config.py files are being
+        autodiscovered. djangocms-rest reads this attribute afterwards, when it
+        configures the app.
+        """
+        from .rest import urlpatterns
+
+        return urlpatterns
 
     # Internalsearch configuration
     if AliasContentConfig:

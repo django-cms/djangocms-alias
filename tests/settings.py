@@ -1,30 +1,46 @@
 import os
+from importlib.util import find_spec
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENABLE_VERSIONING = os.environ.get("ENABLE_VERSIONING", "1").lower() in ("y", "yes", "t", "true", "on", "1")
 
 EXTRA_INSTALLED_APPS = ["djangocms_versioning"] if ENABLE_VERSIONING else []
 
+# Probed rather than imported: djangocms-rest pulls in the CMS toolbar, which is
+# not importable while the settings module is being read.
+HAS_REST = find_spec("djangocms_rest") is not None
+
+REST_INSTALLED_APPS = (
+    # djangocms_text is intentionally omitted: the alias test suite already
+    # registers a TextPlugin via djangocms_alias.test_utils.text, and
+    # djangocms-rest only imports djangocms_text as an optional module.
+    ["filer", "easy_thumbnails", "drf_spectacular", "djangocms_rest"] if HAS_REST else []
+)
+
 SECRET_KEY = "test1234"
 TIME_ZONE = "Europe/Zurich"
 
-INSTALLED_APPS = [
-    "djangocms_alias",
-    "djangocms_alias.test_utils",
-    "djangocms_alias.test_utils.text",
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.sites",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "cms",
-    "menus",
-    "treebeard",
-    "sekizai",
-    "parler",
-] + EXTRA_INSTALLED_APPS
+INSTALLED_APPS = (
+    [
+        "djangocms_alias",
+        "djangocms_alias.test_utils",
+        "djangocms_alias.test_utils.text",
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.sites",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
+        "cms",
+        "menus",
+        "treebeard",
+        "sekizai",
+        "parler",
+    ]
+    + EXTRA_INSTALLED_APPS
+    + REST_INSTALLED_APPS
+)
 VERSIONING_ALIAS_MODELS_ENABLED = ENABLE_VERSIONING
 MIGRATION_MODULES = {
     "sites": None,
@@ -150,5 +166,25 @@ CMS_CONFIRM_VERSION4 = True
 
 SITE_ID = 1
 STATIC_URL = "/static/"
+MEDIA_URL = "/media/"
 
 ROOT_URLCONF = "tests.urls"
+
+# --- djangocms-rest integration (only active when djangocms-rest is installed) ---
+if HAS_REST:
+    THUMBNAIL_PROCESSORS = (
+        "easy_thumbnails.processors.colorspace",
+        "easy_thumbnails.processors.autocrop",
+        "filer.thumbnail_processors.scale_and_crop_with_subject_location",
+        "easy_thumbnails.processors.filters",
+    )
+    REST_FRAMEWORK = {
+        "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    }
+    SPECTACULAR_SETTINGS = {
+        "TITLE": "Django CMS REST API",
+        "VERSION": "test",
+    }
+    # NB: deliberately NOT setting REST_JSON_RENDERING -- that flag flips the CMS
+    # toolbar to JSON rendering, which would change alias's HTML output. The REST
+    # endpoint serializes placeholders directly and does not need it.

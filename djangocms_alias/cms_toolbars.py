@@ -5,7 +5,6 @@ from cms.cms_toolbars import (
     ADMIN_MENU_IDENTIFIER,
     ADMINISTRATION_BREAK,
     LANGUAGE_MENU_IDENTIFIER,
-    SHORTCUTS_BREAK,
 )
 from cms.toolbar.items import Break, ButtonList
 from cms.toolbar.utils import get_object_edit_url
@@ -18,6 +17,7 @@ from cms.utils.i18n import (
 )
 from cms.utils.permissions import get_model_permission_codename
 from cms.utils.urlutils import add_url_parameters, admin_reverse
+from django.contrib import admin
 from django.urls import NoReverseMatch
 from django.utils.encoding import force_str
 from django.utils.http import urlencode
@@ -64,7 +64,10 @@ class AliasToolbar(CMSToolbar):
             self.enable_create_wizard_button()
 
     def add_aliases_link_to_admin_menu(self):
-        if not self.request.user.has_perm("djangocms_alias.change_category"):
+        # The menu item opens the alias changelist, so it requires the same
+        # permissions as viewing the alias module in the admin.
+        alias_admin = admin.site._registry.get(Alias)
+        if alias_admin is None or not alias_admin.has_view_permission(self.request):
             return
         admin_menu = self.toolbar.get_or_create_menu(ADMIN_MENU_IDENTIFIER)
 
@@ -123,27 +126,41 @@ class AliasToolbar(CMSToolbar):
     @classmethod
     def get_insert_position(cls, admin_menu, item_name):
         """
-        Ensures that there is a SHORTCUTS_BREAK and returns a position for an
-        alphabetical position against all items between SHORTCUTS_BREAK, and
-        the ADMINISTRATION_BREAK.
+        Returns a position for an alphabetical placement amongst the admin menu
+        items sitting between the "Pages" entry and the "Administration" entry,
+        so that the item never ends up before "Pages" or after
+        "Administration".
         """
-        start = admin_menu.find_first(Break, identifier=SHORTCUTS_BREAK)
+        items = admin_menu.get_items()
+        administration_break = admin_menu.find_first(Break, identifier=ADMINISTRATION_BREAK)
+        end = administration_break.index if administration_break else len(items)
 
-        if not start:
-            end = admin_menu.find_first(Break, identifier=ADMINISTRATION_BREAK)
-            admin_menu.add_break(SHORTCUTS_BREAK, position=end.index)
-            start = admin_menu.find_first(Break, identifier=SHORTCUTS_BREAK)
-        end = admin_menu.find_first(Break, identifier=ADMINISTRATION_BREAK)
+        try:
+            pages_url = admin_reverse("cms_pagecontent_changelist")
+        except NoReverseMatch:
+            pages_url = None
+        administration_url = admin_reverse("index")
 
-        items = admin_menu.get_items()[start.index + 1 : end.index]
-        for idx, item in enumerate(items):
+        # Narrow the range down to the items between "Pages" and "Administration"
+        start = 0
+        for idx, item in enumerate(items[:end]):
+            url = getattr(item, "url", None)
+            if not url:
+                continue
+            if pages_url and url.startswith(pages_url):
+                start = idx + 1
+            elif url == administration_url:
+                end = idx
+                break
+
+        for idx, item in enumerate(items[start:end], start=start):
             try:
                 if force_str(item_name.lower()) < force_str(item.name.lower()):  # noqa: E501
-                    return idx + start.index + 1
+                    return idx
             except AttributeError:
                 # Some item types do not have a 'name' attribute.
                 pass
-        return end.index
+        return end
 
     def enable_create_wizard_button(self):
         button_lists = [result.item for result in self.toolbar.find_items(item_type=ButtonList)]

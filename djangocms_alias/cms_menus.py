@@ -11,7 +11,9 @@ class AliasDisableMenu(Modifier):
     def modify(self, request, nodes, namespace, root_id, post_cut, breadcrumb):
         if not hasattr(request, "toolbar") or not request.toolbar:
             return nodes
-        if request.toolbar.app_name == PLUGIN_URL_NAME_PREFIX or isinstance(request.toolbar.obj, AliasContent):
+        if getattr(request.toolbar, "app_name", None) == PLUGIN_URL_NAME_PREFIX or isinstance(
+            request.toolbar.obj, AliasContent
+        ):
             return []
         return nodes
 

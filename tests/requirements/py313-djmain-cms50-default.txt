@@ -4,7 +4,7 @@
 #
 #    tox run -m compile
 #
-asgiref==3.12.1
+asgiref==3.13.0
     # via django
 attrs==26.1.0
     # via

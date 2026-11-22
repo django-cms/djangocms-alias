@@ -77,3 +77,54 @@ def emit_content_delete(objs, sender=None):
 
     for obj in objs:
         emit_content_delete(obj, sender=sender)
+
+
+def invalidate_alias_cache(alias) -> None:
+    """Invalidates the caches holding rendered content of the alias. To be
+    called when the visible content of an alias changes, e.g., upon publishing.
+
+    * The placeholder cache of all placeholders showing the alias through an
+      Alias plugin. Those placeholders are not touched when the alias changes.
+      If such a placeholder belongs to another alias, the placeholders showing
+      that alias are cleared, too.
+    * The page cache of all pages: the pages showing the alias through the
+      ``{% static_alias %}`` template tag cannot be determined.
+    """
+    from cms.cache import invalidate_cms_page_cache
+    from cms.cache.placeholder import clear_placeholder_cache
+    from django.contrib.contenttypes.models import ContentType
+    from django.contrib.sites.models import Site
+
+    from .models import AliasContent, AliasPlugin
+
+    alias_content_type = ContentType.objects.get_for_model(AliasContent)
+    site_ids = None
+    cleared = set()
+    seen = set()
+    alias_ids = {alias.pk}
+    while alias_ids:
+        seen |= alias_ids
+        plugins = AliasPlugin.objects.filter(alias_id__in=alias_ids).select_related("placeholder")
+        alias_content_ids = set()
+        for plugin in plugins:
+            placeholder = plugin.placeholder
+            if placeholder is None or (placeholder.pk, plugin.language) in cleared:
+                continue
+            cleared.add((placeholder.pk, plugin.language))
+            if placeholder.content_type_id == alias_content_type.pk:
+                # The alias holding the plugin is shown somewhere else
+                alias_content_ids.add(placeholder.object_id)
+            if placeholder.page:
+                placeholder_site_ids = [placeholder.page.site_id]
+            else:
+                # Not bound to a site, e.g., the placeholder of an alias
+                if site_ids is None:
+                    site_ids = list(Site.objects.values_list("pk", flat=True))
+                placeholder_site_ids = site_ids
+            for site_id in placeholder_site_ids:
+                clear_placeholder_cache(placeholder, plugin.language, site_id)
+        alias_ids = (
+            set(AliasContent.admin_manager.filter(pk__in=alias_content_ids).values_list("alias_id", flat=True)) - seen
+        )
+
+    invalidate_cms_page_cache()

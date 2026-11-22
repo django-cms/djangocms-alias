@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased
+==========
+
+* fix: Publishing or unpublishing an alias did not invalidate the page cache and the placeholder cache of the pages showing it (#408)
+
 
 3.2.0 (2026-08-28)
 ==================

@@ -7,7 +7,7 @@ from packaging.version import Version as PackageVersion
 from .cms_wizards import create_alias_wizard
 from .models import AliasContent, AliasPlugin, copy_alias_content
 from .rendering import add_static_alias_js, render_alias_content
-from .utils import get_versionable_item
+from .utils import get_versionable_item, invalidate_alias_cache
 
 try:
     apps.get_app_config("djangocms_internalsearch")
@@ -21,6 +21,11 @@ try:
     rest_installed = True
 except LookupError:
     rest_installed = False
+
+
+def on_alias_content_change(version):
+    """Publishing or unpublishing an alias changes all pages showing it."""
+    invalidate_alias_cache(version.content.alias)
 
 
 class AliasCMSConfig(CMSAppConfig):
@@ -57,6 +62,8 @@ class AliasCMSConfig(CMSAppConfig):
                     extra_grouping_fields=["language"],
                     version_list_filter_lookups={"language": get_language_tuple},
                     copy_function=copy_alias_content,
+                    on_publish=on_alias_content_change,
+                    on_unpublish=on_alias_content_change,
                     grouper_selector_option_label=lambda obj, lang: obj.get_name(lang),
                     grouper_admin_mixin="__default__",
                 ),

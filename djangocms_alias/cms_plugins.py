@@ -286,7 +286,9 @@ class Alias(CMSPluginBase):
                 "title": _("Create Alias"),
                 "adminform": admin_form,
                 "is_popup": True,
-                "media": admin_form.media,
+                # ``self.media`` adds the admin's RelatedObjectLookups.js which
+                # opens the "add category" link in a popup
+                "media": self.media + admin_form.media,
                 "errors": create_form.errors,
                 "preserved_filters": self.get_preserved_filters(request),
                 "inline_admin_formsets": [],

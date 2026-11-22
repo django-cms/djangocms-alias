@@ -17,7 +17,11 @@
                             page: params.page,
                             app_label: element.dataset.appLabel,
                             model_name: element.dataset.modelName,
-                            field_name: element.dataset.fieldName
+                            field_name: element.dataset.fieldName,
+                            // Marks the request as coming from the alias
+                            // plugin form: only then the endpoint narrows
+                            // the results down.
+                            alias_plugin: 1
                         };
                         const site = $('#id_site').val();
                         const category = $('#id_category').val();

@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Unreleased
+==========
+
+* fix: Categories without aliases could not be selected in the "Create Alias" form and the alias admin (#407)
+* fix: "Add category" link in the "Create Alias" form did not open a popup (#407)
+
 
 3.2.0 (2026-08-28)
 ==================

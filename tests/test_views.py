@@ -54,6 +54,20 @@ class AliasViewsTestCase(BaseAliasPluginTestCase):
                 self.plugin.pk,
             )
 
+    def test_create_alias_view_loads_related_object_lookups(self):
+        # Required for the "add category" link to open in a popup (#407)
+        with self.login_user_context(self.superuser):
+            response = self.client.get(
+                self.get_create_alias_endpoint(),
+                data={
+                    "plugin": self.plugin.pk,
+                    "language": self.language,
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "admin/js/admin/RelatedObjectLookups.js")
+
     def test_create_alias_view_get_show_form_placeholder(self):
         with self.login_user_context(self.superuser):
             response = self.client.get(
@@ -1691,7 +1705,10 @@ class AliasViewsUsingVersioningTestCase(BaseAliasPluginTestCase):
 class AliasAdminAutocompleteTestCase(BaseAliasPluginTestCase):
     """The alias plugin form autocompletes through Django admin's endpoint."""
 
-    def _autocomplete(self, model_name, field_name, **data):
+    def _autocomplete(self, model_name, field_name, plugin_form=True, **data):
+        if plugin_form:
+            # Marker sent by djangocms_alias/js/alias_plugin.js
+            data["alias_plugin"] = 1
         return self.client.get(
             reverse("admin:autocomplete"),
             data={
@@ -1806,6 +1823,34 @@ class AliasAdminAutocompleteTestCase(BaseAliasPluginTestCase):
         self.assertEqual(
             [result["id"] for result in response.json()["results"]],
             [str(self.category.pk)],
+        )
+
+    def test_category_autocomplete_lists_empty_categories_outside_plugin_form(self):
+        # The "Create Alias" form and the alias admin use the same endpoint
+        # and field, but must offer categories without aliases (#407)
+        empty_category = Category.objects.create(name="empty category")
+        self._create_alias(name="test 2")
+
+        with self.login_user_context(self.superuser):
+            response = self.get_category_autocomplete(plugin_form=False)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            {result["id"] for result in response.json()["results"]},
+            {str(self.category.pk), str(empty_category.pk)},
+        )
+
+    def test_alias_autocomplete_not_narrowed_outside_plugin_form(self):
+        alias = self._create_alias(name="test 2")
+        other_language_alias = self._create_alias(name="foo2", language="fr", position=1)
+
+        with self.login_user_context(self.superuser):
+            response = self.get_alias_autocomplete(plugin_form=False)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            {result["id"] for result in response.json()["results"]},
+            {str(alias.pk), str(other_language_alias.pk)},
         )
 
     def test_category_autocomplete_site(self):

@@ -6,6 +6,7 @@ Unreleased
 ==========
 
 * fix: Publishing or unpublishing an alias did not invalidate the page cache and the placeholder cache of the pages showing it (#408)
+* fix: Pages with an alias plugin were not stored in the page cache when rendered for the first time (#409)
 
 
 3.2.0 (2026-08-28)

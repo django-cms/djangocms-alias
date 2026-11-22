@@ -167,3 +167,53 @@ class AliasPublishCacheTestCase(BaseAliasPluginTestCase):
             _get_placeholder_cache_version(other_placeholder, self.language, site_id),
             version,
         )
+
+
+class AliasPluginPageCacheTestCase(BaseAliasPluginTestCase):
+    """Rendering an Alias plugin must not prevent the page from being stored
+    in the page cache (#409)."""
+
+    def setUp(self):
+        super().setUp()
+        cache.clear()
+        self.addCleanup(cache.clear)
+
+    def _get_page(self):
+        """Requests the page as an anonymous visitor"""
+        response = self.client.get(self.page.get_absolute_url(self.language))
+        self.assertEqual(response.status_code, 200)
+        return response
+
+    def assertIsCacheable(self, response):
+        cache_control = response.headers.get("Cache-Control", "")
+        self.assertNotIn("no-cache", cache_control)
+        self.assertNotIn("no-store", cache_control)
+        self.assertRegex(cache_control, r"max-age=[1-9]")
+
+    def test_page_without_alias_plugin_is_cached_at_first_request(self):
+        # Reference: the behaviour of a page without an alias
+        self.assertIsCacheable(self._get_page())
+
+    def test_page_with_alias_plugin_is_cached_at_first_request(self):
+        from cms.cache.page import get_page_cache
+
+        alias = self._create_alias()
+        add_plugin(alias.get_placeholder(self.language), "TextPlugin", language=self.language, body="alias content")
+        self.add_alias_plugin_to_page(self.page, alias)
+
+        response = self._get_page()
+
+        self.assertContains(response, "alias content")
+        self.assertIsCacheable(response)
+        self.assertIsNotNone(get_page_cache(response.wsgi_request))
+
+    def test_page_with_alias_plugin_is_not_cached_for_users(self):
+        alias = self._create_alias()
+        add_plugin(alias.get_placeholder(self.language), "TextPlugin", language=self.language, body="alias content")
+        self.add_alias_plugin_to_page(self.page, alias)
+
+        with self.login_user_context(self.superuser):
+            response = self._get_page()
+
+        self.assertContains(response, "alias content")
+        self.assertIn("no-cache", response.headers.get("Cache-Control", ""))

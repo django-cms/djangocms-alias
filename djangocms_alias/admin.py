@@ -237,7 +237,7 @@ class AliasContentAdmin(admin.ModelAdmin):
         request: HttpRequest,
         object_id: int,
         form_url: str = "",
-        extra_context: dict = None,
+        extra_context: dict | None = None,
     ) -> HttpResponse:
         """Needed for the Alias Content Admin breadcrumbs"""
         obj = self.model.admin_manager.filter(pk=object_id).first()

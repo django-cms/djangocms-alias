@@ -98,6 +98,7 @@ def render_alias(context, instance) -> str:
         content = renderer.render_placeholder(
             placeholder=source,
             context=context,
+            use_cache=True,
         )
         return content or ""
     return ""

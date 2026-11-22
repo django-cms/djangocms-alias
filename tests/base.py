@@ -136,7 +136,7 @@ class BaseAliasPluginTestCase(CMSTestCase):
         page = create_page(
             title=title,
             language=language,
-            template="page.html",
+            template=kwargs.pop("template", "page.html"),
             menu_title="",
             in_navigation=True,
             limit_visibility_in_menu=None,

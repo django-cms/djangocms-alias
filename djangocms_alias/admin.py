@@ -44,12 +44,21 @@ __all__ = [
 ]
 
 
+AUTOCOMPLETE_PLUGIN_PARAM = "alias_plugin"
+
+
 def is_autocomplete_request(request: HttpRequest) -> bool:
     """The alias plugin form uses ``admin:autocomplete`` for its category and
     alias fields and passes the selected site (and category) along. Only those
     requests may narrow the choices down - the changelists have their own
-    filters using the same query parameter names."""
-    return getattr(request.resolver_match, "url_name", None) == "autocomplete"
+    filters using the same query parameter names, and other forms (e.g., the
+    "Create Alias" form or the alias admin) autocomplete through the very same
+    endpoint and fields. The plugin form hence marks its requests with the
+    ``alias_plugin`` parameter (see ``djangocms_alias/js/alias_plugin.js``)."""
+    return (
+        getattr(request.resolver_match, "url_name", None) == "autocomplete"
+        and AUTOCOMPLETE_PLUGIN_PARAM in request.GET
+    )
 
 
 @admin.register(Category)
